@@ -1,0 +1,72 @@
+
+Help Manual for the VolumeGenerator
+
+The Volume Generator produces an xml file that contains lists of doms in a given volume about a given dom.  This
+information is used by the Topological Trigger to decide if a list of hits meets the topological criteria.
+
+Current volumeId's in reigstry 'triggerConfig/resources/jar/VolumeRegistry.xml are:
+0 == hexagon, smallest size, height of 34, length of 250
+1 == sphere, smallest size, radius of 136
+2 == cone, smallest size, one dom up, and one in length, orientation 0
+3 == cone, smallest size, orientation 1
+4 == cone, smallest size, orientation 2
+5 == cone, smallest size, orientation 3
+6 == cone, smallest size, orientation 4
+7 == cone, smallest size, orientation 5
+8 == allcones, all cone orientations combined, or a hexagon with one dom on the center string
+9 == allcones, with a height of 2 doms up and 2 doms down
+10 == allocnes, with a height of 3 doms up and 3 doms down
+11 == hexagon, with a height of 68 and length of 250
+
+orientations == There are six orientations. 0 points along the line of strings closest to due east. Orienataions rotate
+around the center dom counterclockwise.
+
+-help  This option prints this help manual.  No other options should be used at the same time.
+
+-info  This option generates a new dom information file named default-dom-information.xml in the current directory.  It
+should only be used when the default-dom-geometry is updated, so updated volumes can also be created.  All Offsets are
+recorded correctly.  The a complete and correct version of the neighbors' lists has already been stored in
+triggerConfig/resources/jar/neighbors-only.xml.  When this option is run, the offsets with be updated, allowing new
+volumes to be constructed accurately without having to change an xml file by hand.  The order of the list represents
+orientations.  0's are place holders for non existent strings.  No other options should be used at the same time.
+
+<volumeId>  unique Id for each volume, required for every volume.
+
+-center  height of the volume both above and below the center dom in units of doms, default = 1
+
+-neighbor  height of the volume both above and below the neighbors of the center dom in units of doms, default = 1
+
+-size  number of sizes outward horizantly, default = 1
+
+-tilt  tilts the volumes by the amount <tilt> in the direction of <orientation>, not compatible with cone, cylinder,
+sphere or increment modes, default is OFF
+
+-cone  creates a cone in the direction of <orientation>, includes the strings at position <orientation>*size + 0 through
+<orientation>*size + size, not cmpatible with tilt or cylinder modes, default is OFF
+
+-cylinder  this volume contains the three strings in the direction of orientation per size, not compatible with tilt or
+cone modes, default is OFF
+
+-increment  increases the neighbor height as a function of size, example:  if increment is on and neighbor height is 1
+at size one, then the height is 2 at size 2 and 3 at size 3, etc., does not affect center height, not compatiable with
+sphere or tilt modes, default is OFF
+
+-sphere  only affects heights, height depends on size as: height = Sqrt(<radius>^2-size^2), radius must be greater than
+125/17*size or height will become negative, not compatiable with tilt or increment modes, default is OFF
+
+-attribute  adds a list of attributes to the xml file in the <volume> tag, can be used multiple times in the same
+command line, example: -attribute shape hexagon -attribue length 125 prints: <volume shape="hexagon" length="125">
+
+Currently used attributes are:
+shape == name of shape;  hexagon, cone, cylinder, sphere, etc.
+length == length of volume
+height == height of volume
+radius == radius of volume
+orientation == orientation of volume
+toatlsize == number of doms in this volume
+
+-output  changes the standard output file to the new file name given, default file name is 'VolumeRegistry.xml' in the
+current directory
+
+-append  changes the stanard output to the file name given, and adds the new volume in the correct place, given file
+must already be a VolumeReigsttry file, allows VolumeRegistry's with multiple volumes to be created

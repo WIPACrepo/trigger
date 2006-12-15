@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="DomInformation" type="DomInformationType"/>
+
+    <xs:complexType name="DomInformationType">
+        <xs:sequence>
+            <xs:element name ="offsets" type="OffsetsType" minOccurs="1" maxOccurs="1"/>
+            <xs:element name ="neighbors" type="NeighborsType" minOccurs="1" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name ="OffsetsType">
+        <xs:sequence>
+            <xs:element name="offsetCenter" type="OffsetCenterType" minOccurs="1" maxOccurs ="80"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="OffsetCenterType">
+        <xs:sequence>
+            <xs:element name="number" type="xs:nonNegativeInteger"/>
+            <xs:element name ="string" type="StringType" minOccurs="1" maxOccurs="80" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="StringType">
+        <xs:sequence>
+            <xs:element name="number" type="xs:nonNegativeInteger"/>
+            <xs:element name ="offset" type="xs:integer"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="NeighborsType">
+        <xs:sequence>
+            <xs:element name="neighborCenter" type="NeighborCenterType" minOccurs="1" maxOccurs="80"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="NeighborCenterType">
+        <xs:sequence>
+            <xs:element name ="number" type="xs:nonNegativeInteger"/>
+            <xs:element name ="neighbor" type="xs:nonNegativeInteger" minOccurs="6" maxOccurs="6"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

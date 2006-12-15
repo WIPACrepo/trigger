@@ -402,12 +402,13 @@ public class TriggerHandler
             // issue the trigger
             if (null == payloadDestination) {
                 log.error("PayloadDestination has not been set!");
+                throw new RuntimeException("PayloadDestination has not been set!");
             } else {
                 try {
-                    log.info("Writing payload to PayloadDestination. Size = " + trigger.getPayloadLength());
                     payloadDestination.writePayload(trigger);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("Failed to write triggers");
+                    throw new RuntimeException(e);
                 }
                 // now recycle it
                 trigger.recycle();

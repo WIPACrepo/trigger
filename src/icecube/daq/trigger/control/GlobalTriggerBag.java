@@ -395,7 +395,7 @@ public class GlobalTriggerBag
         //--set timeGateWindow as negative always.
         //miTimeGateWindow = -Math.abs(iConfiguredMaxTimeWindow);
         miTimeGateWindow = iConfiguredMaxTimeWindow;
-        System.out.println("set MAX-TIME-GATE-WINDOW at GT Bag= " + miTimeGateWindow);
+        //System.out.println("set MAX-TIME-GATE-WINDOW at GT Bag= " + miTimeGateWindow);
     }
 
     public int size()

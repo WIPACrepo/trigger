@@ -26,6 +26,7 @@ import java.io.InputStream;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.payload.impl.SourceID4B;
+import icecube.daq.payload.ISourceID;
 
 /**
  * This class builds triggers from a trigger configuration object.
@@ -165,4 +166,51 @@ public class TriggerBuilder
         return triggerList;
 
     }
+
+    /**
+     * Build a list of triggers from an xml file given by file name.
+     * @param fileName name of xml file
+     * @param sourceId sourceId of trigger component
+     * @return list of ITriggerConfig's
+     */
+    public static List buildTriggers(String fileName, ISourceID sourceId) {
+        return buildTriggers(TriggerXMLParser.parse(fileName), sourceId);
+    }
+
+    /**
+     * Build a list of triggers from a trigger configuration object.
+     * @param activeTriggers jaxb trigger configuration object
+     * @param sourceId sourceId of trigger component
+     * @return list of ITriggerConfig's
+     */
+    public static List buildTriggers(ActiveTriggers activeTriggers, ISourceID sourceId) {
+        return buildTriggers(activeTriggers.getTriggerConfig(), sourceId);
+    }
+
+    /**
+     * Build a list of triggers from a list of trigger configuration objects.
+     * @param triggerConfigs list of TriggerConfigType's
+     * @param sourceId sourceId of trigger component
+     * @return list of ITriggerConfig's
+     */
+    public static List buildTriggers(List triggerConfigs, ISourceID sourceId) {
+        List triggerList = new ArrayList();
+
+        // loop over triggers
+        Iterator triggerIter = triggerConfigs.iterator();
+        while (triggerIter.hasNext()) {
+            TriggerConfigType triggerConfiguration = (TriggerConfigType) triggerIter.next();
+            ITriggerConfig trigger = buildTrigger(triggerConfiguration);
+
+            // add configured trigger to list
+            if ((null != trigger) && (trigger.getSourceId().getSourceID() == sourceId.getSourceID())) {
+                triggerList.add(trigger);
+            }
+
+        }
+
+        return triggerList;
+
+    }
+
 }

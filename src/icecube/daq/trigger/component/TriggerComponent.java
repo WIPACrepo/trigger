@@ -5,6 +5,7 @@ import icecube.daq.io.PayloadDestinationOutputEngine;
 import icecube.daq.io.SpliceablePayloadInputEngine;
 import icecube.daq.juggler.component.DAQComponent;
 import icecube.daq.juggler.component.DAQConnector;
+import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ByteBufferCache;
@@ -15,28 +16,38 @@ import icecube.daq.splicer.SplicerImpl;
 import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.control.GlobalTriggerManager;
+import icecube.daq.trigger.control.ITriggerControl;
+import icecube.daq.trigger.config.TriggerBuilder;
+
+import java.util.List;
+import java.util.Iterator;
 
 
 public class TriggerComponent
     extends DAQComponent
 {
 
-    protected MasterPayloadFactory masterFactory;
-    protected Splicer splicer;
-    protected ITriggerManager triggerManager;
     protected ISourceID sourceId;
+    protected IByteBufferCache bufferCache;
+    protected ITriggerManager triggerManager;
+    protected Splicer splicer;
     protected SpliceablePayloadInputEngine inputEngine;
     protected PayloadDestinationOutputEngine outputEngine;
+
+    protected String globalConfigurationDir = null;
+    protected List currentTriggers = null;
+
 
     public TriggerComponent(String name, int id) {
         super(name, id);
 
-        // First do things common to all trigger components
+        // Create the source id of this component
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
-        IByteBufferCache bufferCache =
-                new ByteBufferCache(256, 50000000L, 5000000L, name);
+
+        // Create the buffer cache and the payload factory
+        bufferCache = new ByteBufferCache(256, 50000000L, 5000000L, name);
         addCache(bufferCache);
-        masterFactory = new MasterPayloadFactory(bufferCache);
+        MasterPayloadFactory masterFactory = new MasterPayloadFactory(bufferCache);
 
         // Now differentiate
         String inputType, outputType;
@@ -69,8 +80,11 @@ public class TriggerComponent
             }
         }
 
+        // Create splicer and introduce it to the trigger manager
         splicer = new SplicerImpl(triggerManager);
         triggerManager.setSplicer(splicer);
+
+        // Create and register io engines
         inputEngine = new SpliceablePayloadInputEngine(name, id,
                                                        name + "InputEngine",
                                                        splicer,
@@ -78,9 +92,43 @@ public class TriggerComponent
         addEngine(inputType, inputEngine);
         outputEngine = new PayloadDestinationOutputEngine(name, id,
                                                           name + "OutputEngine");
-        outputEngine.registerBufferManager(bufferCache);    
+        outputEngine.registerBufferManager(bufferCache);
         triggerManager.setPayloadDestinationCollection(outputEngine.getPayloadDestinationCollection());
         addEngine(outputType, outputEngine);
+
+    }
+
+    /**
+     * Tell trigger or other component where top level XML configuration tree lives
+     */
+    public void setGlobalConfigurationDir(String dirName) {
+        globalConfigurationDir = dirName;
+    }
+
+    /**
+     * Configure a component using the specified configuration name.
+     *
+     * @param configName configuration name
+     *
+     * @throws icecube.daq.juggler.component.DAQCompException
+     *          if there is a problem configuring
+     */
+    public void configuring(String configName) throws DAQCompException {
+
+        // Lookup the trigger configuration
+        String globalConfigurationFileName = globalConfigurationDir + "/" + configName + ".xml";
+        String triggerConfiguration = GlobalConfiguration.getTriggerConfig(globalConfigurationFileName);
+        String triggerConfigFileName = globalConfigurationDir + "/trigger/" + triggerConfiguration + ".xml";
+
+        // Add triggers to the trigger manager
+        currentTriggers = TriggerBuilder.buildTriggers(triggerConfigFileName, sourceId);
+        Iterator triggerIter = currentTriggers.iterator();
+        while (triggerIter.hasNext()) {
+            ITriggerControl trigger = (ITriggerControl) triggerIter.next();
+            trigger.setTriggerHandler(triggerManager);
+        }
+        triggerManager.addTriggers(currentTriggers);
+
     }
 
     public ITriggerManager getTriggerManager(){

@@ -22,10 +22,15 @@ import icecube.daq.trigger.config.TriggerBuilder;
 import java.util.List;
 import java.util.Iterator;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 public class TriggerComponent
     extends DAQComponent
 {
+
+    private static final Log log = LogFactory.getLog(TriggerComponent.class);
 
     protected ISourceID sourceId;
     protected IByteBufferCache bufferCache;
@@ -116,8 +121,13 @@ public class TriggerComponent
     public void configuring(String configName) throws DAQCompException {
 
         // Lookup the trigger configuration
+        String triggerConfiguration = null;
         String globalConfigurationFileName = globalConfigurationDir + "/" + configName + ".xml";
-        String triggerConfiguration = GlobalConfiguration.getTriggerConfig(globalConfigurationFileName);
+        try {
+            triggerConfiguration = GlobalConfiguration.getTriggerConfig(globalConfigurationFileName);
+        } catch (Exception e) {
+            log.fatal("Cannot get trigger configuration name.", e);
+        }
         String triggerConfigFileName = globalConfigurationDir + "/trigger/" + triggerConfiguration + ".xml";
 
         // Add triggers to the trigger manager

@@ -126,7 +126,8 @@ public class TriggerComponent
         try {
             triggerConfiguration = GlobalConfiguration.getTriggerConfig(globalConfigurationFileName);
         } catch (Exception e) {
-            log.fatal("Cannot get trigger configuration name.", e);
+            log.error("Error extracting trigger configuration name from global configuraion file.", e);
+            throw new DAQCompException("Cannot get trigger configuration name.", e);
         }
         String triggerConfigFileName = globalConfigurationDir + "/trigger/" + triggerConfiguration + ".xml";
 

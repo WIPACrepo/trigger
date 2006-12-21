@@ -101,9 +101,9 @@ public class GlobalConfiguration
             log.error("More than one " + TRIGGER_CONFIG_TAG + " elements found in " + configFileName);
             return null;
         }
-	String nodeValue = elements.item(0).getNodeValue();
+	String nodeValue = elements.item(0).getFirstChild().getNodeValue();
 	log.info("triggerConfig element has: " + nodeValue);
-        return elements.item(0).getNodeValue();
+        return elements.item(0).getFirstChild().getNodeValue();
 
     }
 

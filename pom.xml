@@ -16,18 +16,6 @@
   <name>trigger</name>
 
   <build>
-    <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>test/java</testSourceDirectory>
-    <resources>
-      <resource>
-        <directory>resources/jar</directory>
-      </resource>
-    </resources>
-    <testResources>
-      <testResource>
-        <directory>resources/test/jar</directory>
-      </testResource>
-    </testResources>
     <plugins>
       <plugin>
         <groupId>org.jvnet.jaxb1.maven2</groupId>
@@ -41,7 +29,7 @@
           </execution>
         </executions>
         <configuration>
-          <schemaDirectory>resources/jar/icecube/daq/trigger/config</schemaDirectory>
+          <schemaDirectory>src/main/resources/icecube/daq/trigger/config</schemaDirectory>
           <generateDirectory>${project.build.directory}/jaxb-source</generateDirectory>
         </configuration>
       </plugin>

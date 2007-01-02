@@ -40,6 +40,7 @@ public class TriggerComponent
     protected PayloadDestinationOutputEngine outputEngine;
 
     protected String globalConfigurationDir = null;
+    protected String triggerConfigFileName = null;
     protected List currentTriggers = null;
 
 
@@ -129,7 +130,7 @@ public class TriggerComponent
             log.error("Error extracting trigger configuration name from global configuraion file.", e);
             throw new DAQCompException("Cannot get trigger configuration name.", e);
         }
-        String triggerConfigFileName = globalConfigurationDir + "/trigger/" + triggerConfiguration + ".xml";
+        triggerConfigFileName = globalConfigurationDir + "/trigger/" + triggerConfiguration + ".xml";
 
         // Add triggers to the trigger manager
         currentTriggers = TriggerBuilder.buildTriggers(triggerConfigFileName, sourceId);

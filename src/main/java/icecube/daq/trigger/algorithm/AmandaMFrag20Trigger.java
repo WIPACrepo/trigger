@@ -9,17 +9,17 @@ import org.apache.commons.logging.LogFactory;
  * Date: Dec 11, 2006
  * Time: 1:29:53 PM
  */
-public class AmandaM18Trigger
+public class AmandaMFrag20Trigger
         extends AmandaTrigger
 {
 
-    private static final Log log = LogFactory.getLog(AmandaM18Trigger.class);
+    private static final Log log = LogFactory.getLog(AmandaMFrag20Trigger.class);
 
     private static int triggerNumber = 0;
 
-    public AmandaM18Trigger() {
+    public AmandaMFrag20Trigger() {
         triggerNumber++;
-        triggerBit = M18;
+        triggerBit = MULT_FRAG_20;
     }
 
     public void setTriggerName(String triggerName) {

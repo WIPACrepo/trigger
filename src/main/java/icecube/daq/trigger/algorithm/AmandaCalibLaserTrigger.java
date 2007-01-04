@@ -9,17 +9,17 @@ import org.apache.commons.logging.LogFactory;
  * Date: Dec 11, 2006
  * Time: 1:29:53 PM
  */
-public class AmandaM18Trigger
+public class AmandaCalibLaserTrigger
         extends AmandaTrigger
 {
 
-    private static final Log log = LogFactory.getLog(AmandaM18Trigger.class);
+    private static final Log log = LogFactory.getLog(AmandaCalibLaserTrigger.class);
 
     private static int triggerNumber = 0;
 
-    public AmandaM18Trigger() {
+    public AmandaCalibLaserTrigger() {
         triggerNumber++;
-        triggerBit = M18;
+        triggerBit = CALIB_LASER;
     }
 
     public void setTriggerName(String triggerName) {
@@ -28,5 +28,6 @@ public class AmandaM18Trigger
             log.info("TriggerName set to " + super.triggerName);
         }
     }
+
 
 }

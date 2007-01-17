@@ -484,8 +484,8 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
         IUTCTime firstTime = ((IHitPayload) hits.get(0)).getPayloadTimeUTC();
         IUTCTime lastTime = ((IHitPayload) hits.get(numberOfHits-1)).getPayloadTimeUTC();
 
-        if (log.isDebugEnabled() ||
-            (log.isInfoEnabled() && (triggerCounter % printMod == 0)) ) {
+        if ((log.isDebugEnabled() || log.isInfoEnabled()) 
+	    && (triggerCounter % printMod == 0)) {
             log.info("New Trigger " + triggerCounter + " from " + triggerName + " includes " + numberOfHits
                      + " hits:  First time = "
                      + firstTime.getUTCTimeAsLong() + " Last time = " + lastTime.getUTCTimeAsLong());

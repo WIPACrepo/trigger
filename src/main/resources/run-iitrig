@@ -29,7 +29,8 @@ xmlrpc-client \
 xmlrpc-server \
 icebucket \
 concurrent \
-ws-commons-util"
+ws-commons-util \
+jmxtools"
 
 missing_jar=
 CLASSPATH=""

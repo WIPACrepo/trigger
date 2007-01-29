@@ -93,7 +93,7 @@ public class GlobalTriggerComponent
     }
 
     public static void main(String[] args) throws DAQCompException {
-        new DAQCompServer(new TriggerComponent(COMPONENT_NAME, COMPONENT_ID), args);
+        new DAQCompServer(new GlobalTriggerComponent(), args);
     }
 
 }

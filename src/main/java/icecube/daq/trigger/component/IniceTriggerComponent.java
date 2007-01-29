@@ -3,7 +3,6 @@ package icecube.daq.trigger.component;
 import icecube.daq.common.DAQCmdInterface;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQCompServer;
-import icecube.daq.juggler.mock.MockAppender;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -21,7 +20,7 @@ public class IniceTriggerComponent
     }
 
     public static void main(String[] args) throws DAQCompException {
-        new DAQCompServer(new TriggerComponent(COMPONENT_NAME, COMPONENT_ID), args);
+        new DAQCompServer(new IniceTriggerComponent(), args);
     }
 
 }

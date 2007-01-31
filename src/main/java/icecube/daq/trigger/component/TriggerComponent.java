@@ -95,12 +95,12 @@ public class TriggerComponent
                                                        name + "InputEngine",
                                                        splicer,
                                                        masterFactory);
-        addEngine(inputType, inputEngine);
+        addMonitoredEngine(inputType, inputEngine);
         outputEngine = new PayloadDestinationOutputEngine(name, id,
                                                           name + "OutputEngine");
         outputEngine.registerBufferManager(bufferCache);
         triggerManager.setPayloadDestinationCollection(outputEngine.getPayloadDestinationCollection());
-        addEngine(outputType, outputEngine);
+        addMonitoredEngine(outputType, outputEngine);
 
     }
 

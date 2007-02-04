@@ -76,8 +76,7 @@ public class TriggerComponent
                 inputType = DAQConnector.TYPE_ICETOP_HIT;
                 outputType = DAQConnector.TYPE_TRIGGER;
             } else if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
-                // todo: What should the inputType be for AMANDA???
-                inputType = DAQConnector.TYPE_TEST_HIT;
+                inputType = DAQConnector.TYPE_SELF_CONTAINED;
                 outputType = DAQConnector.TYPE_TRIGGER;
             } else {
                 // Unknown name?

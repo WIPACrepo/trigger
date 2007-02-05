@@ -19,6 +19,8 @@ import icecube.daq.trigger.control.GlobalTriggerManager;
 import icecube.daq.trigger.control.ITriggerControl;
 import icecube.daq.trigger.config.TriggerBuilder;
 
+import java.io.IOException;
+
 import java.util.List;
 import java.util.Iterator;
 
@@ -29,8 +31,10 @@ import org.apache.commons.logging.LogFactory;
 public class TriggerComponent
     extends DAQComponent
 {
-
     private static final Log log = LogFactory.getLog(TriggerComponent.class);
+
+    private static final String AMANDA_HOST = "triggerdaq2";
+    private static final int AMANDA_PORT = 12014;
 
     protected ISourceID sourceId;
     protected IByteBufferCache bufferCache;
@@ -94,6 +98,15 @@ public class TriggerComponent
                                                        name + "InputEngine",
                                                        splicer,
                                                        masterFactory);
+        if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
+            try {
+                inputEngine.addReverseConnection(AMANDA_HOST, AMANDA_PORT,
+                                                 bufferCache);
+            } catch (IOException ioe) {
+                log.error("Couldn't connect to Amanda TWR", ioe);
+                System.exit(1);
+            }
+        }
         addMonitoredEngine(inputType, inputEngine);
         outputEngine = new PayloadDestinationOutputEngine(name, id,
                                                           name + "OutputEngine");

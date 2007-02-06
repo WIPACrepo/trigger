@@ -22,11 +22,17 @@ public class HitFilter
      */
     private DomSet domSet;
 
+    private String sync = "1e5b72775d19";
+    private String trig = "1d165fc478ca";
+
+    private int domSetId = -1;
+
     /**
      * Default constructor
      */
     public HitFilter() {
-        this(null);
+        //this(null);
+        this(-1);
     }
 
     /**
@@ -35,6 +41,10 @@ public class HitFilter
      */
     public HitFilter(DomSet domSet) {
         setDomSet(domSet);
+    }
+
+    public HitFilter(int domSetId) {
+        this.domSetId = domSetId;
     }
 
     /**
@@ -53,16 +63,42 @@ public class HitFilter
      */
     public boolean useHit(IHitPayload hit) {
         // if domSet is not initialized, use the hit
-        if (null == domSet) {
-            return true;
-        }
+        //if (null == domSet) {
+        //    return true;
+        //}
 
         // if the dom is in the domSet, use the hit
-        if (domSet.inSet(hit.getDOMID())) {
-            return true;
+        //if (domSet.inSet(hit.getDOMID())) {
+        //    return true;
+        //} else {
+        //    return false;
+        //}
+
+        String domId = hit.getDOMID().getDomIDAsString().toLowerCase();
+        boolean isSync = (domId.compareTo(sync) == 0);
+        boolean isTrig = (domId.compareTo(trig) == 0);
+
+        if (domSetId == 0) {
+            if (isSync) {
+                return true;
+            } else {
+                return false;
+            }
+        } else if (domSetId == 1) {
+            if (isTrig) {
+                return true;
+            } else {
+                return false;
+            }
         } else {
-            return false;
+            if (isSync || isTrig) {
+                return false;
+            } else {
+                return true;
+            }
         }
+
+
     }
 
 }

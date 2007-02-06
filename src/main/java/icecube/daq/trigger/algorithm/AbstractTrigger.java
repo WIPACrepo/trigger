@@ -642,8 +642,8 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
     }
 
     protected void configHitFilter(int domSetId) {
-        DomSet domSet = DomSetFactory.getDomSet(domSetId);
-        hitFilter = new HitFilter(domSet);
+        //DomSet domSet = DomSetFactory.getDomSet(domSetId);
+        hitFilter = new HitFilter(domSetId);
     }
 
 }

@@ -241,4 +241,20 @@ public class TriggerReadout
         return (readout.getOffset() + readout.getPlus());
     }
 
+    public int hashCode() {
+        return ("" + type + ":" + offset + ":" + minus + ":" + plus).hashCode();
+    }
+
+    public boolean equals(Object object) {
+        if (object == null) {
+            return false;
+        } else if (!(object instanceof TriggerReadout)) {
+            return false;
+        } else if (object.hashCode() != this.hashCode()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 }

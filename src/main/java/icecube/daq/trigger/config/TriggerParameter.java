@@ -86,4 +86,21 @@ public class TriggerParameter
     public String toString() {
         return (name + " = " + value);
     }
+
+    public int hashCode() {
+        return (name + ":" + value).hashCode();
+    }
+
+    public boolean equals(Object object) {
+        if (object == null) {
+            return false;
+        } else if (!(object instanceof TriggerParameter)) {
+            return false;
+        } else if (object.hashCode() != this.hashCode()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 }

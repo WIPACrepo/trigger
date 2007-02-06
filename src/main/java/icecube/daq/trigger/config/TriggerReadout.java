@@ -216,14 +216,6 @@ public class TriggerReadout
     }
 
     /**
-     * Print out the readout as a string.
-     * @return string dump of readout
-     */
-    public String toString() {
-        return (getTypeAsString() + " : " + offset + " - " + minus + " + " + plus);
-    }
-
-    /**
      * Calculates the maximum extentent of the readout into the past.
      * @param readout TriggerReadout to use
      * @return maximum reach into past, in nanoseconds
@@ -241,8 +233,16 @@ public class TriggerReadout
         return (readout.getOffset() + readout.getPlus());
     }
 
+    /**
+     * Print out the readout as a string.
+     * @return string dump of readout
+     */
+    public String toString() {
+        return (getTypeAsString() + " : " + offset + " - " + minus + " + " + plus);
+    }
+
     public int hashCode() {
-        return ("" + type + ":" + offset + ":" + minus + ":" + plus).hashCode();
+        return toString().hashCode();
     }
 
     public boolean equals(Object object) {

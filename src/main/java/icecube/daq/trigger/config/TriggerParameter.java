@@ -88,7 +88,7 @@ public class TriggerParameter
     }
 
     public int hashCode() {
-        return (name + ":" + value).hashCode();
+        return toString().hashCode();
     }
 
     public boolean equals(Object object) {

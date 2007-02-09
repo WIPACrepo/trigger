@@ -6,6 +6,8 @@ import icecube.daq.payload.IUTCTime;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.control.DummyPayload;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -16,6 +18,8 @@ import icecube.daq.trigger.control.DummyPayload;
 public abstract class AmandaTrigger
         extends AbstractTrigger
 {
+
+    private static final Log log = LogFactory.getLog(AmandaTrigger.class);
 
     public static final int MULT_FRAG_20 = 0x001;
     public static final int VOLUME       = 0x002;
@@ -47,7 +51,10 @@ public abstract class AmandaTrigger
         IUTCTime triggerTime = trigger.getFirstTimeUTC();
 
         // check the trigger bit
-        int bitmask = trigger.getTriggerType();
+        int bitmask = trigger.getTriggerConfigID();
+        if (log.isDebugEnabled()) {
+            log.debug("Recieved TWR trigger mask: " + bitmask);
+        }
         if ((bitmask & triggerBit) == triggerBit) {
             // this is the correct type, report trigger
             formTrigger(triggerTime);

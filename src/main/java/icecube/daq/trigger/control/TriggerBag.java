@@ -18,6 +18,7 @@ import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.splicer.Payload;
@@ -151,10 +152,10 @@ public class TriggerBag
      * If it overlaps with any existing payloads, they will be merged.
      * @param payload new payload
      */
-    public synchronized void add(IPayload payload) {
+    public synchronized void add(ILoadablePayload payload) {
 
         try {
-            ((Payload) payload).loadPayload();
+            payload.loadPayload();
         } catch (Exception e) {
             log.error("Error loading payload", e);
         }
@@ -404,7 +405,7 @@ public class TriggerBag
                     for (int i=0; i<hitList.size(); i++)  {
                         IHitPayload hit = (IHitPayload) hitList.get(i);
                         try {
-                            ((Payload) hit).loadPayload();
+                            ((ILoadablePayload) hit).loadPayload();
                         } catch (Exception e) {
                             log.error("Error loading hit", e);
                         }

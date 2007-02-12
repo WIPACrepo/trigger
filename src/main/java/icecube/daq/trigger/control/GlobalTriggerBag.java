@@ -11,6 +11,7 @@
 package icecube.daq.trigger.control;
 
 //import icecube.daq.iniceTrig.framework.ITriggerBag;
+import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.ISourceID;
@@ -136,9 +137,9 @@ public class GlobalTriggerBag
      *
      * @param currentPayload
      */
-    public void add(IPayload currentPayload) {
+    public void add(ILoadablePayload currentPayload) {
          try {
-             ((Payload) currentPayload).loadPayload();
+             currentPayload.loadPayload();
          } catch (Exception e) {
              log.error("Error loading currentPayload", e);
          }

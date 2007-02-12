@@ -169,7 +169,7 @@ public class GlobalTriggerHandler
         ((GlobalTriggerBag) triggerBag).setTimeGap_option(iTimeGap_Option);
     }
 
-    public void addToTriggerBag(IPayload triggerPayload)
+    public void addToTriggerBag(ILoadablePayload triggerPayload)
     {
         triggerBag.add(triggerPayload);
     }
@@ -336,7 +336,7 @@ public class GlobalTriggerHandler
      *
      * @param payload
      */
-    public void process(IPayload payload) {
+    public void process(ILoadablePayload payload) {
         miTotalInputTriggers++;
         log.debug("Total # of Input Triggers so far = " + miTotalInputTriggers);
 
@@ -378,7 +378,7 @@ public class GlobalTriggerHandler
                     {
                         ITriggerRequestPayload subPayload = (ITriggerRequestPayload) vecSubPayloads.get(i);
                         try {
-                            ((Payload) subPayload).loadPayload();
+                            ((ILoadablePayload) subPayload).loadPayload();
                         } catch (IOException e) {
                             e.printStackTrace();
                         } catch (DataFormatException e) {

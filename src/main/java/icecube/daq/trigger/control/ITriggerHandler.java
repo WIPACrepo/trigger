@@ -11,6 +11,7 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 
@@ -29,7 +30,7 @@ public interface ITriggerHandler extends IPayloadProducer
      * add a new trigger request to the trigger bag
      * @param payload new trigger request
      */
-    void addToTriggerBag(IPayload payload);
+    void addToTriggerBag(ILoadablePayload payload);
 
     /**
      * add a trigger to the list of managed triggers
@@ -58,7 +59,7 @@ public interface ITriggerHandler extends IPayloadProducer
      * process next payload
      * @param payload payload to process
      */
-    void process(IPayload payload);
+    void process(ILoadablePayload payload);
 
     /**
      * Reset the handler for a new run.

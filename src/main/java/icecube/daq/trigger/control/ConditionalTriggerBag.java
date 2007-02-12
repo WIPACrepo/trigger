@@ -10,8 +10,9 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.splicer.Payload;
 import icecube.daq.trigger.ITriggerRequestPayload;
@@ -83,10 +84,10 @@ public class ConditionalTriggerBag
      *
      * @param newPayload
      */
-    public void add(IPayload newPayload)
+    public void add(ILoadablePayload newPayload)
     {
         try {
-            ((Payload) newPayload).loadPayload();
+            newPayload.loadPayload();
         } catch (Exception e) {
             log.error("Error loading newPayload", e);
         }
@@ -212,7 +213,7 @@ public class ConditionalTriggerBag
             {
                 ITriggerRequestPayload tPayload = (ITriggerRequestPayload) iterTriggers.next();
                 try {
-                    ((Payload) tPayload).loadPayload();
+                    ((ILoadablePayload) tPayload).loadPayload();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (DataFormatException e) {
@@ -250,7 +251,7 @@ public class ConditionalTriggerBag
                     || (!containAllTriggerIDsRequired(tPayload) && flushing)){
                         payloadListInConditionalBag.remove(i);
                         setUpdateInfo(new DummyPayload(tPayload.getFirstTimeUTC()));
-                        //((Payload)tPayload).recycle();
+                        //((ILoadablePayload)tPayload).recycle();
                       //  mListUnqualifiedTriggers.add(tPayload);
                         iTriggersInBag = payloadListInConditionalBag.size();
                         bRemoved = true;
@@ -285,7 +286,7 @@ public class ConditionalTriggerBag
            /*     mbContainAllTriggerIDsRequired = containAllTriggerIDsRequired(trigger);
 
                 if(!mbContainAllTriggerIDsRequired){
-                    ((Payload)trigger).recycle();
+                    ((ILoadablePayload)trigger).recycle();
                 }
                 return mbContainAllTriggerIDsRequired;*/
                 return true;

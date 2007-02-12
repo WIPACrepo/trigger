@@ -13,6 +13,7 @@ package icecube.daq.trigger.control;
 import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.splicer.PayloadFactory;
 
@@ -30,7 +31,7 @@ public interface ITriggerBag
      * add another payload to the bag
      * @param payload payload to add
      */
-    void add(IPayload payload);
+    void add(ILoadablePayload payload);
 
     /**
      * method to flush the bag, allow all payloads to go free

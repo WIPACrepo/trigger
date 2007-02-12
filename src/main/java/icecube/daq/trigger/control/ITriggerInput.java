@@ -10,7 +10,7 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.payload.IPayload;
+import icecube.daq.payload.ILoadablePayload;
 
 /**
  * This interface defines the functionality of a trigger input module
@@ -21,13 +21,13 @@ import icecube.daq.payload.IPayload;
 public interface ITriggerInput
 {
 
-    void addPayload(IPayload payload);
+    void addPayload(ILoadablePayload payload);
 
     void flush();
 
     boolean hasNext();
 
-    IPayload next();
+    ILoadablePayload next();
 
     int size();
 

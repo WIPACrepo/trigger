@@ -15,6 +15,7 @@ import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.GlobalTrigEventWrapper;
 import icecube.daq.trigger.control.ConditionalTriggerBag;
+import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.PayloadDestination;
 
 import java.util.List;
@@ -95,7 +96,7 @@ public abstract class AbstractGlobalTrigger extends AbstractTrigger
 */
 
             //--every wrapped trigger should be reported to GlobalTrigBag.
-            reportTrigger(mtGlobalTrigEventPayload);
+            reportTrigger((ILoadablePayload) mtGlobalTrigEventPayload);
             mtGlobalTrigEventPayload = null;
         }else{
             throw new NullPointerException("mtGlobalTrigEventPayload is NULL in wrapTrigger()");

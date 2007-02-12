@@ -10,6 +10,7 @@
 
 package icecube.daq.trigger.control;
 
+import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IUTCTime;
@@ -68,11 +69,11 @@ public class TriggerInput
      * add a new payload to the list
      * @param payload
      */
-    public void addPayload(IPayload payload) {
+    public void addPayload(ILoadablePayload payload) {
 
         // Load the payload
         try {
-            ((Payload) payload).loadPayload();
+            payload.loadPayload();
         } catch (IOException ioe) {
             log.error("IO exception while loading payload", ioe);
             return;
@@ -161,7 +162,7 @@ public class TriggerInput
      * get next available payload
      * @return next IPayload
      */
-    public IPayload next() {
+    public ILoadablePayload next() {
 
         // loop over all payloads in list
         for (int i=0; i<inputList.size(); i++) {
@@ -191,13 +192,13 @@ public class TriggerInput
      */
     private class PayloadWindow {
 
-        private IPayload payload;
+        private ILoadablePayload payload;
         public IUTCTime firstTime;
         private IUTCTime lastTime;
         private boolean overlaping;
         private boolean contained;
 
-        private PayloadWindow(IPayload payload) {
+        private PayloadWindow(ILoadablePayload payload) {
             this.payload = payload;
 
             // get firstTime and lastTime from appropriate interface
@@ -246,7 +247,7 @@ public class TriggerInput
 
         }
 
-        private IPayload getPayload() {
+        private ILoadablePayload getPayload() {
             return payload;
         }
 

@@ -10,6 +10,7 @@
 
 package icecube.daq.trigger.algorithm;
 
+import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadInterfaceRegistry;
@@ -82,7 +83,7 @@ public abstract class CoincidenceTrigger
             miNumIncomingConfiguredTriggers++;
             log.debug("Total number of incoming configured triggers so far = " + miNumIncomingConfiguredTriggers);
 
-            mtConditionalTriggerBag.add(payload);
+            mtConditionalTriggerBag.add((ILoadablePayload) payload);
 
             if (log.isDebugEnabled()) {
                 log.debug("coincidence Trigger Bag contains " + mtConditionalTriggerBag.size() + " triggers");
@@ -99,7 +100,7 @@ public abstract class CoincidenceTrigger
         }
         while (mtConditionalTriggerBag.hasNext())
         {
-            IPayload tPayload = mtConditionalTriggerBag.next();
+            ILoadablePayload tPayload = mtConditionalTriggerBag.next();
             //--add to the list only for the first 100 payloads.
             if(mListOutputTriggers.size() <= 100){
                 mListOutputTriggers.add(tPayload);
@@ -130,7 +131,7 @@ public abstract class CoincidenceTrigger
         while(iter.hasNext())
         {
             iter.remove();
-            ((Payload)iter.next()).recycle();
+            ((ILoadablePayload)iter.next()).recycle();
         }*/
     }
     public abstract List getConfiguredTriggerIDs();
@@ -277,7 +278,7 @@ public abstract class CoincidenceTrigger
     {
         mtConditionalTriggerBag.flush();
         while(mtConditionalTriggerBag.hasNext()){
-            IPayload tPayload = mtConditionalTriggerBag.next();
+            ILoadablePayload tPayload = mtConditionalTriggerBag.next();
             mListOutputTriggers.add(tPayload);
             reportTrigger(tPayload);
         }

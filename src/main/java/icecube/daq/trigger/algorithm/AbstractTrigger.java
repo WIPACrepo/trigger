@@ -28,6 +28,7 @@ import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.monitor.ITriggerMonitor;
 import icecube.daq.trigger.monitor.TriggerMonitor;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IDOMID;
@@ -315,7 +316,7 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
      * Report a new trigger to the trigger handler.
      * @param payload single payload forming a trigger
      */
-    protected void reportTrigger(IPayload payload) {
+    protected void reportTrigger(ILoadablePayload payload) {
         if (null == triggerHandler) {
             log.error("TriggerHandler was not set!");
         }
@@ -326,7 +327,7 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
             countMonitor.measure(1);
             byteMonitor.measure(payload.getPayloadLength());
         } else {
-            ((Payload) payload).recycle();
+            payload.recycle();
         }
     }
 

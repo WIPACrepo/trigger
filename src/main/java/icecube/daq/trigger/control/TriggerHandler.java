@@ -136,7 +136,7 @@ public class TriggerHandler
      * add a new trigger payload to the bag
      * @param triggerPayload new trigger to add
      */
-    public void addToTriggerBag(IPayload triggerPayload) {
+    public void addToTriggerBag(ILoadablePayload triggerPayload) {
         triggerBag.add(triggerPayload);
     }
 
@@ -238,7 +238,7 @@ public class TriggerHandler
      * Method to process payloads, assumes that they are time ordered.
      * @param payload payload to process
      */
-    public void process(IPayload payload) {
+    public void process(ILoadablePayload payload) {
 
         // add payload to input handler
         if (null != payload) {
@@ -287,7 +287,7 @@ public class TriggerHandler
 
             } else if(interfaceType == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD){
                 try {
-                    ((Payload) nextPayload).loadPayload();
+                    ((ILoadablePayload) nextPayload).loadPayload();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (DataFormatException e) {

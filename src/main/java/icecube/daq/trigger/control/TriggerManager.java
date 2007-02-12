@@ -15,6 +15,7 @@ import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.SplicerChangedEvent;
 import icecube.daq.payload.MasterPayloadFactory;
+import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.ISourceID;
@@ -158,7 +159,8 @@ public class TriggerManager
         if (lastInputListSize > 0) {
             for (int index = start-decrement; numberOfObjectsInSplicer != index; index++) {
 
-                IPayload payload = (IPayload) splicedObjects.get(index);
+                ILoadablePayload payload =
+                    (ILoadablePayload) splicedObjects.get(index);
                 wallTimeQueue.addLast(new Long(System.currentTimeMillis()));
                 latestTime = payload.getPayloadTimeUTC();
 

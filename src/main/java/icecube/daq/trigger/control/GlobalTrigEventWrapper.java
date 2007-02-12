@@ -131,7 +131,7 @@ public class GlobalTrigEventWrapper
             e.printStackTrace();
         }
 
-        ((Payload) tTriggerRequestPayload).recycle();
+        ((ILoadablePayload) tTriggerRequestPayload).recycle();
 
     }
     /**
@@ -296,14 +296,14 @@ public class GlobalTrigEventWrapper
         {
             ITriggerRequestPayload subPayload = (ITriggerRequestPayload) iter.next();
             try {
-                ((Payload) subPayload).loadPayload();
+                ((ILoadablePayload) subPayload).loadPayload();
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (DataFormatException e) {
                 e.printStackTrace();
             }
             if(subPayload.getSourceID().getSourceID() == mtGlobalTriggerSourceID.getSourceID()){
-                ((Payload) subPayload).recycle();
+                ((ILoadablePayload) subPayload).recycle();
             }
         }
     }
@@ -370,7 +370,7 @@ public class GlobalTrigEventWrapper
         Iterator iter = vecGlobalSubPayload.iterator();
         while(iter.hasNext())
         {
-            ((Payload) iter.next()).recycle();
+            ((ILoadablePayload) iter.next()).recycle();
         }
     }
 
@@ -429,7 +429,7 @@ public class GlobalTrigEventWrapper
         log.debug("Total # of Final Merged-GT event so far = " + miNumMergedGTevent);
 
         //--recycle
-        ((Payload) tGTEvent).recycle();
+        ((ILoadablePayload) tGTEvent).recycle();
 
     }
     /**

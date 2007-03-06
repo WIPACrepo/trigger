@@ -63,4 +63,4 @@ fi
 
 export CLASSPATH
 #echo "CLASSPATH=${CLASSPATH}"
-java -Xmx1024m icecube.daq.trigger.component.AmandaTriggerComponent $@
+java -Xmx1600m icecube.daq.trigger.component.AmandaTriggerComponent $@

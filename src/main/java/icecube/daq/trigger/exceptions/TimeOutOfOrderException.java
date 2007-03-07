@@ -1,7 +1,7 @@
 /*
  * class: TimeOutOfOrderException
  *
- * Version $Id: TimeOutOfOrderException.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: TimeOutOfOrderException.java,v 1.1 2005/12/06 22:29:54 toale Exp $
  *
  * Date: March 31 2005
  *
@@ -10,11 +10,12 @@
 
 package icecube.daq.trigger.exceptions;
 
+import icecube.daq.trigger.exceptions.TriggerException;
 
 /**
  * This class provides a specific exception
  *
- * @version $Id: TimeOutOfOrderException.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: TimeOutOfOrderException.java,v 1.1 2005/12/06 22:29:54 toale Exp $
  * @author pat
  */
 public class TimeOutOfOrderException
@@ -24,16 +25,14 @@ public class TimeOutOfOrderException
     /**
      * default constructor
      */
-    TimeOutOfOrderException()
-    {
+    TimeOutOfOrderException() {
     }
 
     /**
      * constructor taking a message
      * @param message message associated with this exception
      */
-    public TimeOutOfOrderException(String message)
-    {
+    public TimeOutOfOrderException(String message) {
         super(message);
     }
 
@@ -41,8 +40,8 @@ public class TimeOutOfOrderException
      * constructor taking an exception
      * @param exception the exception
      */
-    public TimeOutOfOrderException(Exception exception)
-    {
+    public TimeOutOfOrderException(Exception exception) {
         super(exception);
     }
+
 }

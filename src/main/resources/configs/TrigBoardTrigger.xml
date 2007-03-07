@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<activeTriggers>
+    <triggerConfig>
+        <triggerType>3</triggerType>
+        <triggerConfigId>-1</triggerConfigId>
+        <sourceId>6000</sourceId>
+        <triggerName>ThroughputTrigger</triggerName>
+    </triggerConfig>
+    <triggerConfig>
+        <triggerType>6</triggerType>
+        <triggerConfigId>0</triggerConfigId>
+        <sourceId>4000</sourceId>
+        <triggerName>TrigBoardTrigger</triggerName>
+        <parameterConfig>
+            <parameterName>prescale</parameterName>
+            <parameterValue>1</parameterValue>
+        </parameterConfig>
+        <readoutConfig>
+            <readoutType>2</readoutType>
+            <timeOffset>0</timeOffset>
+            <timeMinus>-16000</timeMinus>
+            <timePlus>16000</timePlus>
+        </readoutConfig>
+        <readoutConfig>
+            <readoutType>1</readoutType>
+            <timeOffset>0</timeOffset>
+            <timeMinus>-16000</timeMinus>
+            <timePlus>16000</timePlus>
+        </readoutConfig>
+    </triggerConfig>
+</activeTriggers>

@@ -1,529 +1,165 @@
 package icecube.daq.trigger.component;
 
 import icecube.daq.common.DAQCmdInterface;
-import icecube.daq.io.DAQComponentOutputProcess;
-import icecube.daq.io.SimpleOutputEngine;
-import icecube.daq.io.SpliceableStreamReader;
-import icecube.daq.juggler.component.DAQCompException;
+import icecube.daq.io.PayloadDestinationOutputEngine;
+import icecube.daq.io.SpliceablePayloadInputEngine;
 import icecube.daq.juggler.component.DAQComponent;
 import icecube.daq.juggler.component.DAQConnector;
-import icecube.daq.juggler.mbean.MemoryStatistics;
-import icecube.daq.juggler.mbean.SystemStatistics;
+import icecube.daq.juggler.component.DAQCompException;
+import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.IByteBufferCache;
+import icecube.daq.payload.ByteBufferCache;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.impl.PayloadFactory;
-import icecube.daq.payload.impl.VitreousBufferCache;
-import icecube.daq.splicer.HKN1Splicer;
-import icecube.daq.splicer.PrioritySplicer;
-import icecube.daq.splicer.Spliceable;
-import icecube.daq.splicer.SpliceableComparator;
-import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
-import icecube.daq.splicer.SplicerException;
-import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
-import icecube.daq.trigger.config.DomSetFactory;
-import icecube.daq.trigger.config.TriggerCreator;
+import icecube.daq.splicer.SplicerImpl;
 import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.TriggerManager;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.util.DOMRegistryFactory;
-import icecube.daq.util.IDOMRegistry;
-import icecube.daq.util.JAXPUtil;
-import icecube.daq.util.JAXPUtilException;
+import icecube.daq.trigger.control.GlobalTriggerManager;
+import icecube.daq.trigger.control.ITriggerControl;
+import icecube.daq.trigger.config.TriggerBuilder;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+
 import java.util.List;
+import java.util.Iterator;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 
-/**
- * Base class for trigger handlers.
- */
 public class TriggerComponent
     extends DAQComponent
-    implements DAQTriggerComponent
 {
-    /** Message logger. */
-    private static final Logger LOG =
-        Logger.getLogger(TriggerComponent.class);
+    private static final Log log = LogFactory.getLog(TriggerComponent.class);
 
-    private static final Spliceable LAST_SPLICEABLE =
-        SpliceableFactory.LAST_POSSIBLE_SPLICEABLE;
+    private static final String AMANDA_HOST = "triggerdaq2";
+    private static final int AMANDA_PORT = 12014;
 
-    private ISourceID sourceId;
+    protected ISourceID sourceId;
+    protected IByteBufferCache bufferCache;
+    protected ITriggerManager triggerManager;
+    protected Splicer splicer;
+    protected SpliceablePayloadInputEngine inputEngine;
+    protected PayloadDestinationOutputEngine outputEngine;
 
-    private TriggerManager triggerManager;
+    protected String globalConfigurationDir = null;
+    protected String triggerConfigFileName = null;
+    protected List currentTriggers = null;
 
-    private IByteBufferCache inCache;
-    private IByteBufferCache outCache;
-    private Splicer<Spliceable> splicer;
-    private SpliceableStreamReader inputEngine;
-    private SimpleOutputEngine outputEngine;
 
-    private boolean isGlobalTrigger;
-
-    private File configDir;
-
-    private List<ITriggerAlgorithm> algorithms;
-
-    /**
-     * Create a trigger hander component
-     *
-     * @param name component name
-     * @param id component ID (usually <tt>0</tt> for trigger handlers)
-     */
-    public TriggerComponent(String name, int id)
-        throws DAQCompException
-    {
+    public TriggerComponent(String name, int id) {
         super(name, id);
 
         // Create the source id of this component
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
-    }
 
-    @Override
-    public void initialize()
-        throws DAQCompException
-    {
-        // Get input and output types
-        String inputType;
-        String outputType;
-        String shortName;
-        int totChannels;
-        // XXX use a `switch` statement in Java 1.7
-        if (getName().equals(DAQCmdInterface.DAQ_GLOBAL_TRIGGER)) {
-            isGlobalTrigger = true;
+        // Create the buffer cache and the payload factory
+        bufferCache = new ByteBufferCache(256, 50000000L, 50000000L, name);
+        addCache(bufferCache);
+        MasterPayloadFactory masterFactory = new MasterPayloadFactory(bufferCache);
+
+        // Now differentiate
+        String inputType, outputType;
+        if (name.equals(DAQCmdInterface.DAQ_GLOBAL_TRIGGER)) {
+
+            // Global trigger
+            triggerManager = new GlobalTriggerManager(masterFactory, sourceId);
+
             inputType = DAQConnector.TYPE_TRIGGER;
             outputType = DAQConnector.TYPE_GLOBAL_TRIGGER;
-            shortName = "GTrig";
-            totChannels = 2;
-        } else if (getName().equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
-            inputType = DAQConnector.TYPE_STRING_HIT;
-            outputType = DAQConnector.TYPE_TRIGGER;
-            shortName = "IITrig";
-            totChannels = DAQCmdInterface.DAQ_MAX_NUM_STRINGS;
-        } else if (getName().equals(DAQCmdInterface.DAQ_ICETOP_TRIGGER)) {
-            inputType = DAQConnector.TYPE_ICETOP_HIT;
-            outputType = DAQConnector.TYPE_TRIGGER;
-            shortName = "ITTrig";
-            totChannels = DAQCmdInterface.DAQ_MAX_NUM_IDH;
         } else {
-            throw new Error("Unknown trigger " + getName());
+
+            // Sub-detector triggers
+            triggerManager = new TriggerManager(masterFactory, sourceId);
+
+            if (name.equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
+                inputType = DAQConnector.TYPE_STRING_HIT;
+                outputType = DAQConnector.TYPE_TRIGGER;
+            } else if (name.equals(DAQCmdInterface.DAQ_ICETOP_TRIGGER)) {
+                inputType = DAQConnector.TYPE_ICETOP_HIT;
+                outputType = DAQConnector.TYPE_TRIGGER;
+            } else if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
+                inputType = DAQConnector.TYPE_SELF_CONTAINED;
+                outputType = DAQConnector.TYPE_TRIGGER;
+            } else {
+                // Unknown name?
+                inputType = "";
+                outputType = "";
+            }
         }
-
-        inCache = new VitreousBufferCache(shortName + "IN", Long.MAX_VALUE);
-        addCache(inCache);
-
-        outCache = new VitreousBufferCache(shortName + "OUT");
-        addCache(outputType, outCache);
-
-        addMBean("jvm", new MemoryStatistics());
-        addMBean("system", new SystemStatistics());
-
-        SpliceableFactory factory = new PayloadFactory(inCache);
-
-        triggerManager = new TriggerManager(sourceId, outCache);
-        addMBean("manager", triggerManager);
 
         // Create splicer and introduce it to the trigger manager
-        SpliceableComparator splCmp =
-            new SpliceableComparator(LAST_SPLICEABLE);
-        if (System.getProperty("usePrioritySplicer") == null) {
-            splicer = new HKN1Splicer<Spliceable>(triggerManager, splCmp,
-                                                  LAST_SPLICEABLE);
-        } else {
-            try {
-                splicer = new PrioritySplicer<Spliceable>(shortName + "Sorter",
-                                                          triggerManager,
-                                                          splCmp,
-                                                          LAST_SPLICEABLE,
-                                                          totChannels);
-            } catch (SplicerException se) {
-                throw new DAQCompException("Cannot create splicer", se);
-            }
-            addMBean(shortName + "Sorter", splicer);
-        }
-
+        splicer = new SplicerImpl(triggerManager);
         triggerManager.setSplicer(splicer);
 
-        // Create and register input engine
-        try {
-            inputEngine = new SpliceableStreamReader(getName(), 25000,
-                                                      splicer, factory);
-        } catch (IOException ioe) {
-            LOG.error("Couldn't create input reader");
-            System.exit(1);
-            inputEngine = null;
+        // Create and register io engines
+        inputEngine = new SpliceablePayloadInputEngine(name, id,
+                                                       name + "InputEngine",
+                                                       splicer,
+                                                       masterFactory);
+        if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
+            try {
+                inputEngine.addReverseConnection(AMANDA_HOST, AMANDA_PORT,
+                                                 bufferCache);
+            } catch (IOException ioe) {
+                log.error("Couldn't connect to Amanda TWR", ioe);
+                System.exit(1);
+            }
         }
         addMonitoredEngine(inputType, inputEngine);
-
-        // Create and register output engine
-        outputEngine = new SimpleOutputEngine(getName(), getNumber(),
-                                              getName() + "OutputEngine");
-        triggerManager.setOutputEngine(outputEngine);
+        outputEngine = new PayloadDestinationOutputEngine(name, id,
+                                                          name + "OutputEngine");
+        outputEngine.registerBufferManager(bufferCache);
+        triggerManager.setPayloadDestinationCollection(outputEngine.getPayloadDestinationCollection());
         addMonitoredEngine(outputType, outputEngine);
+
     }
 
     /**
-     * Close all open files, sockets, etc.
-     *
-     * @throws IOException if there is a problem
+     * Tell trigger or other component where top level XML configuration tree lives
      */
-    @Override
-    public void closeAll()
-        throws IOException
-    {
-        inputEngine.destroyProcessor();
-        outputEngine.destroyProcessor();
-
-        super.closeAll();
+    public void setGlobalConfigurationDir(String dirName) {
+        globalConfigurationDir = dirName;
     }
 
     /**
-     * Configure this component using the specified run configuration file.
+     * Configure a component using the specified configuration name.
      *
-     * @param configName base run configuration file name
-     *                   (with or without trailing ".xml")
+     * @param configName configuration name
      *
-     * @throws DAQCompException if there is a problem
+     * @throws icecube.daq.juggler.component.DAQCompException
+     *          if there is a problem configuring
      */
-    @Override
-    public void configuring(String configName)
-        throws DAQCompException
-    {
-        if (configDir == null) {
-            throw new DAQCompException("Global configuration directory has" +
-                                       " not been set");
-        }
+    public void configuring(String configName) throws DAQCompException {
 
-        // Initialize DOMRegistry
-        IDOMRegistry registry;
+        // Lookup the trigger configuration
+        String triggerConfiguration = null;
+        String globalConfigurationFileName = globalConfigurationDir + "/" + configName + ".xml";
         try {
-            registry = DOMRegistryFactory.load(configDir);
-            LOG.info("loaded DOM registry");
-        } catch (Exception ex) {
-            throw new DAQCompException("Error loading DOM registry", ex);
+            triggerConfiguration = GlobalConfiguration.getTriggerConfig(globalConfigurationFileName);
+        } catch (Exception e) {
+            log.error("Error extracting trigger configuration name from global configuraion file.", e);
+            throw new DAQCompException("Cannot get trigger configuration name.", e);
         }
-        triggerManager.setDOMRegistry(registry);
+        triggerConfigFileName = globalConfigurationDir + "/trigger/" + triggerConfiguration + ".xml";
 
-        // Inform DomSetFactory of the configuration directory location
-        try {
-            DomSetFactory.setConfigurationDirectory(configDir.getPath());
-        } catch (TriggerException ex) {
-            throw new DAQCompException("Bad trigger configuration directory",
-                                       ex);
+        // Add triggers to the trigger manager
+        currentTriggers = TriggerBuilder.buildTriggers(triggerConfigFileName, sourceId);
+        Iterator triggerIter = currentTriggers.iterator();
+        while (triggerIter.hasNext()) {
+            ITriggerControl trigger = (ITriggerControl) triggerIter.next();
+            trigger.setTriggerHandler(triggerManager);
         }
+        triggerManager.addTriggers(currentTriggers);
 
-        Document doc;
-        try {
-            doc = JAXPUtil.loadXMLDocument(configDir, configName);
-        } catch (JAXPUtilException jux) {
-            throw new DAQCompException(jux);
-        }
-
-        Node tcNode;
-        try {
-            tcNode = JAXPUtil.extractNode(doc, "runConfig/triggerConfig");
-        } catch (JAXPUtilException jux) {
-            throw new DAQCompException(jux);
-        }
-
-        if (tcNode == null) {
-            throw new DAQCompException("Run configuration file \"" +
-                                       configName + "\" does not contain" +
-                                       " <triggerConfig>");
-        }
-
-        String tcName = tcNode.getTextContent();
-
-        File trigCfgDir = new File(configDir, "trigger");
-        if (!trigCfgDir.exists()) {
-            throw new DAQCompException("Cannot find trigger configuration" +
-                                       " directory \"" +
-                                       trigCfgDir + "\"");
-        }
-
-        if (sourceId == null) {
-            throw new DAQCompException("Source ID has not been set");
-        }
-
-        Document tcDoc;
-        try {
-            tcDoc = JAXPUtil.loadXMLDocument(trigCfgDir, tcName);
-        } catch (JAXPUtilException jux) {
-            throw new DAQCompException(jux);
-        }
-
-        // initialize algorithm list
-        algorithms = new ArrayList<ITriggerAlgorithm>();
-
-        // the global trigger needs to know about all configured algorithms
-        //  so it can monitor individual algorithm rates
-        ArrayList<ITriggerAlgorithm> extraAlgorithms;
-        if (sourceId.getSourceID() ==
-            SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID)
-        {
-            extraAlgorithms = new ArrayList<ITriggerAlgorithm>();
-        } else {
-            extraAlgorithms = null;
-        }
-
-        try {
-            TriggerCreator.buildTriggers(tcDoc, sourceId.getSourceID(),
-                                         algorithms, extraAlgorithms);
-        } catch (TriggerException te) {
-            throw new DAQCompException("Cannot build triggers in " +
-                                       trigCfgDir + "/" + tcName, te);
-        }
-
-        if (algorithms.size()  == 0) {
-            throw new DAQCompException("No triggers specified in \"" +
-                                       tcName + "\" for " + sourceId);
-        }
-
-        for (ITriggerAlgorithm a : algorithms) {
-            addMBean(a.getTriggerName(), a);
-        }
-
-        triggerManager.setAlertQueue(getAlertQueue());
-        triggerManager.addTriggers(algorithms);
-        if (extraAlgorithms != null) {
-            triggerManager.addExtraAlgorithms(extraAlgorithms);
-        }
     }
 
-    /**
-     * Attempt to send any cached trigger requests.
-     */
-    @Override
-    public void flushTriggers()
-    {
-        triggerManager.flush();
-    }
-
-    /**
-     * Get the list of configured algorithms.
-     *
-     * @return list of algorithms
-     */
-    @Override
-    public List<ITriggerAlgorithm> getAlgorithms()
-    {
-        return algorithms;
-    }
-
-    /**
-     * Get the ByteBufferCache used to track the incoming hit payloads
-     *
-     * @return input cache
-     */
-    @Override
-    public IByteBufferCache getInputCache()
-    {
-        return inCache;
-    }
-
-    /**
-     * Get the ByteBufferCache used to track the outgoing request payloads
-     *
-     * @return output cache
-     */
-    @Override
-    public IByteBufferCache getOutputCache()
-    {
-        return outCache;
-    }
-
-    /**
-     * Get the total number of hits which have been queued for processing
-     *
-     * @return total number of hits
-     */
-    public long getPayloadsProcessed()
-    {
-        return triggerManager.getTotalProcessed();
-    }
-
-    /**
-     * Get the current number of hits/requests received
-     *
-     * @return hits/requests received
-     */
-    @Override
-    public long getPayloadsReceived()
-    {
-        return inputEngine.getTotalRecordsReceived();
-    }
-
-    /**
-     * Get the current number of trigger requests written out
-     *
-     * @return requests sent
-     */
-    @Override
-    public long getPayloadsSent()
-    {
-        return outputEngine.getRecordsSent();
-    }
-
-    /**
-     * Get the input reader for this component.
-     *
-     * @return input reader
-     */
-    @Override
-    public SpliceableStreamReader getReader()
-    {
-        return inputEngine;
-    }
-
-    /**
-     * Get the input splicer for this component.
-     *
-     * @return splicer
-     */
-    @Override
-    public Splicer getSplicer()
-    {
-        return splicer;
-    }
-
-    /**
-     * Get the total number of trigger requests written out
-     *
-     * @return requests sent
-     */
-    public long getTotalPayloadsSent()
-    {
-        return outputEngine.getTotalRecordsSent();
-    }
-
-    /**
-     * Get the trigger manager for this component.
-     *
-     * @return trigger manager
-     */
-    @Override
-    public ITriggerManager getTriggerManager()
-    {
+    public ITriggerManager getTriggerManager(){
         return triggerManager;
     }
 
-    /**
-     * Return this component's svn version info as a String.
-     *
-     * @return svn version id as a String
-     */
-    @Override
-    public String getVersionInfo()
-    {
-        return "$Id: TriggerComponent.java 17851 2020-08-17 22:20:12Z dglo $";
-    }
-
-    /**
-     * Get the output process for this component.
-     *
-     * @return output process
-     */
-    @Override
-    public DAQComponentOutputProcess getWriter()
-    {
-        return outputEngine;
-    }
-
-    /**
-     * Set the first "good" time for the current run.
-     *
-     * @param firstTime first "good" time
-     */
-    @Override
-    public void setFirstGoodTime(long firstTime)
-    {
-        triggerManager.setFirstGoodTime(firstTime);
-    }
-
-    /**
-     * Set the location of the global configuration directory.
-     *
-     * @param dirName absolute path of configuration directory
-     */
-    @Override
-    public void setGlobalConfigurationDir(String dirName)
-    {
-        configDir = new File(dirName);
-
-        if (!configDir.exists()) {
-            throw new Error("Configuration directory \"" + configDir +
-                            "\" does not exist");
-        }
-    }
-
-    /**
-     * Set the last "good" time for the current run.
-     *
-     * @param lastTime last "good" time
-     */
-    @Override
-    public void setLastGoodTime(long lastTime)
-    {
-        triggerManager.setLastGoodTime(lastTime);
-    }
-
-    /**
-     * Send trigger triplets before starting.
-     */
-    @Override
-    public void starting(int runNumber, int domMode)
-    {
-        triggerManager.setRunNumber(runNumber);
-
-        try {
-            triggerManager.sendTriplets(runNumber);
-        } catch (TriggerException te) {
-            LOG.error("Cannot send triplets for run " + runNumber, te);
-        }
-    }
-
-    /**
-     * Send final monitoring messages after run has stopped.
-     *
-     * @throws DAQCompException if there is a problem sending one or more
-     *                          messages
-     */
-    @Override
-    public void stopped()
-        throws DAQCompException
-    {
-        if (isGlobalTrigger) {
-            triggerManager.sendFinalMoni();
-        }
-    }
-
-    /**
-     * Perform any actions related to switching to a new run.
-     *
-     * @param runNumber new run number
-     *
-     * @throws DAQCompException if there is a problem switching the component
-     */
-    @Override
-    public void switching(int runNumber)
-        throws DAQCompException
-    {
-        // histograms are sent inside switchToNewRun()
-        triggerManager.switchToNewRun(runNumber);
-
-        // send triplets after switching
-        try {
-            triggerManager.sendTriplets(runNumber);
-        } catch (TriggerException te) {
-            LOG.error("Cannot send triplets for run " + runNumber, te);
-        }
+    public ISourceID getSourceID(){
+        return sourceId;
     }
 }

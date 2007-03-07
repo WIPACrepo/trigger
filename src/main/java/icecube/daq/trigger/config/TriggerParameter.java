@@ -1,7 +1,7 @@
 /*
  * class: TriggerParameter
  *
- * Version $Id: TriggerParameter.java 17114 2018-09-26 09:51:56Z dglo $
+ * Version $Id: TriggerParameter.java,v 1.1 2005/11/23 16:37:37 toale Exp $
  *
  * Date: November 23 2005
  *
@@ -13,7 +13,7 @@ package icecube.daq.trigger.config;
 /**
  * This class encapsulates a name/value pair that is a trigger parameter.
  *
- * @version $Id: TriggerParameter.java 17114 2018-09-26 09:51:56Z dglo $
+ * @version $Id: TriggerParameter.java,v 1.1 2005/11/23 16:37:37 toale Exp $
  * @author pat
  */
 public class TriggerParameter
@@ -33,8 +33,7 @@ public class TriggerParameter
      * Default constructor.
      * Name/value pair are set to null.
      */
-    public TriggerParameter()
-    {
+    public TriggerParameter() {
         this(null, null);
     }
 
@@ -43,70 +42,40 @@ public class TriggerParameter
      * @param name parameter name
      * @param value parameter value
      */
-    public TriggerParameter(String name, String value)
-    {
+    public TriggerParameter(String name, String value) {
         this.name = name;
         this.value = value;
-    }
-
-    /**
-     * Compare this object against <tt>object</tt>
-     *
-     * @param object object being checked
-     *
-     * @return <tt>true</tt> if the objects are equal
-     */
-    @Override
-    public boolean equals(Object object)
-    {
-        return object != null && (object instanceof TriggerParameter) &&
-            object.hashCode() == hashCode();
     }
 
     /**
      * Get parameter name.
      * @return name of parameter
      */
-    public String getName()
-    {
+    public String getName() {
         return name;
-    }
-
-    /**
-     * Get parameter value.
-     * @return value of parameter
-     */
-    public String getValue()
-    {
-        return value;
-    }
-
-    /**
-     * Hashcode for this parameter.
-     *
-     * @return hash code
-     */
-    @Override
-    public int hashCode()
-    {
-        return toString().hashCode();
     }
 
     /**
      * Set parameter name.
      * @param name name of parameter
      */
-    public void setName(String name)
-    {
+    public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Get parameter value.
+     * @return value of parameter
+     */
+    public String getValue() {
+        return value;
     }
 
     /**
      * Set parameter value.
      * @param value value of parameter
      */
-    public void setValue(String value)
-    {
+    public void setValue(String value) {
         this.value = value;
     }
 
@@ -114,9 +83,24 @@ public class TriggerParameter
      * Override to print out name/value pair.
      * @return parameter as a string
      */
-    @Override
-    public String toString()
-    {
+    public String toString() {
         return (name + " = " + value);
     }
+
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    public boolean equals(Object object) {
+        if (object == null) {
+            return false;
+        } else if (!(object instanceof TriggerParameter)) {
+            return false;
+        } else if (object.hashCode() != this.hashCode()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 }

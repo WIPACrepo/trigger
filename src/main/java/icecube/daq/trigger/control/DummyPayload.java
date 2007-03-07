@@ -1,7 +1,7 @@
 /*
  * class: DummyPayload
  *
- * Version $Id: DummyPayload.java 17771 2020-03-19 22:06:07Z dglo $
+ * Version $Id: DummyPayload.java,v 1.2 2005/10/10 01:23:03 toale Exp $
  *
  * Date: October 7 2005
  *
@@ -10,192 +10,67 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.payload.IByteBufferCache;
+import icecube.daq.splicer.Spliceable;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.impl.UTCTime;
-import icecube.daq.splicer.Spliceable;
-import icecube.daq.trigger.exceptions.UnimplementedError;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /**
  * This class is a dummy payload that only has a UTC time associated with it.
+ * Its main purpose is for truncating the Splicer.
  *
- * @version $Id: DummyPayload.java 17771 2020-03-19 22:06:07Z dglo $
+ * @version $Id: DummyPayload.java,v 1.2 2005/10/10 01:23:03 toale Exp $
  * @author pat
  */
-public class DummyPayload
-    implements Spliceable, IPayload
+public class DummyPayload implements Spliceable, IPayload
 {
-    private long time;
-    private IUTCTime utcTime;
 
-    /**
-     * Create a dummy payload.
-     *
-     * @param payloadTimeUTC payload time
-     */
-    public DummyPayload(IUTCTime payloadTimeUTC)
-    {
-        if (payloadTimeUTC == null) {
-            throw new Error("Payload time cannot be null");
-        }
+    private IUTCTime payloadTimeUTC;
 
-        this.time = payloadTimeUTC.longValue();
+    public DummyPayload(IUTCTime payloadTimeUTC) {
+        this.payloadTimeUTC = payloadTimeUTC;
     }
 
     /**
-     * Create a dummy payload.
-     *
-     * @param time payload time
+     * returns the length in bytes of this payload
      */
-    public DummyPayload(long time)
-    {
-        this.time = time;
-    }
-
-    /**
-     * Compare this payload against others in the splicer.
-     *
-     * @param spl spliced object
-     *
-     * @return the usual comparison values
-     */
-    @Override
-    public int compareSpliceable(Spliceable spl)
-    {
-        if (spl == null) {
-            return -1;
-        }
-
-        IUTCTime payTime = ((IPayload) spl).getPayloadTimeUTC();
-        if (payTime == null) {
-            return -1;
-        }
-
-        long val = time - payTime.longValue();
-        if (val < 0) {
-            return -1;
-        } else if (val > 0) {
-            return 1;
-        }
-
+    public int getPayloadLength() {
         return 0;
+    }
+
+    /**
+     * returns the Payload type
+     */
+    public int getPayloadType() {
+        return -1;
+    }
+
+    /**
+     * returns the Payload interface type as defined in the PayloadInterfaceRegistry.
+     *
+     * @return int ... one of the defined types in icecube.daq.payload.PayloadInterfaceRegistry
+     */
+    public int getPayloadInterfaceType() {
+        return -1;
+    }
+
+    /**
+     * gets the UTC time tag of a payload
+     */
+    public IUTCTime getPayloadTimeUTC() {
+        return payloadTimeUTC;
+    }
+
+    public int compareTo(Object object) {
+        return payloadTimeUTC.compareTo(((IPayload) object).getPayloadTimeUTC());
     }
 
     /**
      * This method allows a deepCopy of itself.
      *
-     * @return Object which is a copy of the object which implements this
-     *         interface.
+     * @return Object which is a copy of the object which implements this interface.
      */
-    @Override
-    public Object deepCopy()
-    {
-        return new DummyPayload(time);
+    public Object deepCopy() {
+        return new DummyPayload(this.payloadTimeUTC);
     }
 
-    /**
-     * XXX unimplemented
-     *
-     * @return UnimplementedError
-     */
-    @Override
-    public ByteBuffer getPayloadBacking()
-    {
-        throw new UnimplementedError();
-    }
-
-    /**
-     * gets the UTC time tag of a payload
-     *
-     * @return UTC time object
-     */
-    @Override
-    public IUTCTime getPayloadTimeUTC()
-    {
-        if (utcTime == null) {
-            utcTime = new UTCTime(time);
-        }
-
-        return utcTime;
-    }
-
-    /**
-     * returns the Payload type
-     *
-     * @return -1
-     */
-    @Override
-    public int getPayloadType()
-    {
-        return -1;
-    }
-
-    /**
-     * gets the UTC time tag of a payload as a long value
-     *
-     * @return UTC time
-     */
-    @Override
-    public long getUTCTime()
-    {
-        return time;
-    }
-
-    @Override
-    public int length()
-    {
-        return 0;
-    }
-
-    /**
-     * Do nothing
-     */
-    @Override
-    public void loadPayload()
-    {
-        // do nothing
-    }
-
-    /**
-     * Do nothing
-     */
-    @Override
-    public void recycle()
-    {
-        // do nothing
-    }
-
-    /**
-     * Do nothing
-     *
-     * @param cache ignored
-     */
-    @Override
-    public void setCache(IByteBufferCache cache)
-    {
-        // do nothing
-    }
-
-    @Override
-    public int writePayload(boolean writeLoaded, int destOffset,
-                            ByteBuffer buf)
-        throws IOException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    /**
-     * Return a debugging string.
-     *
-     * @return debugging string
-     */
-    @Override
-    public String toString()
-    {
-        return "Dummy@" + time;
-    }
 }

@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 17776 2020-03-24 18:32:31Z dglo $
+ * Version $Id: CalibrationTrigger.java,v 1.19 2006/09/14 20:35:13 toale Exp $
  *
  * Date: August 27 2005
  *
@@ -10,48 +10,38 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.payload.IDOMID;
-import icecube.daq.payload.IHitPayload;
-import icecube.daq.payload.IPayload;
-import icecube.daq.payload.ISourceID;
-import icecube.daq.payload.impl.DOMID;
-import icecube.daq.payload.impl.SourceID;
-import icecube.daq.trigger.control.DummyPayload;
-import icecube.daq.trigger.exceptions.ConfigException;
-import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.util.DOMInfo;
-import icecube.daq.util.IDOMRegistry;
+import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.payload.IPayload;
+import icecube.daq.payload.PayloadInterfaceRegistry;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * This class is an implementation of a calibration trigger. It checks each hit
  * to see if it is the correct type (flasher hit for instance), and if so it
- * forms a TriggerRequest.
+ * forms a TriggerRequestPayload.
  *
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 17776 2020-03-24 18:32:31Z dglo $
+ * @version $Id: CalibrationTrigger.java,v 1.19 2006/09/14 20:35:13 toale Exp $
  * @author pat
  */
-public class CalibrationTrigger
-    extends AbstractTrigger
+public class CalibrationTrigger extends AbstractTrigger
 {
-    /** Log object for this class */
-    private static final Logger LOG =
-        Logger.getLogger(CalibrationTrigger.class);
 
-    /** I3Live monitoring name for this algorithm */
-    private static final String MONITORING_NAME = "CALIBRATION";
+    /**
+     * Log object for this class
+     */
+    private static final Log log = LogFactory.getLog(CalibrationTrigger.class);
 
-    /** Numeric type for this algorithm */
-    public static final int TRIGGER_TYPE = 1;
-
-    private static int nextTriggerNumber;
-    private int triggerNumber;
+    private static int triggerNumber = 0;
 
     /**
      * Type of hit to trigger on.
@@ -63,90 +53,8 @@ public class CalibrationTrigger
     /**
      * Constructor.
      */
-    public CalibrationTrigger()
-    {
-        triggerNumber = ++nextTriggerNumber;
-    }
-
-    /**
-     * Add a trigger parameter.
-     *
-     * @param name parameter name
-     * @param value parameter value
-     *
-     * @throws UnknownParameterException if the parameter is unknown
-     * @throws IllegalParameterValueException if the parameter value is bad
-     */
-    @Override
-    public void addParameter(String name, String value)
-        throws UnknownParameterException, IllegalParameterValueException
-    {
-        if (name.compareTo("hitType") == 0) {
-            hitType = Integer.parseInt(value);
-            configHitType = true;
-        } else if (name.compareTo("triggerPrescale") == 0) {
-            triggerPrescale = Integer.parseInt(value);
-        } else if (name.compareTo("domSet") == 0) {
-            domSetId = Integer.parseInt(value);
-            try {
-                configHitFilter(domSetId);
-            } catch (ConfigException ce) {
-                throw new IllegalParameterValueException("Bad DomSet #" +
-                                                         domSetId, ce);
-            }
-        } else {
-            throw new UnknownParameterException("Unknown parameter: " + name);
-        }
-        super.addParameter(name, value);
-    }
-
-    /**
-     * Flush the trigger. Basically indicates that there will be no further
-     * payloads to process.
-     */
-    @Override
-    public void flush()
-    {
-        // nothing to be done here since this trigger does not buffer anything.
-    }
-
-    public int getHitType()
-    {
-        return hitType;
-    }
-
-    /**
-     * Get the monitoring name.
-     *
-     * @return the name used for monitoring this trigger
-     */
-    @Override
-    public String getMonitoringName()
-    {
-        return MONITORING_NAME;
-    }
-
-    /**
-     * Get the trigger type.
-     *
-     * @return trigger type
-     */
-    @Override
-    public int getTriggerType()
-    {
-        return TRIGGER_TYPE;
-    }
-
-    /**
-     * Does this algorithm include all relevant hits in each request
-     * so that it can be used to calculate multiplicity?
-     *
-     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
-     */
-    @Override
-    public boolean hasValidMultiplicity()
-    {
-        return true;
+    public CalibrationTrigger() {
+        triggerNumber++;
     }
 
     /**
@@ -154,10 +62,38 @@ public class CalibrationTrigger
      *
      * @return true if it is
      */
-    @Override
-    public boolean isConfigured()
-    {
+    public boolean isConfigured() {
         return configHitType;
+    }
+
+    /**
+     * Add a parameter.
+     *
+     * @param parameter TriggerParameter object.
+     *
+     * @throws icecube.daq.trigger.exceptions.UnknownParameterException
+     *
+     */
+    public void addParameter(TriggerParameter parameter) throws UnknownParameterException, IllegalParameterValueException {
+        if (parameter.getName().compareTo("hitType") == 0) {
+            hitType = Integer.parseInt(parameter.getValue());
+            configHitType = true;
+        } else if (parameter.getName().compareTo("triggerPrescale") == 0) {
+            triggerPrescale = Integer.parseInt(parameter.getValue());
+        } else if (parameter.getName().compareTo("domSet") == 0) {
+            domSetId = Integer.parseInt(parameter.getValue());
+            configHitFilter(domSetId);
+        } else {
+            throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
+        }
+        super.addParameter(parameter);
+    }
+
+    public void setTriggerName(String triggerName) {
+        super.triggerName = triggerName + triggerNumber;
+        if (log.isInfoEnabled()) {
+            log.info("TriggerName set to " + super.triggerName);
+        }
     }
 
     /**
@@ -168,54 +104,50 @@ public class CalibrationTrigger
      * @throws icecube.daq.trigger.exceptions.TriggerException
      *          if the algorithm doesn't like this payload
      */
-    @Override
-    public void runTrigger(IPayload payload)
-        throws TriggerException
-    {
+    public void runTrigger(IPayload payload) throws TriggerException {
 
-        if (!(payload instanceof IHitPayload)) {
+        int interfaceType = payload.getPayloadInterfaceType();
+        if ((interfaceType != PayloadInterfaceRegistry.I_HIT_PAYLOAD) &&
+            (interfaceType != PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)) {
             throw new TriggerException("Expecting an IHitPayload");
         }
         IHitPayload hit = (IHitPayload) payload;
 
-        if (getHitType(hit) == hitType && hitFilter.useHit(hit)) {
-            // this is the correct type, report trigger
-            IDOMID domId;
-            ISourceID srcId;
-            if (hit.hasChannelID()) {
-                IDOMRegistry registry = getTriggerHandler().getDOMRegistry();
-                DOMInfo dom = getDOMFromHit(registry, hit);
-                if (dom == null) {
-                    LOG.error("Cannot find DOM for " + hit);
-                    return;
-                }
-                domId = new DOMID(dom.getNumericMainboardId());
-                srcId = new SourceID(dom.computeSourceId(hit.getChannelID()));
-            } else {
-                domId = hit.getDOMID();
-                srcId = hit.getSourceID();
+        // check hit filter
+        if (!hitFilter.useHit(hit)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Hit from DOM " + hit.getDOMID().getDomIDAsString() + " not in DomSet");
             }
+            return;
+        }
 
-            formTrigger(hit, domId, srcId);
+        // check the hit type
+        int type = AbstractTrigger.getHitType(hit);
+        if (type == hitType) {
+            // this is the correct type, report trigger
+            formTrigger(hit, hit.getDOMID(), hit.getSourceID());
         } else {
             // this is not, update earliest time of interest
-            IPayload earliest =
-                new DummyPayload(hit.getPayloadTimeUTC().getOffsetUTCTime(1));
+            IPayload earliest = new DummyPayload(hit.getHitTimeUTC().getOffsetUTCTime(0.1));
             setEarliestPayloadOfInterest(earliest);
         }
+
+
     }
 
-    public void setHitType(int hitType)
-    {
+    /**
+     * Flush the trigger. Basically indicates that there will be no further payloads to process.
+     */
+    public void flush() {
+        // nothing has to be done here since this trigger does not buffer anything.
+    }
+
+    public int getHitType() {
+        return hitType;
+    }
+
+    public void setHitType(int hitType) {
         this.hitType = hitType;
     }
 
-    @Override
-    public void setTriggerName(String triggerName)
-    {
-        super.triggerName = triggerName + triggerNumber;
-        if (LOG.isInfoEnabled()) {
-            LOG.info("TriggerName set to " + super.triggerName);
-        }
-    }
 }

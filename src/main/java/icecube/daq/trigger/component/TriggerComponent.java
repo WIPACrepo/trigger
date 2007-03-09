@@ -61,7 +61,7 @@ public class TriggerComponent
         addCache(bufferCache);
         MasterPayloadFactory masterFactory = new MasterPayloadFactory(bufferCache);
 
-        addMBean("memory", new MemoryStatistics());
+        addMBean("jvm", new MemoryStatistics());
         addMBean("system", new SystemStatistics());
 
         // Now differentiate

@@ -57,7 +57,7 @@ public class TriggerComponent
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
 
         // Create the buffer cache and the payload factory
-        bufferCache = new ByteBufferCache(256, 50000000L, 50000000L, name);
+        bufferCache = new ByteBufferCache(256, 250000000L, 225000000L, name);
         addCache(bufferCache);
         MasterPayloadFactory masterFactory = new MasterPayloadFactory(bufferCache);
 

@@ -19,6 +19,7 @@ import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.control.GlobalTriggerManager;
 import icecube.daq.trigger.control.ITriggerControl;
+import icecube.daq.trigger.control.DummyTriggerManager;
 import icecube.daq.trigger.config.TriggerBuilder;
 
 import java.io.IOException;
@@ -77,6 +78,7 @@ public class TriggerComponent
 
             // Sub-detector triggers
             triggerManager = new TriggerManager(masterFactory, sourceId);
+            //triggerManager = new DummyTriggerManager(masterFactory, sourceId);
 
             if (name.equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
                 inputType = DAQConnector.TYPE_STRING_HIT;

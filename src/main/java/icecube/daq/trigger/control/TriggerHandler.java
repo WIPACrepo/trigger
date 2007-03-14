@@ -20,7 +20,6 @@ import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.*;
-import icecube.daq.payload.splicer.Payload;
 import icecube.daq.payload.impl.UTCTime8B;
 import icecube.daq.payload.impl.SourceID4B;
 

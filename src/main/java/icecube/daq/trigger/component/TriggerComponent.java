@@ -2,7 +2,7 @@ package icecube.daq.trigger.component;
 
 import icecube.daq.common.DAQCmdInterface;
 import icecube.daq.io.PayloadDestinationOutputEngine;
-import icecube.daq.io.SpliceablePayloadInputEngine;
+import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.juggler.component.DAQComponent;
 import icecube.daq.juggler.component.DAQConnector;
 import icecube.daq.juggler.component.DAQCompException;
@@ -43,7 +43,7 @@ public class TriggerComponent
     protected IByteBufferCache bufferCache;
     protected ITriggerManager triggerManager;
     protected Splicer splicer;
-    protected SpliceablePayloadInputEngine inputEngine;
+    protected SpliceablePayloadReader inputEngine;
     protected PayloadDestinationOutputEngine outputEngine;
 
     protected String globalConfigurationDir = null;
@@ -101,10 +101,14 @@ public class TriggerComponent
         triggerManager.setSplicer(splicer);
 
         // Create and register io engines
-        inputEngine = new SpliceablePayloadInputEngine(name, id,
-                                                       name + "InputEngine",
-                                                       splicer,
-                                                       masterFactory);
+        try {
+            inputEngine =
+                new SpliceablePayloadReader(name, splicer, masterFactory);
+	} catch (IOException ioe) {
+	    log.error("Couldn't create input reader");
+	    System.exit(1);
+	    inputEngine = null;
+	}
         if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
             try {
                 inputEngine.addReverseConnection(AMANDA_HOST, AMANDA_PORT,

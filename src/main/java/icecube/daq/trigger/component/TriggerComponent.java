@@ -104,11 +104,11 @@ public class TriggerComponent
         try {
             inputEngine =
                 new SpliceablePayloadReader(name, splicer, masterFactory);
-	} catch (IOException ioe) {
-	    log.error("Couldn't create input reader");
-	    System.exit(1);
-	    inputEngine = null;
-	}
+        } catch (IOException ioe) {
+            log.error("Couldn't create input reader");
+            System.exit(1);
+            inputEngine = null;
+        }
         if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
             try {
                 inputEngine.addReverseConnection(AMANDA_HOST, AMANDA_PORT,

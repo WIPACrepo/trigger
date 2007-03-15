@@ -22,6 +22,7 @@ import icecube.daq.trigger.control.ITriggerControl;
 import icecube.daq.trigger.control.DummyTriggerManager;
 import icecube.daq.trigger.config.TriggerBuilder;
 
+import java.nio.ByteBuffer;
 import java.io.IOException;
 
 import java.util.List;
@@ -58,8 +59,21 @@ public class TriggerComponent
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
 
         // Create the buffer cache and the payload factory
-        bufferCache = new ByteBufferCache(256, 250000000L, 225000000L, name);
+        bufferCache = new ByteBufferCache(50, 600000000L, 450000000L, name);
+
+	int PRE_ALLOC = 100000;
+	ByteBuffer[] preAlloc = new ByteBuffer[PRE_ALLOC];
+	// pre-allocation
+	for (int i = 0; i < PRE_ALLOC; i++)
+	    preAlloc[i] = bufferCache.acquireBuffer(38);
+	for (int i = 0; i < PRE_ALLOC; i++) {
+	    bufferCache.returnBuffer(preAlloc[i]);
+	    preAlloc[i] = null;
+	}
+	preAlloc = null;
+	    
         addCache(bufferCache);
+        addMBean("bufferCache", bufferCache);
         MasterPayloadFactory masterFactory = new MasterPayloadFactory(bufferCache);
 
         addMBean("jvm", new MemoryStatistics());

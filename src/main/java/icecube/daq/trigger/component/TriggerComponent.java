@@ -54,23 +54,23 @@ public class TriggerComponent
 
     public TriggerComponent(String name, int id) {
         super(name, id);
-
+        
         // Create the source id of this component
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
 
         // Create the buffer cache and the payload factory
         bufferCache = new ByteBufferCache(50, 600000000L, 450000000L, name);
 
-	int PRE_ALLOC = 100000;
-	ByteBuffer[] preAlloc = new ByteBuffer[PRE_ALLOC];
-	// pre-allocation
-	for (int i = 0; i < PRE_ALLOC; i++)
-	    preAlloc[i] = bufferCache.acquireBuffer(38);
-	for (int i = 0; i < PRE_ALLOC; i++) {
-	    bufferCache.returnBuffer(preAlloc[i]);
-	    preAlloc[i] = null;
-	}
-	preAlloc = null;
+    	int PRE_ALLOC = 100000;
+    	ByteBuffer[] preAlloc = new ByteBuffer[PRE_ALLOC];
+    	// pre-allocation
+    	for (int i = 0; i < PRE_ALLOC; i++)
+    	    preAlloc[i] = bufferCache.acquireBuffer(38);
+    	for (int i = 0; i < PRE_ALLOC; i++) {
+    	    bufferCache.returnBuffer(preAlloc[i]);
+    	    preAlloc[i] = null;
+    	}
+    	preAlloc = null;
 	    
         addCache(bufferCache);
         addMBean("bufferCache", bufferCache);

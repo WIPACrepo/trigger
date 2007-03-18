@@ -1,6 +1,7 @@
 package icecube.daq.trigger.component;
 
 import icecube.daq.common.DAQCmdInterface;
+import icecube.daq.hkn1.HKN1Splicer;
 import icecube.daq.io.PayloadDestinationOutputEngine;
 import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.juggler.component.DAQComponent;
@@ -111,7 +112,7 @@ public class TriggerComponent
         }
 
         // Create splicer and introduce it to the trigger manager
-        splicer = new SplicerImpl(triggerManager);
+        splicer = new HKN1Splicer(triggerManager);
         triggerManager.setSplicer(splicer);
 
         // Create and register io engines

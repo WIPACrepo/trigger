@@ -1,7 +1,6 @@
 package icecube.daq.trigger.component;
 
 import icecube.daq.common.DAQCmdInterface;
-import icecube.daq.hkn1.HKN1Splicer;
 import icecube.daq.io.PayloadDestinationOutputEngine;
 import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.juggler.component.DAQComponent;
@@ -14,6 +13,7 @@ import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ByteBufferCache;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerImpl;
 import icecube.daq.trigger.control.ITriggerManager;

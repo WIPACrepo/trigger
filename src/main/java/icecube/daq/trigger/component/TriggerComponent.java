@@ -13,6 +13,7 @@ import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ByteBufferCache;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.payload.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerImpl;
@@ -59,20 +60,8 @@ public class TriggerComponent
         // Create the source id of this component
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
 
-        // Create the buffer cache and the payload factory
-        bufferCache = new ByteBufferCache(50, 600000000L, 450000000L, name);
-
-    	int PRE_ALLOC = 100000;
-    	ByteBuffer[] preAlloc = new ByteBuffer[PRE_ALLOC];
-    	// pre-allocation
-    	for (int i = 0; i < PRE_ALLOC; i++)
-    	    preAlloc[i] = bufferCache.acquireBuffer(38);
-    	for (int i = 0; i < PRE_ALLOC; i++) {
-    	    bufferCache.returnBuffer(preAlloc[i]);
-    	    preAlloc[i] = null;
-    	}
-    	preAlloc = null;
-	    
+        bufferCache = new VitreousBufferCache();
+        
         addCache(bufferCache);
         addMBean("bufferCache", bufferCache);
         MasterPayloadFactory masterFactory = new MasterPayloadFactory(bufferCache);

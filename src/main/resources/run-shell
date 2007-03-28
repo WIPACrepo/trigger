@@ -63,5 +63,4 @@ fi
 
 export CLASSPATH
 #echo "CLASSPATH=${CLASSPATH}"
-#export JAVA_HOME=/usr/java/jdk1.5.0_07
-java -Xmx1600m icecube.daq.trigger.component.IniceTriggerComponent $@
+java -Xmx1024m icecube.daq.trigger.component.TriggerShell $@

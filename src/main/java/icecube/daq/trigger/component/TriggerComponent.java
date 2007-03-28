@@ -2,23 +2,29 @@ package icecube.daq.trigger.component;
 
 import icecube.daq.common.DAQCmdInterface;
 import icecube.daq.io.PayloadDestinationOutputEngine;
-import icecube.daq.io.SpliceablePayloadInputEngine;
+import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.juggler.component.DAQComponent;
 import icecube.daq.juggler.component.DAQConnector;
 import icecube.daq.juggler.component.DAQCompException;
+import icecube.daq.juggler.mbean.MemoryStatistics;
+import icecube.daq.juggler.mbean.SystemStatistics;
 import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ByteBufferCache;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.payload.VitreousBufferCache;
+import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerImpl;
 import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.control.GlobalTriggerManager;
 import icecube.daq.trigger.control.ITriggerControl;
+import icecube.daq.trigger.control.DummyTriggerManager;
 import icecube.daq.trigger.config.TriggerBuilder;
 
+import java.nio.ByteBuffer;
 import java.io.IOException;
 
 import java.util.List;
@@ -40,7 +46,7 @@ public class TriggerComponent
     protected IByteBufferCache bufferCache;
     protected ITriggerManager triggerManager;
     protected Splicer splicer;
-    protected SpliceablePayloadInputEngine inputEngine;
+    protected SpliceablePayloadReader inputEngine;
     protected PayloadDestinationOutputEngine outputEngine;
 
     protected String globalConfigurationDir = null;
@@ -50,14 +56,18 @@ public class TriggerComponent
 
     public TriggerComponent(String name, int id) {
         super(name, id);
-
+        
         // Create the source id of this component
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
 
-        // Create the buffer cache and the payload factory
-        bufferCache = new ByteBufferCache(256, 50000000L, 50000000L, name);
+        bufferCache = new VitreousBufferCache();
+        
         addCache(bufferCache);
+        addMBean("bufferCache", bufferCache);
         MasterPayloadFactory masterFactory = new MasterPayloadFactory(bufferCache);
+
+        addMBean("jvm", new MemoryStatistics());
+        addMBean("system", new SystemStatistics());
 
         // Now differentiate
         String inputType, outputType;
@@ -72,6 +82,7 @@ public class TriggerComponent
 
             // Sub-detector triggers
             triggerManager = new TriggerManager(masterFactory, sourceId);
+            //triggerManager = new DummyTriggerManager(masterFactory, sourceId);
 
             if (name.equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
                 inputType = DAQConnector.TYPE_STRING_HIT;
@@ -90,14 +101,18 @@ public class TriggerComponent
         }
 
         // Create splicer and introduce it to the trigger manager
-        splicer = new SplicerImpl(triggerManager);
+        splicer = new HKN1Splicer(triggerManager);
         triggerManager.setSplicer(splicer);
 
         // Create and register io engines
-        inputEngine = new SpliceablePayloadInputEngine(name, id,
-                                                       name + "InputEngine",
-                                                       splicer,
-                                                       masterFactory);
+        try {
+            inputEngine =
+                new SpliceablePayloadReader(name, splicer, masterFactory);
+        } catch (IOException ioe) {
+            log.error("Couldn't create input reader");
+            System.exit(1);
+            inputEngine = null;
+        }
         if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
             try {
                 inputEngine.addReverseConnection(AMANDA_HOST, AMANDA_PORT,

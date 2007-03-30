@@ -114,7 +114,7 @@ public class TriggerHandler
         init();
     }
 
-    private void init() {
+    protected void init() {
 
         count = 0;
         earliestPayloadOfInterest = null;

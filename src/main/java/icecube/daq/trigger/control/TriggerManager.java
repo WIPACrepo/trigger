@@ -120,7 +120,7 @@ public class TriggerManager
         init();
     }
 
-    private void init() {
+    protected void init() {
         start = 0;
         inputCount = 0;
         recycleCount = 0;

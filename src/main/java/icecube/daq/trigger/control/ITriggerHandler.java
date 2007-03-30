@@ -10,7 +10,6 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;

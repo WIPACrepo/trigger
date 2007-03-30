@@ -78,6 +78,15 @@ public class StringTriggerHandler
     }
 
     /**
+     * clear list of triggers
+     */
+    public void clearTriggers() {
+        super.clearTriggers();
+        // Need to make sure the default is present after the list is cleared
+        addTrigger(createDefaultTrigger());
+    }
+
+    /**
      * Receives a ByteBuffer from a source.
      *
      * @param tBuffer ByteBuffer the new buffer to be processed.

@@ -175,7 +175,7 @@ public class TriggerHandler
      */
     public void addTriggers(List triggers) {
         clearTriggers();
-        triggerList = triggers;
+        triggerList.addAll(triggers);
     }
 
     /**

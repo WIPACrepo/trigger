@@ -130,6 +130,7 @@ public class TriggerManager
         latestTime = new UTCTime8B(0);
         wallTimeQueue = new LinkedList();
         processingTime = new Statistic();
+        super.init();
     }
 
     /**

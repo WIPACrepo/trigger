@@ -120,7 +120,7 @@ public class TriggerManager
         init();
     }
 
-    private void init() {
+    protected void init() {
         start = 0;
         inputCount = 0;
         recycleCount = 0;
@@ -130,6 +130,7 @@ public class TriggerManager
         latestTime = new UTCTime8B(0);
         wallTimeQueue = new LinkedList();
         processingTime = new Statistic();
+        super.init();
     }
 
     /**

@@ -145,6 +145,8 @@ public class DummyTriggerHandler
         // need to make TRP and add to trigger bag
         if (count % 1000 == 0) {
 
+            log.info("Creating Trigger...");
+
             IUTCTime hitTime = hit.getHitTimeUTC();
 
             // create readout
@@ -215,6 +217,7 @@ public class DummyTriggerHandler
                 throw new RuntimeException("PayloadDestination has not been set!");
             } else {
                 try {
+		    log.info("Writing Trigger...");
                     payloadDestination.writePayload(trigger);
                 } catch (IOException e) {
                     log.error("Failed to write triggers");

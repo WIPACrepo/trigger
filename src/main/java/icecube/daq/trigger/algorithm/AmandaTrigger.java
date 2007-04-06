@@ -90,4 +90,5 @@ public abstract class AmandaTrigger
     public void setTriggerBit(int triggerBit) {
         this.triggerBit = triggerBit;
     }
+
 }

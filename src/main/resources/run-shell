@@ -23,7 +23,7 @@ REQ_LIBS="commons-logging \
 log4j \
 jaxp-ri jaxp-api \
 jaxb-xjc jaxb-impl jaxb-libs jaxb-api \
-jax-qname relaxng xsdlib \
+jax-qname relaxngDatatype xsdlib \
 xmlrpc-common \
 xmlrpc-client \
 xmlrpc-server \

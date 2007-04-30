@@ -20,6 +20,7 @@ import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.*;
+import icecube.daq.payload.splicer.Payload;
 import icecube.daq.payload.impl.UTCTime8B;
 import icecube.daq.payload.impl.SourceID4B;
 
@@ -376,25 +377,28 @@ public class TriggerHandler
         setEarliestTime();
 
         while (triggerBag.hasNext()) {
-            TriggerRequestPayload trigger = triggerBag.next();
+            IPayload payload = triggerBag.next();
 
-            if (log.isDebugEnabled()) {
-                IUTCTime firstTime = trigger.getFirstTimeUTC();
-                IUTCTime lastTime = trigger.getLastTimeUTC();
+            if (payload.getPayloadInterfaceType() == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
+                TriggerRequestPayload trigger = (TriggerRequestPayload) payload;
+                if (log.isDebugEnabled()) {
+                    IUTCTime firstTime = trigger.getFirstTimeUTC();
+                    IUTCTime lastTime = trigger.getLastTimeUTC();
 
-                int nSubPayloads = 0;
-                try {
-                    nSubPayloads = trigger.getPayloads().size();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                    int nSubPayloads = 0;
+                    try {
+                        nSubPayloads = trigger.getPayloads().size();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
-                if (0 > trigger.getTriggerType()) {
-                    log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
-                              + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " triggers");
-                } else {
-                    log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
-                              + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " hits");
+                    if (0 > trigger.getTriggerType()) {
+                        log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
+                                  + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " triggers");
+                    } else {
+                        log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
+                                  + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " hits");
+                    }
                 }
             }
 
@@ -404,13 +408,13 @@ public class TriggerHandler
                 throw new RuntimeException("PayloadDestination has not been set!");
             } else {
                 try {
-                    payloadDestination.writePayload(trigger);
+                    payloadDestination.writePayload((Payload) payload);
                 } catch (IOException e) {
                     log.error("Failed to write triggers");
                     throw new RuntimeException(e);
                 }
                 // now recycle it
-                trigger.recycle();
+                ((Payload) payload).recycle();
             }
 
         }

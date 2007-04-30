@@ -4,6 +4,7 @@ import icecube.daq.payload.*;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.algorithm.DefaultStringTrigger;
+import icecube.daq.trigger.monitor.PayloadBagMonitor;
 
 import java.nio.ByteBuffer;
 import java.io.IOException;
@@ -69,6 +70,10 @@ public class StringTriggerHandler
     protected void init() {
         super.init();
         addTrigger(createDefaultTrigger());
+        triggerBag = new SimpleTriggerBag();
+        PayloadBagMonitor triggerBagMonitor = new PayloadBagMonitor();
+        triggerBag.setMonitor(triggerBagMonitor);
+        monitor.setTriggerBagMonitor(triggerBagMonitor);
     }
 
     public void setMasterPayloadFactory(MasterPayloadFactory masterFactory) {

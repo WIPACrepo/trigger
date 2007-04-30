@@ -209,7 +209,7 @@ public class DummyTriggerHandler
      */
     public void issueTriggers() {
         while (triggerBag.hasNext()) {
-            TriggerRequestPayload trigger = triggerBag.next();
+            TriggerRequestPayload trigger = (TriggerRequestPayload) triggerBag.next();
 
             // issue the trigger
             if (null == payloadDestination) {

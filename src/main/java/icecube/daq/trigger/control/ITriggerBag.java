@@ -10,11 +10,9 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.ILoadablePayload;
-import icecube.daq.payload.IPayload;
 import icecube.daq.payload.splicer.PayloadFactory;
 
 /**
@@ -45,10 +43,10 @@ public interface ITriggerBag
     boolean hasNext();
 
     /**
-     * get next trigger from bag
-     * @return next available trigger
+     * get next payload from bag
+     * @return next available payload
      */
-    TriggerRequestPayload next();
+    ILoadablePayload next();
 
     /**
      * get the current time of the bag

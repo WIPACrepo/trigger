@@ -468,7 +468,7 @@ public class GlobalTriggerHandler
         setEarliestTime();
 
         while (triggerBag.hasNext()) {
-            TriggerRequestPayload GTEventPayload = triggerBag.next();
+            TriggerRequestPayload GTEventPayload = (TriggerRequestPayload) triggerBag.next();
             miTotalOutputGlobalTriggers++;
             int GT_trigType = GTEventPayload.getTriggerType();
 

@@ -354,7 +354,7 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
 
         int type = readoutConfig.getType();
         switch (type) {
-            case IReadoutRequestElement.READOUT_TYPE_IIIT_GLOBAL:
+            case IReadoutRequestElement.READOUT_TYPE_GLOBAL:
                 if (null != stringId) {
                     log.warn("ReadoutType = " + type + " but StringId is not NULL.");
                     stringId = null;
@@ -456,7 +456,7 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
                 break;
             default:
                 log.error("Unknown ReadoutType: " + type + " -> Making it GLOBAL");
-                type = IReadoutRequestElement.READOUT_TYPE_IIIT_GLOBAL;
+                type = IReadoutRequestElement.READOUT_TYPE_GLOBAL;
                 timeMinus = firstTime.getOffsetUTCTime(-readoutConfig.getMinus());
                 timePlus = lastTime.getOffsetUTCTime(readoutConfig.getPlus());
                 break;

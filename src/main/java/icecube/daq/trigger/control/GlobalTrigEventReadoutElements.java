@@ -82,7 +82,7 @@ public class GlobalTrigEventReadoutElements
 
             switch(readoutType){
                 //IIIT-GLOBAL needs to be separated out as II-GLOBAL and IT-GLOBAL.
-                case IReadoutRequestElement.READOUT_TYPE_IIIT_GLOBAL:
+                case IReadoutRequestElement.READOUT_TYPE_GLOBAL:
 
                     IReadoutRequestElement element_II = triggerFactory.createReadoutRequestElement(
                                                 IReadoutRequestElement.READOUT_TYPE_II_GLOBAL,

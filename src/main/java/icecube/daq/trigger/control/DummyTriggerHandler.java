@@ -153,7 +153,7 @@ public class DummyTriggerHandler
             Vector readouts = new Vector();
             IUTCTime timeMinus = hitTime.getOffsetUTCTime(-8000);
             IUTCTime timePlus = hitTime.getOffsetUTCTime(8000);
-            readouts.add(TriggerRequestPayloadFactory.createReadoutRequestElement(IReadoutRequestElement.READOUT_TYPE_IIIT_GLOBAL,
+            readouts.add(TriggerRequestPayloadFactory.createReadoutRequestElement(IReadoutRequestElement.READOUT_TYPE_GLOBAL,
                                                                                   timeMinus, timePlus, null, null));
             IReadoutRequest readout = TriggerRequestPayloadFactory.createReadoutRequest(sourceId, count, readouts);
 

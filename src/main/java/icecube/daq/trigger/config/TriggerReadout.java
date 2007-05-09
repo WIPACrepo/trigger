@@ -31,7 +31,7 @@ public class TriggerReadout
     /**
      * Default readout type.
      */
-    private static final int DEFAULT_READOUT_TYPE = IReadoutRequestElement.READOUT_TYPE_IIIT_GLOBAL;
+    private static final int DEFAULT_READOUT_TYPE = IReadoutRequestElement.READOUT_TYPE_GLOBAL;
 
     /**
      * String value of readout type.
@@ -177,7 +177,7 @@ public class TriggerReadout
      */
     public String getTypeAsString() {
         switch (type) {
-            case IReadoutRequestElement.READOUT_TYPE_IIIT_GLOBAL :
+            case IReadoutRequestElement.READOUT_TYPE_GLOBAL :
                 return IIIT_GLOBAL;
             case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL :
                 return II_GLOBAL;
@@ -202,7 +202,7 @@ public class TriggerReadout
      */
     private int checkType(int type) {
         switch (type) {
-            case IReadoutRequestElement.READOUT_TYPE_IIIT_GLOBAL :
+            case IReadoutRequestElement.READOUT_TYPE_GLOBAL :
             case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL :
             case IReadoutRequestElement.READOUT_TYPE_II_STRING :
             case IReadoutRequestElement.READOUT_TYPE_II_MODULE :

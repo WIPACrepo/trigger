@@ -294,7 +294,25 @@ public class TriggerHandler
                     e.printStackTrace();
                 }
                 ITriggerRequestPayload tPayload = (ITriggerRequestPayload) nextPayload;
-                int sourceId = tPayload.getSourceID().getSourceID();
+                int sourceId;
+                if (tPayload.getSourceID() != null) {
+                    sourceId = tPayload.getSourceID().getSourceID();
+                } else {
+                    if (tPayload.getPayloadLength() == 0 &&
+                        tPayload.getPayloadTimeUTC() == null &&
+                        ((Payload) tPayload).getPayloadBacking() == null)
+                    {
+                        log.error("Ignoring recycled payload");
+                    } else {
+                        log.error("Unexpected null SourceID in payload (len=" +
+                                  tPayload.getPayloadLength() + ", time=" +
+                                  (tPayload.getPayloadTimeUTC() == null ?
+                                   "null" : "" + tPayload.getPayloadTimeUTC().getUTCTimeAsLong()) +
+                                   ", buf=" + ((Payload) tPayload).getPayloadBacking());
+                    }
+
+                    sourceId = -1;
+                }
                 if(sourceId == SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID
                     || sourceId == SourceIdRegistry.STRINGPROCESSOR_SOURCE_ID){
                     // loop over triggers
@@ -307,7 +325,7 @@ public class TriggerHandler
                             log.error("Exception while running trigger: " + e);
                         }
                     }
-                }else {
+                }else if (sourceId != -1) {
 
                     log.error("SourceID " + sourceId + " should not send TriggerRequestPayloads!");
                 }

@@ -256,6 +256,15 @@ public class TriggerHandler
                 (interfaceType == PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)) {
 
                 IHitPayload hit = (IHitPayload) nextPayload;
+                if (hit.getHitTimeUTC() == null) {
+                    Payload pay = (Payload) hit;
+                    log.error("Bad hit buf " + pay.getPayloadBacking() +
+                              " off " + pay.getPayloadOffset() + " len " +
+                              pay.getPayloadLength() + " type " +
+                              pay.getPayloadType() + " utc " +
+                              pay.getPayloadTimeUTC());
+                    continue;
+                }
 
                 // Calculate time since last hit
                 double timeDiff;

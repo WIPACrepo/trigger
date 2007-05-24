@@ -365,13 +365,46 @@ public class GlobalTriggerHandler
                      miTotalMergedInputTriggers++;
                      log.debug("Total # of Merged Input Triggers so far = " + miTotalMergedInputTriggers);
                      log.debug("Now start processing merged trigger input");
-                    Vector vecSubPayloads = new Vector();
+                    boolean failedLoad = false;
+                    Vector vecSubPayloads;
                     try {
                         vecSubPayloads = ((TriggerRequestPayload) tInputTrigger).getPayloads();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        log.error("Couldn't load payload", e);
+                        vecSubPayloads = null;
+                        failedLoad = true;
                     } catch (DataFormatException e) {
-                        e.printStackTrace();
+                        log.error("Couldn't load payload", e);
+                        vecSubPayloads = null;
+                        failedLoad = true;
+                    }
+                    if (vecSubPayloads == null) {
+                        if (!failedLoad) {
+                            ITriggerRequestPayload trigReq =
+                                (ITriggerRequestPayload) tInputTrigger;
+
+                            ISourceID srcObj =
+                                trigReq.getSourceID();
+                            int srcId = (srcObj == null ? -1 :
+                                         srcObj.getSourceID());
+
+                            IUTCTime firstObj =
+                                trigReq.getFirstTimeUTC();
+                            long firstTime = (firstObj == null ? -1L :
+                                              firstObj.getUTCTimeAsLong());
+
+                            IUTCTime lastObj =
+                                trigReq.getLastTimeUTC();
+                            long lastTime = (lastObj == null ? -1L :
+                                              lastObj.getUTCTimeAsLong());
+
+                            log.error("Bad merged trigger: uid " +
+                                      trigReq.getUID() + " configId " +
+                                      trigReq.getTriggerConfigID() + " src "+
+                                      srcId + " times [" + firstTime + "-" +
+                                      lastTime + "]");
+                        }
+                        continue;
                     }
                     //--Each component payload of the MergedPayload needs to be sent to its filter.
                     for(int i=0; i<vecSubPayloads.size(); i++)

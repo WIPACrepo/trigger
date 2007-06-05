@@ -39,8 +39,8 @@ public class TriggerComponent
 {
     private static final Log log = LogFactory.getLog(TriggerComponent.class);
 
-    public static final String DEFAULT_AMANDA_HOST = "triggerdaq2";
-    public static final int DEFAULT_AMANDA_PORT = 12014;
+    private static final String AMANDA_HOST = "triggerdaq2";
+    private static final int AMANDA_PORT = 12014;
 
     protected ISourceID sourceId;
     protected IByteBufferCache bufferCache;
@@ -53,20 +53,10 @@ public class TriggerComponent
     protected String triggerConfigFileName = null;
     protected List currentTriggers = null;
 
-    private String amandaHost = DEFAULT_AMANDA_HOST;
-    private int amandaPort = DEFAULT_AMANDA_PORT;
 
     public TriggerComponent(String name, int id) {
-        this(name, id, DEFAULT_AMANDA_HOST, DEFAULT_AMANDA_PORT);
-    }
-
-    public TriggerComponent(String name, int id,
-                            String amandaHost, int amandaPort) {
         super(name, id);
         
-        this.amandaHost = amandaHost;
-        this.amandaPort = amandaPort;
-
         // Create the source id of this component
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
 
@@ -125,7 +115,7 @@ public class TriggerComponent
         }
         if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
             try {
-                inputEngine.addReverseConnection(amandaHost, amandaPort,
+                inputEngine.addReverseConnection(AMANDA_HOST, AMANDA_PORT,
                                                  bufferCache);
             } catch (IOException ioe) {
                 log.error("Couldn't connect to Amanda TWR", ioe);

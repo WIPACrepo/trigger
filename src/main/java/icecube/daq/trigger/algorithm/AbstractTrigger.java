@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: AbstractTrigger.java,v 1.27 2006/09/14 20:35:13 toale Exp $
  *
  * Date: August 19 2005
  *
@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: AbstractTrigger.java,v 1.27 2006/09/14 20:35:13 toale Exp $
  * @author pat
  */
 public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor
@@ -271,10 +271,6 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
         this.triggerHandler = triggerHandler;
     }
 
-    public ITriggerHandler getTriggerHandler() {
-	return triggerHandler;
-    }
-
     public void setTriggerFactory(TriggerRequestPayloadFactory triggerFactory) {
         this.triggerFactory = triggerFactory;
     }
@@ -322,7 +318,7 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
      */
     protected void reportTrigger(ILoadablePayload payload) {
         if (null == triggerHandler) {
-            throw new Error("TriggerHandler was not set!");
+            log.error("TriggerHandler was not set!");
         }
         triggerCounter++;
         if ((triggerPrescale == 0) || ((triggerCounter % triggerPrescale) == 0)) {
@@ -484,10 +480,6 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
      */
     protected void formTrigger(List hits, IDOMID dom, ISourceID string) {
 
-        if (null == triggerFactory) {
-            throw new Error("TriggerFactory is not set!");
-        }
-
         // get times (this assumes that the hits are time-ordered)
         int numberOfHits = hits.size();
         IUTCTime firstTime = ((IHitPayload) hits.get(0)).getPayloadTimeUTC();
@@ -497,7 +489,7 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
 	    && (triggerCounter % printMod == 0)) {
             log.info("New Trigger " + triggerCounter + " from " + triggerName + " includes " + numberOfHits
                      + " hits:  First time = "
-                     + firstTime + " Last time = " + lastTime);
+                     + firstTime.getUTCTimeAsLong() + " Last time = " + lastTime.getUTCTimeAsLong());
         }
 
         // set earliest payload of interest to 1/10 ns after the last hit
@@ -517,6 +509,9 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
                                                                                            readoutElements);
 
         // make payload
+        if (null == triggerFactory) {
+            log.error("TriggerFactory is not set!");
+        }
         TriggerRequestPayload triggerPayload
                 = (TriggerRequestPayload) triggerFactory.createPayload(triggerCounter,
                                                                        triggerType,
@@ -536,10 +531,6 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
      */
     protected void formTrigger(IUTCTime time) {
 
-        if (null == triggerFactory) {
-            throw new Error("TriggerFactory is not set!");
-        }
-
         if (log.isDebugEnabled() ||
             (log.isInfoEnabled() && (triggerCounter % printMod == 0)) ) {
             log.info("New Trigger " + triggerCounter + " from " + triggerName);
@@ -557,6 +548,9 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
                                                                                            readoutElements);
 
         // make payload
+        if (null == triggerFactory) {
+            log.error("TriggerFactory is not set!");
+        }
         TriggerRequestPayload triggerPayload
                 = (TriggerRequestPayload) triggerFactory.createPayload(triggerCounter,
                                                                        triggerType,

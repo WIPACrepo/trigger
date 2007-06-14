@@ -1,7 +1,7 @@
 /*
  * class: TriggerXMLParser
  *
- * Version $Id: TriggerXMLParser.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: TriggerXMLParser.java,v 1.6 2005/09/16 18:02:05 toale Exp $
  *
  * Date: March 30 2005
  *
@@ -32,7 +32,7 @@ import java.io.IOException;
 /**
  * This class creates jaxb trigger configuration objects from an xml file.
  *
- * @version $Id: TriggerXMLParser.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: TriggerXMLParser.java,v 1.6 2005/09/16 18:02:05 toale Exp $
  * @author pat
  */
 public class TriggerXMLParser

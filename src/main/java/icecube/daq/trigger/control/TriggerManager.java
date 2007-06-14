@@ -1,7 +1,7 @@
 /*
  * class: TriggerManager
  *
- * Version $Id: TriggerManager.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: TriggerManager.java,v 1.24 2006/05/09 19:55:29 toale Exp $
  *
  * Date: October 25 2004
  *
@@ -20,9 +20,9 @@ import icecube.daq.payload.IPayload;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
+import icecube.daq.payload.splicer.Payload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.monitor.Statistic;
 
@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger
  *
- * @version $Id: TriggerManager.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: TriggerManager.java,v 1.24 2006/05/09 19:55:29 toale Exp $
  * @author pat
  */
 public class TriggerManager
@@ -53,7 +53,7 @@ public class TriggerManager
     /**
      * The factory used to produce IHitPayloads for this object to use.
      */
-    private SpliceableFactory inputFactory;
+    private SpliceableFactory inputFactory = null;
 
     /**
      * splicer associated with this manager
@@ -104,8 +104,7 @@ public class TriggerManager
      * @param inputFactory SpiceableFactory used by Splicer
      */
     public TriggerManager(SpliceableFactory inputFactory) {
-        this(inputFactory,
-             new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
+        this(inputFactory, new SourceID4B(4000));
     }
 
     /**
@@ -114,19 +113,11 @@ public class TriggerManager
      * @param sourceId SourceId of this TriggerManager
      */
     public TriggerManager(SpliceableFactory inputFactory, ISourceID sourceId) {
-        super(sourceId, getOutputFactory(inputFactory));
+        super(sourceId);
         this.inputFactory = inputFactory;
+        this.outputFactory = (TriggerRequestPayloadFactory)
+                ((MasterPayloadFactory) inputFactory).getPayloadFactory(PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST);
         init();
-    }
-
-    private static TriggerRequestPayloadFactory
-        getOutputFactory(SpliceableFactory inputFactory)
-    {
-        final int id = PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST;
-
-        MasterPayloadFactory factory = (MasterPayloadFactory) inputFactory;
-
-        return (TriggerRequestPayloadFactory) factory.getPayloadFactory(id);
     }
 
     protected void init() {
@@ -176,7 +167,7 @@ public class TriggerManager
 
                 if (log.isDebugEnabled()) {
                     log.debug("  Processing payload " + inputCount + " with time "
-                              + payload.getPayloadTimeUTC());
+                              + payload.getPayloadTimeUTC().getUTCTimeAsLong());
                 }
 
                 process(payload);
@@ -224,7 +215,7 @@ public class TriggerManager
         Spliceable update = (Spliceable) getEarliestPayloadOfInterest();
         if (null != update) {
             if (log.isDebugEnabled()) {
-                log.debug("Truncating splicer at " + ((IPayload) update).getPayloadTimeUTC());
+                log.debug("Truncating splicer at " + ((IPayload) update).getPayloadTimeUTC().getUTCTimeAsLong());
             }
             splicer.truncate(update);
         }
@@ -237,10 +228,10 @@ public class TriggerManager
      */
     public void disposed(SplicerChangedEvent event) {
         if (log.isInfoEnabled()) {
-            log.info("Received Splicer DISPOSED");
+            log.info("Recieved Splicer DISPOSED");
         }
         try {
-            getPayloadDestination().closeAllPayloadDestinations();
+            payloadDestination.closeAllPayloadDestinations();
         } catch (IOException e) {
             log.error("Error closing PayloadDestination", e);
         }
@@ -253,10 +244,10 @@ public class TriggerManager
      */
     public void failed(SplicerChangedEvent event) {
         if (log.isErrorEnabled()) {
-            log.error("Received Splicer FAILED");
+            log.error("Recieved Splicer FAILED");
         }
         try {
-            getPayloadDestination().closeAllPayloadDestinations();
+            payloadDestination.closeAllPayloadDestinations();
         } catch (IOException e) {
             log.error("Error closing PayloadDestination", e);
         }
@@ -287,10 +278,11 @@ public class TriggerManager
      */
     public void stopped(SplicerChangedEvent event) {
         if (log.isInfoEnabled()) {
-            log.info("Received Splicer STOPPED");
+            log.info("Recieved Splicer STOPPED");
         }
         try {
-            getPayloadDestination().stopAllPayloadDestinations();
+            //payloadDestination.closeAllPayloadDestinations();
+            payloadDestination.stopAllPayloadDestinations();
         } catch (IOException e) {
             log.error("Error closing PayloadDestination", e);
         }
@@ -328,9 +320,9 @@ public class TriggerManager
 
         Iterator iter = event.getAllSpliceables().iterator();
         while (iter.hasNext()) {
-            ILoadablePayload payload = (ILoadablePayload) iter.next();
+            Payload payload = (Payload) iter.next();
             if (log.isDebugEnabled()) {
-                log.debug("Recycle payload " + recycleCount + " at " + payload.getPayloadTimeUTC());
+                log.debug("Recycle payload " + recycleCount + " at " + payload.getPayloadTimeUTC().getUTCTimeAsLong());
             }
 
             earliestTime = payload.getPayloadTimeUTC();

@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerMonitor
  *
- * Version $Id: ITriggerMonitor.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ITriggerMonitor.java,v 1.3 2005/11/22 21:30:31 toale Exp $
  *
  * Date: August 22 2005
  *
@@ -13,7 +13,7 @@ package icecube.daq.trigger.monitor;
 /**
  * This interface defines the control aspect of a trigger.
  *
- * @version $Id: ITriggerMonitor.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ITriggerMonitor.java,v 1.3 2005/11/22 21:30:31 toale Exp $
  * @author pat
  */
 public interface ITriggerMonitor

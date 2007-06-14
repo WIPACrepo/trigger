@@ -67,7 +67,7 @@ public class SimpleTriggerBag
     /**
      * flag to indicate we are flushing
      */
-    private boolean flushing;
+    private boolean flushing = false;
 
     /**
      * Payload monitor object.
@@ -93,7 +93,6 @@ public class SimpleTriggerBag
             payload.loadPayload();
         } catch (Exception e) {
             log.error("Error loading payload", e);
-            return;
         }
 
         // show this input to the monitor
@@ -105,7 +104,7 @@ public class SimpleTriggerBag
 
         if (log.isDebugEnabled()) {
             log.debug("TriggerList has " + payloadList.size() + " payloads");
-            log.debug("   TimeGate at " + timeGate);
+            log.debug("   TimeGate at " + timeGate.getUTCTimeAsLong());
         }
 
     }
@@ -163,7 +162,7 @@ public class SimpleTriggerBag
                  (0 < timeGate.compareTo(getPayloadTime(payload))) ) {
                 iter.remove();
                 if (log.isDebugEnabled()) {
-                    log.debug("Releasing payload at " + getPayloadTime(payload)
+                    log.debug("Releasing payload at " + getPayloadTime(payload).getUTCTimeAsLong()
                              + " with timeDiff = " + timeDiff);
                 }
                 // show this output to the monitor
@@ -183,7 +182,7 @@ public class SimpleTriggerBag
      */
     public void setTimeGate(IUTCTime time) {
         if (log.isDebugEnabled()) {
-            log.debug("Updating timeGate to " + time);
+            log.debug("Updating timeGate to " + time.getUTCTimeAsLong());
         }
         timeGate = time;
     }

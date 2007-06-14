@@ -1,7 +1,7 @@
 /*
  * class: TriggerReadout
  *
- * Version $Id: TriggerReadout.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: TriggerReadout.java,v 1.1 2005/11/23 16:38:06 toale Exp $
  *
  * Date: November 23 2005
  *
@@ -17,7 +17,7 @@ import icecube.daq.trigger.IReadoutRequestElement;
 /**
  * This class represents a trigger readout.
  *
- * @version $Id: TriggerReadout.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: TriggerReadout.java,v 1.1 2005/11/23 16:38:06 toale Exp $
  * @author pat
  */
 public class TriggerReadout

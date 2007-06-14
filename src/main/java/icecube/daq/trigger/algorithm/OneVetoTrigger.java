@@ -1,7 +1,7 @@
 /*
  * class: OneVetoTrigger
  *
- * Version $Id: OneVetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: OneVetoTrigger.java,v 1.2 2006/06/30 18:27:53 dwharton Exp $
  *
  * Date: January 25 2006
  *
@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is accept all incoming triggers but to veto one configured triggers.
  *
- * @version $Id: OneVetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: OneVetoTrigger.java,v 1.2 2006/06/30 18:27:53 dwharton Exp $
  * @author shseo
  */
 public class OneVetoTrigger

@@ -1,7 +1,7 @@
 /*
  * class: PayloadBagMonitor
  *
- * Version $Id: PayloadBagMonitor.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: PayloadBagMonitor.java,v 1.1 2005/12/29 23:16:15 toale Exp $
  *
  * Date: December 29 2005
  *
@@ -17,7 +17,7 @@ import icecube.daq.payload.IPayload;
  * This class combines two PayloadFlowMonitors to be used by any class that consumes and
  * produces payloads.
  *
- * @version $Id: PayloadBagMonitor.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: PayloadBagMonitor.java,v 1.1 2005/12/29 23:16:15 toale Exp $
  * @author pat
  */
 public class PayloadBagMonitor

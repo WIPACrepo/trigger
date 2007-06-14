@@ -13,12 +13,11 @@ package icecube.daq.trigger.control;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.IReadoutRequestElement;
 import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
+import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.*;
 import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.util.DOMRegistry;
 
 import java.util.List;
 import java.util.Vector;
@@ -45,17 +44,17 @@ public class DummyTriggerHandler
     /**
      * Bag of triggers to issue
      */
-    private ITriggerBag triggerBag;
+    protected ITriggerBag triggerBag = null;
 
     /**
      * output destination
      */
-    private IPayloadDestinationCollection payloadDestination;
+    protected IPayloadDestinationCollection payloadDestination = null;
 
     /**
      * Default output factory
      */
-    private TriggerRequestPayloadFactory outputFactory;
+    protected TriggerRequestPayloadFactory outputFactory = null;
 
     /**
      * SourceId of this TriggerHandler.
@@ -65,25 +64,22 @@ public class DummyTriggerHandler
     /**
      * earliest thing of interest to the analysis
      */
-    private IPayload earliestPayloadOfInterest;
+    private IPayload earliestPayloadOfInterest = null;
 
-    private int numHitsPerTrigger = 1000;
     private int count;
-
-    private DOMRegistry domRegistry;
 
     /**
      * Default constructor
      */
     public DummyTriggerHandler() {
-        this(new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
+        this(new SourceID4B(4000));
     }
 
-    private DummyTriggerHandler(ISourceID sourceId) {
+    public DummyTriggerHandler(ISourceID sourceId) {
         this(sourceId, new TriggerRequestPayloadFactory());
     }
 
-    protected DummyTriggerHandler(ISourceID sourceId, TriggerRequestPayloadFactory outputFactory) {
+    public DummyTriggerHandler(ISourceID sourceId, TriggerRequestPayloadFactory outputFactory) {
         this.sourceId = sourceId;
         this.outputFactory = outputFactory;
         init();
@@ -108,7 +104,6 @@ public class DummyTriggerHandler
      * @param trigger trigger to be added
      */
     public void addTrigger(ITriggerControl trigger) {
-        log.info("Triggers added to DummyTriggerBag are ignored");
     }
 
     /**
@@ -117,7 +112,6 @@ public class DummyTriggerHandler
      * @param triggers
      */
     public void addTriggers(List triggers) {
-        log.info("Triggers added to DummyTriggerBag are ignored");
     }
 
     /**
@@ -141,16 +135,6 @@ public class DummyTriggerHandler
         this.payloadDestination = payloadDestination;
     }
 
-    IPayloadDestinationCollection getPayloadDestination()
-    {
-        return payloadDestination;
-    }
-
-    public void setNumHitsPerTrigger(int numHitsPerTrigger)
-    {
-        this.numHitsPerTrigger = numHitsPerTrigger;
-    }
-
     /**
      * Method to process payloads, assumes that they are time ordered.
      * @param payload payload to process
@@ -159,7 +143,7 @@ public class DummyTriggerHandler
         IHitPayload hit = (IHitPayload) payload;
 
         // need to make TRP and add to trigger bag
-        if (count % numHitsPerTrigger == 0) {
+        if (count % 1000 == 0) {
 
             log.info("Creating Trigger...");
 
@@ -174,8 +158,8 @@ public class DummyTriggerHandler
             IReadoutRequest readout = TriggerRequestPayloadFactory.createReadoutRequest(sourceId, count, readouts);
 
             // create trigger
-            ITriggerRequestPayload triggerPayload
-                    = (ITriggerRequestPayload) outputFactory.createPayload(count,
+            TriggerRequestPayload triggerPayload
+                    = (TriggerRequestPayload) outputFactory.createPayload(count,
                                                                           0,
                                                                           0,
                                                                           sourceId,
@@ -211,14 +195,6 @@ public class DummyTriggerHandler
     }
 
     /**
-     * getter for count
-     * @return count
-     */
-    public int getCount() {
-        return count;
-    }
-
-    /**
      * getter for SourceID
      * @return sourceID
      */
@@ -232,29 +208,23 @@ public class DummyTriggerHandler
      *   if any of those overlap, they are merged
      */
     public void issueTriggers() {
-        if (null == payloadDestination) {
-            log.error("PayloadDestination has not been set!");
-            throw new RuntimeException("PayloadDestination has not been set!");
-        }
-
         while (triggerBag.hasNext()) {
-            ITriggerRequestPayload trigger = (ITriggerRequestPayload) triggerBag.next();
+            TriggerRequestPayload trigger = (TriggerRequestPayload) triggerBag.next();
 
             // issue the trigger
-            RuntimeException rte;
-            try {
-                log.info("Writing Trigger...");
-                payloadDestination.writePayload(trigger);
-                rte = null;
-            } catch (IOException e) {
-                log.error("Failed to write triggers");
-                rte = new RuntimeException(e);
-            }
-            // now recycle it
-            trigger.recycle();
-
-            if (rte != null) {
-                throw rte;
+            if (null == payloadDestination) {
+                log.error("PayloadDestination has not been set!");
+                throw new RuntimeException("PayloadDestination has not been set!");
+            } else {
+                try {
+		    log.info("Writing Trigger...");
+                    payloadDestination.writePayload(trigger);
+                } catch (IOException e) {
+                    log.error("Failed to write triggers");
+                    throw new RuntimeException(e);
+                }
+                // now recycle it
+                trigger.recycle();
             }
 
         }
@@ -265,16 +235,8 @@ public class DummyTriggerHandler
         return earliestPayloadOfInterest;
     }
 
-    private void setEarliestPayloadOfInterest(IPayload earliest) {
+    protected void setEarliestPayloadOfInterest(IPayload earliest) {
         earliestPayloadOfInterest = earliest;
-    }
-
-    public void setDOMRegistry(DOMRegistry registry) {
-	domRegistry = registry;
-    }
-
-    public DOMRegistry getDOMRegistry() {
-	return domRegistry;
     }
 
 }

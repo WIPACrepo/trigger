@@ -1,7 +1,7 @@
 /*
  * class: ThreeVetoTrigger
  *
- * Version $Id: ThreeVetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ThreeVetoTrigger.java,v 1.2 2006/06/30 18:27:58 dwharton Exp $
  *
  * Date: January 25 2006
  *
@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is accept all incoming triggers but to veto three configured triggers.
  *
- * @version $Id: ThreeVetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ThreeVetoTrigger.java,v 1.2 2006/06/30 18:27:58 dwharton Exp $
  * @author shseo
  */
 public class ThreeVetoTrigger

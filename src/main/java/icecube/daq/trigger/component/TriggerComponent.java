@@ -10,6 +10,7 @@ import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
 import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.IByteBufferCache;
+import icecube.daq.payload.ByteBufferCache;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.VitreousBufferCache;
@@ -22,17 +23,12 @@ import icecube.daq.trigger.control.GlobalTriggerManager;
 import icecube.daq.trigger.control.ITriggerControl;
 import icecube.daq.trigger.control.DummyTriggerManager;
 import icecube.daq.trigger.config.TriggerBuilder;
-import icecube.daq.util.DOMRegistry;
 
 import java.nio.ByteBuffer;
 import java.io.IOException;
 
 import java.util.List;
 import java.util.Iterator;
-import java.util.HashMap;
-
-import javax.xml.parsers.ParserConfigurationException;
-import org.xml.sax.SAXException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,14 +38,6 @@ public class TriggerComponent
     extends DAQComponent
 {
     private static final Log log = LogFactory.getLog(TriggerComponent.class);
-
-    /** svn version information */
-    private static final HashMap SVN_VER_INFO;
-    static {
-	SVN_VER_INFO = new HashMap(4);
-	SVN_VER_INFO.put("id",  "$Id: TriggerComponent.java 2146 2007-10-17 01:37:59Z ksb $");
-	SVN_VER_INFO.put("url", "$URL: http://code.icecube.wisc.edu/daq/projects/trigger/releases/Grange/src/main/java/icecube/daq/trigger/component/TriggerComponent.java $");
-    }
 
     public static final String DEFAULT_AMANDA_HOST = "triggerdaq2";
     public static final int DEFAULT_AMANDA_PORT = 12014;
@@ -190,17 +178,6 @@ public class TriggerComponent
         }
         triggerManager.addTriggers(currentTriggers);
 
-	// Setup DOMRegistry
-	try {
-	    triggerManager.setDOMRegistry(DOMRegistry.loadRegistry(globalConfigurationDir));
-	} catch (ParserConfigurationException pce) {
-	    log.error("Error loading the DOMRegistry", pce);
-	} catch (SAXException se) {
-	    log.error("Error loading the DOMRegistry", se);
-	} catch (IOException ioe) {
-	    log.error("Error loading the DOMRegistry", ioe);
-	}
-
     }
 
     public ITriggerManager getTriggerManager(){
@@ -209,15 +186,5 @@ public class TriggerComponent
 
     public ISourceID getSourceID(){
         return sourceId;
-    }
-
-    /**
-     * Return this component's svn version info as a HashMap.
-     *
-     * @return svn version info (id, url) as a HashMap
-     */
-    public HashMap getVersionInfo()
-    {
-	return SVN_VER_INFO;
     }
 }

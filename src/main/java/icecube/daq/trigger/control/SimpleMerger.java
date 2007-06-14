@@ -24,9 +24,7 @@ import org.apache.commons.logging.LogFactory;
  * This class is to take care of timeOverlap and spaceOverlap of ReadoutElements
  * in the same ReadoutType in a given GlobalTrigEvent.
  *
- * TODO: Massively clean up this code!!!
- *
- * @version $Id: SimpleMerger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: SimpleMerger.java,v 1.3 2005/09/16 18:13:11 shseo Exp $
  * @author shseo
  */
 public class SimpleMerger
@@ -37,14 +35,16 @@ public class SimpleMerger
     private static final Log log = LogFactory.getLog(SimpleMerger.class);
 
     private TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY = new TriggerRequestPayloadFactory();
-    private TriggerRequestPayloadFactory triggerFactory;
+    private TriggerRequestPayloadFactory triggerFactory = null;
 
     private final int mi_TIMEGAP_NO = 1;
     private final int mi_TIMEGAP_YES = 2;
     private int DEFAULT_TIMEGAP_OPTION = mi_TIMEGAP_NO;
     private int mi_TimeGap_option;
 
-    private Sorter tSorter = new Sorter();
+    Sorter tSorter = new Sorter();
+
+    private List mListSimpleMergedSameReadoutElements = new ArrayList();
 
     private List mlistSameIDElementLists = new ArrayList();
     private List mlistDiffIDElements = new ArrayList();
@@ -60,13 +60,13 @@ public class SimpleMerger
         setTimeGap_option(DEFAULT_TIMEGAP_OPTION);
     }
     /**
-     * This is the main method.
+     * This is the main mehtod.
      *
      * @param listSameReadoutElements : the same ReadoutType is required as input parameter.
      */
-    public List merge(List listSameReadoutElements)
+    public void merge(List listSameReadoutElements)
     {
-        List mListSimpleMergedSameReadoutElements = new ArrayList();
+        mListSimpleMergedSameReadoutElements = new ArrayList();
 
         //There is no need to merge if the sizeList == 1.
         if(listSameReadoutElements.size() == 1) //listSize == 1.
@@ -84,6 +84,7 @@ public class SimpleMerger
             listSameReadoutElements = new ArrayList();
             listSameReadoutElements = tempList;
 
+            List listSameIDElementLists = new ArrayList();
             List listTimeManagedSameIDElements = new ArrayList();
 
             int iReadoutType = ((IReadoutRequestElement) listSameReadoutElements.get(0)).getReadoutType();
@@ -106,7 +107,7 @@ public class SimpleMerger
                             try {
                                 listTimeManagedSameIDElements = manageTimeOverlap(listSameIDElements, mi_TimeGap_option);
                             } catch (Exception e) {
-                                log.error("Couldn't manage time overlap", e);
+                                e.printStackTrace();
                             }
                             mListSimpleMergedSameReadoutElements.addAll(listTimeManagedSameIDElements);
 
@@ -127,16 +128,15 @@ public class SimpleMerger
                 try {
                     listTimeManagedSameIDElements = manageTimeOverlap(listSameReadoutElements, mi_TimeGap_option);
                 } catch (Exception e) {
-                    log.error("Couldn't manage time overlap", e);
+                    e.printStackTrace();
                 }
                 mListSimpleMergedSameReadoutElements.addAll(listTimeManagedSameIDElements);
             }
 
         }
 
-        return mListSimpleMergedSameReadoutElements;
     }
-    private void classifySameIDElements(List listSameReadoutElements)
+    public void classifySameIDElements(List listSameReadoutElements)
     {
         mlistSameIDElementLists = new ArrayList();
         mlistDiffIDElements = new ArrayList();
@@ -155,21 +155,9 @@ public class SimpleMerger
         int iReadoutType = tElement.getReadoutType();
 
       // select ReadoutElements whose SourceID is the same and put in lists. (i.e., same String# or DOM#)
-        if(listSameReadoutElements.size() <= 1 ||
-           iReadoutType == IReadoutRequestElement.READOUT_TYPE_II_GLOBAL ||
-           iReadoutType == IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL)
-        {
-            // XXX I don't think it's possible for this code to be run
-            if(listSameReadoutElements.size() == 1)
-            {
-                mlistDiffIDElements.addAll(listSameReadoutElements);
-
-            }else
-            {
-                mlistSameIDElementLists.add(listSameReadoutElements);
-
-            }
-        }else
+        if(listSameReadoutElements.size() > 1
+            && iReadoutType != IReadoutRequestElement.READOUT_TYPE_II_GLOBAL
+            && iReadoutType != IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL)
         {
             for(int i=0; i < listSameReadoutElements.size(); i++)
             {
@@ -265,6 +253,18 @@ public class SimpleMerger
                 }
 
             }//for loop
+
+        }else
+        {
+            if(listSameReadoutElements.size() == 1)
+            {
+                mlistDiffIDElements.addAll(listSameReadoutElements);
+
+            }else
+            {
+                mlistSameIDElementLists.add(listSameReadoutElements);
+
+            }
         }
 
     }
@@ -272,19 +272,19 @@ public class SimpleMerger
      * @param listSameReadoutElementsSameID
      * @return
      */
-    private List manageTimeOverlap_NoGap(List listSameReadoutElementsSameID) throws Exception {
+    public List manageTimeOverlap_NoGap(List listSameReadoutElementsSameID) throws Exception {
         List listTimeManagedElementsSameID = new ArrayList();
 
         listTimeManagedElementsSameID.add(makeNewReadoutElement(listSameReadoutElementsSameID));
 
         return listTimeManagedElementsSameID;
     }
-    private List manageTimeOverlap_Gap(List listSameReadoutElementsSameID) throws Exception {
+    public List manageTimeOverlap_Gap(List listSameReadoutElementsSameID) throws Exception {
         List listTimeManagedElementsSameID = new ArrayList();
         List listTempMergedElements = new ArrayList();
         List listUnmergedElements = new ArrayList();
 
-        //if time-overlap then make new IReadoutRequestElement. --> put in listTimeManagedElementsSameID.
+        //if time-overlap then make new IReaoutRequestElement. --> put in listTimeManagedElementsSameID.
         IReadoutRequestElement lastElement = null;
         IReadoutRequestElement currentElement = null;
 
@@ -292,12 +292,7 @@ public class SimpleMerger
         IUTCTime currentUTCTime_start = null;
 
         //Before checking timeOverlap, sort input list.
-        if(listSameReadoutElementsSameID.size() == 1)
-        {
-            // XXX I don't think it's possible for this code to be run
-            listTimeManagedElementsSameID.addAll(listSameReadoutElementsSameID);
-
-        }else if(listSameReadoutElementsSameID.size() > 1)
+        if(listSameReadoutElementsSameID.size() > 1)
         {
             List listTemp = tSorter.getReadoutElementsUTCTimeSorted(listSameReadoutElementsSameID);
             listSameReadoutElementsSameID = new ArrayList();
@@ -350,6 +345,9 @@ public class SimpleMerger
                 listTimeManagedElementsSameID.addAll(listUnmergedElements);
             }
 
+        }else if(listSameReadoutElementsSameID.size() == 1)
+        {
+            listTimeManagedElementsSameID.addAll(listSameReadoutElementsSameID);
         }
 
         return listTimeManagedElementsSameID;
@@ -360,7 +358,7 @@ public class SimpleMerger
      *
      * @param listSameReadoutElementsSameID: list of ReadoutElements w/ the same ISourceID or IDOMID.
      */
-    private List manageTimeOverlap(List listSameReadoutElementsSameID, int iTimeGap_option) throws Exception {
+    public List manageTimeOverlap(List listSameReadoutElementsSameID, int iTimeGap_option) throws Exception {
         List listTimeManagedElementsSameID = new ArrayList();
 
         if(iTimeGap_option == mi_TIMEGAP_NO)
@@ -378,32 +376,76 @@ public class SimpleMerger
         return listTimeManagedElementsSameID;
     }
     /**
-     * This method will create a new ReadoutElement based on the list of
-     * elements to be merged.
+     * This method will create a new ReadoutElement based on the list of Elements to be merged.
      *
-     * @param list list of merged elements
+     * @param listMergedElements
      * @return
      */
-    private IReadoutRequestElement makeNewReadoutElement(List list) throws Exception {
+    public IReadoutRequestElement makeNewReadoutElement(List listMergedElements) throws Exception {
+        IReadoutRequestElement element = null;
+        //need to manage time only
+        //find the earliest/latest Time
+        //todo:use the mehtod in mtSorter....?
 
-        if(list.size() == 0)
+/*
+        IUTCTime earliestUTCTime = new UTCTime8B(Long.MAX_VALUE);
+        IUTCTime latestUTCTime = new UTCTime8B(Long.MIN_VALUE);
+
+        IUTCTime startUTCTime = null;
+        IUTCTime endUTCTime = null;
+
+        for(int i=0; i<listMergedElements.size(); i++)
         {
-            throw new Exception("List should contain at least one element!");
+            element = (IReadoutRequestElement) listMergedElements.get(i);
+            startUTCTime = element.getFirstTimeUTC();
+            endUTCTime = element.getLastTimeUTC();
+
+            if(earliestUTCTime.compareTo(startUTCTime) > 0)
+            {
+                earliestUTCTime = startUTCTime;
+            }
+            if(latestUTCTime.compareTo(endUTCTime) < 0)
+            {
+                latestUTCTime = endUTCTime;
+            }
+
+        }
+*/
+
+        if(listMergedElements.size() > 0)
+        {
+            element = (IReadoutRequestElement) listMergedElements.get(0);
+
+        }else{
+            throw new Exception("listMergedElements should contain at least one element!");
         }
 
-        IReadoutRequestElement elem =
-            (IReadoutRequestElement) list.get(0);
+        IUTCTime earliestUTCTime = tSorter.getUTCTimeEarliest(listMergedElements);
+        IUTCTime latestUTCTime = tSorter.getUTCTimeLatest(listMergedElements);
 
-        IUTCTime earliestUTCTime =
-            tSorter.getUTCTimeEarliest(list);
-        IUTCTime latestUTCTime = tSorter.getUTCTimeLatest(list);
+        IReadoutRequestElement newElement = triggerFactory.createReadoutRequestElement(
+                                                element.getReadoutType(),
+                                                earliestUTCTime,
+                                                latestUTCTime,
+                                                element.getDomID(),
+                                                element.getSourceID());
 
-        return triggerFactory.createReadoutRequestElement(elem.getReadoutType(),
-                                                          earliestUTCTime,
-                                                          latestUTCTime,
-                                                          elem.getDomID(),
-                                                          elem.getSourceID());
 
+        return newElement;
+
+    }
+    public List getListSameIDElementLists()
+    {
+        return mlistSameIDElementLists;
+    }
+
+    public List getListDiffIDElements()
+    {
+        return mlistDiffIDElements;
+    }
+    public List getListSimpleMergedSameReadoutElements()
+    {
+        return mListSimpleMergedSameReadoutElements;
     }
     public void setPayloadFactory(PayloadFactory triggerFactory)
     {
@@ -412,5 +454,9 @@ public class SimpleMerger
     public void setTimeGap_option(int iTimeGap_option)
     {
         mi_TimeGap_option = iTimeGap_option;
+    }
+    public int getTimeGap_option()
+    {
+        return mi_TimeGap_option;
     }
 }

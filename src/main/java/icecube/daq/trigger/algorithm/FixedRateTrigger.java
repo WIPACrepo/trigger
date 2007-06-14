@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: FixedRateTrigger.java,v 1.3 2006/06/16 21:10:29 vav111 Exp $
  *
  * Date: May 1 2006
  *
@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: FixedRateTrigger.java,v 1.3 2006/06/16 21:10:29 vav111 Exp $
  * @author pat
  */
 public class FixedRateTrigger extends AbstractTrigger

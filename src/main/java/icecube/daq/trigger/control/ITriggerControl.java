@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerControl
  *
- * Version $Id: ITriggerControl.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ITriggerControl.java,v 1.4 2005/12/06 22:29:54 toale Exp $
  *
  * Date: August 22 2005
  *
@@ -17,7 +17,7 @@ import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 /**
  * This interface defines the control aspect of a trigger.
  *
- * @version $Id: ITriggerControl.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ITriggerControl.java,v 1.4 2005/12/06 22:29:54 toale Exp $
  * @author pat
  */
 public interface ITriggerControl
@@ -36,14 +36,8 @@ public interface ITriggerControl
     void setTriggerHandler(ITriggerHandler triggerHandler);
 
     /**
-     * Get the trigger handler of this trigger.
-     * @return thr trigger handler
-     */
-    ITriggerHandler getTriggerHandler();
-
-    /**
      * Set the TriggerRequestPayloadFactory for this trigger.
-     * @param triggerFactory payload factory
+     * @param triggerFactory paylaod factory
      */
     void setTriggerFactory(TriggerRequestPayloadFactory triggerFactory);
 

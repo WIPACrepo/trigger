@@ -1,7 +1,7 @@
 /*
  * interface: IPayloadProducer
  *
- * Version $Id: IPayloadProducer.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: IPayloadProducer.java,v 1.2 2006/05/08 02:44:44 toale Exp $
  *
  * Date: October 19 2005
  *
@@ -15,7 +15,7 @@ import icecube.daq.payload.IPayloadDestinationCollection;
 /**
  * This interface provides methods for setting payload destinations.
  *
- * @version $Id: IPayloadProducer.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: IPayloadProducer.java,v 1.2 2006/05/08 02:44:44 toale Exp $
  * @author pat
  */
 public interface IPayloadProducer

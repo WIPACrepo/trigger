@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerInput
  *
- * Version $Id: ITriggerInput.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ITriggerInput.java,v 1.1 2005/08/30 01:14:35 toale Exp $
  *
  * Date: May 2 2005
  *
@@ -15,7 +15,7 @@ import icecube.daq.payload.ILoadablePayload;
 /**
  * This interface defines the functionality of a trigger input module
  *
- * @version $Id: ITriggerInput.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ITriggerInput.java,v 1.1 2005/08/30 01:14:35 toale Exp $
  * @author pat
  */
 public interface ITriggerInput

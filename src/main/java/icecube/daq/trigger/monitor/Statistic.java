@@ -1,7 +1,7 @@
 /*
  * class: Statistic
  *
- * Version $Id: Statistic.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: Statistic.java,v 1.2 2006/05/08 02:44:44 toale Exp $
  *
  * Date: May 7 2006
  *
@@ -14,7 +14,7 @@ package icecube.daq.trigger.monitor;
  * This class implements a simple statistic, keeping track of the average value as
  * well as min and max values.
  *
- * @version $Id: Statistic.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: Statistic.java,v 1.2 2006/05/08 02:44:44 toale Exp $
  * @author pat
  */
 public class Statistic

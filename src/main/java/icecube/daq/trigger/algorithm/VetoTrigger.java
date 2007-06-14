@@ -1,7 +1,7 @@
 /*
  * class: VetoTrigger
  *
- * Version $Id: VetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: VetoTrigger.java,v 1.4 2006/02/02 12:49:35 shseo Exp $
  *
  * Date: January 25 2006
  *
@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * This class is to provide commond methods for any N-VetoTrigger.
  *
- * @version $Id: VetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: VetoTrigger.java,v 1.4 2006/02/02 12:49:35 shseo Exp $
  * @author shseo
  */
 public abstract class VetoTrigger
@@ -57,15 +57,17 @@ public abstract class VetoTrigger
          if(!isConfiguredTrigger((ITriggerRequestPayload) payload))
          {
              miNumIncomingSelectedTriggers++;
+             System.out.println("Total number of incoming Unvetoed triggers so far = " + miNumIncomingSelectedTriggers);
              log.debug("Total number of incoming Unvetoed triggers so far = " + miNumIncomingSelectedTriggers);
              try {
                  wrapTrigger((ITriggerRequestPayload) payload);
              } catch (Exception e) {
-                 log.error("Couldn't wrap trigger", e);
+                 e.printStackTrace();
              }
          }else
          {
              miNumIncomingVetoedTriggers++;
+             System.out.println("Total number of incoming vetoed triggers so far = " + miNumIncomingVetoedTriggers);
              log.debug("This Trigger is being vetoed.");
              //DummyPayload dummy = new DummyPayload(((ITriggerRequestPayload) payload).getFirstTimeUTC());
              //setEarliestPayloadOfInterest(dummy);

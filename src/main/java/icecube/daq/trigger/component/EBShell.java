@@ -15,6 +15,7 @@ import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
 
+import icecube.daq.payload.ByteBufferCache;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayloadDestinationCollection;
@@ -22,7 +23,6 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.VitreousBufferCache;
 
 import icecube.daq.trigger.control.ITriggerControl;
 import icecube.daq.trigger.control.ITriggerManager;
@@ -94,7 +94,8 @@ public class EBShell
         super(name, id);
 
         // Create the buffer cache
-        IByteBufferCache bufferCache = new VitreousBufferCache();
+        IByteBufferCache bufferCache =
+            new ByteBufferCache(256, 250000000L, 225000000L, name);
         addCache(bufferCache);
 
         addMBean("jvm", new MemoryStatistics());

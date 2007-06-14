@@ -1,7 +1,7 @@
 /*
  * class: TriggerBuilder
  *
- * Version $Id: TriggerBuilder.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: TriggerBuilder.java,v 1.18 2006/08/08 20:26:29 vav111 Exp $
  *
  * Date: August 18 2005
  *
@@ -31,7 +31,7 @@ import icecube.daq.payload.ISourceID;
 /**
  * This class builds triggers from a trigger configuration object.
  *
- * @version $Id: TriggerBuilder.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: TriggerBuilder.java,v 1.18 2006/08/08 20:26:29 vav111 Exp $
  * @author pat
  */
 public class TriggerBuilder

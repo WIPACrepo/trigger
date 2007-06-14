@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerManager
  *
- * Version $Id: ITriggerManager.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ITriggerManager.java,v 1.7 2006/05/07 17:17:41 toale Exp $
  *
  * Date: March 31 2005
  *
@@ -16,7 +16,7 @@ import icecube.daq.payload.IUTCTime;
 /**
  * This interface defines the behavior of a TriggerManager
  *
- * @version $Id: ITriggerManager.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ITriggerManager.java,v 1.7 2006/05/07 17:17:41 toale Exp $
  * @author pat
  */
 public interface ITriggerManager

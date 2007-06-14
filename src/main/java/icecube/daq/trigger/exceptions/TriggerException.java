@@ -1,7 +1,7 @@
 /*
  * class: TriggerException
  *
- * Version $Id: TriggerException.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: TriggerException.java,v 1.1 2005/12/06 22:29:54 toale Exp $
  *
  * Date: November 13 2004
  *
@@ -13,7 +13,7 @@ package icecube.daq.trigger.exceptions;
 /**
  * This class defines a general trigger exception
  *
- * @version $Id: TriggerException.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: TriggerException.java,v 1.1 2005/12/06 22:29:54 toale Exp $
  * @author pat
  */
 public class TriggerException extends Exception

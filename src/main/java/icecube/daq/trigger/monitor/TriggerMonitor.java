@@ -1,7 +1,7 @@
 /*
  * class: TriggerMonitor
  *
- * Version $Id: TriggerMonitor.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: TriggerMonitor.java,v 1.6 2006/05/08 02:44:44 toale Exp $
  *
  * Date: August 31 2005
  *
@@ -15,7 +15,7 @@ import icecube.icebucket.monitor.ScalarFlowMonitor;
 /**
  * This class is a mess.
  *
- * @version $Id: TriggerMonitor.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: TriggerMonitor.java,v 1.6 2006/05/08 02:44:44 toale Exp $
  * @author pat
  */
 public class TriggerMonitor

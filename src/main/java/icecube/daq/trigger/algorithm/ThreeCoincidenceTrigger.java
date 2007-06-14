@@ -1,7 +1,7 @@
 /*
  * class: ThreeCoincidenceTrigger
  *
- * Version $Id: ThreeCoincidenceTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ThreeCoincidenceTrigger.java,v 1.16 2006/06/30 18:27:56 dwharton Exp $
  *
  * Date: September 6 2005
  *
@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  * Three coincidence trigger algorithm which uses timeGate (using CoincidenceTriggerBag)
  * for safe release of a selected trigger.
  *
- * @version $Id: ThreeCoincidenceTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ThreeCoincidenceTrigger.java,v 1.16 2006/06/30 18:27:56 dwharton Exp $
  * @author shseo
  */
 public class ThreeCoincidenceTrigger

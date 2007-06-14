@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: CalibrationTrigger.java,v 1.19 2006/09/14 20:35:13 toale Exp $
  *
  * Date: August 27 2005
  *
@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: CalibrationTrigger.java,v 1.19 2006/09/14 20:35:13 toale Exp $
  * @author pat
  */
 public class CalibrationTrigger extends AbstractTrigger

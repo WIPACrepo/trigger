@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: SimpleMajorityTrigger.java,v 1.27 2006/09/14 20:35:13 toale Exp $
  *
  * Date: August 19 2005
  *
@@ -32,7 +32,7 @@ import org.apache.commons.logging.Log;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: SimpleMajorityTrigger.java,v 1.27 2006/09/14 20:35:13 toale Exp $
  * @author pat
  */
 public class SimpleMajorityTrigger extends AbstractTrigger
@@ -181,7 +181,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
 
             if (log.isDebugEnabled()) {
                 log.debug("This is the first hit, initializing...");
-                log.debug("slidingTimeWindowStart set to " + slidingTimeWindow.startTime());
+                log.debug("slidingTimeWindowStart set to " + slidingTimeWindow.startTime().getUTCTimeAsLong());
             }
 
         }
@@ -191,7 +191,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
         else {
 
             if (log.isDebugEnabled()) {
-                log.debug("Processing hit at time " + hitTimeUTC);
+                log.debug("Processing hit at time " + hitTimeUTC.getUTCTimeAsLong());
             }
 
             /*
@@ -210,15 +210,15 @@ public class SimpleMajorityTrigger extends AbstractTrigger
                         if (h.getPayloadTimeUTC() == null) {
                             log.error("  Hit " + i + " has a null time");
                         } else {
-                            log.error("  Hit " + i + " has time = " + h.getPayloadTimeUTC());
+                            log.error("  Hit " + i + " has time = " + h.getPayloadTimeUTC().getUTCTimeAsLong());
                         }
                     }
                 }
             }
             if (hitTimeUTC.compareTo(slidingTimeWindow.startTime()) < 0) {
                 throw new TimeOutOfOrderException("Hit comes before start of sliding time window: Window is at "
-                                                                                 + slidingTimeWindow.startTime() + " Hit is at "
-                                                                                 + hitTimeUTC + " DOMId = "
+                                                                                 + slidingTimeWindow.startTime().getUTCTimeAsLong() + " Hit is at "
+                                                                                 + hitTimeUTC.getUTCTimeAsLong() + " DOMId = "
                                                                                  + hit.getDOMID().getDomIDAsString());
             }
 
@@ -258,7 +258,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
 
                         if (log.isDebugEnabled()) {
                             log.debug("Trigger is already on. Changing triggerWindowStop to "
-                                      + getTriggerWindowStop());
+                                      + getTriggerWindowStop().getUTCTimeAsLong());
                         }
 
                     } else {
@@ -270,8 +270,8 @@ public class SimpleMajorityTrigger extends AbstractTrigger
                         if (log.isDebugEnabled()) {
                             log.debug("Trigger is now on, numberOfHitsInTriggerWindow = "
                                       + numberOfHitsInTriggerWindow + " triggerWindowStart = "
-                                      + getTriggerWindowStart() + " triggerWindowStop = "
-                                      + getTriggerWindowStop());
+                                      + getTriggerWindowStart().getUTCTimeAsLong() + " triggerWindowStop = "
+                                      + getTriggerWindowStop().getUTCTimeAsLong());
                         }
 
                     }
@@ -300,7 +300,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
 
                     if (log.isDebugEnabled()) {
                         log.debug("numberOfHitsInSlidingTimeWindow is now " + slidingTimeWindow.size()
-                                  + " slidingTimeWindowStart is now " + slidingTimeWindow.startTime());
+                                  + " slidingTimeWindowStart is now " + slidingTimeWindow.startTime().getUTCTimeAsLong());
                     }
 
                 }
@@ -328,7 +328,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
                     if (log.isDebugEnabled()) {
                         log.debug("Hit still outside slidingTimeWindow, start a new one "
                                   + "numberOfHitsInSlidingTimeWindow = " + slidingTimeWindow.size()
-                                  + " slidingTimeWindowStart = " + slidingTimeWindow.startTime());
+                                  + " slidingTimeWindowStart = " + slidingTimeWindow.startTime().getUTCTimeAsLong());
                     }
 
                 }
@@ -366,7 +366,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
                         for (int i=0; i<hitsWithinTriggerWindow.size(); i++) {
                             IHitPayload h = (IHitPayload) hitsWithinTriggerWindow.get(i);
                             if (slidingTimeWindow.contains(h)) {
-                                log.error("Hit at time " + h.getPayloadTimeUTC()
+                                log.error("Hit at time " + h.getPayloadTimeUTC().getUTCTimeAsLong()
                                           + " is part of new trigger but is still in SlidingTimeWindow");
                             }
                         }
@@ -421,8 +421,8 @@ public class SimpleMajorityTrigger extends AbstractTrigger
             if (log.isDebugEnabled()) {
                 log.debug(" Last Trigger is now on, numberOfHitsInTriggerWindow = "
                 + numberOfHitsInTriggerWindow + " triggerWindowStart = "
-                + getTriggerWindowStart() + " triggerWindowStop = "
-                + getTriggerWindowStop());
+                + getTriggerWindowStart().getUTCTimeAsLong() + " triggerWindowStop = "
+                + getTriggerWindowStop().getUTCTimeAsLong());
             }
 
             // form last trigger

@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java 2148 2007-10-17 16:17:24Z dglo $
+ * Version $Id: ConditionalTriggerBag.java,v 1.14 2005/12/22 14:01:37 shseo Exp $
  *
  * Date: September 2 2005
  *
@@ -11,10 +11,13 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.splicer.Payload;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.algorithm.CoincidenceTrigger;
+import icecube.daq.trigger.impl.TriggerRequestPayload;
 
 import java.util.*;
 import java.util.zip.DataFormatException;
@@ -28,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java 2148 2007-10-17 16:17:24Z dglo $
+ * @version $Id: ConditionalTriggerBag.java,v 1.14 2005/12/22 14:01:37 shseo Exp $
  * @author shseo
  */
 public class ConditionalTriggerBag
@@ -40,7 +43,7 @@ public class ConditionalTriggerBag
     private static final Log log = LogFactory.getLog(ConditionalTriggerBag.class);
     private CoincidenceTrigger mtCoincidenceTriggerAlgorithm;
     public List mListConfiguredTriggerIDs;
-    public boolean mbContainAllTriggerIDsRequired;
+    public boolean mbContainAllTriggerIDsRequired = false;
     public String msCoincidenceTriggerAlgorithmName;
 
     public Vector payloadListInConditionalBag = new Vector();
@@ -50,15 +53,16 @@ public class ConditionalTriggerBag
      */
     protected static List mergeListForConditionalBag = new ArrayList();
 
-    public boolean flushing;
+    public boolean flushing = false;
 
     /**
      * UID for newly merged triggers
      */
     public int triggerUID;
 
-    private boolean mbNeedUpdate;
-    private DummyPayload mtUpdater;
+    private int miCount;
+    private boolean mbNeedUpdate = false;
+    private DummyPayload mtUpdater = null;
     public List mListUnqualifiedTriggers = new ArrayList();
     /**
      * Create an instance of this class.
@@ -86,7 +90,6 @@ public class ConditionalTriggerBag
             newPayload.loadPayload();
         } catch (Exception e) {
             log.error("Error loading newPayload", e);
-            return;
         }
 
         //--accept only configured triggers.
@@ -117,11 +120,11 @@ public class ConditionalTriggerBag
             Iterator iter = payloadListInConditionalBag.iterator();
             while (iter.hasNext())
             {
-                ITriggerRequestPayload existingPayload = (ITriggerRequestPayload) iter.next();
+                TriggerRequestPayload existingPayload = (TriggerRequestPayload) iter.next();
 
                 //--check if CoincidenceTrigger
-                if (mtCoincidenceTriggerAlgorithm.isCoincidentTrigger(existingPayload,
-                                                             (ITriggerRequestPayload) newPayload))
+                if (mtCoincidenceTriggerAlgorithm.isCoincidentTrigger((TriggerRequestPayload) existingPayload,
+                                                             (TriggerRequestPayload) newPayload))
                 {
                     if (log.isDebugEnabled()) {
                         log.debug("Two payloads are coincident");
@@ -150,19 +153,19 @@ public class ConditionalTriggerBag
                 for(int i=0; i<mergeListForConditionalBag.size(); i++)
                 {
                     ITriggerRequestPayload trigger = (ITriggerRequestPayload) mergeListForConditionalBag.get(i);
-                    log.debug("Trigger in mergeList: FirstTime = " + trigger.getFirstTimeUTC());
-                    log.debug("Trigger in mergeList: LastTime = " + trigger.getLastTimeUTC());
+                    log.debug("Trigger in mergeList: FirstTime = " + trigger.getFirstTimeUTC().getUTCTimeAsLong());
+                    log.debug("Trigger in mergeList: LastTime = " + trigger.getLastTimeUTC().getUTCTimeAsLong());
                 }
 
                 Collections.sort(mergeListForConditionalBag);
                 //-- performed prevention of multiple wrapping in this stage: only single wrap !!!
-                getGlobalTrigEventWrapper().wrapMergingEvent(mergeListForConditionalBag,
+                mtGlobalTrigEventWrapper.wrapMergingEvent(mergeListForConditionalBag,
                         mtCoincidenceTriggerAlgorithm.getTriggerType(),
                         mtCoincidenceTriggerAlgorithm.getTriggerConfigId());
 
                 //-- remove individual triggers from triggerList and add new merged trigger
                 payloadListInConditionalBag.removeAll(mergeListForConditionalBag);
-                payloadListInConditionalBag.add(getGlobalTrigEventWrapper().getGlobalTrigEventPayload_merged());
+                payloadListInConditionalBag.add(mtGlobalTrigEventWrapper.getGlobalTrigEventPayload_merged());
 
             } else {
                 if (log.isDebugEnabled()) {
@@ -177,7 +180,7 @@ public class ConditionalTriggerBag
 
         if (log.isDebugEnabled()) {
             log.debug("Selected CoincidenceTriggerList has " + payloadListInConditionalBag.size() + " payloads.");
-            log.debug("   TimeGate at " + getTimeGate());
+            log.debug("   TimeGate at " + timeGate.getUTCTimeAsLong());
         }
 
     }
@@ -189,19 +192,19 @@ public class ConditionalTriggerBag
      */
     public boolean containAllTriggerIDsRequired(ITriggerRequestPayload tTrigger)
     {
-        if(tTrigger.getSourceID().getSourceID() != GlobalTrigEventWrapper.GLOBAL_TRIGGER_SOURCE_ID.getSourceID()){
+        if(tTrigger.getSourceID().getSourceID() != mtGlobalTrigEventWrapper.mtGlobalTriggerSourceID.getSourceID()){
             return false;
         }else{
             Vector vecTriggers = new Vector();
             try {
                 vecTriggers = tTrigger.getPayloads();
             } catch (IOException e) {
-                log.error("Couldn't get payloads", e);
-                return false;
+                e.printStackTrace();
             } catch (DataFormatException e) {
-                log.error("Couldn't get payloads", e);
-                return false;
+                e.printStackTrace();
             }
+
+            miCount++;
 
             //--find triggerIDs
             List listTriggerIDs = new ArrayList();
@@ -212,11 +215,9 @@ public class ConditionalTriggerBag
                 try {
                     ((ILoadablePayload) tPayload).loadPayload();
                 } catch (IOException e) {
-                    log.error("Couldn't load payload", e);
-                    continue;
+                    e.printStackTrace();
                 } catch (DataFormatException e) {
-                    log.error("Couldn't load payload", e);
-                    continue;
+                    e.printStackTrace();
                 }
 
                 Integer tTriggerId = new Integer(mtCoincidenceTriggerAlgorithm.getTriggerId(tPayload));
@@ -246,7 +247,7 @@ public class ConditionalTriggerBag
                 }else{
                     ITriggerRequestPayload tPayload = (ITriggerRequestPayload) payloadListInConditionalBag.get(i);
                     IUTCTime lastTime = tPayload.getLastTimeUTC();
-                    if((!containAllTriggerIDsRequired(tPayload) && getTimeGate().compareTo(lastTime) > 0)
+                    if((!containAllTriggerIDsRequired(tPayload) && timeGate.compareTo(lastTime) > 0)
                     || (!containAllTriggerIDsRequired(tPayload) && flushing)){
                         payloadListInConditionalBag.remove(i);
                         setUpdateInfo(new DummyPayload(tPayload.getFirstTimeUTC()));
@@ -281,7 +282,7 @@ public class ConditionalTriggerBag
         {
             ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
 
-            if (flushing || 0 < getTimeGate().compareTo(trigger.getLastTimeUTC())) {
+            if (flushing || 0 < timeGate.compareTo(trigger.getLastTimeUTC())) {
            /*     mbContainAllTriggerIDsRequired = containAllTriggerIDsRequired(trigger);
 
                 if(!mbContainAllTriggerIDsRequired){
@@ -299,14 +300,14 @@ public class ConditionalTriggerBag
      *
      * @return
      */
-    public ITriggerRequestPayload next() {
+    public TriggerRequestPayload next() {
         //-- iterate over triggerList and check against timeGate
         Iterator iter = payloadListInConditionalBag.iterator();
         while (iter.hasNext())
         {
-            ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
-            double timeDiff = getTimeGate().timeDiff_ns(trigger.getLastTimeUTC());
-            if ( flushing || 0 < getTimeGate().compareTo(trigger.getLastTimeUTC()) )
+            TriggerRequestPayload trigger = (TriggerRequestPayload) iter.next();
+            double timeDiff = timeGate.timeDiff_ns(trigger.getLastTimeUTC());
+            if ( flushing || 0 < timeGate.compareTo(trigger.getLastTimeUTC()) )
             {
                 iter.remove();
                 if (log.isDebugEnabled()) {
@@ -314,8 +315,8 @@ public class ConditionalTriggerBag
                 }
                 //--GTEventNumber should be assigned here.
                 triggerUID++;
-                getGlobalTrigEventWrapper().wrapFinalEvent(trigger, triggerUID);
-                trigger = (ITriggerRequestPayload) getGlobalTrigEventWrapper().getGlobalTrigEventPayload_final();
+                mtGlobalTrigEventWrapper.wrapFinalEvent(trigger, triggerUID);
+                trigger = (TriggerRequestPayload) mtGlobalTrigEventWrapper.getGlobalTrigEventPayload_final();
 
                 return trigger;
             }

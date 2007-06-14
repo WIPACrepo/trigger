@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerManager
  *
- * Version $Id: ITriggerHandler.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ITriggerHandler.java,v 1.6 2006/08/08 20:26:29 vav111 Exp $
  *
  * Date: March 31 2005
  *
@@ -13,14 +13,13 @@ package icecube.daq.trigger.control;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
-import icecube.daq.util.DOMRegistry;
 
 import java.util.List;
 
 /**
  * This interface defines the behavior of a TriggerHandler
  *
- * @version $Id: ITriggerHandler.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ITriggerHandler.java,v 1.6 2006/08/08 20:26:29 vav111 Exp $
  * @author pat
  */
 public interface ITriggerHandler extends IPayloadProducer
@@ -77,17 +76,5 @@ public interface ITriggerHandler extends IPayloadProducer
      * @return a TriggerHandlerMonitor
      */
     TriggerHandlerMonitor getMonitor();
-
-    /**
-     * Set the DOMRegistry that should be used.
-     * @param registry A configured DOMRegistry
-     */
-    void setDOMRegistry(DOMRegistry registry);
-
-    /**
-     * Get the DOMRegistry.
-     * @return the DOMRegistry to use
-     */
-    DOMRegistry getDOMRegistry();
 
 }

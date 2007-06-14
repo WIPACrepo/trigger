@@ -1,7 +1,7 @@
 /*
  * interface: AdvancedSplicedAnalysis
  *
- * Version $Id: AdvancedSplicedAnalysis.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: AdvancedSplicedAnalysis.java,v 1.2 2005/10/20 15:21:02 toale Exp $
  *
  * Date: October 17 2005
  *
@@ -18,7 +18,7 @@ import icecube.daq.splicer.SpliceableFactory;
 /**
  * This interface defines a SplicedAnalysis tailored to the modern Payload system.
  *
- * @version $Id: AdvancedSplicedAnalysis.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: AdvancedSplicedAnalysis.java,v 1.2 2005/10/20 15:21:02 toale Exp $
  * @author pat
  */
 public interface AdvancedSplicedAnalysis extends SplicedAnalysis, SplicerListener, IPayloadProducer

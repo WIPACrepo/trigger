@@ -3,12 +3,11 @@ package icecube.daq.trigger.monitor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import icecube.icebucket.logging.LoggingConsumer;
+import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.splicer.Payload;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
@@ -150,12 +149,11 @@ public class AmandaSocketSimulator
      * Generate the next TriggerRequestPayload
      * @return a trigger payload
      */
-    private ITriggerRequestPayload generateTrigger() {
+    private TriggerRequestPayload generateTrigger() {
 
         int triggerType = 0;
         int configId = generateTriggerMask();
-        ISourceID sourceId =
-            new SourceID4B(SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID);
+        ISourceID sourceId = new SourceID4B(10000);
         long nextTime = lastTime + generateDelta();
         IUTCTime time = new UTCTime8B(nextTime);
         Vector payloads = new Vector();
@@ -165,17 +163,17 @@ public class AmandaSocketSimulator
         count++;
         lastTime = nextTime;
 
-        return (ITriggerRequestPayload) trigger;
+        return (TriggerRequestPayload) trigger;
     }
 
     private void fillBuffer() {
         buffer.clear();
         for (int i=0; i<128; i++) {
             int offset = i*72;
-            ITriggerRequestPayload trigger = generateTrigger();
+            TriggerRequestPayload trigger = generateTrigger();
             log.info("Trigger size = " + trigger.getPayloadLength());
             try {
-                trigger.writePayload(false, offset, buffer);
+                trigger.writePayload(offset, buffer);
             } catch (IOException e) {
                 log.error("Error writing to buffer: ", e);
             }

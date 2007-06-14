@@ -12,10 +12,13 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.payload.*;
 import icecube.daq.payload.splicer.PayloadFactory;
+import icecube.daq.payload.splicer.Payload;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.IReadoutRequest;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.common.DAQCmdInterface;
+//import icecube.daq.globalTrig.util.TriggerTestUtil;
 
 import java.util.*;
 import java.util.zip.DataFormatException;
@@ -29,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
  *  and put in the payloadList.
  * This is called in GlobalTrigBag.java.
  *
- * @version $Id: GlobalTrigEventWrapper.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: GlobalTrigEventWrapper.java,v 1.19 2005/10/26 18:31:44 toale Exp $
  * @author shseo
  */
 public class GlobalTrigEventWrapper
@@ -39,38 +42,97 @@ public class GlobalTrigEventWrapper
      */
     private static final Log log = LogFactory.getLog(GlobalTrigEventWrapper.class);
 
-    private static final String GLOBAL_TRIGGER_NAME =
-        DAQCmdInterface.DAQ_GLOBAL_TRIGGER;
-    public static final ISourceID GLOBAL_TRIGGER_SOURCE_ID =
-        SourceIdRegistry.getISourceIDFromNameAndId(GLOBAL_TRIGGER_NAME, 0);
-
-    private static final TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY =
-        new TriggerRequestPayloadFactory();
-
     private Sorter tSorter = new Sorter();
-    private GlobalTrigEventReadoutElements  mtGlobalTrigEventReadoutElements;
+    private GlobalTrigEventReadoutElements  mtGlobalTrigEventReadoutElements = null;
+    private PayloadDestination asciiFileOutPayloadDestination;
 
     /**
      * The factory used to create triggers
      */
-    private TriggerRequestPayloadFactory triggerFactory;
 
-    private ITriggerRequestPayload mtGlobalTrigEventPayload_single;
-    private ITriggerRequestPayload mtGlobalTrigEventPayload_merged;
-    private ITriggerRequestPayload mtGlobalTrigEventPayload_final;
+    private TriggerRequestPayloadFactory triggerFactory = null;
+    private TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY = new TriggerRequestPayloadFactory();
+
+    private TriggerRequestPayload mtGlobalTrigEventPayload_single;
+    private TriggerRequestPayload mtGlobalTrigEventPayload_merged;
+    private TriggerRequestPayload mtGlobalTrigEventPayload_final;
+    private TriggerRequestPayload mtPayload_onlyTimeWrapped;
+
+ //   SortedSet mergeSet = new TreeSet();
 
     private int miTriggerUID;
-    private boolean mbIsCalled_Wrap_single;
+    private boolean mbIsCalled_Wrap_single = false;
+    public final ISourceID mtGlobalTriggerSourceID = SourceIdRegistry.
+            getISourceIDFromNameAndId(DAQCmdInterface.DAQ_GLOBAL_TRIGGER, 0);
 
-    private int miNumMergedGTevent;
+    private Vector mVecGlobalReadoutRequestElements = new Vector();
+    public int miNumMergedGTevent;
 
+    /**
+     * Create an instance of this class.
+     * Default constructor is declared, but private, to stop accidental
+     * creation of an instance of the class.
+     *
+     * Use this constructor for JUnit test.
+     *
+     */
     public GlobalTrigEventWrapper()
+    {
+        this(1); // No_TimeGap configuration
+        setPayloadFactory(DEFAULT_TRIGGER_FACTORY);
+    }
+
+    public GlobalTrigEventWrapper(int iTimeGap_option)
     {
         miTriggerUID = 0;
         miNumMergedGTevent = 0;
         mtGlobalTrigEventReadoutElements = new GlobalTrigEventReadoutElements();
-        mtGlobalTrigEventReadoutElements.setTimeGap_option(1);//No_TimeGap
-        setPayloadFactory(DEFAULT_TRIGGER_FACTORY);
+        mtGlobalTrigEventReadoutElements.setTimeGap_option(iTimeGap_option);//No_TimeGap
+    }
+    /**
+     * This method is to provide corrected time using readoutTimes,
+     * so that LowThresholdTrigger can use it for checking overalp.
+     *
+     * @param tTriggerRequestPayload
+     */
+    public void wrapTime(ITriggerRequestPayload tTriggerRequestPayload)
+    {
+        IReadoutRequest tReadoutRequest = tTriggerRequestPayload.getReadoutRequest();
+        Vector vecReadoutElement = new Vector();
+
+        IUTCTime tUTCTime_earliest = null;
+        IUTCTime tUTCTime_latest = null;
+
+        if(null != tReadoutRequest){
+
+            vecReadoutElement = tReadoutRequest.getReadoutRequestElements();
+            tUTCTime_earliest = tSorter.getUTCTimeEarliest((List) vecReadoutElement, false);
+            tUTCTime_latest = tSorter.getUTCTimeLatest((List) vecReadoutElement, false);
+
+        } else {//--Make sure ReadoutReqeust is null for Beacon, Stop triggers.
+
+            tUTCTime_earliest = tTriggerRequestPayload.getFirstTimeUTC();
+            tUTCTime_latest = tTriggerRequestPayload.getLastTimeUTC();
+        }
+
+        try {
+            mtPayload_onlyTimeWrapped = (TriggerRequestPayload) triggerFactory.
+                                   createPayload(tTriggerRequestPayload.getUID(),
+                                                 tTriggerRequestPayload.getTriggerType(),
+                                                 tTriggerRequestPayload.getTriggerConfigID(),
+                                                 tTriggerRequestPayload.getSourceID(),
+                                                 tUTCTime_earliest,
+                                                 tUTCTime_latest,
+                                                 tTriggerRequestPayload.getPayloads(),
+                                                 tTriggerRequestPayload.getReadoutRequest());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (DataFormatException e) {
+            e.printStackTrace();
+        }
+
+        ((ILoadablePayload) tTriggerRequestPayload).recycle();
+
     }
     /**
      * Collects all readout elements from input list of payloads into a vector.
@@ -96,7 +158,7 @@ public class GlobalTrigEventWrapper
         return vecGlobalReadoutRequestElements_Raw;
     }
     /**
-     * Collects all subPayloads from input list of payloads into a vector.
+     * Collects all subPayloads from input list of paylaods into a vector.
      *
      * @param mergeList
      * @return
@@ -109,11 +171,11 @@ public class GlobalTrigEventWrapper
 
         while(iterMergeList.hasNext())
         {
-            ITriggerRequestPayload tPayload = (ITriggerRequestPayload) iterMergeList.next();
+            TriggerRequestPayload tPayload = (TriggerRequestPayload) iterMergeList.next();
             //testUtil.show_trigger_Info("inside collect subpayload up: ", miTriggerUID, tPayload);
 
-            //--if subPayload is NOT a mergedTrigger
-            if(tPayload.getSourceID().getSourceID() != GLOBAL_TRIGGER_SOURCE_ID.getSourceID())
+            //--if subPayload is NOT a mergedTirgger
+            if(tPayload.getSourceID().getSourceID() != mtGlobalTriggerSourceID.getSourceID())
             {
                 vecLocalSubPayload.add(tPayload);
 
@@ -127,11 +189,11 @@ public class GlobalTrigEventWrapper
                 }else{
                     try {
                         vecLocalSubPayload.addAll(((ITriggerRequestPayload) tPayload).getPayloads());
-                        //log.debug("size of the local subPayload = " + vecLocalSubPayload.size());
+                        //System.out.println("size of the local subPayload = " + vecLocalSubPayload.size());
                     } catch (IOException e) {
-                        log.error("Couldn't get payloads", e);
+                        e.printStackTrace();
                     } catch (DataFormatException e) {
-                        log.error("Couldn't get payloads", e);
+                        e.printStackTrace();
                     }
                 }
             }
@@ -172,11 +234,11 @@ public class GlobalTrigEventWrapper
         vecSubpayloads.add(tTriggerRequestPayload);
 
         miTriggerUID++;
-        mtGlobalTrigEventPayload_single = (ITriggerRequestPayload) triggerFactory.
+        mtGlobalTrigEventPayload_single = (TriggerRequestPayload) triggerFactory.
                                 createPayload(miTriggerUID,
                                               iGTrigType,
                                               iGTrigConfigID,
-                                              GLOBAL_TRIGGER_SOURCE_ID,
+                                              mtGlobalTriggerSourceID,
                                               tUTCTime_earliest,
                                               tUTCTime_latest,
                                               vecSubpayloads,
@@ -215,15 +277,15 @@ public class GlobalTrigEventWrapper
         }
         //--------------------------------------------------------------------------------------------------------/
         //--create a readout request for the new trigger
-        IReadoutRequest tReadoutRequest = TriggerRequestPayloadFactory.createReadoutRequest(GLOBAL_TRIGGER_SOURCE_ID,
+        IReadoutRequest tReadoutRequest = TriggerRequestPayloadFactory.createReadoutRequest(mtGlobalTriggerSourceID,
                                                                                             miTriggerUID,
                                                                               vecGlobalReadoutRequestElements_Raw);
         miTriggerUID++;
         //--create the MergedGlobalTriggerEventPayload
-        mtGlobalTrigEventPayload_merged = (ITriggerRequestPayload) triggerFactory.createPayload(miTriggerUID,
+        mtGlobalTrigEventPayload_merged = (TriggerRequestPayload) triggerFactory.createPayload(miTriggerUID,
                                                                                                iGTrigType,
                                                                                                iGTrigConfigID,
-                                                                                                GLOBAL_TRIGGER_SOURCE_ID,
+                                                                                                mtGlobalTriggerSourceID,
                                                                                                 tSorter.getUTCTimeEarliest((List) vecGlobalReadoutRequestElements_Raw),
                                                                                                 tSorter.getUTCTimeLatest((List) vecGlobalReadoutRequestElements_Raw),
                                                                                                 vecGlobalSubPayload,
@@ -232,19 +294,15 @@ public class GlobalTrigEventWrapper
         Iterator iter = vecGlobalSubPayload.iterator();
         while(iter.hasNext())
         {
-            ITriggerRequestPayload subPayload =
-                (ITriggerRequestPayload) iter.next();
-            // XXX shouldn't need to load payload before recycling it
+            ITriggerRequestPayload subPayload = (ITriggerRequestPayload) iter.next();
             try {
                 ((ILoadablePayload) subPayload).loadPayload();
             } catch (IOException e) {
-                log.error("Couldn't load payload", e);
+                e.printStackTrace();
             } catch (DataFormatException e) {
-                log.error("Couldn't load payload", e);
+                e.printStackTrace();
             }
-            if(subPayload.getSourceID().getSourceID() ==
-               GLOBAL_TRIGGER_SOURCE_ID.getSourceID())
-            {
+            if(subPayload.getSourceID().getSourceID() == mtGlobalTriggerSourceID.getSourceID()){
                 ((ILoadablePayload) subPayload).recycle();
             }
         }
@@ -270,7 +328,7 @@ public class GlobalTrigEventWrapper
             log.debug("We have " + mergeList.size() + " triggers to wrapMergingEvent");
         }
 
-        Vector vecGlobalReadoutRequestElements_Final;
+        Vector vecGlobalReadoutRequestElements_Final = new Vector();
 
         if(vecGlobalReadoutRequestElements_Raw.size() > 1)
         {
@@ -281,18 +339,16 @@ public class GlobalTrigEventWrapper
 
             vecGlobalReadoutRequestElements_Final = vecGlobalReadoutRequestElements_Raw;
 
-        }else{
+        }else if(vecGlobalReadoutRequestElements_Raw.size() < 1){
 
-            vecGlobalReadoutRequestElements_Final = new Vector();
+            vecGlobalReadoutRequestElements_Final = null;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("size Final readoutElements in wrapMergingEvent()_merged= " + vecGlobalReadoutRequestElements_Final.size());
-        }
+        log.debug("size Final readoutElements in wrapMergingEvent()_merged= " + vecGlobalReadoutRequestElements_Final.size());
 
 //---------------------------------------------------------------------------------------------------------------
         // create a readout request for the new trigger
-        IReadoutRequest tReadoutRequest = TriggerRequestPayloadFactory.createReadoutRequest(GLOBAL_TRIGGER_SOURCE_ID,
+        IReadoutRequest tReadoutRequest = TriggerRequestPayloadFactory.createReadoutRequest(mtGlobalTriggerSourceID,
                                                                               miTriggerUID,
                                                                               vecGlobalReadoutRequestElements_Final);
 
@@ -303,10 +359,10 @@ public class GlobalTrigEventWrapper
 
         miTriggerUID++;
         // create the MergedGlobalTriggerEventPayload
-        mtGlobalTrigEventPayload_merged = (ITriggerRequestPayload) triggerFactory.createPayload(miTriggerUID,
+        mtGlobalTrigEventPayload_merged = (TriggerRequestPayload) triggerFactory.createPayload(miTriggerUID,
                                                                                                 iMergedTriggerType,
                                                                                                 iMergedTriggerConfigID,
-                                                                                                GLOBAL_TRIGGER_SOURCE_ID,
+                                                                                                mtGlobalTriggerSourceID,
                                                                                                 tSorter.getUTCTimeEarliest(mergeList,true),
                                                                                                 tSorter.getUTCTimeLatest(mergeList,true),
                                                                                                 vecGlobalSubPayload,
@@ -340,7 +396,7 @@ public class GlobalTrigEventWrapper
      * @param tGTEvent
      * @param iEvtNumber
      */
-    public void wrapFinalEvent(ITriggerRequestPayload tGTEvent, int iEvtNumber)
+    public void wrapFinalEvent(TriggerRequestPayload tGTEvent, int iEvtNumber)
     {
         Vector vecReadoutRequestElements = ((IReadoutRequest) tGTEvent.getReadoutRequest()).getReadoutRequestElements();
 
@@ -349,7 +405,7 @@ public class GlobalTrigEventWrapper
                                                                                     vecReadoutRequestElements);
         try {
 
-            mtGlobalTrigEventPayload_final = (ITriggerRequestPayload) triggerFactory.createPayload(iEvtNumber,
+            mtGlobalTrigEventPayload_final = (TriggerRequestPayload) triggerFactory.createPayload(iEvtNumber,
                                                                                                    tGTEvent.getTriggerType(),
                                                                                                    tGTEvent.getTriggerConfigID(),
                                                                                                    tGTEvent.getSourceID(),
@@ -359,9 +415,9 @@ public class GlobalTrigEventWrapper
                                                                                                    tReadoutRequest_final);
 
         } catch (IOException e) {
-            log.error("Couldn't create payload", e);
+            e.printStackTrace();
         } catch (DataFormatException e) {
-            log.error("Couldn't create payload", e);
+            e.printStackTrace();
         }
 
         //--count merged GT event.
@@ -385,11 +441,15 @@ public class GlobalTrigEventWrapper
         triggerFactory = (TriggerRequestPayloadFactory) payloadFactory;
         mtGlobalTrigEventReadoutElements.setPayloadFactory(triggerFactory);
     }
+ /*   public void setPayloadFactory(TriggerRequestPayloadFactory triggerFactory) {
+        this.triggerFactory = triggerFactory;
+    }
+    */
     /**
      * Sets timeGateOption. This should be set in configuration.
      * @param iTimeGap_option
      */
-    protected void setTimeGap_option(int iTimeGap_option)
+    public void setTimeGap_option(int iTimeGap_option)
     {
         mtGlobalTrigEventReadoutElements.setTimeGap_option(iTimeGap_option);
     }

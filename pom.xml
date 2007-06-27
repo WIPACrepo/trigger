@@ -43,7 +43,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
+        <!-- configuration>
           <classifier>gtrig</classifier>
           <archive>
             <manifest>
@@ -51,9 +51,9 @@
               <addClasspath>true</addClasspath>
             </manifest>
           </archive>
-        </configuration>
+        </configuration -->
         <executions>
-          <!-- execution>
+          <execution>
             <id>global-trig</id>
             <goals>
               <goal>jar</goal>
@@ -67,7 +67,7 @@
                 </manifest>
               </archive>
             </configuration>
-          </execution -->
+          </execution>
           <execution>
             <id>inice-trig</id>
             <goals>

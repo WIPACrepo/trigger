@@ -43,15 +43,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <!-- configuration>
-          <classifier>gtrig</classifier>
-          <archive>
-            <manifest>
-              <mainClass>icecube.daq.trigger.component.GlobalTriggerComponent</mainClass>
-              <addClasspath>true</addClasspath>
-            </manifest>
-          </archive>
-        </configuration -->
         <executions>
           <execution>
             <id>global-trig</id>
@@ -171,39 +162,6 @@
                   <addClasspath>true</addClasspath>
                 </manifest>
               </archive>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-artifacts</id>
-            <phase>package</phase>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <classifier>gtrig</classifier>
-                  <file>${project.build.directory}/${artifactId}-${version}-gtrig.jar</file>
-                  <type>jar</type>
-                </artifact>
-                <artifact>
-                  <classifier>ittrig</classifier>
-                  <file>${project.build.directory}/${artifactId}-${version}-ittrig.jar</file>
-                  <type>jar</type>
-                </artifact>
-                <artifact>
-                  <classifier>iitrig</classifier>
-                  <file>${project.build.directory}/${artifactId}-${version}-iitrig.jar</file>
-                  <type>jar</type>
-                </artifact>
-
-              </artifacts>
             </configuration>
           </execution>
         </executions>

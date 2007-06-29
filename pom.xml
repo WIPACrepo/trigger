@@ -55,6 +55,7 @@
                 <manifest>
                   <mainClass>icecube.daq.trigger.component.GlobalTriggerComponent</mainClass>
                   <addClasspath>true</addClasspath>
+                  <classpathPrefix>../lib</classpathPrefix>
                 </manifest>
               </archive>
             </configuration>
@@ -70,6 +71,7 @@
                 <manifest>
                   <mainClass>icecube.daq.trigger.component.IniceTriggerComponent</mainClass>
                   <addClasspath>true</addClasspath>
+                  <classpathPrefix>../lib</classpathPrefix>
                 </manifest>
               </archive>
             </configuration>
@@ -85,6 +87,7 @@
                 <manifest>
                   <mainClass>icecube.daq.trigger.component.IcetopTriggerComponent</mainClass>
                   <addClasspath>true</addClasspath>
+                  <classpathPrefix>../lib</classpathPrefix>
                 </manifest>
               </archive>
             </configuration>
@@ -100,6 +103,7 @@
                 <manifest>
                   <mainClass>icecube.daq.trigger.component.AmandaTriggerComponent</mainClass>
                   <addClasspath>true</addClasspath>
+                  <classpathPrefix>../lib</classpathPrefix>
                 </manifest>
               </archive>
             </configuration>
@@ -115,6 +119,7 @@
                 <manifest>
                   <mainClass>icecube.daq.trigger.monitor.AmandaSocketSimulator</mainClass>
                   <addClasspath>true</addClasspath>
+                  <classpathPrefix>../lib</classpathPrefix>
                 </manifest>
               </archive>
             </configuration>
@@ -130,6 +135,7 @@
                 <manifest>
                   <mainClass>icecube.daq.trigger.monitor.AmandaSocketReader</mainClass>
                   <addClasspath>true</addClasspath>
+                  <classpathPrefix>../lib</classpathPrefix>
                 </manifest>
               </archive>
             </configuration>
@@ -145,6 +151,7 @@
                 <manifest>
                   <mainClass>icecube.daq.trigger.component.EBShell</mainClass>
                   <addClasspath>true</addClasspath>
+                  <classpathPrefix>../lib</classpathPrefix>
                 </manifest>
               </archive>
             </configuration>
@@ -160,6 +167,7 @@
                 <manifest>
                   <mainClass>icecube.daq.trigger.component.TriggerShell</mainClass>
                   <addClasspath>true</addClasspath>
+                  <classpathPrefix>../lib</classpathPrefix>
                 </manifest>
               </archive>
             </configuration>

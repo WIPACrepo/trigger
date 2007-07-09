@@ -10,7 +10,6 @@ import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
 import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.IByteBufferCache;
-import icecube.daq.payload.ByteBufferCache;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.VitreousBufferCache;

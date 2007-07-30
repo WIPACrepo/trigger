@@ -419,12 +419,14 @@ public class TriggerHandler
                         e.printStackTrace();
                     }
 
-                    if (0 > trigger.getTriggerType()) {
-                        log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
-                                  + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " triggers");
-                    } else {
-                        log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
-                                  + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " hits");
+                    if (log.isDebugEnabled()) {
+                        if (0 > trigger.getTriggerType()) {
+                            log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
+                                      + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " triggers");
+                        } else {
+                            log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
+                                      + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " hits");
+                        }
                     }
                 }
             }

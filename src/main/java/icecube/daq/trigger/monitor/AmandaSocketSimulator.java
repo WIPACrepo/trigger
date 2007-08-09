@@ -3,9 +3,9 @@ package icecube.daq.trigger.monitor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import icecube.icebucket.logging.LoggingConsumer;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.IReadoutRequest;
+import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.splicer.Payload;
@@ -149,7 +149,7 @@ public class AmandaSocketSimulator
      * Generate the next TriggerRequestPayload
      * @return a trigger payload
      */
-    private TriggerRequestPayload generateTrigger() {
+    private ITriggerRequestPayload generateTrigger() {
 
         int triggerType = 0;
         int configId = generateTriggerMask();
@@ -163,17 +163,17 @@ public class AmandaSocketSimulator
         count++;
         lastTime = nextTime;
 
-        return (TriggerRequestPayload) trigger;
+        return (ITriggerRequestPayload) trigger;
     }
 
     private void fillBuffer() {
         buffer.clear();
         for (int i=0; i<128; i++) {
             int offset = i*72;
-            TriggerRequestPayload trigger = generateTrigger();
+            ITriggerRequestPayload trigger = generateTrigger();
             log.info("Trigger size = " + trigger.getPayloadLength());
             try {
-                trigger.writePayload(offset, buffer);
+                trigger.writePayload(false, offset, buffer);
             } catch (IOException e) {
                 log.error("Error writing to buffer: ", e);
             }

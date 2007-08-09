@@ -404,10 +404,10 @@ public class TriggerHandler
         setEarliestTime();
 
         while (triggerBag.hasNext()) {
-            IPayload payload = triggerBag.next();
+            IWriteablePayload payload = (IWriteablePayload) triggerBag.next();
 
             if (payload.getPayloadInterfaceType() == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
-                TriggerRequestPayload trigger = (TriggerRequestPayload) payload;
+                ITriggerRequestPayload trigger = (ITriggerRequestPayload) payload;
                 if (log.isDebugEnabled()) {
                     IUTCTime firstTime = trigger.getFirstTimeUTC();
                     IUTCTime lastTime = trigger.getLastTimeUTC();
@@ -437,13 +437,13 @@ public class TriggerHandler
                 throw new RuntimeException("PayloadDestination has not been set!");
             } else {
                 try {
-                    payloadDestination.writePayload((Payload) payload);
+                    payloadDestination.writePayload(payload);
                 } catch (IOException e) {
                     log.error("Failed to write triggers");
                     throw new RuntimeException(e);
                 }
                 // now recycle it
-                ((Payload) payload).recycle();
+                payload.recycle();
             }
 
         }

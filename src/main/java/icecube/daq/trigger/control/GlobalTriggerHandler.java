@@ -501,7 +501,7 @@ public class GlobalTriggerHandler
         setEarliestTime();
 
         while (triggerBag.hasNext()) {
-            TriggerRequestPayload GTEventPayload = (TriggerRequestPayload) triggerBag.next();
+            ITriggerRequestPayload GTEventPayload = (ITriggerRequestPayload) triggerBag.next();
             miTotalOutputGlobalTriggers++;
             int GT_trigType = GTEventPayload.getTriggerType();
 
@@ -571,7 +571,7 @@ public class GlobalTriggerHandler
      * send trigger to output destination.
      * @param trigger
      */
-    public void sendTrigger(Payload trigger) {
+    public void sendTrigger(ITriggerRequestPayload trigger) {
         // issue the trigger
         try {
             payloadDestination.writePayload(trigger);

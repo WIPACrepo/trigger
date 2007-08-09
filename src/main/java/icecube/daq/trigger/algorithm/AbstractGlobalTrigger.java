@@ -16,6 +16,7 @@ import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.GlobalTrigEventWrapper;
 import icecube.daq.trigger.control.ConditionalTriggerBag;
 import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.PayloadDestination;
 
 import java.util.List;
@@ -88,7 +89,7 @@ public abstract class AbstractGlobalTrigger extends AbstractTrigger
 /*
             if(null != payloadDestination){
                 try {
-                    payloadDestination.writePayload((Payload) mtGlobalTrigEventPayload);
+                    payloadDestination.writePayload(mtGlobalTrigEventPayload);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

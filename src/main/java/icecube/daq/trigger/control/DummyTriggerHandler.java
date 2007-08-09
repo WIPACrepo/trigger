@@ -13,8 +13,8 @@ package icecube.daq.trigger.control;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.IReadoutRequestElement;
 import icecube.daq.trigger.IReadoutRequest;
+import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.*;
 import icecube.daq.payload.impl.SourceID4B;
@@ -158,8 +158,8 @@ public class DummyTriggerHandler
             IReadoutRequest readout = TriggerRequestPayloadFactory.createReadoutRequest(sourceId, count, readouts);
 
             // create trigger
-            TriggerRequestPayload triggerPayload
-                    = (TriggerRequestPayload) outputFactory.createPayload(count,
+            ITriggerRequestPayload triggerPayload
+                    = (ITriggerRequestPayload) outputFactory.createPayload(count,
                                                                           0,
                                                                           0,
                                                                           sourceId,
@@ -209,7 +209,7 @@ public class DummyTriggerHandler
      */
     public void issueTriggers() {
         while (triggerBag.hasNext()) {
-            TriggerRequestPayload trigger = (TriggerRequestPayload) triggerBag.next();
+            ITriggerRequestPayload trigger = (ITriggerRequestPayload) triggerBag.next();
 
             // issue the trigger
             if (null == payloadDestination) {

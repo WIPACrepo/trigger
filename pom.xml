@@ -108,6 +108,7 @@
               </archive>
             </configuration>
           </execution>
+<!-- Remove this comment to enable AmandaSocketSimulator
           <execution>
             <id>amanda-sim</id>
             <goals>
@@ -124,6 +125,8 @@
               </archive>
             </configuration>
           </execution>
+Remove this comment to enable AmandaSocketSimulator -->
+<!-- Remove this comment to enable AmandaSocketReader
           <execution>
             <id>amanda-reader</id>
             <goals>
@@ -140,6 +143,8 @@
               </archive>
             </configuration>
           </execution>
+Remove this comment to enable AmandaSocketReader -->
+<!-- Remove this comment to enable EBShell
           <execution>
             <id>ebshell</id>
             <goals>
@@ -156,6 +161,8 @@
               </archive>
             </configuration>
           </execution>
+Remove this comment to enable EBShell -->
+<!-- Remove this comment to enable TriggerShell
           <execution>
             <id>shell</id>
             <goals>
@@ -172,6 +179,7 @@
               </archive>
             </configuration>
           </execution>
+Remove this comment to enable TriggerShell -->
         </executions>
       </plugin>
     </plugins>

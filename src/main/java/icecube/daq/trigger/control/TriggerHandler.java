@@ -407,8 +407,9 @@ public class TriggerHandler
             IWriteablePayload payload = (IWriteablePayload) triggerBag.next();
 
             if (payload.getPayloadInterfaceType() == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
-                ITriggerRequestPayload trigger = (ITriggerRequestPayload) payload;
                 if (log.isDebugEnabled()) {
+                    ITriggerRequestPayload trigger = (ITriggerRequestPayload) payload;
+
                     IUTCTime firstTime = trigger.getFirstTimeUTC();
                     IUTCTime lastTime = trigger.getLastTimeUTC();
 
@@ -419,14 +420,12 @@ public class TriggerHandler
                         e.printStackTrace();
                     }
 
-                    if (log.isDebugEnabled()) {
-                        if (0 > trigger.getTriggerType()) {
-                            log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
-                                      + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " triggers");
-                        } else {
-                            log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
-                                      + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " hits");
-                        }
+                    if (0 > trigger.getTriggerType()) {
+                        log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
+                                  + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " triggers");
+                    } else {
+                        log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
+                                  + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " hits");
                     }
                 }
             }
@@ -435,16 +434,16 @@ public class TriggerHandler
             if (null == payloadDestination) {
                 log.error("PayloadDestination has not been set!");
                 throw new RuntimeException("PayloadDestination has not been set!");
-            } else {
-                try {
-                    payloadDestination.writePayload(payload);
-                } catch (IOException e) {
-                    log.error("Failed to write triggers");
-                    throw new RuntimeException(e);
-                }
-                // now recycle it
-                payload.recycle();
             }
+
+            try {
+                payloadDestination.writePayload(payload);
+            } catch (IOException e) {
+                log.error("Failed to write triggers");
+                throw new RuntimeException(e);
+            }
+            // now recycle it
+            payload.recycle();
 
         }
 

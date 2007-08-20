@@ -322,7 +322,7 @@ public class TriggerManager
 
         Iterator iter = event.getAllSpliceables().iterator();
         while (iter.hasNext()) {
-            Payload payload = (Payload) iter.next();
+            ILoadablePayload payload = (ILoadablePayload) iter.next();
             if (log.isDebugEnabled()) {
                 log.debug("Recycle payload " + recycleCount + " at " + payload.getPayloadTimeUTC().getUTCTimeAsLong());
             }

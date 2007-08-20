@@ -10,7 +10,6 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.IReadoutRequest;
@@ -278,12 +277,12 @@ public class TriggerBag
      *
      * @return the next trigger
      */
-    public synchronized TriggerRequestPayload next() {
+    public synchronized ITriggerRequestPayload next() {
 
         // iterate over triggerList and check against timeGate
         Iterator iter = payloadList.iterator();
         while (iter.hasNext()) {
-            TriggerRequestPayload trigger = (TriggerRequestPayload) iter.next();
+            ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
             double timeDiff = timeGate.timeDiff_ns(trigger.getLastTimeUTC());
             if ( (flushing) ||
                  (0 < timeGate.compareTo(trigger.getLastTimeUTC())) ) {
@@ -365,7 +364,7 @@ public class TriggerBag
         while (!stack.isEmpty()) {
 
             // check trigger type to see if this is a merged trigger
-            TriggerRequestPayload next = (TriggerRequestPayload) stack.removeFirst();
+            ITriggerRequestPayload next = (ITriggerRequestPayload) stack.removeFirst();
             if (0 > next.getTriggerType()) {
                 // if it is, get the subPayloads and add them to the stack
                 if (log.isDebugEnabled()) {
@@ -492,7 +491,7 @@ public class TriggerBag
                                                                                            readoutElements);
 
         // create the new trigger
-        TriggerRequestPayload newTrigger = (TriggerRequestPayload) triggerFactory.createPayload(triggerUID,
+        ITriggerRequestPayload newTrigger = (ITriggerRequestPayload) triggerFactory.createPayload(triggerUID,
                                                                                                 triggerType,
                                                                                                 triggerConfigID,
                                                                                                 triggerSourceID,
@@ -508,7 +507,7 @@ public class TriggerBag
         // recycle old subTriggers
         Iterator iter = subTriggers.iterator();
         while (iter.hasNext()) {
-            ((TriggerRequestPayload) iter.next()).recycle();
+            ((ITriggerRequestPayload) iter.next()).recycle();
         }
     }
 

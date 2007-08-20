@@ -91,7 +91,7 @@ public abstract class AbstractGlobalTrigger extends AbstractTrigger
                 try {
                     payloadDestination.writePayload(mtGlobalTrigEventPayload);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("Couldn't write payload", e);
                 }
             }
 */

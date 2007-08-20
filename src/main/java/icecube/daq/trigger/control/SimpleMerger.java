@@ -107,7 +107,7 @@ public class SimpleMerger
                             try {
                                 listTimeManagedSameIDElements = manageTimeOverlap(listSameIDElements, mi_TimeGap_option);
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                log.error("Couldn't manage time overlap", e);
                             }
                             mListSimpleMergedSameReadoutElements.addAll(listTimeManagedSameIDElements);
 
@@ -128,7 +128,7 @@ public class SimpleMerger
                 try {
                     listTimeManagedSameIDElements = manageTimeOverlap(listSameReadoutElements, mi_TimeGap_option);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("Couldn't manage time overlap", e);
                 }
                 mListSimpleMergedSameReadoutElements.addAll(listTimeManagedSameIDElements);
             }

@@ -65,7 +65,7 @@ public class ThroughputTrigger
         try {
             wrapTrigger((ITriggerRequestPayload) payload);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Couldn't wrap trigger", e);
         }
 
     }

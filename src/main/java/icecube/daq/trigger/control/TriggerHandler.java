@@ -298,9 +298,9 @@ public class TriggerHandler
                 try {
                     ((ILoadablePayload) nextPayload).loadPayload();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("Couldn't load payload", e);
                 } catch (DataFormatException e) {
-                    e.printStackTrace();
+                    log.error("Couldn't load payload", e);
                 }
                 ITriggerRequestPayload tPayload = (ITriggerRequestPayload) nextPayload;
                 int sourceId;
@@ -427,7 +427,7 @@ public class TriggerHandler
                     try {
                         nSubPayloads = trigger.getPayloads().size();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("Couldn't get number of subpayloads", e);
                     }
 
                     if (0 > trigger.getTriggerType()) {

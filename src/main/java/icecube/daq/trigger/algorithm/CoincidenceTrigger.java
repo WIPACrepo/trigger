@@ -70,7 +70,7 @@ public abstract class CoincidenceTrigger
         try {
             setEarliestTimeInConditionalTrigBag(dummy_one);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Couldn't set earliest time", e);
         }
 
         if(!isConfigured()) {

@@ -199,9 +199,9 @@ public class ConditionalTriggerBag
             try {
                 vecTriggers = tTrigger.getPayloads();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Couldn't get payloads", e);
             } catch (DataFormatException e) {
-                e.printStackTrace();
+                log.error("Couldn't get payloads", e);
             }
 
             miCount++;
@@ -215,9 +215,9 @@ public class ConditionalTriggerBag
                 try {
                     ((ILoadablePayload) tPayload).loadPayload();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("Couldn't load payload", e);
                 } catch (DataFormatException e) {
-                    e.printStackTrace();
+                    log.error("Couldn't load payload", e);
                 }
 
                 Integer tTriggerId = new Integer(mtCoincidenceTriggerAlgorithm.getTriggerId(tPayload));

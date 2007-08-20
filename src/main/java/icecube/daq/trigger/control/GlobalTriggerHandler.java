@@ -415,9 +415,9 @@ public class GlobalTriggerHandler
                         try {
                             ((ILoadablePayload) subPayload).loadPayload();
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            log.error("Couldn't load payload", e);
                         } catch (DataFormatException e) {
-                            e.printStackTrace();
+                            log.error("Couldn't load payload", e);
                         }
 
                         //sendPayloadToFilterDestinantion((IPayload) vecSubPayloads.get(i));
@@ -534,7 +534,7 @@ public class GlobalTriggerHandler
             try {
                 nSubPayloads = GTEventPayload.getPayloads().size();
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("Couldn't get payloads", e);
             }
 
             if (log.isInfoEnabled()) {
@@ -562,7 +562,7 @@ public class GlobalTriggerHandler
                 try {
                     payloadDestination.writePayload(GTEventPayload);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("Couldn't write payload", e);
                 }
                 GTEventPayload.recycle();
                 //sendTrigger(GTEventPayload);
@@ -578,7 +578,7 @@ public class GlobalTriggerHandler
         try {
             payloadDestination.writePayload(trigger);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Couldn't write trigger", e);
         }
     }
 

@@ -126,9 +126,9 @@ public class GlobalTrigEventWrapper
                                                  tTriggerRequestPayload.getPayloads(),
                                                  tTriggerRequestPayload.getReadoutRequest());
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Couldn't wrap trigger time", e);
         } catch (DataFormatException e) {
-            e.printStackTrace();
+            log.error("Couldn't wrap trigger time", e);
         }
 
         ((ILoadablePayload) tTriggerRequestPayload).recycle();
@@ -189,7 +189,7 @@ public class GlobalTrigEventWrapper
                 }else{
                     try {
                         vecLocalSubPayload.addAll(((ITriggerRequestPayload) tPayload).getPayloads());
-                        //System.out.println("size of the local subPayload = " + vecLocalSubPayload.size());
+                        //log.debug("size of the local subPayload = " + vecLocalSubPayload.size());
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (DataFormatException e) {

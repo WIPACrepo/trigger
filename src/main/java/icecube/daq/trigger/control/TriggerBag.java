@@ -283,11 +283,11 @@ public class TriggerBag
         Iterator iter = payloadList.iterator();
         while (iter.hasNext()) {
             ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
-            double timeDiff = timeGate.timeDiff_ns(trigger.getLastTimeUTC());
             if ( (flushing) ||
                  (0 < timeGate.compareTo(trigger.getLastTimeUTC())) ) {
                 iter.remove();
                 if (log.isDebugEnabled()) {
+                    double timeDiff = timeGate.timeDiff_ns(trigger.getLastTimeUTC());
                     log.debug("Releasing trigger from " + trigger.getFirstTimeUTC().getUTCTimeAsLong()
                              + " to " + trigger.getLastTimeUTC().getUTCTimeAsLong()
                              + " with timeDiff = " + timeDiff);

@@ -366,6 +366,16 @@ public class TriggerHandler
     }
 
     /**
+     * Get the input handler
+     *
+     * @return a trigger input handler
+     */
+    public ITriggerInput getInputHandler()
+    {
+        return inputHandler;
+    }
+
+    /**
      * getter for count
      * @return count
      */

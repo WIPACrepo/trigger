@@ -19,6 +19,7 @@ import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.splicer.Payload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
@@ -86,7 +87,8 @@ public class DummyTriggerManager
      * @param inputFactory SpiceableFactory used by Splicer
      */
     public DummyTriggerManager(SpliceableFactory inputFactory) {
-        this(inputFactory, new SourceID4B(4000));
+        this(inputFactory,
+             new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
     /**

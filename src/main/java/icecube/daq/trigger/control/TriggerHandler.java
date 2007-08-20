@@ -102,7 +102,7 @@ public class TriggerHandler
      * Default constructor
      */
     public TriggerHandler() {
-        this(new SourceID4B(4000));
+        this(new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
     public TriggerHandler(ISourceID sourceId) {

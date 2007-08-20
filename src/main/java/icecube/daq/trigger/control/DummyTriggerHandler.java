@@ -72,7 +72,7 @@ public class DummyTriggerHandler
      * Default constructor
      */
     public DummyTriggerHandler() {
-        this(new SourceID4B(4000));
+        this(new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
     public DummyTriggerHandler(ISourceID sourceId) {

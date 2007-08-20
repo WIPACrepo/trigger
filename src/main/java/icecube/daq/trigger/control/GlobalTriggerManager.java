@@ -20,6 +20,7 @@ import icecube.daq.payload.IPayload;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
 import icecube.daq.payload.splicer.Payload;
@@ -91,12 +92,16 @@ public class GlobalTriggerManager
      */
     public GlobalTriggerManager()
     {
-        this(new MasterPayloadFactory(), new SourceID4B(6000), DEFAULT_TIMEGAP_OPTION);
+        this(new MasterPayloadFactory(),
+             new SourceID4B(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID),
+             DEFAULT_TIMEGAP_OPTION);
     }
 
     public GlobalTriggerManager(SpliceableFactory inputFactory)
     {
-        this(inputFactory, new SourceID4B(6000), DEFAULT_TIMEGAP_OPTION);
+        this(inputFactory,
+             new SourceID4B(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID),
+             DEFAULT_TIMEGAP_OPTION);
     }
 
     public GlobalTriggerManager(SpliceableFactory inputFactory, ISourceID sourceID)

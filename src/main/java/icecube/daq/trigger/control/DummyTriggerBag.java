@@ -15,6 +15,7 @@ import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.splicer.PayloadFactory;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
@@ -62,7 +63,7 @@ public class DummyTriggerBag
      * default constructor
      */
     public DummyTriggerBag() {
-        this(-1, -1, new SourceID4B(4000));
+        this(-1, -1, new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
     /**

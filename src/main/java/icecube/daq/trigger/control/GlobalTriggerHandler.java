@@ -144,7 +144,8 @@ public class GlobalTriggerHandler
      */
     public GlobalTriggerHandler()
     {
-        this(new SourceID4B(6000), DEFAULT_TIMEGAP_OPTION);
+        this(new SourceID4B(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID),
+             DEFAULT_TIMEGAP_OPTION);
     }
 
     public GlobalTriggerHandler(ISourceID sourceID)
@@ -153,7 +154,8 @@ public class GlobalTriggerHandler
     }
 
     public GlobalTriggerHandler(TriggerRequestPayloadFactory outputFactory) {
-        this(new SourceID4B(6000), DEFAULT_TIMEGAP_OPTION, outputFactory);
+        this(new SourceID4B(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID),
+             DEFAULT_TIMEGAP_OPTION, outputFactory);
     }
 
     public GlobalTriggerHandler(ISourceID sourceID, int iTimeGap_Option)

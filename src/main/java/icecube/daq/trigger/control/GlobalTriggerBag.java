@@ -16,6 +16,7 @@ import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.splicer.Payload;
 import icecube.daq.payload.splicer.PayloadFactory;
 import icecube.daq.payload.impl.UTCTime8B;
@@ -107,7 +108,7 @@ public class GlobalTriggerBag
      */
     public GlobalTriggerBag()
     {
-        this(-1, -1, new SourceID4B(6000));
+        this(-1, -1, new SourceID4B(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID));
     }
     /**
       * constructor

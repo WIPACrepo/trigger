@@ -53,7 +53,7 @@ public abstract class AmandaTrigger
         // check the trigger bit
         int bitmask = trigger.getTriggerConfigID();
         if (log.isDebugEnabled()) {
-            log.debug("Recieved TWR trigger mask: " + bitmask);
+            log.debug("Received TWR trigger mask: " + bitmask);
         }
         if ((bitmask & triggerBit) == triggerBit) {
             // this is the correct type, report trigger

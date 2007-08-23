@@ -189,7 +189,7 @@ public class DummyTriggerManager
      */
     public void disposed(SplicerChangedEvent event) {
         if (log.isInfoEnabled()) {
-            log.info("Recieved Splicer DISPOSED");
+            log.info("Received Splicer DISPOSED");
         }
         try {
             payloadDestination.closeAllPayloadDestinations();
@@ -205,7 +205,7 @@ public class DummyTriggerManager
      */
     public void failed(SplicerChangedEvent event) {
         if (log.isErrorEnabled()) {
-            log.error("Recieved Splicer FAILED");
+            log.error("Received Splicer FAILED");
         }
         try {
             payloadDestination.closeAllPayloadDestinations();
@@ -239,7 +239,7 @@ public class DummyTriggerManager
      */
     public void stopped(SplicerChangedEvent event) {
         if (log.isInfoEnabled()) {
-            log.info("Recieved Splicer STOPPED");
+            log.info("Received Splicer STOPPED");
         }
         try {
             //payloadDestination.closeAllPayloadDestinations();

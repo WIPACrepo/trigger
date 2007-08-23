@@ -228,7 +228,7 @@ public class GlobalTriggerManager
 
     public void failed(SplicerChangedEvent event) {
         if (log.isErrorEnabled()) {
-            log.error("Recieved Splicer FAILED");
+            log.error("Received Splicer FAILED");
         }
         try {
             payloadDestination.closeAllPayloadDestinations();
@@ -238,7 +238,7 @@ public class GlobalTriggerManager
     }
 
     public void stopped(SplicerChangedEvent event) {
-        log.info("Recieved Splicer STOPPED, flushing...");
+        log.info("Received Splicer STOPPED, flushing...");
         try {
             payloadDestination.stopAllPayloadDestinations();
         } catch (IOException e) {
@@ -276,7 +276,7 @@ public class GlobalTriggerManager
 
     public void disposed(SplicerChangedEvent event) {
         if (log.isInfoEnabled()) {
-            log.info("Recieved Splicer DISPOSED");
+            log.info("Received Splicer DISPOSED");
         }
         try {
             payloadDestination.closeAllPayloadDestinations();

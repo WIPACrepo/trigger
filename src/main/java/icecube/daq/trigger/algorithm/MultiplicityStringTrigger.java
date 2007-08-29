@@ -164,13 +164,14 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
             }
         }
         else if(parameter.getName().compareTo("string")==0) {
-            if(Integer.parseInt(parameter.getValue())>0&&Integer.parseInt(parameter.getValue())<=80) {
+	    // Can't have this check on SPTS
+	    // if(Integer.parseInt(parameter.getValue())>0&&Integer.parseInt(parameter.getValue())<=80) {
                 string = Integer.parseInt(parameter.getValue());
                 configString = true;
-            }
-            else {
-                throw new IllegalParameterValueException("Illegal String value: " + Integer.parseInt(parameter.getValue()));
-            }
+	    //            }
+	    //else {
+	    //    throw new IllegalParameterValueException("Illegal String value: " + Integer.parseInt(parameter.getValue()));
+	    //}
         }
         else if (parameter.getName().compareTo("timeWindow") == 0) {
             if(Integer.parseInt(parameter.getValue())>=0) {

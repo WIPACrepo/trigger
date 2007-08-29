@@ -182,9 +182,8 @@ public class TriggerComponent
         triggerManager.addTriggers(currentTriggers);
 
 	// Setup DOMRegistry
-	String domGeometry = globalConfigurationDir + "/default-dom-geometry.xml";
 	try {
-	    triggerManager.setDOMRegistry(DOMRegistry.loadRegistry(domGeometry));
+	    triggerManager.setDOMRegistry(DOMRegistry.loadRegistry(globalConfigurationDir));
 	} catch (ParserConfigurationException pce) {
 	    log.error("Error loading the DOMRegistry", pce);
 	} catch (SAXException se) {

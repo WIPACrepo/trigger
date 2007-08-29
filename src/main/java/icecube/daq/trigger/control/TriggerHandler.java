@@ -23,6 +23,7 @@ import icecube.daq.payload.*;
 import icecube.daq.payload.splicer.Payload;
 import icecube.daq.payload.impl.UTCTime8B;
 import icecube.daq.payload.impl.SourceID4B;
+import icecube.daq.util.DOMRegistry;
 
 import java.util.Iterator;
 import java.util.List;
@@ -97,6 +98,11 @@ public class TriggerHandler
      * Monitor object.
      */
     protected TriggerHandlerMonitor monitor;
+
+    /**
+     * DOMRegistry
+     */
+    private DOMRegistry domRegistry;
 
     /**
      * Default constructor
@@ -498,6 +504,14 @@ public class TriggerHandler
             setEarliestPayloadOfInterest(earliestPayloadOfInterest);
         }
 
+    }
+
+    public void setDOMRegistry(DOMRegistry registry) {
+	domRegistry = registry;
+    }
+
+    public DOMRegistry getDOMRegistry() {
+	return domRegistry;
     }
 
 }

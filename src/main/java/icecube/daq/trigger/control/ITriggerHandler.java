@@ -13,6 +13,7 @@ package icecube.daq.trigger.control;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
+import icecube.daq.util.DOMRegistry;
 
 import java.util.List;
 
@@ -76,5 +77,17 @@ public interface ITriggerHandler extends IPayloadProducer
      * @return a TriggerHandlerMonitor
      */
     TriggerHandlerMonitor getMonitor();
+
+    /**
+     * Set the DOMRegistry that should be used.
+     * @param registry A configured DOMRegistry
+     */
+    void setDOMRegistry(DOMRegistry registry);
+
+    /**
+     * Get the DOMRegistry.
+     * @return the DOMRegistry to use
+     */
+    DOMRegistry getDOMRegistry();
 
 }

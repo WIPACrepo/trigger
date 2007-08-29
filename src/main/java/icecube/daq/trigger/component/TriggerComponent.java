@@ -22,12 +22,16 @@ import icecube.daq.trigger.control.GlobalTriggerManager;
 import icecube.daq.trigger.control.ITriggerControl;
 import icecube.daq.trigger.control.DummyTriggerManager;
 import icecube.daq.trigger.config.TriggerBuilder;
+import icecube.daq.util.DOMRegistry;
 
 import java.nio.ByteBuffer;
 import java.io.IOException;
 
 import java.util.List;
 import java.util.Iterator;
+
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -176,6 +180,18 @@ public class TriggerComponent
             trigger.setTriggerHandler(triggerManager);
         }
         triggerManager.addTriggers(currentTriggers);
+
+	// Setup DOMRegistry
+	String domGeometry = globalConfigurationDir + "/default-dom-geometry.xml";
+	try {
+	    triggerManager.setDOMRegistry(DOMRegistry.loadRegistry(domGeometry));
+	} catch (ParserConfigurationException pce) {
+	    log.error("Error loading the DOMRegistry", pce);
+	} catch (SAXException se) {
+	    log.error("Error loading the DOMRegistry", se);
+	} catch (IOException ioe) {
+	    log.error("Error loading the DOMRegistry", ioe);
+	}
 
     }
 

@@ -23,6 +23,7 @@ import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.trigger.config.ITriggerConfig;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.util.DOMRegistry;
 //import icecube.daq.globalTrig.util.TriggerTestUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -136,6 +137,8 @@ public class GlobalTriggerHandler
     protected TriggerHandlerMonitor monitor;
 
     private double longestTrigger;
+
+    private DOMRegistry domRegistry;
 
     /**
      * Create an instance of this class.
@@ -692,4 +695,13 @@ public class GlobalTriggerHandler
     {
         return mListAvailableTriggersToRelease;
     }
+
+    public void setDOMRegistry(DOMRegistry registry) {
+	domRegistry = registry;
+    }
+
+    public DOMRegistry getDOMRegistry() {
+	return domRegistry;
+    }
+
 }

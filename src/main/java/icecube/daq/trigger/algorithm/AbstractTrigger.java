@@ -271,6 +271,10 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
         this.triggerHandler = triggerHandler;
     }
 
+    public ITriggerHandler getTriggerHandler() {
+	return triggerHandler;
+    }
+
     public void setTriggerFactory(TriggerRequestPayloadFactory triggerFactory) {
         this.triggerFactory = triggerFactory;
     }

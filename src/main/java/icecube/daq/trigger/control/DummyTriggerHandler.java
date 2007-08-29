@@ -18,6 +18,7 @@ import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.*;
 import icecube.daq.payload.impl.SourceID4B;
+import icecube.daq.util.DOMRegistry;
 
 import java.util.List;
 import java.util.Vector;
@@ -67,6 +68,8 @@ public class DummyTriggerHandler
     private IPayload earliestPayloadOfInterest = null;
 
     private int count;
+
+    private DOMRegistry domRegistry;
 
     /**
      * Default constructor
@@ -237,6 +240,14 @@ public class DummyTriggerHandler
 
     protected void setEarliestPayloadOfInterest(IPayload earliest) {
         earliestPayloadOfInterest = earliest;
+    }
+
+    public void setDOMRegistry(DOMRegistry registry) {
+	domRegistry = registry;
+    }
+
+    public DOMRegistry getDOMRegistry() {
+	return domRegistry;
     }
 
 }

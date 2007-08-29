@@ -29,7 +29,6 @@ import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.util.DOMRegistry;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -98,19 +97,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
     private boolean configMaxLength = false;
     private boolean configString = false;
 
-    /**
-     * DOMRegistry object
-     */
-
-    private DOMRegistry registry;
-
     public MultiplicityStringTrigger() {
         triggerNumber++;
-        try {
-            registry = DOMRegistry.loadRegistry(null);
-        } catch (ParserConfigurationException pce) {log.fatal("ERROR parsing registry");}
-          catch (SAXException se) {log.fatal("ERROR sax exception");}
-          catch (IOException ioe) {log.fatal("ERROR IO Ex expection");}
     }
 
     /**
@@ -476,8 +464,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
         while(iter.hasNext()) {
             IHitPayload hit = (IHitPayload) iter.next();
-            int hitPosition = registry.getStringMinor(hit.getDOMID().getDomIDAsString());
-            int hitString = registry.getStringMajor(hit.getDOMID().getDomIDAsString());
+            int hitPosition = getTriggerHandler().getDOMRegistry().getStringMinor(hit.getDOMID().getDomIDAsString());
+            int hitString = getTriggerHandler().getDOMRegistry().getStringMajor(hit.getDOMID().getDomIDAsString());
             if(hitPosition<=numberOfVetoTopDoms||hitString!=string) {            
                 if(log.isDebugEnabled())
                     log.debug("The event contains a hit in the veto region, vetoing event.");
@@ -490,13 +478,13 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
         while(iter2.hasNext()) {
             IHitPayload topHit = (IHitPayload) iter2.next();
-            int topPosition = registry.getStringMinor(topHit.getDOMID().getDomIDAsString());
+            int topPosition = getTriggerHandler().getDOMRegistry().getStringMinor(topHit.getDOMID().getDomIDAsString());
             int numberOfHits = 0;
             Iterator iter3 = hitsWithinTriggerWindow.iterator();
 
             while(iter3.hasNext()) {
                 IHitPayload hit = (IHitPayload) iter3.next();
-                int hitPosition = registry.getStringMinor(hit.getDOMID().getDomIDAsString());
+                int hitPosition = getTriggerHandler().getDOMRegistry().getStringMinor(hit.getDOMID().getDomIDAsString());
                 if(hitPosition>=topPosition && hitPosition<(topPosition+maxLength))
                     numberOfHits++;
             }
@@ -539,13 +527,13 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 //
 //        while(iter.hasNext()) {
 //            IHitPayload topHit = (IHitPayload) iter.next();
-//            int topPosition = registry.getStringMinor(topHit.getDOMID().getDomIDAsString());
+//            int topPosition = getTriggerHandler().getDOMRegistry().getStringMinor(topHit.getDOMID().getDomIDAsString());
 //            int numberOfHits = 0;
 //            if(topPosition>numberOfVetoTopDoms) {
 //                Iterator iter2 = hitsWithinTriggerWindow.iterator();
 //                while(iter2.hasNext()) {
 //                    IHitPayload hit = (IHitPayload) iter2.next();
-//                    int hitPosition = registry.getStringMinor(hit.getDOMID().getDomIDAsString());
+//                    int hitPosition = getTriggerHandler().getDOMRegistry().getStringMinor(hit.getDOMID().getDomIDAsString());
 //                    if(hitPosition>=topPosition && hitPosition<(topPosition+maxLength))
 //                        numberOfHits++;
 //                }

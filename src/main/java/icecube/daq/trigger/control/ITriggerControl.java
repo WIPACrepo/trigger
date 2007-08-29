@@ -36,6 +36,12 @@ public interface ITriggerControl
     void setTriggerHandler(ITriggerHandler triggerHandler);
 
     /**
+     * Get the trigger handler of this trigger.
+     * @return thr trigger handler
+     */
+    ITriggerHandler getTriggerHandler();
+
+    /**
      * Set the TriggerRequestPayloadFactory for this trigger.
      * @param triggerFactory paylaod factory
      */

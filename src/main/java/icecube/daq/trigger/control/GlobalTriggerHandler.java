@@ -285,7 +285,7 @@ public class GlobalTriggerHandler
         longestTrigger = 0.0;
     }
     /**
-     * This is the main mehtod.
+     * This is the main method.
      *
      * @param payload
      */

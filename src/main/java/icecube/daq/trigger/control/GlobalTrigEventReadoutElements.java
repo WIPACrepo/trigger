@@ -174,7 +174,7 @@ public class GlobalTrigEventReadoutElements
         return hashCurrentEventReadoutTypeLists;
     }
     /**
-     * This mehtod is the main method and called by GlobalTrigEventWrapper.java.
+     * This method is the main method and called by GlobalTrigEventWrapper.java.
      * This returns final vector of ReadoutRequestElements for a GTEvent.
      *
      * @param vecInputReadoutElements

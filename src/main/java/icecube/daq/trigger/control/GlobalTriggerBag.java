@@ -389,7 +389,7 @@ public class GlobalTriggerBag
 
     /**
      * This method should be called in a class where configuration mbean is obtained.
-     * todo. this mehtod fits better in Config.java class...?
+     * todo. this method fits better in Config.java class...?
      * @param iConfiguredMaxTimeWindow
      */
     public void setMaxTimeGateWindow(int iConfiguredMaxTimeWindow)

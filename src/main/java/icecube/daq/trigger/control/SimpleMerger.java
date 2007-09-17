@@ -60,7 +60,7 @@ public class SimpleMerger
         setTimeGap_option(DEFAULT_TIMEGAP_OPTION);
     }
     /**
-     * This is the main mehtod.
+     * This is the main method.
      *
      * @param listSameReadoutElements : the same ReadoutType is required as input parameter.
      */
@@ -385,7 +385,7 @@ public class SimpleMerger
         IReadoutRequestElement element = null;
         //need to manage time only
         //find the earliest/latest Time
-        //todo:use the mehtod in mtSorter....?
+        //todo:use the method in mtSorter....?
 
         if(listMergedElements.size() > 0)
         {

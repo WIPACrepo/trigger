@@ -106,7 +106,7 @@ public class TriggerInput
             // for each contained window...
             if (window1.isContained()) {
 
-                window1.setOverlaping(false);
+                window1.setOverlapping(false);
 
                 for (int j=i+1; j<inputList.size(); j++) {
                     PayloadWindow window2 = (PayloadWindow) inputList.get(j);
@@ -115,7 +115,7 @@ public class TriggerInput
 
                         if ( (0 >= window1.firstTime.compareTo(window2.lastTime)) &&
                              (0 <= window1.lastTime.compareTo(window2.firstTime)) ) {
-                            window1.setOverlaping(true);
+                            window1.setOverlapping(true);
                         }
 
                     }
@@ -148,7 +148,7 @@ public class TriggerInput
             // if flushing, just return true
             // otherwise check if it is free to go
             if ( (flushing) ||
-                 (window.isContained() && !window.isOverlaping()) ) {
+                 (window.isContained() && !window.isOverlapping()) ) {
                 return true;
             }
         }
@@ -168,7 +168,7 @@ public class TriggerInput
             // if flushing, just return the payload
             // otherwise check if it is free to go
             if ( (flushing) ||
-                 (window.isContained() && !window.isOverlaping()) ) {
+                 (window.isContained() && !window.isOverlapping()) ) {
                 inputList.remove(i);
                 return window.getPayload();
             }
@@ -193,7 +193,7 @@ public class TriggerInput
         private ILoadablePayload payload;
         public IUTCTime firstTime;
         private IUTCTime lastTime;
-        private boolean overlaping;
+        private boolean overlapping;
         private boolean contained;
 
         private PayloadWindow(ILoadablePayload payload) {
@@ -253,16 +253,16 @@ public class TriggerInput
             return contained;
         }
 
-        private boolean isOverlaping() {
-            return overlaping;
+        private boolean isOverlapping() {
+            return overlapping;
         }
 
         private void setContained(boolean contained) {
             this.contained = contained;
         }
 
-        private void setOverlaping(boolean overlaping) {
-            this.overlaping = overlaping;
+        private void setOverlapping(boolean overlapping) {
+            this.overlapping = overlapping;
         }
 
     }

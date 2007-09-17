@@ -114,7 +114,7 @@ public class SmartMerger
 
     }
     /**
-     * This mehtod initializes all lists before merge().
+     * This method initializes all lists before merge().
      */
     public void initialize()
     {
@@ -130,7 +130,7 @@ public class SmartMerger
         mListFinalReadoutElements_All = new ArrayList();
     }
     /**
-     * This mehtod manages timeOverlap among differnt ReadoutTypes in InIce.
+     * This method manages timeOverlap among differnt ReadoutTypes in InIce.
      */
     public void manageReadout_InIce()
     {
@@ -260,7 +260,7 @@ public class SmartMerger
 
     }
     /**
-     * This mehtod manages timeOverlap among differnt ReadoutTypes in IceTop.
+     * This method manages timeOverlap among differnt ReadoutTypes in IceTop.
      * Note: There will be no READOUT_IT_String. But I implement it for generality.
      */
     public void manageReadout_IceTop()
@@ -409,7 +409,7 @@ public class SmartMerger
     }
     /**
      * This method is the heart of this class.
-     * In this mehtod timeOverlap between different ReadoutTypes will be managed.
+     * In this method timeOverlap between different ReadoutTypes will be managed.
      *
      * @param listLargerSameReadoutElements: II_GLOBAL, II_STRING, or IT_GLOBAL
      * @param listSmallerSameReadoutElements: II_String, II_DOM, IT_DOM
@@ -543,7 +543,7 @@ public class SmartMerger
         return listNewElements;
     }
     /**
-     * This is the main mehtod called in GlobalTrigReadoutElements.java after SimpleMerger.
+     * This is the main method called in GlobalTrigReadoutElements.java after SimpleMerger.
      *
      * @param listSimplyMergedReadoutTypeLists: require SimpleMerge for each list of ReadouType.
      */

@@ -19,9 +19,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * This class is to provide the earliest/latest UTC-timeStamp.
  *
@@ -30,12 +27,6 @@ import org.apache.commons.logging.LogFactory;
  */
 public class Sorter
 {
-    /**
-     * Log object for this class
-     */
-    private static final Log log = LogFactory.getLog(Sorter.class);
-
-
     List mListIUTCTime = new ArrayList();
     int miListSize = -1;
 

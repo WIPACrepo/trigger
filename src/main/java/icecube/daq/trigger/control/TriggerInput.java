@@ -11,10 +11,8 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.payload.ILoadablePayload;
-import icecube.daq.payload.IPayload;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.splicer.Payload;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.IHitDataPayload;
 import icecube.daq.trigger.ICompositePayload;
@@ -160,7 +158,7 @@ public class TriggerInput
 
     /**
      * get next available payload
-     * @return next IPayload
+     * @return next ILoadablePayload
      */
     public ILoadablePayload next() {
 

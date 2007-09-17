@@ -387,31 +387,6 @@ public class SimpleMerger
         //find the earliest/latest Time
         //todo:use the mehtod in mtSorter....?
 
-/*
-        IUTCTime earliestUTCTime = new UTCTime8B(Long.MAX_VALUE);
-        IUTCTime latestUTCTime = new UTCTime8B(Long.MIN_VALUE);
-
-        IUTCTime startUTCTime = null;
-        IUTCTime endUTCTime = null;
-
-        for(int i=0; i<listMergedElements.size(); i++)
-        {
-            element = (IReadoutRequestElement) listMergedElements.get(i);
-            startUTCTime = element.getFirstTimeUTC();
-            endUTCTime = element.getLastTimeUTC();
-
-            if(earliestUTCTime.compareTo(startUTCTime) > 0)
-            {
-                earliestUTCTime = startUTCTime;
-            }
-            if(latestUTCTime.compareTo(endUTCTime) < 0)
-            {
-                latestUTCTime = endUTCTime;
-            }
-
-        }
-*/
-
         if(listMergedElements.size() > 0)
         {
             element = (IReadoutRequestElement) listMergedElements.get(0);

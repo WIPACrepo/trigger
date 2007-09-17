@@ -50,16 +50,6 @@ public class GlobalTriggerHandler
     private static final Log log = LogFactory.getLog(GlobalTriggerHandler.class);
 
     /**
-     * interval at which messages are printed
-     */
-    private static final int messageInterval = 1000;
-
-    /**
-     * maximum allowable time difference between hits (in ns)
-     */
-    private static final double MAX_TIME_DIFF = 30*1e9;
-
-    /**
      * List of defined triggers
      */
     private List configuredTriggerList = null;
@@ -73,11 +63,6 @@ public class GlobalTriggerHandler
      * The factory used to create triggers to issue
      */
     protected TriggerRequestPayloadFactory outputFactory;
-
-    /**
-     * counts the number of processed primitives
-     */
-    private int count;
 
     protected IPayloadDestinationCollection payloadDestination = null;
     /**
@@ -96,11 +81,6 @@ public class GlobalTriggerHandler
     protected ISourceID sourceID;
 
     /**
-     * time of last hit, used for monitoring
-     */
-    private IUTCTime timeOfLastHit = null;
-
-    /**
      * input handler
      */
     protected ITriggerInput inputHandler;
@@ -108,9 +88,6 @@ public class GlobalTriggerHandler
      * This list is used for JUnitTest purpose.
      */
     private List mListAvailableTriggersToRelease;
-
-    private int miNumberAvailableTriggerToRelease;
-    private int miCount;
 
     protected static final int DEFAULT_MAX_TIMEGATE_WINDOW = 0;
     protected static final int miTimeGap_No = 1;
@@ -224,32 +201,6 @@ public class GlobalTriggerHandler
     public List getConfiguredTriggerList() {
         return configuredTriggerList;
     }
-    /**
-     * This method sends input payload to its destinantion algorithm
-     * where filtering of payloads may occur if necessary.
-     * This method will be removed once automatice routing for a payload is implemented.
-     *
-     * //todo: finish this method.
-     *
-     */
- /*   public void sendPayloadToFilterDestinantion(IPayload iPayload)
-    {
-        switch(iPayload.getPayloadInterfaceType()){
-            case PayloadInterfaceRegistry.I_STOP_PAYLOAD:
-                tStropTrigger.;
-                break;
-            case PayloadInterfaceRegistry.I_BEACON_PAYLOAD:
-
-                break;
-            case PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD:
-
-                break;
-            default:
-
-                break;
-
-        }
-    }*/
     public void flush()
     {
         // flush the input handler
@@ -306,9 +257,6 @@ public class GlobalTriggerHandler
     }
 
     protected void init() {
-        count = 0;
-        miNumberAvailableTriggerToRelease = 0;
-        miCount = 0;
         miTotalInputTriggers = 0;
         miTotalOutputGlobalTriggers = 0;
         miTotalOutputMergedGlobalTriggers = 0;
@@ -443,7 +391,6 @@ public class GlobalTriggerHandler
                     }
                 }else{
                     log.debug("Now start processing single trigger input");
-                    //sendPayloadToFilterDestinantion(tInputTrigger);
                     Iterator triggerIterator = configuredTriggerList.iterator();
                     while (triggerIterator.hasNext()) {
                         ITriggerControl configuredTrigger = (ITriggerControl) triggerIterator.next();
@@ -568,20 +515,7 @@ public class GlobalTriggerHandler
                     log.error("Couldn't write payload", e);
                 }
                 GTEventPayload.recycle();
-                //sendTrigger(GTEventPayload);
             }
-        }
-    }
-    /**
-     * send trigger to output destination.
-     * @param trigger
-     */
-    public void sendTrigger(ITriggerRequestPayload trigger) {
-        // issue the trigger
-        try {
-            payloadDestination.writePayload(trigger);
-        } catch (IOException e) {
-            log.error("Couldn't write trigger", e);
         }
     }
 

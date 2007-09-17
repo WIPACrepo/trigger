@@ -11,10 +11,8 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.payload.ILoadablePayload;
-import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.splicer.Payload;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.algorithm.CoincidenceTrigger;
 import icecube.daq.trigger.impl.TriggerRequestPayload;
@@ -60,7 +58,6 @@ public class ConditionalTriggerBag
      */
     public int triggerUID;
 
-    private int miCount;
     private boolean mbNeedUpdate = false;
     private DummyPayload mtUpdater = null;
     public List mListUnqualifiedTriggers = new ArrayList();
@@ -203,8 +200,6 @@ public class ConditionalTriggerBag
             } catch (DataFormatException e) {
                 log.error("Couldn't get payloads", e);
             }
-
-            miCount++;
 
             //--find triggerIDs
             List listTriggerIDs = new ArrayList();

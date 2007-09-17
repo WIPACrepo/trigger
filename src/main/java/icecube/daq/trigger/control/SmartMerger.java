@@ -582,32 +582,6 @@ public class SmartMerger
     {
         return mListFinalReadoutElements_All;
     }
-    public List getFinalReadoutElementsTimeOrdered_InIce()
-    {
-        //time-order the final ReadoutList
-        if(1 < mListFinalReadoutElements_InIce.size())
-        {
-            List listTimeordered = new ArrayList();
-            listTimeordered = mtSorter.getReadoutElementsUTCTimeSorted(mListFinalReadoutElements_InIce);
-            mListFinalReadoutElements_InIce = new ArrayList();
-            mListFinalReadoutElements_InIce = listTimeordered;
-        }
-
-        return mListFinalReadoutElements_InIce;
-    }
-    public List getFinalReadoutElementsTimeOrdered_IceTop()
-    {
-        //time-order the final ReadoutList
-        if(1 < mListFinalReadoutElements_IceTop.size())
-        {
-            List listTimeordered = new ArrayList();
-            listTimeordered =mtSorter.getReadoutElementsUTCTimeSorted(mListFinalReadoutElements_IceTop);
-            mListFinalReadoutElements_IceTop = new ArrayList();
-            mListFinalReadoutElements_IceTop = listTimeordered;
-        }
-
-        return mListFinalReadoutElements_IceTop;
-    }
     public void setPayloadFactory(PayloadFactory triggerFactory) {
         this.triggerFactory = (TriggerRequestPayloadFactory) triggerFactory;
     }

@@ -16,9 +16,6 @@ import icecube.daq.payload.splicer.PayloadFactory;
 
 import java.util.*;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * This class is to produce final ReadoutRequestElement for one GlobalTrigEvent.
  * Required is Input of an unorganized ReadoutRequestelements (Vector).
@@ -29,11 +26,6 @@ import org.apache.commons.logging.LogFactory;
  */
 public class GlobalTrigEventReadoutElements
 {
-    /**
-     * Log object for this class
-     */
-    private static final Log log = LogFactory.getLog(GlobalTrigEventReadoutElements.class);
-
     private TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY = new TriggerRequestPayloadFactory();
     private TriggerRequestPayloadFactory triggerFactory = null;
 

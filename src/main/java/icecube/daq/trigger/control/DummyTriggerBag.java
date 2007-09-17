@@ -24,9 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * This class implements a collection specific to IPayload's.
  *
@@ -48,11 +45,6 @@ import org.apache.commons.logging.LogFactory;
 public class DummyTriggerBag
         implements ITriggerBag
 {
-
-    /**
-     * Log object for this class
-     */
-    private static final Log log = LogFactory.getLog(DummyTriggerBag.class);
 
     /**
      * internal list of triggers

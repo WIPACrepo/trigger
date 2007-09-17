@@ -296,7 +296,7 @@ public class TriggerHandler
                     try {
                         trigger.runTrigger(hit);
                     } catch (TriggerException e) {
-                        log.error("Exception while running trigger: " + e);
+                        log.error("Exception while running trigger", e);
                     }
                 }
 
@@ -337,7 +337,7 @@ public class TriggerHandler
                         try {
                             trigger.runTrigger(tPayload);
                         } catch (TriggerException e) {
-                            log.error("Exception while running trigger: " + e);
+                            log.error("Exception while running trigger", e);
                         }
                     }
                 }else if (sourceId != -1) {

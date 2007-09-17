@@ -437,7 +437,7 @@ public class GlobalTriggerHandler
                                 }
 
                             } catch (TriggerException e) {
-                                log.error("Exception while running configuredTrigger: " + e);
+                                log.error("Exception while running configuredTrigger", e);
                             }
                         }
                     }
@@ -450,7 +450,7 @@ public class GlobalTriggerHandler
                         try {
                             configuredTrigger.runTrigger(tInputTrigger);
                         } catch (TriggerException e) {
-                            log.error("Exception while running configuredTrigger: " + e);
+                            log.error("Exception while running configuredTrigger", e);
                         }
                     }
                 }

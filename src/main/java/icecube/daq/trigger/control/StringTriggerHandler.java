@@ -53,7 +53,7 @@ public class StringTriggerHandler
                 try {
                     trigger.runTrigger(payload);
                 } catch (TriggerException e) {
-                    log.error("Exception while running trigger: " + e);
+                    log.error("Exception while running trigger", e);
                 }
             }
 

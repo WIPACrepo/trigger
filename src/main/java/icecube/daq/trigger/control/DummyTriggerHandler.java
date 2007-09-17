@@ -211,23 +211,29 @@ public class DummyTriggerHandler
      *   if any of those overlap, they are merged
      */
     public void issueTriggers() {
+        if (null == payloadDestination) {
+            log.error("PayloadDestination has not been set!");
+            throw new RuntimeException("PayloadDestination has not been set!");
+        }
+
         while (triggerBag.hasNext()) {
             ITriggerRequestPayload trigger = (ITriggerRequestPayload) triggerBag.next();
 
             // issue the trigger
-            if (null == payloadDestination) {
-                log.error("PayloadDestination has not been set!");
-                throw new RuntimeException("PayloadDestination has not been set!");
-            } else {
-                try {
-		    log.info("Writing Trigger...");
-                    payloadDestination.writePayload(trigger);
-                } catch (IOException e) {
-                    log.error("Failed to write triggers");
-                    throw new RuntimeException(e);
-                }
-                // now recycle it
-                trigger.recycle();
+            RuntimeException rte;
+            try {
+                log.info("Writing Trigger...");
+                payloadDestination.writePayload(trigger);
+                rte = null;
+            } catch (IOException e) {
+                log.error("Failed to write triggers");
+                rte = new RuntimeException(e);
+            }
+            // now recycle it
+            trigger.recycle();
+
+            if (rte != null) {
+                throw rte;
             }
 
         }

@@ -411,6 +411,11 @@ public class TriggerHandler
      *   if any of those overlap, they are merged
      */
     public void issueTriggers() {
+        if (null == payloadDestination) {
+            log.error("PayloadDestination has not been set!");
+            throw new RuntimeException("PayloadDestination has not been set!");
+        }
+
 
         if (log.isDebugEnabled()) {
             log.debug("Trigger Bag contains " + triggerBag.size() + " triggers");
@@ -446,20 +451,20 @@ public class TriggerHandler
                 }
             }
 
-            // issue the trigger
-            if (null == payloadDestination) {
-                log.error("PayloadDestination has not been set!");
-                throw new RuntimeException("PayloadDestination has not been set!");
-            }
-
+            RuntimeException rte;
             try {
                 payloadDestination.writePayload(payload);
+                rte = null;
             } catch (IOException e) {
                 log.error("Failed to write triggers");
-                throw new RuntimeException(e);
+                rte = new RuntimeException(e);
             }
             // now recycle it
             payload.recycle();
+
+            if (rte != null) {
+                throw rte;
+            }
 
         }
 

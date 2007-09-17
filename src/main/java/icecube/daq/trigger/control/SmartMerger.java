@@ -36,7 +36,7 @@ public class SmartMerger
     private static final Log log = LogFactory.getLog(SmartMerger.class);
 
     private TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY = new TriggerRequestPayloadFactory();
-    private TriggerRequestPayloadFactory triggerFactory = null;
+    private TriggerRequestPayloadFactory triggerFactory;
 
     private Sorter mtSorter = new Sorter();
 

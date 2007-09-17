@@ -41,7 +41,7 @@ public class ConditionalTriggerBag
     private static final Log log = LogFactory.getLog(ConditionalTriggerBag.class);
     private CoincidenceTrigger mtCoincidenceTriggerAlgorithm;
     public List mListConfiguredTriggerIDs;
-    public boolean mbContainAllTriggerIDsRequired = false;
+    public boolean mbContainAllTriggerIDsRequired;
     public String msCoincidenceTriggerAlgorithmName;
 
     public Vector payloadListInConditionalBag = new Vector();
@@ -51,15 +51,15 @@ public class ConditionalTriggerBag
      */
     protected static List mergeListForConditionalBag = new ArrayList();
 
-    public boolean flushing = false;
+    public boolean flushing;
 
     /**
      * UID for newly merged triggers
      */
     public int triggerUID;
 
-    private boolean mbNeedUpdate = false;
-    private DummyPayload mtUpdater = null;
+    private boolean mbNeedUpdate;
+    private DummyPayload mtUpdater;
     public List mListUnqualifiedTriggers = new ArrayList();
     /**
      * Create an instance of this class.

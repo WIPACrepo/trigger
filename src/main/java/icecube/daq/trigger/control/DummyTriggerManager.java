@@ -50,7 +50,7 @@ public class DummyTriggerManager
     /**
      * The factory used to produce IHitPayloads for this object to use.
      */
-    private SpliceableFactory inputFactory = null;
+    private SpliceableFactory inputFactory;
 
     /**
      * splicer associated with this manager

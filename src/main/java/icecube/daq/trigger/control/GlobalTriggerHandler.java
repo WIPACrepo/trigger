@@ -52,19 +52,19 @@ public class GlobalTriggerHandler
     /**
      * List of defined triggers
      */
-    private List configuredTriggerList = null;
+    private List configuredTriggerList;
 
     /**
      * Bag of triggers to issue
      */
-    protected ITriggerBag triggerBag = null;
+    protected ITriggerBag triggerBag;
 
     /**
      * The factory used to create triggers to issue
      */
     protected TriggerRequestPayloadFactory outputFactory;
 
-    protected IPayloadDestinationCollection payloadDestination = null;
+    protected IPayloadDestinationCollection payloadDestination;
     /**
      * output destination
      */

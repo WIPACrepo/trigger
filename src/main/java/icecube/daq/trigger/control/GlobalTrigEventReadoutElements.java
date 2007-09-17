@@ -27,11 +27,11 @@ import java.util.*;
 public class GlobalTrigEventReadoutElements
 {
     private TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY = new TriggerRequestPayloadFactory();
-    private TriggerRequestPayloadFactory triggerFactory = null;
+    private TriggerRequestPayloadFactory triggerFactory;
 
     Sorter mtSorter = new Sorter();
-    SimpleMerger mtSimpleMerger = null;
-    SmartMerger mtSmartMerger = null;
+    SimpleMerger mtSimpleMerger;
+    SmartMerger mtSmartMerger;
 
     Vector mVecFinalReadoutElements = new Vector();
 

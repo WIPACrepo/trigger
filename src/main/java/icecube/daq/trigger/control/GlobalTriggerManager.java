@@ -53,7 +53,7 @@ public class GlobalTriggerManager
      * The factory used to produce IHitPayloads for this object to use.
      */
     //private final MasterPayloadFactory inputFactory = new MasterPayloadFactory();
-    private SpliceableFactory inputFactory = null;
+    private SpliceableFactory inputFactory;
 
     /**
      * splicer associated with this manager
@@ -69,7 +69,7 @@ public class GlobalTriggerManager
      * spliceable inputCount
      */
     private int inputCount;
-    private int recycleCount = 0;
+    private int recycleCount;
     private double totalProcessTime;
     /**
      * size of last input list

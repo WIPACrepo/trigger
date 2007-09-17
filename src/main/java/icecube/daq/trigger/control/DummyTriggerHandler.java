@@ -45,17 +45,17 @@ public class DummyTriggerHandler
     /**
      * Bag of triggers to issue
      */
-    protected ITriggerBag triggerBag = null;
+    protected ITriggerBag triggerBag;
 
     /**
      * output destination
      */
-    protected IPayloadDestinationCollection payloadDestination = null;
+    protected IPayloadDestinationCollection payloadDestination;
 
     /**
      * Default output factory
      */
-    protected TriggerRequestPayloadFactory outputFactory = null;
+    protected TriggerRequestPayloadFactory outputFactory;
 
     /**
      * SourceId of this TriggerHandler.
@@ -65,7 +65,7 @@ public class DummyTriggerHandler
     /**
      * earliest thing of interest to the analysis
      */
-    private IPayload earliestPayloadOfInterest = null;
+    private IPayload earliestPayloadOfInterest;
 
     private int count;
 

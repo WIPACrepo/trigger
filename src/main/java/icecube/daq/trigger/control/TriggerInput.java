@@ -49,12 +49,12 @@ public class TriggerInput
      */
     private List inputList;
 
-    private int count = 0;
+    private int count;
 
     /**
      * flag to indicate if we should flush
      */
-    private boolean flushing = false;
+    private boolean flushing;
 
     /**
      * default constructor

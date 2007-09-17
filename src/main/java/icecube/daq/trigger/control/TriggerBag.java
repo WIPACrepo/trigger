@@ -108,7 +108,7 @@ public class TriggerBag
     /**
      * flag to indicate we are flushing
      */
-    private boolean flushing = false;
+    private boolean flushing;
 
     /**
      * Payload monitor object.

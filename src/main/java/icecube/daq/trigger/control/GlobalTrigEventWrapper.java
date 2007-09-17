@@ -43,14 +43,14 @@ public class GlobalTrigEventWrapper
     private static final Log log = LogFactory.getLog(GlobalTrigEventWrapper.class);
 
     private Sorter tSorter = new Sorter();
-    private GlobalTrigEventReadoutElements  mtGlobalTrigEventReadoutElements = null;
+    private GlobalTrigEventReadoutElements  mtGlobalTrigEventReadoutElements;
     private PayloadDestination asciiFileOutPayloadDestination;
 
     /**
      * The factory used to create triggers
      */
 
-    private TriggerRequestPayloadFactory triggerFactory = null;
+    private TriggerRequestPayloadFactory triggerFactory;
     private TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY = new TriggerRequestPayloadFactory();
 
     private TriggerRequestPayload mtGlobalTrigEventPayload_single;
@@ -61,7 +61,7 @@ public class GlobalTrigEventWrapper
  //   SortedSet mergeSet = new TreeSet();
 
     private int miTriggerUID;
-    private boolean mbIsCalled_Wrap_single = false;
+    private boolean mbIsCalled_Wrap_single;
     public final ISourceID mtGlobalTriggerSourceID = SourceIdRegistry.
             getISourceIDFromNameAndId(DAQCmdInterface.DAQ_GLOBAL_TRIGGER, 0);
 

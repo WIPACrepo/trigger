@@ -51,42 +51,42 @@ public class TriggerHandler
     /**
      * List of defined triggers
      */
-    protected List triggerList = null;
+    protected List triggerList;
 
     /**
      * Bag of triggers to issue
      */
-    protected ITriggerBag triggerBag = null;
+    protected ITriggerBag triggerBag;
 
     /**
      * counts the number of processed primitives
      */
-    private int count = 0;
+    private int count;
 
     /**
      * output destination
      */
-    protected IPayloadDestinationCollection payloadDestination = null;
+    protected IPayloadDestinationCollection payloadDestination;
 
     /**
      * earliest thing of interest to the analysis
      */
-    private IPayload earliestPayloadOfInterest = null;
+    private IPayload earliestPayloadOfInterest;
 
     /**
      * time of last hit, used for monitoring
      */
-    private IUTCTime timeOfLastHit = null;
+    private IUTCTime timeOfLastHit;
 
     /**
      * input handler
      */
-    private ITriggerInput inputHandler = null;
+    private ITriggerInput inputHandler;
 
     /**
      * Default output factory
      */
-    protected TriggerRequestPayloadFactory outputFactory = null;
+    protected TriggerRequestPayloadFactory outputFactory;
 
     /**
      * SourceId of this TriggerHandler.

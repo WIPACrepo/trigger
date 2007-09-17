@@ -92,7 +92,7 @@ public class GlobalTriggerBag
     /**
      * flag to indicate we are flushing
      */
-    private boolean flushing = false;
+    private boolean flushing;
 
     private int miTimeGateWindow;
 

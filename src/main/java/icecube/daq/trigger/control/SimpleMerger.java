@@ -35,7 +35,7 @@ public class SimpleMerger
     private static final Log log = LogFactory.getLog(SimpleMerger.class);
 
     private TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY = new TriggerRequestPayloadFactory();
-    private TriggerRequestPayloadFactory triggerFactory = null;
+    private TriggerRequestPayloadFactory triggerFactory;
 
     private final int mi_TIMEGAP_NO = 1;
     private final int mi_TIMEGAP_YES = 2;

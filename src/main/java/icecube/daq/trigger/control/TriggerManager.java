@@ -169,7 +169,7 @@ public class TriggerManager
 
                 if (log.isDebugEnabled()) {
                     log.debug("  Processing payload " + inputCount + " with time "
-                              + payload.getPayloadTimeUTC().getUTCTimeAsLong());
+                              + payload.getPayloadTimeUTC());
                 }
 
                 process(payload);
@@ -217,7 +217,7 @@ public class TriggerManager
         Spliceable update = (Spliceable) getEarliestPayloadOfInterest();
         if (null != update) {
             if (log.isDebugEnabled()) {
-                log.debug("Truncating splicer at " + ((IPayload) update).getPayloadTimeUTC().getUTCTimeAsLong());
+                log.debug("Truncating splicer at " + ((IPayload) update).getPayloadTimeUTC());
             }
             splicer.truncate(update);
         }
@@ -324,7 +324,7 @@ public class TriggerManager
         while (iter.hasNext()) {
             ILoadablePayload payload = (ILoadablePayload) iter.next();
             if (log.isDebugEnabled()) {
-                log.debug("Recycle payload " + recycleCount + " at " + payload.getPayloadTimeUTC().getUTCTimeAsLong());
+                log.debug("Recycle payload " + recycleCount + " at " + payload.getPayloadTimeUTC());
             }
 
             earliestTime = payload.getPayloadTimeUTC();

@@ -497,7 +497,7 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
 	    && (triggerCounter % printMod == 0)) {
             log.info("New Trigger " + triggerCounter + " from " + triggerName + " includes " + numberOfHits
                      + " hits:  First time = "
-                     + firstTime.getUTCTimeAsLong() + " Last time = " + lastTime.getUTCTimeAsLong());
+                     + firstTime + " Last time = " + lastTime);
         }
 
         // set earliest payload of interest to 1/10 ns after the last hit

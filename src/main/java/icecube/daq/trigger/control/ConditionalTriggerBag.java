@@ -153,8 +153,8 @@ public class ConditionalTriggerBag
                 for(int i=0; i<mergeListForConditionalBag.size(); i++)
                 {
                     ITriggerRequestPayload trigger = (ITriggerRequestPayload) mergeListForConditionalBag.get(i);
-                    log.debug("Trigger in mergeList: FirstTime = " + trigger.getFirstTimeUTC().getUTCTimeAsLong());
-                    log.debug("Trigger in mergeList: LastTime = " + trigger.getLastTimeUTC().getUTCTimeAsLong());
+                    log.debug("Trigger in mergeList: FirstTime = " + trigger.getFirstTimeUTC());
+                    log.debug("Trigger in mergeList: LastTime = " + trigger.getLastTimeUTC());
                 }
 
                 Collections.sort(mergeListForConditionalBag);
@@ -180,7 +180,7 @@ public class ConditionalTriggerBag
 
         if (log.isDebugEnabled()) {
             log.debug("Selected CoincidenceTriggerList has " + payloadListInConditionalBag.size() + " payloads.");
-            log.debug("   TimeGate at " + timeGate.getUTCTimeAsLong());
+            log.debug("   TimeGate at " + timeGate);
         }
 
     }

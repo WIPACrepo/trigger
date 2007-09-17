@@ -234,7 +234,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
             if (log.isDebugEnabled()) {
                 log.debug("This is the first hit, initializing...");
-                log.debug("slidingTimeWindowStart set to " + slidingTimeWindow.startTime().getUTCTimeAsLong());
+                log.debug("slidingTimeWindowStart set to " + slidingTimeWindow.startTime());
             }
 
         }
@@ -244,7 +244,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
         else {
 
             if (log.isDebugEnabled()) {
-                log.debug("Processing hit at time " + hitTimeUTC.getUTCTimeAsLong());
+                log.debug("Processing hit at time " + hitTimeUTC);
             }
 
             /*
@@ -263,15 +263,15 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                         if (h.getPayloadTimeUTC() == null) {
                             log.error("  Hit " + i + " has a null time");
                         } else {
-                            log.error("  Hit " + i + " has time = " + h.getPayloadTimeUTC().getUTCTimeAsLong());
+                            log.error("  Hit " + i + " has time = " + h.getPayloadTimeUTC());
                         }
                     }
                 }
             }
             if (hitTimeUTC.compareTo(slidingTimeWindow.startTime()) < 0) {
                 throw new TimeOutOfOrderException("Hit comes before start of sliding time window: Window is at "
-                                                                                 + slidingTimeWindow.startTime().getUTCTimeAsLong() + " Hit is at "
-                                                                                 + hitTimeUTC.getUTCTimeAsLong() + " DOMId = "
+                                                                                 + slidingTimeWindow.startTime() + " Hit is at "
+                                                                                 + hitTimeUTC + " DOMId = "
                                                                                  + hit.getDOMID().getDomIDAsString());
             }
 
@@ -311,7 +311,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
                         if (log.isDebugEnabled()) {
                             log.debug("Trigger is already on. Changing triggerWindowStop to "
-                                      + getTriggerWindowStop().getUTCTimeAsLong());
+                                      + getTriggerWindowStop());
                         }
 
                     } else {
@@ -323,8 +323,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                         if (log.isDebugEnabled()) {
                             log.debug("Trigger is now on, numberOfHitsInTriggerWindow = "
                                       + numberOfHitsInTriggerWindow + " triggerWindowStart = "
-                                      + getTriggerWindowStart().getUTCTimeAsLong() + " triggerWindowStop = "
-                                      + getTriggerWindowStop().getUTCTimeAsLong());
+                                      + getTriggerWindowStart() + " triggerWindowStop = "
+                                      + getTriggerWindowStop());
                         }
 
                     }
@@ -353,7 +353,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
                     if (log.isDebugEnabled()) {
                         log.debug("numberOfHitsInSlidingTimeWindow is now " + slidingTimeWindow.size()
-                                  + " slidingTimeWindowStart is now " + slidingTimeWindow.startTime().getUTCTimeAsLong());
+                                  + " slidingTimeWindowStart is now " + slidingTimeWindow.startTime());
                     }
 
                 }
@@ -381,7 +381,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                     if (log.isDebugEnabled()) {
                         log.debug("Hit still outside slidingTimeWindow, start a new one "
                                   + "numberOfHitsInSlidingTimeWindow = " + slidingTimeWindow.size()
-                                  + " slidingTimeWindowStart = " + slidingTimeWindow.startTime().getUTCTimeAsLong());
+                                  + " slidingTimeWindowStart = " + slidingTimeWindow.startTime());
                     }
 
                 }
@@ -418,7 +418,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                         for (int i=0; i<hitsWithinTriggerWindow.size(); i++) {
                             IHitPayload h = (IHitPayload) hitsWithinTriggerWindow.get(i);
                             if (slidingTimeWindow.contains(h)) {
-                                log.error("Hit at time " + h.getPayloadTimeUTC().getUTCTimeAsLong()
+                                log.error("Hit at time " + h.getPayloadTimeUTC()
                                           + " is part of new trigger but is still in SlidingTimeWindow");
                             }
                         }
@@ -586,8 +586,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
             if (log.isDebugEnabled()) {
                 log.debug(" Last Trigger is now on, numberOfHitsInTriggerWindow = "
                 + numberOfHitsInTriggerWindow + " triggerWindowStart = "
-                + getTriggerWindowStart().getUTCTimeAsLong() + " triggerWindowStop = "
-                + getTriggerWindowStop().getUTCTimeAsLong());
+                + getTriggerWindowStart() + " triggerWindowStop = "
+                + getTriggerWindowStop());
             }
 
             // pass last trigger

@@ -156,7 +156,7 @@ public class Sorter
             }
         }
         //System.out.println("------------------------------------------------------------");
-        //System.out.println("chosen earliest time = " + UTCTime_earliest.getUTCTimeAsLong());
+        //System.out.println("chosen earliest time = " + UTCTime_earliest);
         //System.out.println("------------------------------------------------------------");
         return UTCTime_earliest;
     }

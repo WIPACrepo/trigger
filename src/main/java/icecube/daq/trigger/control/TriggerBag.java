@@ -224,7 +224,7 @@ public class TriggerBag
 
         if (log.isDebugEnabled()) {
             log.debug("TriggerList has " + payloadList.size() + " payloads");
-            log.debug("   TimeGate at " + timeGate.getUTCTimeAsLong());
+            log.debug("   TimeGate at " + timeGate);
         }
 
     }
@@ -259,8 +259,8 @@ public class TriggerBag
         while (iter.hasNext()) {
             ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
             if (log.isDebugEnabled()) {
-                log.debug("Checking trigger from " + trigger.getFirstTimeUTC().getUTCTimeAsLong()
-                         + " to " + trigger.getLastTimeUTC().getUTCTimeAsLong());
+                log.debug("Checking trigger from " + trigger.getFirstTimeUTC()
+                         + " to " + trigger.getLastTimeUTC());
             }
             if ( (flushing) ||
                  (0 < timeGate.compareTo(trigger.getLastTimeUTC())) ) {
@@ -288,8 +288,8 @@ public class TriggerBag
                 iter.remove();
                 if (log.isDebugEnabled()) {
                     double timeDiff = timeGate.timeDiff_ns(trigger.getLastTimeUTC());
-                    log.debug("Releasing trigger from " + trigger.getFirstTimeUTC().getUTCTimeAsLong()
-                             + " to " + trigger.getLastTimeUTC().getUTCTimeAsLong()
+                    log.debug("Releasing trigger from " + trigger.getFirstTimeUTC()
+                             + " to " + trigger.getLastTimeUTC()
                              + " with timeDiff = " + timeDiff);
                 }
                 // show this output to the monitor
@@ -309,7 +309,7 @@ public class TriggerBag
      */
     public void setTimeGate(IUTCTime time) {
         if (log.isDebugEnabled()) {
-            log.debug("Updating timeGate to " + time.getUTCTimeAsLong());
+            log.debug("Updating timeGate to " + time);
         }
         timeGate = time;
     }
@@ -409,7 +409,7 @@ public class TriggerBag
                         } catch (Exception e) {
                             log.error("Error loading hit", e);
                         }
-                        log.debug("    Hit " + i + ": " + hit.getHitTimeUTC().getUTCTimeAsLong());
+                        log.debug("    Hit " + i + ": " + hit.getHitTimeUTC());
                     }
                 }
                 subTriggers.add(next);
@@ -553,10 +553,10 @@ public class TriggerBag
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Payload1: FirstTime = " + startOfPayload1.getUTCTimeAsLong()
-                      + " LastTime = " + endOfPayload1.getUTCTimeAsLong());
-            log.debug("Payload2: FirstTime = " + startOfPayload2.getUTCTimeAsLong()
-                      + " LastTime = " + endOfPayload2.getUTCTimeAsLong());
+            log.debug("Payload1: FirstTime = " + startOfPayload1
+                      + " LastTime = " + endOfPayload1);
+            log.debug("Payload2: FirstTime = " + startOfPayload2
+                      + " LastTime = " + endOfPayload2);
         }
 
         if ( (0 < startOfPayload1.compareTo(endOfPayload2)) ||

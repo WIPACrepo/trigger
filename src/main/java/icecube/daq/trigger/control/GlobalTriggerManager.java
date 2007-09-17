@@ -185,7 +185,7 @@ public class GlobalTriggerManager
                 inputCount++;
                 if (log.isDebugEnabled()) {
                     log.debug("  Processing payload " + inputCount + " with time "
-                         + payload.getPayloadTimeUTC().getUTCTimeAsLong());
+                         + payload.getPayloadTimeUTC());
                 }
 
                 process(payload);
@@ -221,7 +221,7 @@ public class GlobalTriggerManager
     public void updateSplicer() {
         Spliceable update = (Spliceable) super.getEarliestPayloadOfInterest();
         if (null != update) {
-            log.debug("Truncating splicer at " + ((IPayload) update).getPayloadTimeUTC().getUTCTimeAsLong());
+            log.debug("Truncating splicer at " + ((IPayload) update).getPayloadTimeUTC());
             splicer.truncate(update);
         }
     }
@@ -265,7 +265,7 @@ public class GlobalTriggerManager
         while (iter.hasNext()) {
             Payload payload = (Payload) iter.next();
             recycleCount++;
-            log.debug("  Recycle payload " + recycleCount + " at time " + payload.getPayloadTimeUTC().getUTCTimeAsLong());
+            log.debug("  Recycle payload " + recycleCount + " at time " + payload.getPayloadTimeUTC());
             earliestTime = payload.getPayloadTimeUTC();
             long startTime = ((Long) wallTimeQueue.removeFirst()).longValue();
             long endTime = System.currentTimeMillis();

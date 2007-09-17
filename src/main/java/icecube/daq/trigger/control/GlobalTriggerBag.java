@@ -211,7 +211,7 @@ public class GlobalTriggerBag
 
             if (log.isDebugEnabled()) {
                 log.debug("TriggerList has " + payloadList.size() + " payloads");
-                log.debug("   TimeGate at " + timeGate.getUTCTimeAsLong());
+                log.debug("   TimeGate at " + timeGate);
             }
      }
 
@@ -348,10 +348,10 @@ public class GlobalTriggerBag
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Payload1: FirstTime = " + startOfPayload1.getUTCTimeAsLong()
-                      + " LastTime = " + endOfPayload1.getUTCTimeAsLong());
-            log.debug("Payload2: FirstTime = " + startOfPayload2.getUTCTimeAsLong()
-                      + " LastTime = " + endOfPayload2.getUTCTimeAsLong());
+            log.debug("Payload1: FirstTime = " + startOfPayload1
+                      + " LastTime = " + endOfPayload1);
+            log.debug("Payload2: FirstTime = " + startOfPayload2
+                      + " LastTime = " + endOfPayload2);
         }
 
         if ( (0 < startOfPayload1.compareTo(endOfPayload2)) ||
@@ -378,12 +378,12 @@ public class GlobalTriggerBag
     public void setTimeGate(IUTCTime time)
     {
         if (log.isDebugEnabled()) {
-            log.debug("Updating timeGate to " + time.getUTCTimeAsLong());
+            log.debug("Updating timeGate to " + time);
         }
         //System.out.println("------------------------------------------------------");
         //System.out.println("in BAG: MAX-TIME-GATE-WINDOW = " + miTimeGateWindow);
         timeGate = time.getOffsetUTCTime((double) miTimeGateWindow);
-        //System.out.println("print timeGate = " + timeGate.getUTCTimeAsLong());
+        //System.out.println("print timeGate = " + timeGate);
         //System.out.println("------------------------------------------------------");
     }
 

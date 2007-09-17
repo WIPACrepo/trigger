@@ -322,7 +322,7 @@ public class TriggerHandler
                         log.error("Unexpected null SourceID in payload (len=" +
                                   tPayload.getPayloadLength() + ", time=" +
                                   (tPayload.getPayloadTimeUTC() == null ?
-                                   "null" : "" + tPayload.getPayloadTimeUTC().getUTCTimeAsLong()) +
+                                   "null" : "" + tPayload.getPayloadTimeUTC()) +
                                    ", buf=" + ((Payload) tPayload).getPayloadBacking());
                     }
 
@@ -437,11 +437,11 @@ public class TriggerHandler
                     }
 
                     if (0 > trigger.getTriggerType()) {
-                        log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
-                                  + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " triggers");
+                        log.debug("Issue trigger: extended event time = " + firstTime + " to "
+                                  + lastTime + " and contains " + nSubPayloads + " triggers");
                     } else {
-                        log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
-                                  + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " hits");
+                        log.debug("Issue trigger: extended event time = " + firstTime + " to "
+                                  + lastTime + " and contains " + nSubPayloads + " hits");
                     }
                 }
             }

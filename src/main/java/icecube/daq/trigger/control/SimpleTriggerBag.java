@@ -104,7 +104,7 @@ public class SimpleTriggerBag
 
         if (log.isDebugEnabled()) {
             log.debug("TriggerList has " + payloadList.size() + " payloads");
-            log.debug("   TimeGate at " + timeGate.getUTCTimeAsLong());
+            log.debug("   TimeGate at " + timeGate);
         }
 
     }
@@ -162,7 +162,7 @@ public class SimpleTriggerBag
                  (0 < timeGate.compareTo(getPayloadTime(payload))) ) {
                 iter.remove();
                 if (log.isDebugEnabled()) {
-                    log.debug("Releasing payload at " + getPayloadTime(payload).getUTCTimeAsLong()
+                    log.debug("Releasing payload at " + getPayloadTime(payload)
                              + " with timeDiff = " + timeDiff);
                 }
                 // show this output to the monitor
@@ -182,7 +182,7 @@ public class SimpleTriggerBag
      */
     public void setTimeGate(IUTCTime time) {
         if (log.isDebugEnabled()) {
-            log.debug("Updating timeGate to " + time.getUTCTimeAsLong());
+            log.debug("Updating timeGate to " + time);
         }
         timeGate = time;
     }

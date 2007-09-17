@@ -543,8 +543,8 @@ public class GlobalTriggerHandler
             if (log.isInfoEnabled()) {
                 if(miTotalOutputGlobalTriggers%miInfoPrintoutFrequency == 0){
                     log.info("Issue # " + miTotalOutputGlobalTriggers + " GTEventPayload (trigType = " + GT_trigType + " ) : "
-                             + " extended event time = " + firstTime.getUTCTimeAsLong() + " to "
-                             + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " subTriggers"
+                             + " extended event time = " + firstTime + " to "
+                             + lastTime + " and contains " + nSubPayloads + " subTriggers"
                              + ", payload length = " + GTEventPayload.getPayloadLength() + "bytes");
                     if(-1 == GT_trigType){
                         log.info("Merged GT # " + miTotalOutputMergedGlobalTriggers);
@@ -601,14 +601,14 @@ public class GlobalTriggerHandler
                     = (IPayload) ((ITriggerControl) triggerListIterator.next()).getEarliestPayloadOfInterest();
 
             if (earliestPayload != null) {
-                log.debug("There is earliestPayload: Time = " + earliestPayload.getPayloadTimeUTC().getUTCTimeAsLong());
+                log.debug("There is earliestPayload: Time = " + earliestPayload.getPayloadTimeUTC());
                 // if payload < earliest
                 if (earliestTimeOverall.compareTo(earliestPayload.getPayloadTimeUTC()) > 0) {
                     earliestTimeOverall = earliestPayload.getPayloadTimeUTC();
                     earliestPayloadOverall = earliestPayload;
                 }
                 log.debug("There is earliestPayloadOverall: Time = "
-                         + earliestPayloadOverall.getPayloadTimeUTC().getUTCTimeAsLong());
+                         + earliestPayloadOverall.getPayloadTimeUTC());
             }
         }
 

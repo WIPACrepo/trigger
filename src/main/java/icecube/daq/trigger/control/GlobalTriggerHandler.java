@@ -449,6 +449,11 @@ public class GlobalTriggerHandler
      */
     public void issueTriggers() {
 
+        if (null == payloadDestination) {
+            log.error("PayloadDestination has not been set!");
+            throw new RuntimeException("PayloadDestination has not been set!");
+        }
+
         if (log.isDebugEnabled()) {
             log.debug("GlobalTrig Bag contains " + triggerBag.size() + " triggers");
         }
@@ -511,16 +516,12 @@ public class GlobalTriggerHandler
             }
 
             //--ship the GTEventPayload to its destinantion (i.e., EB).
-            if (null == payloadDestination) {
-                log.error("PayloadDestination has not been set!");
-            } else {
-                try {
-                    payloadDestination.writePayload(GTEventPayload);
-                } catch (IOException e) {
-                    log.error("Couldn't write payload", e);
-                }
-                GTEventPayload.recycle();
+            try {
+                payloadDestination.writePayload(GTEventPayload);
+            } catch (IOException e) {
+                log.error("Couldn't write payload", e);
             }
+            GTEventPayload.recycle();
         }
     }
 

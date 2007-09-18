@@ -20,7 +20,6 @@ import icecube.daq.payload.splicer.PayloadFactory;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -109,8 +108,7 @@ public class DummyTriggerBag
      * @return true if there is a releasable trigger
      */
     public synchronized boolean hasNext() {
-        Iterator iter = payloadList.iterator();
-        return iter.hasNext();
+        return payloadList.size() > 0;
     }
 
     /**
@@ -119,8 +117,11 @@ public class DummyTriggerBag
      * @return the next trigger
      */
     public synchronized ITriggerRequestPayload next() {
-        Iterator iter = payloadList.iterator();
-        return (ITriggerRequestPayload) iter.next();
+        if (hasNext()) {
+            return (ITriggerRequestPayload) payloadList.remove(0);
+        }
+
+        return null;
     }
 
     /**

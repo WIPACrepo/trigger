@@ -61,7 +61,7 @@ public class GlobalTrigEventReadoutElements
      *
      * @param vecInputElements
      */
-    public void classifyReadoutTypes(Vector vecInputElements)
+    private void classifyReadoutTypes(Vector vecInputElements)
     {
         Iterator iterElements = vecInputElements.iterator();
         while(iterElements.hasNext())

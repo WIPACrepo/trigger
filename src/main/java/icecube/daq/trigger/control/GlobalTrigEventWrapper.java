@@ -58,7 +58,6 @@ public class GlobalTrigEventWrapper
     private ITriggerRequestPayload mtGlobalTrigEventPayload_single;
     private ITriggerRequestPayload mtGlobalTrigEventPayload_merged;
     private ITriggerRequestPayload mtGlobalTrigEventPayload_final;
-    private ITriggerRequestPayload mtPayload_onlyTimeWrapped;
 
     private int miTriggerUID;
     private boolean mbIsCalled_Wrap_single;
@@ -130,9 +129,9 @@ public class GlobalTrigEventWrapper
                         vecLocalSubPayload.addAll(((ITriggerRequestPayload) tPayload).getPayloads());
                         //log.debug("size of the local subPayload = " + vecLocalSubPayload.size());
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        log.error("Couldn't get payloads", e);
                     } catch (DataFormatException e) {
-                        e.printStackTrace();
+                        log.error("Couldn't get payloads", e);
                     }
                 }
             }
@@ -233,13 +232,15 @@ public class GlobalTrigEventWrapper
         Iterator iter = vecGlobalSubPayload.iterator();
         while(iter.hasNext())
         {
-            ITriggerRequestPayload subPayload = (ITriggerRequestPayload) iter.next();
+            ITriggerRequestPayload subPayload =
+                (ITriggerRequestPayload) iter.next();
+            // XXX shouldn't need to load payload before recycling it
             try {
                 ((ILoadablePayload) subPayload).loadPayload();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Couldn't load payload", e);
             } catch (DataFormatException e) {
-                e.printStackTrace();
+                log.error("Couldn't load payload", e);
             }
             if(subPayload.getSourceID().getSourceID() ==
                GLOBAL_TRIGGER_SOURCE_ID.getSourceID())
@@ -282,10 +283,12 @@ public class GlobalTrigEventWrapper
 
         }else{
 
-            vecGlobalReadoutRequestElements_Final = null;
+            vecGlobalReadoutRequestElements_Final = new Vector();
         }
 
-        log.debug("size Final readoutElements in wrapMergingEvent()_merged= " + vecGlobalReadoutRequestElements_Final.size());
+        if (log.isDebugEnabled()) {
+            log.debug("size Final readoutElements in wrapMergingEvent()_merged= " + vecGlobalReadoutRequestElements_Final.size());
+        }
 
 //---------------------------------------------------------------------------------------------------------------
         // create a readout request for the new trigger
@@ -356,9 +359,9 @@ public class GlobalTrigEventWrapper
                                                                                                    tReadoutRequest_final);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Couldn't create payload", e);
         } catch (DataFormatException e) {
-            e.printStackTrace();
+            log.error("Couldn't create payload", e);
         }
 
         //--count merged GT event.

@@ -156,13 +156,13 @@ public class ConditionalTriggerBag
 
                 Collections.sort(mergeListForConditionalBag);
                 //-- performed prevention of multiple wrapping in this stage: only single wrap !!!
-                getGlobalTrigEventWrapper().wrapMergingEvent(mergeListForConditionalBag,
+                mtGlobalTrigEventWrapper.wrapMergingEvent(mergeListForConditionalBag,
                         mtCoincidenceTriggerAlgorithm.getTriggerType(),
                         mtCoincidenceTriggerAlgorithm.getTriggerConfigId());
 
                 //-- remove individual triggers from triggerList and add new merged trigger
                 payloadListInConditionalBag.removeAll(mergeListForConditionalBag);
-                payloadListInConditionalBag.add(getGlobalTrigEventWrapper().getGlobalTrigEventPayload_merged());
+                payloadListInConditionalBag.add(mtGlobalTrigEventWrapper.getGlobalTrigEventPayload_merged());
 
             } else {
                 if (log.isDebugEnabled()) {
@@ -177,7 +177,7 @@ public class ConditionalTriggerBag
 
         if (log.isDebugEnabled()) {
             log.debug("Selected CoincidenceTriggerList has " + payloadListInConditionalBag.size() + " payloads.");
-            log.debug("   TimeGate at " + getTimeGate());
+            log.debug("   TimeGate at " + timeGate);
         }
 
     }
@@ -189,7 +189,7 @@ public class ConditionalTriggerBag
      */
     public boolean containAllTriggerIDsRequired(ITriggerRequestPayload tTrigger)
     {
-        if(tTrigger.getSourceID().getSourceID() != getGlobalTrigEventWrapper().mtGlobalTriggerSourceID.getSourceID()){
+        if(tTrigger.getSourceID().getSourceID() != mtGlobalTrigEventWrapper.mtGlobalTriggerSourceID.getSourceID()){
             return false;
         }else{
             Vector vecTriggers = new Vector();
@@ -310,8 +310,8 @@ public class ConditionalTriggerBag
                 }
                 //--GTEventNumber should be assigned here.
                 triggerUID++;
-                getGlobalTrigEventWrapper().wrapFinalEvent(trigger, triggerUID);
-                trigger = (TriggerRequestPayload) getGlobalTrigEventWrapper().getGlobalTrigEventPayload_final();
+                mtGlobalTrigEventWrapper.wrapFinalEvent(trigger, triggerUID);
+                trigger = (TriggerRequestPayload) mtGlobalTrigEventWrapper.getGlobalTrigEventPayload_final();
 
                 return trigger;
             }

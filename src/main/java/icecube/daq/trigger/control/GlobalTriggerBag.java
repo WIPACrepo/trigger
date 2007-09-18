@@ -49,12 +49,12 @@ public class GlobalTriggerBag
     /**
      * internal list of triggers
      */
-    public Vector payloadList = new Vector();
+    private Vector payloadList = new Vector();
 
     /**
      * set of overlapping triggers to merge
      */
-    protected static List mergeList = new ArrayList();
+    private static List mergeList = new ArrayList();
 
     /**
      * The factory used to create triggers
@@ -64,9 +64,9 @@ public class GlobalTriggerBag
     /**
      * triggers that occur earlier than this time are free to be released
      */
-    protected IUTCTime timeGate = new UTCTime8B(-1);
+    private IUTCTime timeGate = new UTCTime8B(-1);
 
-    protected GlobalTrigEventWrapper mtGlobalTrigEventWrapper;
+    private GlobalTrigEventWrapper mtGlobalTrigEventWrapper;
 
     /**
      * UID for newly merged triggers
@@ -375,4 +375,8 @@ public class GlobalTriggerBag
         mtGlobalTrigEventWrapper.setTimeGap_option(iTimeGap_option);
     }
 
+    protected GlobalTrigEventWrapper getGlobalTrigEventWrapper()
+    {
+        return mtGlobalTrigEventWrapper;
+    }
 }

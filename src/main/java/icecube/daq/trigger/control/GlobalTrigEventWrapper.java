@@ -43,12 +43,10 @@ public class GlobalTrigEventWrapper
 
     private Sorter tSorter = new Sorter();
     private GlobalTrigEventReadoutElements  mtGlobalTrigEventReadoutElements;
-    private PayloadDestination asciiFileOutPayloadDestination;
 
     /**
      * The factory used to create triggers
      */
-
     private TriggerRequestPayloadFactory triggerFactory;
     private TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY = new TriggerRequestPayloadFactory();
 
@@ -57,81 +55,20 @@ public class GlobalTrigEventWrapper
     private TriggerRequestPayload mtGlobalTrigEventPayload_final;
     private TriggerRequestPayload mtPayload_onlyTimeWrapped;
 
- //   SortedSet mergeSet = new TreeSet();
-
     private int miTriggerUID;
     private boolean mbIsCalled_Wrap_single;
     public final ISourceID mtGlobalTriggerSourceID = SourceIdRegistry.
             getISourceIDFromNameAndId(DAQCmdInterface.DAQ_GLOBAL_TRIGGER, 0);
 
-    private Vector mVecGlobalReadoutRequestElements = new Vector();
     public int miNumMergedGTevent;
 
-    /**
-     * Create an instance of this class.
-     * Default constructor is declared, but private, to stop accidental
-     * creation of an instance of the class.
-     *
-     * Use this constructor for JUnit test.
-     *
-     */
     public GlobalTrigEventWrapper()
-    {
-        this(1); // No_TimeGap configuration
-        setPayloadFactory(DEFAULT_TRIGGER_FACTORY);
-    }
-
-    public GlobalTrigEventWrapper(int iTimeGap_option)
     {
         miTriggerUID = 0;
         miNumMergedGTevent = 0;
         mtGlobalTrigEventReadoutElements = new GlobalTrigEventReadoutElements();
-        mtGlobalTrigEventReadoutElements.setTimeGap_option(iTimeGap_option);//No_TimeGap
-    }
-    /**
-     * This method is to provide corrected time using readoutTimes,
-     * so that LowThresholdTrigger can use it for checking overalp.
-     *
-     * @param tTriggerRequestPayload
-     */
-    public void wrapTime(ITriggerRequestPayload tTriggerRequestPayload)
-    {
-        IReadoutRequest tReadoutRequest = tTriggerRequestPayload.getReadoutRequest();
-        Vector vecReadoutElement = new Vector();
-
-        IUTCTime tUTCTime_earliest = null;
-        IUTCTime tUTCTime_latest = null;
-
-        if(null != tReadoutRequest){
-
-            vecReadoutElement = tReadoutRequest.getReadoutRequestElements();
-            tUTCTime_earliest = tSorter.getUTCTimeEarliest((List) vecReadoutElement, false);
-            tUTCTime_latest = tSorter.getUTCTimeLatest((List) vecReadoutElement, false);
-
-        } else {//--Make sure ReadoutReqeust is null for Beacon, Stop triggers.
-
-            tUTCTime_earliest = tTriggerRequestPayload.getFirstTimeUTC();
-            tUTCTime_latest = tTriggerRequestPayload.getLastTimeUTC();
-        }
-
-        try {
-            mtPayload_onlyTimeWrapped = (TriggerRequestPayload) triggerFactory.
-                                   createPayload(tTriggerRequestPayload.getUID(),
-                                                 tTriggerRequestPayload.getTriggerType(),
-                                                 tTriggerRequestPayload.getTriggerConfigID(),
-                                                 tTriggerRequestPayload.getSourceID(),
-                                                 tUTCTime_earliest,
-                                                 tUTCTime_latest,
-                                                 tTriggerRequestPayload.getPayloads(),
-                                                 tTriggerRequestPayload.getReadoutRequest());
-        } catch (IOException e) {
-            log.error("Couldn't wrap trigger time", e);
-        } catch (DataFormatException e) {
-            log.error("Couldn't wrap trigger time", e);
-        }
-
-        ((ILoadablePayload) tTriggerRequestPayload).recycle();
-
+        mtGlobalTrigEventReadoutElements.setTimeGap_option(1);//No_TimeGap
+        setPayloadFactory(DEFAULT_TRIGGER_FACTORY);
     }
     /**
      * Collects all readout elements from input list of payloads into a vector.
@@ -173,7 +110,7 @@ public class GlobalTrigEventWrapper
             TriggerRequestPayload tPayload = (TriggerRequestPayload) iterMergeList.next();
             //testUtil.show_trigger_Info("inside collect subpayload up: ", miTriggerUID, tPayload);
 
-            //--if subPayload is NOT a mergedTirgger
+            //--if subPayload is NOT a mergedTrigger
             if(tPayload.getSourceID().getSourceID() != mtGlobalTriggerSourceID.getSourceID())
             {
                 vecLocalSubPayload.add(tPayload);
@@ -327,7 +264,7 @@ public class GlobalTrigEventWrapper
             log.debug("We have " + mergeList.size() + " triggers to wrapMergingEvent");
         }
 
-        Vector vecGlobalReadoutRequestElements_Final = new Vector();
+        Vector vecGlobalReadoutRequestElements_Final;
 
         if(vecGlobalReadoutRequestElements_Raw.size() > 1)
         {
@@ -338,7 +275,7 @@ public class GlobalTrigEventWrapper
 
             vecGlobalReadoutRequestElements_Final = vecGlobalReadoutRequestElements_Raw;
 
-        }else if(vecGlobalReadoutRequestElements_Raw.size() < 1){
+        }else{
 
             vecGlobalReadoutRequestElements_Final = null;
         }
@@ -440,10 +377,6 @@ public class GlobalTrigEventWrapper
         triggerFactory = (TriggerRequestPayloadFactory) payloadFactory;
         mtGlobalTrigEventReadoutElements.setPayloadFactory(triggerFactory);
     }
- /*   public void setPayloadFactory(TriggerRequestPayloadFactory triggerFactory) {
-        this.triggerFactory = triggerFactory;
-    }
-    */
     /**
      * Sets timeGateOption. This should be set in configuration.
      * @param iTimeGap_option

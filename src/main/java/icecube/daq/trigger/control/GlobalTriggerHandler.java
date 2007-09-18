@@ -212,7 +212,9 @@ public class GlobalTriggerHandler
             log.info("Flushing GlobalTriggers");
         }
 
-        Iterator triggerIterator = configuredTriggerList.iterator();
+        Iterator triggerIterator;
+
+        triggerIterator = configuredTriggerList.iterator();
         while (triggerIterator.hasNext()) {
             ITriggerControl trigger = (ITriggerControl) triggerIterator.next();
             trigger.flush();
@@ -237,6 +239,7 @@ public class GlobalTriggerHandler
         System.out.println("Total # of GT events = " + miTotalOutputGlobalTriggers);
         System.out.println("Total # of merged GT events = " + miTotalOutputMergedGlobalTriggers);
         System.out.println(" ");
+        triggerIterator = configuredTriggerList.iterator();
         while (triggerIterator.hasNext()) {
             ITriggerControl trigger = (ITriggerControl) triggerIterator.next();
             System.out.println("Total # of " + ((ITriggerConfig) trigger).getTriggerName() + "= "
@@ -647,6 +650,36 @@ public class GlobalTriggerHandler
 
     public DOMRegistry getDOMRegistry() {
 	return domRegistry;
+    }
+
+    public int getTotalInputTriggers()
+    {
+        return miTotalInputTriggers;
+    }
+
+    public int getTotalNullInputTriggers()
+    {
+        return miTotalNullInputTriggers;
+    }
+
+    public int getTotalNonTRPInputTriggers()
+    {
+        return miTotalNonTRPInputTriggers;
+    }
+
+    public int getTotalMergedInputTriggers()
+    {
+        return miTotalMergedInputTriggers;
+    }
+
+    public int getTotalOutputGlobalTriggers()
+    {
+        return miTotalOutputGlobalTriggers;
+    }
+
+    public int getTotalOutputMergedGlobalTriggers()
+    {
+        return miTotalOutputMergedGlobalTriggers;
     }
 
 }

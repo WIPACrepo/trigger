@@ -59,11 +59,11 @@ public class GlobalTrigEventReadoutElements
      * This method is to classify each ReadoutElement according to its ReadoutTypes.
      * This will produce GlobalList, StringList and  ModuleList.
      *
-     * @param vecInputElements
+     * @param inputElements
      */
-    private void classifyReadoutTypes(Vector vecInputElements)
+    private void classifyReadoutTypes(List inputElements)
     {
-        Iterator iterElements = vecInputElements.iterator();
+        Iterator iterElements = inputElements.iterator();
         while(iterElements.hasNext())
         {
             IReadoutRequestElement element = (IReadoutRequestElement) iterElements.next();
@@ -142,14 +142,14 @@ public class GlobalTrigEventReadoutElements
      * This method is the main method and called by GlobalTrigEventWrapper.java.
      * This returns final vector of ReadoutRequestElements for a GTEvent.
      *
-     * @param vecInputReadoutElements
+     * @param inputElements
      * @return
      */
-    public Vector getManagedFinalReadoutRequestElements(Vector vecInputReadoutElements)
+    public Vector getManagedFinalReadoutRequestElements(List inputElements)
     {
         initialize();
 
-        classifyReadoutTypes(vecInputReadoutElements);
+        classifyReadoutTypes(inputElements);
 
         //Each element of this list is another list (of ReadoutType) containing ReadoutElements.
         List listCurrentEventReadoutTypeLists = getCurrentEventReadoutTypeLists();
@@ -158,28 +158,27 @@ public class GlobalTrigEventReadoutElements
 
         for(int i=0; i<listCurrentEventReadoutTypeLists.size(); i++)
         {
-            listSameReadoutTypeElements = (List) listCurrentEventReadoutTypeLists.get(i);
+            listSameReadoutTypeElements = listCurrentEventReadoutTypeLists.get(i);
 
             if(listSameReadoutTypeElements.size() > 1)
             {
                 mtSimpleMerger.merge(listSameReadoutTypeElements);
-                listSimpleMergedSameReadoutLists.add((List) mtSimpleMerger.getListSimpleMergedSameReadoutElements());
+                listSimpleMergedSameReadoutLists.add(mtSimpleMerger.getListSimpleMergedSameReadoutElements());
 
             } else
             {
-                listSimpleMergedSameReadoutLists.add((List) listSameReadoutTypeElements);
+                listSimpleMergedSameReadoutLists.add(listSameReadoutTypeElements);
             }
         }
 
         if(listSimpleMergedSameReadoutLists.size() > 1)
         {
             mtSmartMerger.merge(listSimpleMergedSameReadoutLists);
-            //List listFinalElements = mtSmartMerger.getFinalReadoutElementsTimeOrdered_All();
-            mVecFinalReadoutElements.addAll((List) mtSmartMerger.getFinalReadoutElementsTimeOrdered_All());
+            mVecFinalReadoutElements.addAll(mtSmartMerger.getFinalReadoutElementsTimeOrdered_All());
 
         }else if(1 == listSimpleMergedSameReadoutLists.size()) //--> no need for smartMerge.
         {
-            mVecFinalReadoutElements.addAll((List) listSimpleMergedSameReadoutLists.get(0));
+            mVecFinalReadoutElements.addAll(listSimpleMergedSameReadoutLists.get(0));
         }
 
         return mVecFinalReadoutElements;

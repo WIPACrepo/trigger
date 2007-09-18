@@ -265,6 +265,12 @@ public class TriggerInput
             this.overlapping = overlapping;
         }
 
+        public String toString()
+        {
+            return "PayloadWindow[" + firstTime + "," + lastTime + "]" +
+                (overlapping ? ",overlapping" : "") +
+                (contained ? ",contained" : "");
+        }
     }
 
 }

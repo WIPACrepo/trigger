@@ -49,7 +49,6 @@ public class GlobalTrigEventReadoutElements
     public GlobalTrigEventReadoutElements()
     {
         mtSimpleMerger = new SimpleMerger();
-        mtSimpleMerger.setTimeGap_option(1); //No_TimeGap
         mtSmartMerger = new SmartMerger();
 
         setPayloadFactory(DEFAULT_TRIGGER_FACTORY);
@@ -154,11 +153,9 @@ public class GlobalTrigEventReadoutElements
         //Each element of this list is another list (of ReadoutType) containing ReadoutElements.
         List listCurrentEventReadoutTypeLists = getCurrentEventReadoutTypeLists();
         List listSimpleMergedSameReadoutLists = new ArrayList();
-        List listSameReadoutTypeElements = new ArrayList();
-
         for(int i=0; i<listCurrentEventReadoutTypeLists.size(); i++)
         {
-            listSameReadoutTypeElements =
+            List listSameReadoutTypeElements =
                 (List) listCurrentEventReadoutTypeLists.get(i);
 
             if(listSameReadoutTypeElements.size() > 1)
@@ -189,13 +186,13 @@ public class GlobalTrigEventReadoutElements
      */
     public void initialize()
     {
-        mListGlobal_II = new ArrayList();
-        mListString_II = new ArrayList();
-        mListModule_II = new ArrayList();
-        mListGlobal_IT = new ArrayList();
-        mListModule_IT = new ArrayList();
+        mListGlobal_II.clear();
+        mListString_II.clear();
+        mListModule_II.clear();
+        mListGlobal_IT.clear();
+        mListModule_IT.clear();
 
-        mVecFinalReadoutElements = new Vector();
+        mVecFinalReadoutElements.clear();
 
     }
 

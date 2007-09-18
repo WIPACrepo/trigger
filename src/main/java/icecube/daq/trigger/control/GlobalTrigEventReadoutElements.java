@@ -160,8 +160,7 @@ public class GlobalTrigEventReadoutElements
 
             if(listSameReadoutTypeElements.size() > 1)
             {
-                mtSimpleMerger.merge(listSameReadoutTypeElements);
-                listSimpleMergedSameReadoutLists.add(mtSimpleMerger.getListSimpleMergedSameReadoutElements());
+                listSimpleMergedSameReadoutLists.add(mtSimpleMerger.merge(listSameReadoutTypeElements));
 
             } else
             {

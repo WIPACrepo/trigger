@@ -52,6 +52,10 @@ public class StringTriggerHandler
      */
     public void process(ILoadablePayload payload) {
 
+        if (payload == null) {
+            return;
+        }
+
         int interfaceType = payload.getPayloadInterfaceType();
 
         // make sure we have hit payloads (or hit data payloads)

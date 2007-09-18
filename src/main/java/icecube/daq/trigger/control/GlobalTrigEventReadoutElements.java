@@ -158,7 +158,8 @@ public class GlobalTrigEventReadoutElements
 
         for(int i=0; i<listCurrentEventReadoutTypeLists.size(); i++)
         {
-            listSameReadoutTypeElements = listCurrentEventReadoutTypeLists.get(i);
+            listSameReadoutTypeElements =
+                (List) listCurrentEventReadoutTypeLists.get(i);
 
             if(listSameReadoutTypeElements.size() > 1)
             {
@@ -178,7 +179,7 @@ public class GlobalTrigEventReadoutElements
 
         }else if(1 == listSimpleMergedSameReadoutLists.size()) //--> no need for smartMerge.
         {
-            mVecFinalReadoutElements.addAll(listSimpleMergedSameReadoutLists.get(0));
+            mVecFinalReadoutElements.addAll((List) listSimpleMergedSameReadoutLists.get(0));
         }
 
         return mVecFinalReadoutElements;

@@ -21,7 +21,6 @@ import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.splicer.Payload;
 import icecube.daq.payload.splicer.PayloadFactory;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
@@ -377,7 +376,8 @@ public class TriggerBag
                     }
                     Iterator iter = subs.iterator();
                     while (iter.hasNext()) {
-                        Payload payload = (Payload) iter.next();
+                        ILoadablePayload payload =
+                            (ILoadablePayload) iter.next();
                         // must load or bad things happen
                         try {
                             payload.loadPayload();
@@ -507,7 +507,7 @@ public class TriggerBag
         // recycle old subTriggers
         Iterator iter = subTriggers.iterator();
         while (iter.hasNext()) {
-            ((ITriggerRequestPayload) iter.next()).recycle();
+            ((ILoadablePayload) iter.next()).recycle();
         }
     }
 

@@ -23,7 +23,6 @@ import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.payload.splicer.Payload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.monitor.Statistic;
 
@@ -256,7 +255,7 @@ public class GlobalTriggerManager
         }
         Iterator iter = event.getAllSpliceables().iterator();
         while (iter.hasNext()) {
-            Payload payload = (Payload) iter.next();
+            ILoadablePayload payload = (ILoadablePayload) iter.next();
             recycleCount++;
             log.debug("  Recycle payload " + recycleCount + " at time " + payload.getPayloadTimeUTC());
             earliestTime = payload.getPayloadTimeUTC();

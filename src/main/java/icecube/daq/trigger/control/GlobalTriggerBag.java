@@ -21,7 +21,6 @@ import icecube.daq.payload.splicer.Payload;
 import icecube.daq.payload.splicer.PayloadFactory;
 import icecube.daq.payload.impl.UTCTime8B;
 import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.ITriggerRequestPayload;
@@ -215,12 +214,12 @@ public class GlobalTriggerBag
         return false;
     }
 
-    public TriggerRequestPayload next() {
+    public ITriggerRequestPayload next() {
 
         // iterate over triggerList and check against timeGate
         Iterator iter = payloadList.iterator();
         while (iter.hasNext()) {
-            TriggerRequestPayload trigger = (TriggerRequestPayload) iter.next();
+            ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
             double timeDiff = timeGate.timeDiff_ns(trigger.getLastTimeUTC());
             if ( (flushing) ||
                  (0 < timeGate.compareTo(trigger.getLastTimeUTC())) ) {
@@ -231,7 +230,7 @@ public class GlobalTriggerBag
                 //GTEventNumber should be assigned here.
                 triggerUID++;
                 mtGlobalTrigEventWrapper.wrapFinalEvent(trigger, triggerUID);
-                trigger = (TriggerRequestPayload) mtGlobalTrigEventWrapper.getGlobalTrigEventPayload_final();
+                trigger = (ITriggerRequestPayload) mtGlobalTrigEventWrapper.getGlobalTrigEventPayload_final();
 
                 // show this output to the monitor
                 monitor.recordOutput(trigger);

@@ -12,11 +12,9 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.payload.*;
 import icecube.daq.payload.splicer.PayloadFactory;
-import icecube.daq.payload.splicer.Payload;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.IReadoutRequest;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.common.DAQCmdInterface;
 
 import java.util.*;
@@ -57,10 +55,10 @@ public class GlobalTrigEventWrapper
      */
     private TriggerRequestPayloadFactory triggerFactory;
 
-    private TriggerRequestPayload mtGlobalTrigEventPayload_single;
-    private TriggerRequestPayload mtGlobalTrigEventPayload_merged;
-    private TriggerRequestPayload mtGlobalTrigEventPayload_final;
-    private TriggerRequestPayload mtPayload_onlyTimeWrapped;
+    private ITriggerRequestPayload mtGlobalTrigEventPayload_single;
+    private ITriggerRequestPayload mtGlobalTrigEventPayload_merged;
+    private ITriggerRequestPayload mtGlobalTrigEventPayload_final;
+    private ITriggerRequestPayload mtPayload_onlyTimeWrapped;
 
     private int miTriggerUID;
     private boolean mbIsCalled_Wrap_single;
@@ -112,7 +110,7 @@ public class GlobalTrigEventWrapper
 
         while(iterMergeList.hasNext())
         {
-            TriggerRequestPayload tPayload = (TriggerRequestPayload) iterMergeList.next();
+            ITriggerRequestPayload tPayload = (ITriggerRequestPayload) iterMergeList.next();
             //testUtil.show_trigger_Info("inside collect subpayload up: ", miTriggerUID, tPayload);
 
             //--if subPayload is NOT a mergedTrigger
@@ -175,7 +173,7 @@ public class GlobalTrigEventWrapper
         vecSubpayloads.add(tTriggerRequestPayload);
 
         miTriggerUID++;
-        mtGlobalTrigEventPayload_single = (TriggerRequestPayload) triggerFactory.
+        mtGlobalTrigEventPayload_single = (ITriggerRequestPayload) triggerFactory.
                                 createPayload(miTriggerUID,
                                               iGTrigType,
                                               iGTrigConfigID,
@@ -223,7 +221,7 @@ public class GlobalTrigEventWrapper
                                                                               vecGlobalReadoutRequestElements_Raw);
         miTriggerUID++;
         //--create the MergedGlobalTriggerEventPayload
-        mtGlobalTrigEventPayload_merged = (TriggerRequestPayload) triggerFactory.createPayload(miTriggerUID,
+        mtGlobalTrigEventPayload_merged = (ITriggerRequestPayload) triggerFactory.createPayload(miTriggerUID,
                                                                                                iGTrigType,
                                                                                                iGTrigConfigID,
                                                                                                 GLOBAL_TRIGGER_SOURCE_ID,
@@ -302,7 +300,7 @@ public class GlobalTrigEventWrapper
 
         miTriggerUID++;
         // create the MergedGlobalTriggerEventPayload
-        mtGlobalTrigEventPayload_merged = (TriggerRequestPayload) triggerFactory.createPayload(miTriggerUID,
+        mtGlobalTrigEventPayload_merged = (ITriggerRequestPayload) triggerFactory.createPayload(miTriggerUID,
                                                                                                 iMergedTriggerType,
                                                                                                 iMergedTriggerConfigID,
                                                                                                 GLOBAL_TRIGGER_SOURCE_ID,
@@ -339,7 +337,7 @@ public class GlobalTrigEventWrapper
      * @param tGTEvent
      * @param iEvtNumber
      */
-    public void wrapFinalEvent(TriggerRequestPayload tGTEvent, int iEvtNumber)
+    public void wrapFinalEvent(ITriggerRequestPayload tGTEvent, int iEvtNumber)
     {
         Vector vecReadoutRequestElements = ((IReadoutRequest) tGTEvent.getReadoutRequest()).getReadoutRequestElements();
 
@@ -348,7 +346,7 @@ public class GlobalTrigEventWrapper
                                                                                     vecReadoutRequestElements);
         try {
 
-            mtGlobalTrigEventPayload_final = (TriggerRequestPayload) triggerFactory.createPayload(iEvtNumber,
+            mtGlobalTrigEventPayload_final = (ITriggerRequestPayload) triggerFactory.createPayload(iEvtNumber,
                                                                                                    tGTEvent.getTriggerType(),
                                                                                                    tGTEvent.getTriggerConfigID(),
                                                                                                    tGTEvent.getSourceID(),

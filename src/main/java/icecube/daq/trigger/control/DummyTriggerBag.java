@@ -10,7 +10,7 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.impl.TriggerRequestPayload;
+import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.ISourceID;
@@ -118,9 +118,9 @@ public class DummyTriggerBag
      *
      * @return the next trigger
      */
-    public synchronized TriggerRequestPayload next() {
+    public synchronized ITriggerRequestPayload next() {
         Iterator iter = payloadList.iterator();
-        return (TriggerRequestPayload) iter.next();
+        return (ITriggerRequestPayload) iter.next();
     }
 
     /**

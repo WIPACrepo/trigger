@@ -11,11 +11,9 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.payload.*;
-import icecube.daq.payload.splicer.Payload;
 import icecube.daq.payload.impl.UTCTime8B;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.monitor.ITriggerMonitor;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
@@ -318,7 +316,7 @@ public class GlobalTriggerHandler
                     boolean failedLoad = false;
                     Vector vecSubPayloads;
                     try {
-                        vecSubPayloads = ((TriggerRequestPayload) tInputTrigger).getPayloads();
+                        vecSubPayloads = ((ITriggerRequestPayload) tInputTrigger).getPayloads();
                     } catch (IOException e) {
                         log.error("Couldn't load payload", e);
                         vecSubPayloads = null;

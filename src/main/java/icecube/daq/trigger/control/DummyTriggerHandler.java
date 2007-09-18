@@ -67,6 +67,7 @@ public class DummyTriggerHandler
      */
     private IPayload earliestPayloadOfInterest;
 
+    private int numHitsPerTrigger = 1000;
     private int count;
 
     private DOMRegistry domRegistry;
@@ -107,6 +108,7 @@ public class DummyTriggerHandler
      * @param trigger trigger to be added
      */
     public void addTrigger(ITriggerControl trigger) {
+        log.info("Triggers added to DummyTriggerBag are ignored");
     }
 
     /**
@@ -115,6 +117,7 @@ public class DummyTriggerHandler
      * @param triggers
      */
     public void addTriggers(List triggers) {
+        log.info("Triggers added to DummyTriggerBag are ignored");
     }
 
     /**
@@ -143,6 +146,11 @@ public class DummyTriggerHandler
         return payloadDestination;
     }
 
+    public void setNumHitsPerTrigger(int numHitsPerTrigger)
+    {
+        this.numHitsPerTrigger = numHitsPerTrigger;
+    }
+
     /**
      * Method to process payloads, assumes that they are time ordered.
      * @param payload payload to process
@@ -151,7 +159,7 @@ public class DummyTriggerHandler
         IHitPayload hit = (IHitPayload) payload;
 
         // need to make TRP and add to trigger bag
-        if (count % 1000 == 0) {
+        if (count % numHitsPerTrigger == 0) {
 
             log.info("Creating Trigger...");
 

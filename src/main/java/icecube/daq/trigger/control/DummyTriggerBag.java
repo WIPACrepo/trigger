@@ -55,7 +55,7 @@ public class DummyTriggerBag
      * default constructor
      */
     public DummyTriggerBag() {
-        this(-1, -1, new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
+        this(new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
     /**

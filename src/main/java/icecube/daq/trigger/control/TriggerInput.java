@@ -191,7 +191,7 @@ public class TriggerInput
     private class PayloadWindow {
 
         private ILoadablePayload payload;
-        public IUTCTime firstTime;
+        private IUTCTime firstTime;
         private IUTCTime lastTime;
         private boolean overlapping;
         private boolean contained;

@@ -44,6 +44,12 @@ import java.io.IOException;
 public class GlobalTriggerHandler
         implements ITriggerHandler
 {
+    public static final int DEFAULT_MAX_TIMEGATE_WINDOW = 0;
+    private static final int miTimeGap_Yes = 2;
+    public static final int DEFAULT_TIMEGAP_OPTION = miTimeGap_Yes;
+
+    private static final int PRINTOUT_FREQUENCY = 100000;
+
     /**
      * Log object for this class
      */
@@ -57,18 +63,17 @@ public class GlobalTriggerHandler
     /**
      * Bag of triggers to issue
      */
-    protected ITriggerBag triggerBag;
+    private ITriggerBag triggerBag;
 
     /**
      * The factory used to create triggers to issue
      */
-    protected TriggerRequestPayloadFactory outputFactory;
+    private TriggerRequestPayloadFactory outputFactory;
 
-    protected IPayloadDestinationCollection payloadDestination;
     /**
      * output destination
      */
-    // private PayloadDestination payloadDestination;
+    private IPayloadDestinationCollection payloadDestination;
 
     /**
      * earliest thing of interest to the analysis
@@ -78,40 +83,33 @@ public class GlobalTriggerHandler
     /**
      * sourceID of the iniceTrigger
      */
-    protected ISourceID sourceID;
+    private ISourceID sourceID;
 
     /**
      * input handler
      */
-    protected ITriggerInput inputHandler;
+    private ITriggerInput inputHandler;
     /**
      * This list is used for JUnitTest purpose.
      */
     private List mListAvailableTriggersToRelease;
 
-    protected static final int DEFAULT_MAX_TIMEGATE_WINDOW = 0;
-    protected static final int miTimeGap_No = 1;
-    protected static final int miTimeGap_Yes = 2;
-    protected static final int DEFAULT_TIMEGAP_OPTION = miTimeGap_Yes;
-
     //--assign Default value.
     private int miMaxTimeGateWindow = DEFAULT_MAX_TIMEGATE_WINDOW;
     private int miTimeGap_option = DEFAULT_TIMEGAP_OPTION;
 
-    public int miTotalInputTriggers;
-    public int miTotalNullInputTriggers;
-    public int miTotalNonTRPInputTriggers;
-    public int miTotalMergedInputTriggers;
-    public int miTotalOutputGlobalTriggers;
-    public int miTotalOutputMergedGlobalTriggers;
-    int miMaxNum = 20;
-
-    private int miInfoPrintoutFrequency = 100000;
+    private int miTotalInputTriggers;
+    private int miTotalNullInputTriggers;
+    private int miTotalNonTRPInputTriggers;
+    private int miTotalMergedInputTriggers;
+    private int miTotalOutputGlobalTriggers;
+    private int miTotalOutputMergedGlobalTriggers;
+    private int miMaxNum = 20;
 
     /**
      * Monitor object.
      */
-    protected TriggerHandlerMonitor monitor;
+    private TriggerHandlerMonitor monitor;
 
     private double longestTrigger;
 
@@ -124,8 +122,7 @@ public class GlobalTriggerHandler
      */
     public GlobalTriggerHandler()
     {
-        this(new SourceID4B(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID),
-             DEFAULT_TIMEGAP_OPTION);
+        this(new SourceID4B(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID));
     }
 
     public GlobalTriggerHandler(ISourceID sourceID)
@@ -263,10 +260,9 @@ public class GlobalTriggerHandler
         earliestPayloadOfInterest = null;
         mListAvailableTriggersToRelease = new ArrayList();
         configuredTriggerList = new ArrayList();
+        longestTrigger = 0.0;
 
         inputHandler = new TriggerInput();
-        triggerBag = new GlobalTriggerBag();
-        triggerBag.setPayloadFactory(outputFactory);
 
         //--following two values need to be reset anytime we want to change the values.
         //  Inside JBoss DAQ framework, those values are reset in enterRunning() stage.
@@ -274,15 +270,16 @@ public class GlobalTriggerHandler
        // ((GlobalTriggerBag) triggerBag).setMaxTimeGateWindow((int) getMaxTimeGateWindow());
        // ((GlobalTriggerBag) triggerBag).setTimeGap_option(getTimeGap_option());
 
-        this.setMaxTimeGateWindow((int) getMaxTimeGateWindow());
-        this.setTimeGap_option(getTimeGap_option());
-        
+        triggerBag = new GlobalTriggerBag();
+        triggerBag.setPayloadFactory(outputFactory);
+
         monitor = new TriggerHandlerMonitor();
         PayloadBagMonitor triggerBagMonitor = new PayloadBagMonitor();
         triggerBag.setMonitor(triggerBagMonitor);
         monitor.setTriggerBagMonitor(triggerBagMonitor);
 
-        longestTrigger = 0.0;
+        this.setMaxTimeGateWindow((int) getMaxTimeGateWindow());
+        this.setTimeGap_option(getTimeGap_option());
     }
     /**
      * This is the main method.
@@ -378,7 +375,7 @@ public class GlobalTriggerHandler
                             try {
                                 configuredTrigger.runTrigger(subPayload);
                                 int triggerCounter = ((ITriggerMonitor) configuredTrigger).getTriggerCounter();
-                                if(triggerCounter % miInfoPrintoutFrequency == 0 && triggerCounter >= miInfoPrintoutFrequency){
+                                if(triggerCounter % PRINTOUT_FREQUENCY == 0 && triggerCounter >= PRINTOUT_FREQUENCY){
                                     log.info(((ITriggerConfig) configuredTrigger).
                                             getTriggerName() + ":  #  " + triggerCounter);
 
@@ -438,6 +435,16 @@ public class GlobalTriggerHandler
     }
 
     /**
+     * Get the input handler
+     *
+     * @return a trigger input handler
+     */
+    public ITriggerInput getInputHandler()
+    {
+        return inputHandler;
+    }
+
+    /**
      * check triggerBag and issue/ship GTEventPayload if possible
      *   any triggers that are earlier than the earliestPayloadOfInterest are selected
      *   if any of those overlap, they are merged
@@ -488,7 +495,7 @@ public class GlobalTriggerHandler
             }
 
             if (log.isInfoEnabled()) {
-                if(miTotalOutputGlobalTriggers%miInfoPrintoutFrequency == 0){
+                if(miTotalOutputGlobalTriggers % PRINTOUT_FREQUENCY == 0){
                     log.info("Issue # " + miTotalOutputGlobalTriggers + " GTEventPayload (trigType = " + GT_trigType + " ) : "
                              + " extended event time = " + firstTime + " to "
                              + lastTime + " and contains " + nSubPayloads + " subTriggers"
@@ -623,6 +630,11 @@ public class GlobalTriggerHandler
     public void setPayloadDestinationCollection(IPayloadDestinationCollection payloadDestination)
     {
         this.payloadDestination = payloadDestination;
+    }
+
+    public IPayloadDestinationCollection getPayloadDestination()
+    {
+        return payloadDestination;
     }
 
     public List getListAvailableTriggerToRelease()

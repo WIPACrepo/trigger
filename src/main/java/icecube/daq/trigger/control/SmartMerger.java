@@ -40,23 +40,23 @@ public class SmartMerger
 
     private Sorter mtSorter = new Sorter();
 
-    List mListFinalReadoutElements_All = new ArrayList();
+    private List mListFinalReadoutElements_All = new ArrayList();
 
-    List mListReadoutElements_II_Global = new ArrayList();
-    List mListReadoutElements_II_String = new ArrayList();
-    List mListReadoutElements_II_Module = new ArrayList();
-    List mListReadoutElements_IT_Global = new ArrayList();
-    List mListReadoutElements_IT_String = new ArrayList();
-    List mListReadoutElements_IT_Module = new ArrayList();
+    private List mListReadoutElements_II_Global = new ArrayList();
+    private List mListReadoutElements_II_String = new ArrayList();
+    private List mListReadoutElements_II_Module = new ArrayList();
+    private List mListReadoutElements_IT_Global = new ArrayList();
+    private List mListReadoutElements_IT_String = new ArrayList();
+    private List mListReadoutElements_IT_Module = new ArrayList();
 
     // list containg new ReadoutElements of all (Global, Strings, Modules) in InIce
-    List mListFinalReadoutElements_InIce = new ArrayList();
+    private List mListFinalReadoutElements_InIce = new ArrayList();
 
     // list containg new ReadoutElements of all (Global, Strings, Modules) in IceTop
-    List mListFinalReadoutElements_IceTop = new ArrayList();
+    private List mListFinalReadoutElements_IceTop = new ArrayList();
 
-    final double mdNanoSec_negative = -0.1;
-    final double mdNanoSec_positive = 0.1;
+    private final double mdNanoSec_negative = -0.1;
+    private final double mdNanoSec_positive = 0.1;
 
     /**
      * Create an instance of this class.
@@ -72,7 +72,7 @@ public class SmartMerger
      *
      * @param listSimpleMergedSameReadoutTypeLists
      */
-    public void assignListReadoutType(List listSimpleMergedSameReadoutTypeLists)
+    private void assignListReadoutType(List listSimpleMergedSameReadoutTypeLists)
     {
         initialize();
 
@@ -116,7 +116,7 @@ public class SmartMerger
     /**
      * This method initializes all lists before merge().
      */
-    public void initialize()
+    private void initialize()
     {
         mListReadoutElements_II_Global = new ArrayList();
         mListReadoutElements_II_String = new ArrayList();
@@ -132,16 +132,16 @@ public class SmartMerger
     /**
      * This method manages timeOverlap among differnt ReadoutTypes in InIce.
      */
-    public void manageReadout_InIce()
+    private void manageReadout_InIce()
     {
-        //Only one ReadoutType has already been taken care in GlobalTrigEventReadoutElelemts.
+        //Only one ReadoutType has already been taken care in GlobalTrigEventReadoutElements.
 
         if(0 != mListReadoutElements_II_Global.size() &&
-             0 != mListReadoutElements_II_String.size() &&
-                 0 == mListReadoutElements_II_Module.size())
+           0 != mListReadoutElements_II_String.size() &&
+           0 == mListReadoutElements_II_Module.size())
         {
             //Larger ReadoutElements are not affected.
-            //Only Smaller ReaoutElements are adjusted according to LargerReadoutElements.
+            //Only Smaller ReadoutElements are adjusted according to LargerReadoutElements.
             mListFinalReadoutElements_InIce.addAll(mListReadoutElements_II_Global);
 
             //check timeOverlap between Strings and Global. --> new ReadoutElement
@@ -160,10 +160,9 @@ public class SmartMerger
                  0 != mListReadoutElements_II_Module.size())
         {
             //Larger ReadoutElements are not affected.
-            //Only Smaller ReaoutElements are adjusted according to LargerReadoutElements.
+            //Only Smaller ReadoutElements are adjusted according to LargerReadoutElements.
             mListFinalReadoutElements_InIce.addAll(mListReadoutElements_II_Global);
 
-            //check againt
             List listNewReadoutElements_II_String = new ArrayList();
             listNewReadoutElements_II_String.addAll(
                     (List) getListNewAdjustedSmallerReadoutElements(
@@ -210,7 +209,6 @@ public class SmartMerger
         {
             mListFinalReadoutElements_InIce.addAll(mListReadoutElements_II_String);
 
-            //check againt
             List listNewReadoutElements_II_Module = new ArrayList();
 
             listNewReadoutElements_II_Module.addAll(
@@ -228,7 +226,6 @@ public class SmartMerger
         {
             mListFinalReadoutElements_InIce.addAll(mListReadoutElements_II_Global);
 
-            //check againt
             List listNewReadoutElements_II_Module = new ArrayList();
             listNewReadoutElements_II_Module.addAll(
                     (List) getListNewAdjustedSmallerReadoutElements(
@@ -263,7 +260,7 @@ public class SmartMerger
      * This method manages timeOverlap among differnt ReadoutTypes in IceTop.
      * Note: There will be no READOUT_IT_String. But I implement it for generality.
      */
-    public void manageReadout_IceTop()
+    private void manageReadout_IceTop()
     {
         // same as manageReadout_InIce() but substitute with IT
        if(0 != mListReadoutElements_IT_Global.size() &&
@@ -289,7 +286,6 @@ public class SmartMerger
         {
             mListFinalReadoutElements_IceTop.addAll(mListReadoutElements_IT_Global);
 
-            //check againt
             List listNewReadoutElements_IT_String = new ArrayList();
             listNewReadoutElements_IT_String.addAll(
                     (List) getListNewAdjustedSmallerReadoutElements(
@@ -337,7 +333,6 @@ public class SmartMerger
         {
             mListFinalReadoutElements_IceTop.addAll(mListReadoutElements_IT_String);
 
-            //check againt
             List listNewReadoutElements_IT_Module = new ArrayList();
 
             listNewReadoutElements_IT_Module.addAll(
@@ -355,7 +350,6 @@ public class SmartMerger
         {
             mListFinalReadoutElements_IceTop.addAll(mListReadoutElements_IT_Global);
 
-            //check againt
             List listNewReadoutElements_IT_Module = new ArrayList();
             listNewReadoutElements_IT_Module.addAll(
                     (List) getListNewAdjustedSmallerReadoutElements(
@@ -394,8 +388,8 @@ public class SmartMerger
      * @param tTime_end
      * @return
      */
-    public IReadoutRequestElement makeNewReadoutElement(IReadoutRequestElement tOldElement,
-                                                       IUTCTime tTime_start, IUTCTime tTime_end)
+    private IReadoutRequestElement makeNewReadoutElement(IReadoutRequestElement tOldElement,
+                                                         IUTCTime tTime_start, IUTCTime tTime_end)
     {
         IReadoutRequestElement tNewReadoutElement =
                 triggerFactory.createReadoutRequestElement(
@@ -414,8 +408,8 @@ public class SmartMerger
      * @param listLargerSameReadoutElements: II_GLOBAL, II_STRING, or IT_GLOBAL
      * @param listSmallerSameReadoutElements: II_String, II_DOM, IT_DOM
      */
-    public List getListNewAdjustedSmallerReadoutElements(List listLargerSameReadoutElements,
-                                                         List listSmallerSameReadoutElements)
+    private List getListNewAdjustedSmallerReadoutElements(List listLargerSameReadoutElements,
+                                                          List listSmallerSameReadoutElements)
     {
         List listNewElements = new ArrayList();
         
@@ -545,7 +539,7 @@ public class SmartMerger
     /**
      * This is the main method called in GlobalTrigReadoutElements.java after SimpleMerger.
      *
-     * @param listSimplyMergedReadoutTypeLists: require SimpleMerge for each list of ReadouType.
+     * @param listSimplyMergedReadoutTypeLists: require SimpleMerge for each list of ReadoutType.
      */
     public void merge(List listSimplyMergedReadoutTypeLists)
     {

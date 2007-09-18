@@ -51,12 +51,12 @@ public class TriggerHandler
     /**
      * List of defined triggers
      */
-    protected List triggerList;
+    private List triggerList;
 
     /**
      * Bag of triggers to issue
      */
-    protected ITriggerBag triggerBag;
+    private ITriggerBag triggerBag;
 
     /**
      * counts the number of processed primitives
@@ -66,7 +66,7 @@ public class TriggerHandler
     /**
      * output destination
      */
-    protected IPayloadDestinationCollection payloadDestination;
+    private IPayloadDestinationCollection payloadDestination;
 
     /**
      * earliest thing of interest to the analysis
@@ -86,7 +86,7 @@ public class TriggerHandler
     /**
      * Default output factory
      */
-    protected TriggerRequestPayloadFactory outputFactory;
+    private TriggerRequestPayloadFactory outputFactory;
 
     /**
      * SourceId of this TriggerHandler.
@@ -96,7 +96,7 @@ public class TriggerHandler
     /**
      * Monitor object.
      */
-    protected TriggerHandlerMonitor monitor;
+    private TriggerHandlerMonitor monitor;
 
     /**
      * DOMRegistry
@@ -127,14 +127,20 @@ public class TriggerHandler
         timeOfLastHit = null;
         inputHandler = new TriggerInput();
         triggerList = new ArrayList();
-        triggerBag = new TriggerBag(sourceId);
-        triggerBag.setPayloadFactory(outputFactory);
+
+        triggerBag = createTriggerBag();
 
         monitor = new TriggerHandlerMonitor();
         PayloadBagMonitor triggerBagMonitor = new PayloadBagMonitor();
         triggerBag.setMonitor(triggerBagMonitor);
         monitor.setTriggerBagMonitor(triggerBagMonitor);
+    }
 
+    protected ITriggerBag createTriggerBag()
+    {
+        ITriggerBag bag = new TriggerBag(sourceId);
+        bag.setPayloadFactory(outputFactory);
+        return bag;
     }
 
     /**
@@ -237,6 +243,11 @@ public class TriggerHandler
      */
     public void setPayloadDestinationCollection(IPayloadDestinationCollection payloadDestination) {
         this.payloadDestination = payloadDestination;
+    }
+
+    public IPayloadDestinationCollection getPayloadDestination()
+    {
+        return payloadDestination;
     }
 
     /**
@@ -480,7 +491,7 @@ public class TriggerHandler
     /**
      * sets the earliest overall time of interest by inspecting each trigger
      */
-    protected void setEarliestTime() {
+    private void setEarliestTime() {
 
         IUTCTime earliestTimeOverall = new UTCTime8B(Long.MAX_VALUE);
         IPayload earliestPayloadOverall = null;
@@ -516,6 +527,11 @@ public class TriggerHandler
 
     public DOMRegistry getDOMRegistry() {
 	return domRegistry;
+    }
+
+    public void setOutputFactory(TriggerRequestPayloadFactory factory)
+    {
+        outputFactory = factory;
     }
 
 }

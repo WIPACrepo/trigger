@@ -119,7 +119,7 @@ public class TriggerBag
      * default constructor
      */
     public TriggerBag() {
-        this(-1, -1, new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
+        this(new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
     /**

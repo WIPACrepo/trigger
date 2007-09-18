@@ -92,11 +92,19 @@ public class DummyTriggerManager
      * @param sourceId SourceId of this TriggerManager
      */
     public DummyTriggerManager(SpliceableFactory inputFactory, ISourceID sourceId) {
-        super(sourceId);
+        super(sourceId, getOutputFactory(inputFactory));
         this.inputFactory = inputFactory;
-        this.outputFactory = (TriggerRequestPayloadFactory)
-                ((MasterPayloadFactory) inputFactory).getPayloadFactory(PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST);
         init();
+    }
+
+    private static TriggerRequestPayloadFactory
+        getOutputFactory(SpliceableFactory inputFactory)
+    {
+        final int id = PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST;
+
+        MasterPayloadFactory factory = (MasterPayloadFactory) inputFactory;
+
+        return (TriggerRequestPayloadFactory) factory.getPayloadFactory(id);
     }
 
     private void init() {
@@ -182,7 +190,7 @@ public class DummyTriggerManager
             log.info("Received Splicer DISPOSED");
         }
         try {
-            payloadDestination.closeAllPayloadDestinations();
+            getPayloadDestination().closeAllPayloadDestinations();
         } catch (IOException e) {
             log.error("Error closing PayloadDestination", e);
         }
@@ -198,7 +206,7 @@ public class DummyTriggerManager
             log.error("Received Splicer FAILED");
         }
         try {
-            payloadDestination.closeAllPayloadDestinations();
+            getPayloadDestination().closeAllPayloadDestinations();
         } catch (IOException e) {
             log.error("Error closing PayloadDestination", e);
         }
@@ -232,8 +240,7 @@ public class DummyTriggerManager
             log.info("Received Splicer STOPPED");
         }
         try {
-            //payloadDestination.closeAllPayloadDestinations();
-            payloadDestination.stopAllPayloadDestinations();
+            getPayloadDestination().stopAllPayloadDestinations();
         } catch (IOException e) {
             log.error("Error closing PayloadDestination", e);
         }

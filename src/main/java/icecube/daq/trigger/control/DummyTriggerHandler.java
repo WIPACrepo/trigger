@@ -45,17 +45,17 @@ public class DummyTriggerHandler
     /**
      * Bag of triggers to issue
      */
-    protected ITriggerBag triggerBag;
+    private ITriggerBag triggerBag;
 
     /**
      * output destination
      */
-    protected IPayloadDestinationCollection payloadDestination;
+    private IPayloadDestinationCollection payloadDestination;
 
     /**
      * Default output factory
      */
-    protected TriggerRequestPayloadFactory outputFactory;
+    private TriggerRequestPayloadFactory outputFactory;
 
     /**
      * SourceId of this TriggerHandler.
@@ -78,11 +78,11 @@ public class DummyTriggerHandler
         this(new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
-    public DummyTriggerHandler(ISourceID sourceId) {
+    private DummyTriggerHandler(ISourceID sourceId) {
         this(sourceId, new TriggerRequestPayloadFactory());
     }
 
-    public DummyTriggerHandler(ISourceID sourceId, TriggerRequestPayloadFactory outputFactory) {
+    protected DummyTriggerHandler(ISourceID sourceId, TriggerRequestPayloadFactory outputFactory) {
         this.sourceId = sourceId;
         this.outputFactory = outputFactory;
         init();
@@ -136,6 +136,11 @@ public class DummyTriggerHandler
      */
     public void setPayloadDestinationCollection(IPayloadDestinationCollection payloadDestination) {
         this.payloadDestination = payloadDestination;
+    }
+
+    IPayloadDestinationCollection getPayloadDestination()
+    {
+        return payloadDestination;
     }
 
     /**
@@ -198,6 +203,14 @@ public class DummyTriggerHandler
     }
 
     /**
+     * getter for count
+     * @return count
+     */
+    public int getCount() {
+        return count;
+    }
+
+    /**
      * getter for SourceID
      * @return sourceID
      */
@@ -244,7 +257,7 @@ public class DummyTriggerHandler
         return earliestPayloadOfInterest;
     }
 
-    protected void setEarliestPayloadOfInterest(IPayload earliest) {
+    private void setEarliestPayloadOfInterest(IPayload earliest) {
         earliestPayloadOfInterest = earliest;
     }
 

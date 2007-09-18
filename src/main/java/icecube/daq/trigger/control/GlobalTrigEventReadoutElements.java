@@ -29,17 +29,17 @@ public class GlobalTrigEventReadoutElements
     private TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY = new TriggerRequestPayloadFactory();
     private TriggerRequestPayloadFactory triggerFactory;
 
-    SimpleMerger mtSimpleMerger;
-    SmartMerger mtSmartMerger;
+    private SimpleMerger mtSimpleMerger;
+    private SmartMerger mtSmartMerger;
 
-    Vector mVecFinalReadoutElements = new Vector();
+    private Vector mVecFinalReadoutElements = new Vector();
 
-    List mListGlobal_II = new ArrayList();
-    List mListString_II = new ArrayList();
-    List mListModule_II = new ArrayList();
+    private List mListGlobal_II = new ArrayList();
+    private List mListString_II = new ArrayList();
+    private List mListModule_II = new ArrayList();
 
-    List mListGlobal_IT = new ArrayList();
-    List mListModule_IT = new ArrayList();
+    private List mListGlobal_IT = new ArrayList();
+    private List mListModule_IT = new ArrayList();
 
     /**
      * Create an instance of this class.
@@ -125,18 +125,18 @@ public class GlobalTrigEventReadoutElements
      *
      * @return
      */
-    public List getCurrentEventReadoutTypeLists()
+    private List getCurrentEventReadoutTypeLists()
     {
-        List listCurrentReaoutTypeLists = new ArrayList();
+        List listCurrentReadoutTypeLists = new ArrayList();
 
-        if(0 != mListGlobal_II.size()) listCurrentReaoutTypeLists.add(mListGlobal_II);
-        if(0 != mListString_II.size()) listCurrentReaoutTypeLists.add(mListString_II);
-        if(0 != mListModule_II.size()) listCurrentReaoutTypeLists.add(mListModule_II);
+        if(0 != mListGlobal_II.size()) listCurrentReadoutTypeLists.add(mListGlobal_II);
+        if(0 != mListString_II.size()) listCurrentReadoutTypeLists.add(mListString_II);
+        if(0 != mListModule_II.size()) listCurrentReadoutTypeLists.add(mListModule_II);
 
-        if(0 != mListGlobal_IT.size()) listCurrentReaoutTypeLists.add(mListGlobal_IT);
-        if(0 != mListModule_IT.size()) listCurrentReaoutTypeLists.add(mListModule_IT);
+        if(0 != mListGlobal_IT.size()) listCurrentReadoutTypeLists.add(mListGlobal_IT);
+        if(0 != mListModule_IT.size()) listCurrentReadoutTypeLists.add(mListModule_IT);
 
-        return listCurrentReaoutTypeLists;
+        return listCurrentReadoutTypeLists;
     }
     /**
      * This method is the main method and called by GlobalTrigEventWrapper.java.
@@ -209,6 +209,5 @@ public class GlobalTrigEventReadoutElements
     {
         mtSimpleMerger.setTimeGap_option(iTimeGap_option);
     }
-
 
 }

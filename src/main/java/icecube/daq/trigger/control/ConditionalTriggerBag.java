@@ -156,13 +156,13 @@ public class ConditionalTriggerBag
 
                 Collections.sort(mergeListForConditionalBag);
                 //-- performed prevention of multiple wrapping in this stage: only single wrap !!!
-                mtGlobalTrigEventWrapper.wrapMergingEvent(mergeListForConditionalBag,
+                getGlobalTrigEventWrapper().wrapMergingEvent(mergeListForConditionalBag,
                         mtCoincidenceTriggerAlgorithm.getTriggerType(),
                         mtCoincidenceTriggerAlgorithm.getTriggerConfigId());
 
                 //-- remove individual triggers from triggerList and add new merged trigger
                 payloadListInConditionalBag.removeAll(mergeListForConditionalBag);
-                payloadListInConditionalBag.add(mtGlobalTrigEventWrapper.getGlobalTrigEventPayload_merged());
+                payloadListInConditionalBag.add(getGlobalTrigEventWrapper().getGlobalTrigEventPayload_merged());
 
             } else {
                 if (log.isDebugEnabled()) {
@@ -177,7 +177,7 @@ public class ConditionalTriggerBag
 
         if (log.isDebugEnabled()) {
             log.debug("Selected CoincidenceTriggerList has " + payloadListInConditionalBag.size() + " payloads.");
-            log.debug("   TimeGate at " + timeGate);
+            log.debug("   TimeGate at " + getTimeGate());
         }
 
     }
@@ -189,7 +189,7 @@ public class ConditionalTriggerBag
      */
     public boolean containAllTriggerIDsRequired(ITriggerRequestPayload tTrigger)
     {
-        if(tTrigger.getSourceID().getSourceID() != mtGlobalTrigEventWrapper.mtGlobalTriggerSourceID.getSourceID()){
+        if(tTrigger.getSourceID().getSourceID() != GlobalTrigEventWrapper.GLOBAL_TRIGGER_SOURCE_ID.getSourceID()){
             return false;
         }else{
             Vector vecTriggers = new Vector();
@@ -242,7 +242,7 @@ public class ConditionalTriggerBag
                 }else{
                     ITriggerRequestPayload tPayload = (ITriggerRequestPayload) payloadListInConditionalBag.get(i);
                     IUTCTime lastTime = tPayload.getLastTimeUTC();
-                    if((!containAllTriggerIDsRequired(tPayload) && timeGate.compareTo(lastTime) > 0)
+                    if((!containAllTriggerIDsRequired(tPayload) && getTimeGate().compareTo(lastTime) > 0)
                     || (!containAllTriggerIDsRequired(tPayload) && flushing)){
                         payloadListInConditionalBag.remove(i);
                         setUpdateInfo(new DummyPayload(tPayload.getFirstTimeUTC()));
@@ -277,7 +277,7 @@ public class ConditionalTriggerBag
         {
             ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
 
-            if (flushing || 0 < timeGate.compareTo(trigger.getLastTimeUTC())) {
+            if (flushing || 0 < getTimeGate().compareTo(trigger.getLastTimeUTC())) {
            /*     mbContainAllTriggerIDsRequired = containAllTriggerIDsRequired(trigger);
 
                 if(!mbContainAllTriggerIDsRequired){
@@ -301,8 +301,8 @@ public class ConditionalTriggerBag
         while (iter.hasNext())
         {
             TriggerRequestPayload trigger = (TriggerRequestPayload) iter.next();
-            double timeDiff = timeGate.timeDiff_ns(trigger.getLastTimeUTC());
-            if ( flushing || 0 < timeGate.compareTo(trigger.getLastTimeUTC()) )
+            double timeDiff = getTimeGate().timeDiff_ns(trigger.getLastTimeUTC());
+            if ( flushing || 0 < getTimeGate().compareTo(trigger.getLastTimeUTC()) )
             {
                 iter.remove();
                 if (log.isDebugEnabled()) {
@@ -310,8 +310,8 @@ public class ConditionalTriggerBag
                 }
                 //--GTEventNumber should be assigned here.
                 triggerUID++;
-                mtGlobalTrigEventWrapper.wrapFinalEvent(trigger, triggerUID);
-                trigger = (TriggerRequestPayload) mtGlobalTrigEventWrapper.getGlobalTrigEventPayload_final();
+                getGlobalTrigEventWrapper().wrapFinalEvent(trigger, triggerUID);
+                trigger = (TriggerRequestPayload) getGlobalTrigEventWrapper().getGlobalTrigEventPayload_final();
 
                 return trigger;
             }

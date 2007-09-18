@@ -42,7 +42,7 @@ public class SimpleMerger
     private int DEFAULT_TIMEGAP_OPTION = mi_TIMEGAP_NO;
     private int mi_TimeGap_option;
 
-    Sorter tSorter = new Sorter();
+    private Sorter tSorter = new Sorter();
 
     private List mListSimpleMergedSameReadoutElements = new ArrayList();
 
@@ -135,7 +135,7 @@ public class SimpleMerger
         }
 
     }
-    public void classifySameIDElements(List listSameReadoutElements)
+    private void classifySameIDElements(List listSameReadoutElements)
     {
         mlistSameIDElementLists = new ArrayList();
         mlistDiffIDElements = new ArrayList();
@@ -271,19 +271,19 @@ public class SimpleMerger
      * @param listSameReadoutElementsSameID
      * @return
      */
-    public List manageTimeOverlap_NoGap(List listSameReadoutElementsSameID) throws Exception {
+    private List manageTimeOverlap_NoGap(List listSameReadoutElementsSameID) throws Exception {
         List listTimeManagedElementsSameID = new ArrayList();
 
         listTimeManagedElementsSameID.add(makeNewReadoutElement(listSameReadoutElementsSameID));
 
         return listTimeManagedElementsSameID;
     }
-    public List manageTimeOverlap_Gap(List listSameReadoutElementsSameID) throws Exception {
+    private List manageTimeOverlap_Gap(List listSameReadoutElementsSameID) throws Exception {
         List listTimeManagedElementsSameID = new ArrayList();
         List listTempMergedElements = new ArrayList();
         List listUnmergedElements = new ArrayList();
 
-        //if time-overlap then make new IReaoutRequestElement. --> put in listTimeManagedElementsSameID.
+        //if time-overlap then make new IReadoutRequestElement. --> put in listTimeManagedElementsSameID.
         IReadoutRequestElement lastElement = null;
         IReadoutRequestElement currentElement = null;
 
@@ -357,7 +357,7 @@ public class SimpleMerger
      *
      * @param listSameReadoutElementsSameID: list of ReadoutElements w/ the same ISourceID or IDOMID.
      */
-    public List manageTimeOverlap(List listSameReadoutElementsSameID, int iTimeGap_option) throws Exception {
+    private List manageTimeOverlap(List listSameReadoutElementsSameID, int iTimeGap_option) throws Exception {
         List listTimeManagedElementsSameID = new ArrayList();
 
         if(iTimeGap_option == mi_TIMEGAP_NO)
@@ -380,7 +380,7 @@ public class SimpleMerger
      * @param listMergedElements
      * @return
      */
-    public IReadoutRequestElement makeNewReadoutElement(List listMergedElements) throws Exception {
+    private IReadoutRequestElement makeNewReadoutElement(List listMergedElements) throws Exception {
         IReadoutRequestElement element = null;
         //need to manage time only
         //find the earliest/latest Time
@@ -408,15 +408,6 @@ public class SimpleMerger
         return newElement;
 
     }
-    public List getListSameIDElementLists()
-    {
-        return mlistSameIDElementLists;
-    }
-
-    public List getListDiffIDElements()
-    {
-        return mlistDiffIDElements;
-    }
     public List getListSimpleMergedSameReadoutElements()
     {
         return mListSimpleMergedSameReadoutElements;
@@ -428,9 +419,5 @@ public class SimpleMerger
     public void setTimeGap_option(int iTimeGap_option)
     {
         mi_TimeGap_option = iTimeGap_option;
-    }
-    public int getTimeGap_option()
-    {
-        return mi_TimeGap_option;
     }
 }

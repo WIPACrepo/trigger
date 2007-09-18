@@ -17,7 +17,6 @@ import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.splicer.Payload;
 import icecube.daq.payload.splicer.PayloadFactory;
 import icecube.daq.payload.impl.UTCTime8B;
 import icecube.daq.payload.impl.SourceID4B;
@@ -105,9 +104,8 @@ public class GlobalTriggerBag
         triggerUID = 0;
 
         mtGlobalTrigEventWrapper = new GlobalTrigEventWrapper();
+        mtGlobalTrigEventWrapper.setTimeGap_option(1);
 
-        //--todo: need to rework...?
-        setTimeGap_option(1);//No_TimeGap
         this.init();
 
         monitor = new PayloadBagMonitor();
@@ -123,6 +121,7 @@ public class GlobalTriggerBag
              currentPayload.loadPayload();
          } catch (Exception e) {
              log.error("Error loading currentPayload", e);
+             return;
          }
 
         // show this input to the monitor

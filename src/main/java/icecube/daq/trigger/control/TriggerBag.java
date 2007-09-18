@@ -258,8 +258,9 @@ public class TriggerBag
         while (iter.hasNext()) {
             ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
             if (log.isDebugEnabled()) {
-                log.debug("Checking trigger from " + trigger.getFirstTimeUTC()
-                         + " to " + trigger.getLastTimeUTC());
+                log.debug("Checking trigger from " + trigger.getFirstTimeUTC() +
+                          " to " + trigger.getLastTimeUTC() +
+                          " against " + timeGate);
             }
             if ( (flushing) ||
                  (0 < timeGate.compareTo(trigger.getLastTimeUTC())) ) {
@@ -394,7 +395,7 @@ public class TriggerBag
             } else {
                 // if it is not, add it to the list of subTriggers
                 if (log.isDebugEnabled()) {
-                    log.debug("  SubTrigger from " + next.getSourceID().getSourceID()
+                    log.debug("  SubTrigger from " + next.getSourceID()
                               + " has type " + next.getTriggerType());
                     List hitList = null;
                     try {

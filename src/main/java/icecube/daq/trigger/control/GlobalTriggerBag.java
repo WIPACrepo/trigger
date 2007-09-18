@@ -75,21 +75,6 @@ public class GlobalTriggerBag
     private int triggerUID;
 
     /**
-     * type for newly merged triggers
-     */
-    private int triggerType;
-
-    /**
-     * config ID for newly merged triggers
-     */
-    private int triggerConfigID;
-
-    /**
-     * source ID for newly merged triggers
-     */
-    private ISourceID triggerSourceID;
-
-    /**
      * flag to indicate we are flushing
      */
     private boolean flushing;
@@ -120,9 +105,6 @@ public class GlobalTriggerBag
     public GlobalTriggerBag(int type, int configID, ISourceID sourceID)
     {
         triggerUID = 0;
-        triggerType = type;
-        triggerConfigID = configID;
-        triggerSourceID = sourceID;
 
         mtGlobalTrigEventWrapper = new GlobalTrigEventWrapper();
 

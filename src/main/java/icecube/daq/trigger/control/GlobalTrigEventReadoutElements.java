@@ -234,10 +234,6 @@ public class GlobalTrigEventReadoutElements
 
     }
 
-   /* public void setPayloadFactory(PayloadFactory payloadFactory) {
-
-        triggerFactory = (TriggerRequestPayloadFactory) payloadFactory;
-    }  */
     public void setPayloadFactory(PayloadFactory triggerFactory) {
        this.triggerFactory = (TriggerRequestPayloadFactory) triggerFactory;
        mtSimpleMerger.setPayloadFactory(triggerFactory);

@@ -27,9 +27,6 @@ import java.util.Iterator;
  */
 public class Sorter
 {
-    List mListIUTCTime = new ArrayList();
-    int miListSize = -1;
-
     /**
      * Create an instance of this class.
      * Default constructor is declared, but private, to stop accidental

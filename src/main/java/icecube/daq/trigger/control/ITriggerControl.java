@@ -43,7 +43,7 @@ public interface ITriggerControl
 
     /**
      * Set the TriggerRequestPayloadFactory for this trigger.
-     * @param triggerFactory paylaod factory
+     * @param triggerFactory payload factory
      */
     void setTriggerFactory(TriggerRequestPayloadFactory triggerFactory);
 

@@ -56,7 +56,6 @@ public class GlobalTriggerBag
      */
     protected static List mergeList = new ArrayList();
 
-    private final TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY = new TriggerRequestPayloadFactory();
     /**
      * The factory used to create triggers
      */
@@ -242,46 +241,6 @@ public class GlobalTriggerBag
         }
 
         return null;
-    }
-    /**
-     * checks the top-level trigger for sub-triggers
-     *
-     * @param trigger top-level trigger
-     * @return vector of sub-triggers
-     */
-    private static List getSubTriggers(IPayload trigger) {
-
-        Vector subTriggers = new Vector();
-        LinkedList stack = new LinkedList();
-        stack.add(trigger);
-
-        while (!stack.isEmpty()) {
-
-            // check trigger type to see if this is a merged trigger
-            TriggerRequestPayload next = (TriggerRequestPayload) stack.removeFirst();
-            if (0 > next.getTriggerType()) {
-                // if it is, get the subPayloads and add them to the stack
-                try {
-                    stack.addAll(next.getPayloads());
-                } catch (Exception e) {
-                    log.error("Error accessing sub-payloads", e);
-                }
-            } else {
-                // if it is not, add it to the list of subTriggers
-                if (log.isDebugEnabled()) {
-                    log.debug("  SubTrigger from " + next.getSourceID().getSourceID()
-                              + " has type " + next.getTriggerType());
-                }
-                subTriggers.add(next);
-            }
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("  Returning " + subTriggers.size() + " subTriggers");
-        }
-
-        return subTriggers;
-
     }
 
     public IUTCTime getTimeGate() {

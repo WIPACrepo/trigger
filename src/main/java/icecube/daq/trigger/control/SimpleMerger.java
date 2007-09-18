@@ -84,7 +84,6 @@ public class SimpleMerger
             listSameReadoutElements = new ArrayList();
             listSameReadoutElements = tempList;
 
-            List listSameIDElementLists = new ArrayList();
             List listTimeManagedSameIDElements = new ArrayList();
 
             int iReadoutType = ((IReadoutRequestElement) listSameReadoutElements.get(0)).getReadoutType();

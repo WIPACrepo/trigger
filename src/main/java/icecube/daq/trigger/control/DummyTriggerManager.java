@@ -63,11 +63,6 @@ public class DummyTriggerManager
     private int start;
 
     /**
-     * size of last input list
-     */
-    private int lastInputListSize;
-
-    /**
      * Default constructor.
      */
     public DummyTriggerManager() {
@@ -106,7 +101,6 @@ public class DummyTriggerManager
 
     private void init() {
         start = 0;
-        lastInputListSize = 0;
     }
 
     /**
@@ -127,7 +121,7 @@ public class DummyTriggerManager
 
         // Loop over the new objects in the splicer
         int numberOfObjectsInSplicer = splicedObjects.size();
-        lastInputListSize = numberOfObjectsInSplicer - (start - decrement);
+        int lastInputListSize = numberOfObjectsInSplicer - (start - decrement);
 
         if (lastInputListSize > 0) {
             for (int index = start-decrement; numberOfObjectsInSplicer != index; index++) {
@@ -157,10 +151,6 @@ public class DummyTriggerManager
 
     public void setFactory(SpliceableFactory inputFactory) {
         this.inputFactory = inputFactory;
-    }
-
-    public int getLastInputListSize() {
-        return lastInputListSize;
     }
 
     /**
@@ -278,10 +268,6 @@ public class DummyTriggerManager
             payload.recycle();
         }
 
-    }
-
-    public void flush() {
-        super.flush();
     }
 
     public Splicer getSplicer() {

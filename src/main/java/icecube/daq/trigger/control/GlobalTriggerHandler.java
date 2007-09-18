@@ -499,7 +499,7 @@ public class GlobalTriggerHandler
                 }
                 if(nSubPayloads > miMaxNum){
                     miMaxNum = nSubPayloads;
-                    log.info("paylaod length = " + GTEventPayload.getPayloadLength() + "bytes");
+                    log.info("payload length = " + GTEventPayload.getPayloadLength() + "bytes");
                     //TriggerTestUtil testUtil = new TriggerTestUtil();
                     //testUtil.show_trigger_Info("Final GT ", miTotalOutputGlobalTriggers, GTEventPayload);
                 }

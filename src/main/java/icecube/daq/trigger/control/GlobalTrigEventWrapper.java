@@ -18,7 +18,6 @@ import icecube.daq.trigger.IReadoutRequest;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.common.DAQCmdInterface;
-//import icecube.daq.globalTrig.util.TriggerTestUtil;
 
 import java.util.*;
 import java.util.zip.DataFormatException;
@@ -158,7 +157,7 @@ public class GlobalTrigEventWrapper
         return vecGlobalReadoutRequestElements_Raw;
     }
     /**
-     * Collects all subPayloads from input list of paylaods into a vector.
+     * Collects all subPayloads from input list of payloads into a vector.
      *
      * @param mergeList
      * @return

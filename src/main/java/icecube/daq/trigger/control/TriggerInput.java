@@ -110,7 +110,7 @@ public class TriggerInput
 
                 for (int j=i+1; j<inputList.size(); j++) {
                     PayloadWindow window2 = (PayloadWindow) inputList.get(j);
-                    // check ovelaps with all uncontained windows
+                    // check overlaps with all uncontained windows
                     if (!window2.isContained()) {
 
                         if ( (0 >= window1.firstTime.compareTo(window2.lastTime)) &&

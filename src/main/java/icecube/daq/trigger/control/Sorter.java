@@ -39,6 +39,7 @@ public class Sorter
     //--todo: include excetion
     /**
      * This method is to provide time-ordered list of ReadoutElements.
+     * NOTE: This method destroys the original list
      *
      * @param listReadoutElementsUTCTimeUnsorted
      * @return
@@ -54,6 +55,8 @@ public class Sorter
 
         int iSizeUnsortedList = listReadoutElementsUTCTimeUnsorted.size();
         int index = -1;
+
+        // XXX YIKES!  This needs to be changed to use Collection.sort()
 
         if(iSizeUnsortedList > 1)
         {
@@ -103,7 +106,6 @@ public class Sorter
     {
         return getUTCTimeEarliest(listReadoutElements, false);
     }
-    //todo: need to check for readout-elements.size == 0
     public IUTCTime getUTCTimeEarliest(List listObjects, boolean isPayloadObjects)
     {
         IUTCTime UTCTime_earliest = new UTCTime8B(Long.MAX_VALUE);

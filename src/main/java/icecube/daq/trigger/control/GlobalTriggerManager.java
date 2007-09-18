@@ -146,6 +146,10 @@ public class GlobalTriggerManager
         this.inputFactory = inputFactory;
     }
 
+    public void setReportingThreshold(int threshold) {
+        nThresholdInSplicer = threshold;
+    }
+
     public void execute(List splicedObjects, int decrement) {
         // Loop over the new objects in the splicer
 //-----------------------------------------------------

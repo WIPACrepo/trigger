@@ -340,6 +340,8 @@ public class TriggerHandler
                 }
                 if(sourceId == SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID
                     || sourceId == SourceIdRegistry.STRINGPROCESSOR_SOURCE_ID){
+                    count++;
+
                     // loop over triggers
                     Iterator triggerIterator = triggerList.iterator();
                     while (triggerIterator.hasNext()) {

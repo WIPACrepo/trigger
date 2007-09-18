@@ -102,9 +102,9 @@ class Analysis
 
     private int hitCount;
     private long totHitCount;
-    private int triggerCount = 1;
-    private long prevTime = 0;
-    private long ignoredCount = 0;
+    private int triggerCount;
+    private long prevTime;
+    private long ignoredCount;
 
     Analysis(MasterPayloadFactory factory)
     {
@@ -151,7 +151,6 @@ System.out.println("Hits/Trig initialized to " + numHitsPerTrigger);
             if (listLen >= listOffset) listOffset = listLen;
             splicer.truncate((Spliceable) splicedObjects.get(listLen - 1));
         }
-
     }
 
     public void failed(SplicerChangedEvent evt)
@@ -218,6 +217,8 @@ System.out.println("Hits/Trig initialized to " + numHitsPerTrigger);
         if (maxTime <= minTime) {
             ignoredCount++;
         } else {
+            triggerCount++;
+
             prevTime = maxTime;
 
             IUTCTime minObj = new UTCTime8B(minTime);

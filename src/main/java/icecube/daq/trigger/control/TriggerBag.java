@@ -157,6 +157,7 @@ public class TriggerBag
             payload.loadPayload();
         } catch (Exception e) {
             log.error("Error loading payload", e);
+            return;
         }
 
         // show this input to the monitor
@@ -397,13 +398,14 @@ public class TriggerBag
                 if (log.isDebugEnabled()) {
                     log.debug("  SubTrigger from " + next.getSourceID()
                               + " has type " + next.getTriggerType());
-                    List hitList = null;
+                    List hitList;
                     try {
                         hitList = next.getPayloads();
                     } catch (Exception e) {
                         log.error("Error getting list of hits", e);
+                        hitList = null;
                     }
-                    for (int i=0; i<hitList.size(); i++)  {
+                    for (int i=0; hitList != null && i < hitList.size(); i++) {
                         IHitPayload hit = (IHitPayload) hitList.get(i);
                         try {
                             ((ILoadablePayload) hit).loadPayload();

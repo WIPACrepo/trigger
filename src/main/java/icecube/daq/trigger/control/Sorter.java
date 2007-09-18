@@ -101,22 +101,7 @@ public class Sorter
      */
     public IUTCTime getUTCTimeEarliest(List listReadoutElements)
     {
-        IUTCTime UTCTime_earliest = new UTCTime8B(Long.MAX_VALUE);
-        IUTCTime UTCTime_start = null;
-
-        Iterator iterElements = listReadoutElements.iterator();
-        while(iterElements.hasNext())
-        {
-            IReadoutRequestElement element = (IReadoutRequestElement) iterElements.next();
-            UTCTime_start = element.getFirstTimeUTC();
-
-            if(UTCTime_earliest.compareTo(UTCTime_start) > 0)
-            {
-                UTCTime_earliest = UTCTime_start;
-            }
-        }
-
-        return UTCTime_earliest;
+        return getUTCTimeEarliest(listReadoutElements, false);
     }
     //todo: need to check for readout-elements.size == 0
     public IUTCTime getUTCTimeEarliest(List listObjects, boolean isPayloadObjects)
@@ -184,22 +169,7 @@ public class Sorter
      */
     public IUTCTime getUTCTimeLatest(List listReadoutElements)
     {
-        IUTCTime UTCTime_latest = new UTCTime8B(Long.MIN_VALUE);
-        IUTCTime UTCTime_end = null;
-
-        Iterator iterElements = listReadoutElements.iterator();
-        while(iterElements.hasNext())
-        {
-            IReadoutRequestElement element = (IReadoutRequestElement) iterElements.next();
-            UTCTime_end = element.getLastTimeUTC();
-
-            if(UTCTime_latest.compareTo(UTCTime_end) < 0)
-            {
-                UTCTime_latest = UTCTime_end;
-            }
-        }
-
-        return UTCTime_latest;
+        return getUTCTimeLatest(listReadoutElements, false);
     }
 
 }

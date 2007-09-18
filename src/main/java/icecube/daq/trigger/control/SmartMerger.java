@@ -25,6 +25,8 @@ import org.apache.commons.logging.LogFactory;
  * This class is to take care of timeOverlap and spaceOverlap between different ReadoutTypes
  * in a single GlobalTrigEvent after SimpleMerger.
  *
+ * TODO: Massively clean up this code!!!
+ *
  * @version $Id: SmartMerger.java,v 1.4 2005/09/16 18:13:11 shseo Exp $
  * @author shseo
  */
@@ -46,7 +48,6 @@ public class SmartMerger
     private List mListReadoutElements_II_String = new ArrayList();
     private List mListReadoutElements_II_Module = new ArrayList();
     private List mListReadoutElements_IT_Global = new ArrayList();
-    private List mListReadoutElements_IT_String = new ArrayList();
     private List mListReadoutElements_IT_Module = new ArrayList();
 
     // list containg new ReadoutElements of all (Global, Strings, Modules) in InIce
@@ -122,7 +123,6 @@ public class SmartMerger
         mListReadoutElements_II_String = new ArrayList();
         mListReadoutElements_II_Module = new ArrayList();
         mListReadoutElements_IT_Global = new ArrayList();
-        mListReadoutElements_IT_String = new ArrayList();
         mListReadoutElements_IT_Module = new ArrayList();
 
         mListFinalReadoutElements_InIce = new ArrayList();
@@ -258,94 +258,16 @@ public class SmartMerger
     }
     /**
      * This method manages timeOverlap among differnt ReadoutTypes in IceTop.
-     * Note: There will be no READOUT_IT_String. But I implement it for generality.
      */
     private void manageReadout_IceTop()
     {
         // same as manageReadout_InIce() but substitute with IT
        if(0 != mListReadoutElements_IT_Global.size() &&
-                 0 != mListReadoutElements_IT_String.size() &&
-                 0 == mListReadoutElements_IT_Module.size())
+          0 == mListReadoutElements_IT_Module.size())
         {
            mListFinalReadoutElements_IceTop.addAll(mListReadoutElements_IT_Global);
 
-            //check timeOverlap between Strings and Global. --> new ReadoutElement
-            List listNewReadoutElements_IT_String = new ArrayList();
-            listNewReadoutElements_IT_String.addAll(
-                    (List) getListNewAdjustedSmallerReadoutElements(
-                            mListReadoutElements_IT_Global, mListReadoutElements_IT_String));
-
-            if(0 != listNewReadoutElements_IT_String.size())
-            {
-                mListFinalReadoutElements_IceTop.addAll(listNewReadoutElements_IT_String);
-            }
-
         }else if(0 != mListReadoutElements_IT_Global.size() &&
-                 0 != mListReadoutElements_IT_String.size() &&
-                 0 != mListReadoutElements_IT_Module.size())
-        {
-            mListFinalReadoutElements_IceTop.addAll(mListReadoutElements_IT_Global);
-
-            List listNewReadoutElements_IT_String = new ArrayList();
-            listNewReadoutElements_IT_String.addAll(
-                    (List) getListNewAdjustedSmallerReadoutElements(
-                            mListReadoutElements_IT_Global, mListReadoutElements_IT_String));
-
-            List listNewReadoutElements_IT_Module = new ArrayList();
-
-            if(0 != listNewReadoutElements_IT_String.size())
-            {
-                mListFinalReadoutElements_IceTop.addAll(listNewReadoutElements_IT_String);
-
-                listNewReadoutElements_IT_Module.addAll(
-                        (List) getListNewAdjustedSmallerReadoutElements(
-                                listNewReadoutElements_IT_String,  mListReadoutElements_IT_Module));
-
-                if(0 != listNewReadoutElements_IT_Module.size())
-                {
-                    List listNewReadoutElements_IT_Module2 = new ArrayList();
-                    listNewReadoutElements_IT_Module2.addAll(
-                            (List) getListNewAdjustedSmallerReadoutElements(
-                                    mListReadoutElements_IT_Global, listNewReadoutElements_IT_Module));
-
-                    if(0 != listNewReadoutElements_IT_Module2.size())
-                    {
-                        mListFinalReadoutElements_IceTop.addAll(listNewReadoutElements_IT_Module2);
-                    }
-                }
-
-            }else{
-
-                listNewReadoutElements_IT_Module.addAll(
-                        (List) getListNewAdjustedSmallerReadoutElements(
-                                mListReadoutElements_IT_Global, mListReadoutElements_IT_Module));
-
-                if(0 != listNewReadoutElements_IT_Module.size())
-                {
-                    mListFinalReadoutElements_IceTop.addAll(listNewReadoutElements_IT_Module);
-                }
-
-            }
-
-        }else if(0 == mListReadoutElements_IT_Global.size() &&
-                 0!= mListReadoutElements_IT_String.size() &&
-                 0 != mListReadoutElements_IT_Module.size())
-        {
-            mListFinalReadoutElements_IceTop.addAll(mListReadoutElements_IT_String);
-
-            List listNewReadoutElements_IT_Module = new ArrayList();
-
-            listNewReadoutElements_IT_Module.addAll(
-                    (List) getListNewAdjustedSmallerReadoutElements(
-                            mListReadoutElements_IT_String,  mListReadoutElements_IT_Module));
-
-            if(0 != listNewReadoutElements_IT_Module.size())
-            {
-                mListFinalReadoutElements_IceTop.addAll(listNewReadoutElements_IT_Module);
-            }
-
-        }else if(0 != mListReadoutElements_IT_Global.size() &&
-                 0 == mListReadoutElements_IT_String.size() &&
                  0 != mListReadoutElements_IT_Module.size())
         {
             mListFinalReadoutElements_IceTop.addAll(mListReadoutElements_IT_Global);
@@ -359,20 +281,8 @@ public class SmartMerger
             {
                 mListFinalReadoutElements_IceTop.addAll(listNewReadoutElements_IT_Module);
             }
-        }else if(0 != mListReadoutElements_IT_Global.size() &&
-                 0 == mListReadoutElements_IT_String.size() &&
-                 0 == mListReadoutElements_IT_Module.size())
-        {
-            mListFinalReadoutElements_IceTop.addAll(mListReadoutElements_IT_Global);
 
         }else if(0 == mListReadoutElements_IT_Global.size() &&
-                 0 != mListReadoutElements_IT_String.size() &&
-                 0 == mListReadoutElements_IT_Module.size())
-        {
-            mListFinalReadoutElements_IceTop.addAll(mListReadoutElements_IT_String);
-
-        }else if(0 == mListReadoutElements_IT_Global.size() &&
-                 0 == mListReadoutElements_IT_String.size() &&
                  0 != mListReadoutElements_IT_Module.size())
         {
             mListFinalReadoutElements_IceTop.addAll(mListReadoutElements_IT_Module);
@@ -391,15 +301,12 @@ public class SmartMerger
     private IReadoutRequestElement makeNewReadoutElement(IReadoutRequestElement tOldElement,
                                                          IUTCTime tTime_start, IUTCTime tTime_end)
     {
-        IReadoutRequestElement tNewReadoutElement =
-                triggerFactory.createReadoutRequestElement(
+        return triggerFactory.createReadoutRequestElement(
                                                 tOldElement.getReadoutType(),
                                                 tTime_start,
                                                 tTime_end,
                                                 tOldElement.getDomID(),
                                                 tOldElement.getSourceID());
-
-        return tNewReadoutElement;
     }
     /**
      * This method is the heart of this class.

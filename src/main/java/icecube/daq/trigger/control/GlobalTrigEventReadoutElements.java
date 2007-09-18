@@ -29,7 +29,6 @@ public class GlobalTrigEventReadoutElements
     private TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY = new TriggerRequestPayloadFactory();
     private TriggerRequestPayloadFactory triggerFactory;
 
-    Sorter mtSorter = new Sorter();
     SimpleMerger mtSimpleMerger;
     SmartMerger mtSmartMerger;
 
@@ -40,7 +39,6 @@ public class GlobalTrigEventReadoutElements
     List mListModule_II = new ArrayList();
 
     List mListGlobal_IT = new ArrayList();
-    List mListString_IT = new ArrayList();
     List mListModule_IT = new ArrayList();
 
     /**
@@ -136,42 +134,9 @@ public class GlobalTrigEventReadoutElements
         if(0 != mListModule_II.size()) listCurrentReaoutTypeLists.add(mListModule_II);
 
         if(0 != mListGlobal_IT.size()) listCurrentReaoutTypeLists.add(mListGlobal_IT);
-        if(0 != mListString_IT.size()) listCurrentReaoutTypeLists.add(mListString_IT);
         if(0 != mListModule_IT.size()) listCurrentReaoutTypeLists.add(mListModule_IT);
 
         return listCurrentReaoutTypeLists;
-    }
-    /**
-     * 
-     *
-     * @return
-     */
-    public Hashtable getHashCurrentEventReadoutTypeLists()
-    {
-        Hashtable hashCurrentEventReadoutTypeLists = new Hashtable();
-
-        if(null != mListGlobal_II)
-        {
-            hashCurrentEventReadoutTypeLists.put(new Integer(IReadoutRequestElement.READOUT_TYPE_II_GLOBAL), mListGlobal_II);
-        }
-        if(null != mListString_II)
-        {
-            hashCurrentEventReadoutTypeLists.put(new Integer(IReadoutRequestElement.READOUT_TYPE_II_STRING), mListString_II);
-        }
-        if(null != mListModule_II)
-        {
-            hashCurrentEventReadoutTypeLists.put(new Integer(IReadoutRequestElement.READOUT_TYPE_II_MODULE), mListModule_II);
-        }
-        if(null != mListGlobal_IT)
-        {
-            hashCurrentEventReadoutTypeLists.put(new Integer(IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL), mListGlobal_IT);
-        }
-        if(null != mListModule_IT)
-        {
-            hashCurrentEventReadoutTypeLists.put(new Integer(IReadoutRequestElement.READOUT_TYPE_IT_MODULE), mListModule_IT);
-        }
-
-        return hashCurrentEventReadoutTypeLists;
     }
     /**
      * This method is the main method and called by GlobalTrigEventWrapper.java.

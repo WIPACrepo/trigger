@@ -5,7 +5,6 @@ import icecube.daq.payload.*;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.algorithm.DefaultStringTrigger;
-import icecube.daq.trigger.monitor.PayloadBagMonitor;
 
 import java.nio.ByteBuffer;
 import java.io.IOException;

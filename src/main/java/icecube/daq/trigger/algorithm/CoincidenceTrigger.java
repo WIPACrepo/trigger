@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTrigger
  *
- * Version $Id: CoincidenceTrigger.java,v 1.21 2006/01/27 10:49:55 shseo Exp $
+ * Version $Id: CoincidenceTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: September 2 2005
  *
@@ -29,7 +29,7 @@ import java.util.Vector;
 /**
  * This class is to provide methods common to all coincidence triggers.
  *
- * @version $Id: CoincidenceTrigger.java,v 1.21 2006/01/27 10:49:55 shseo Exp $
+ * @version $Id: CoincidenceTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public abstract class CoincidenceTrigger

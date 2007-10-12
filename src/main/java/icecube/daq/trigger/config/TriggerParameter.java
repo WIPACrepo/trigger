@@ -1,7 +1,7 @@
 /*
  * class: TriggerParameter
  *
- * Version $Id: TriggerParameter.java,v 1.1 2005/11/23 16:37:37 toale Exp $
+ * Version $Id: TriggerParameter.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: November 23 2005
  *
@@ -13,7 +13,7 @@ package icecube.daq.trigger.config;
 /**
  * This class encapsulates a name/value pair that is a trigger parameter.
  *
- * @version $Id: TriggerParameter.java,v 1.1 2005/11/23 16:37:37 toale Exp $
+ * @version $Id: TriggerParameter.java 2125 2007-10-12 18:27:05Z ksb $
  * @author pat
  */
 public class TriggerParameter

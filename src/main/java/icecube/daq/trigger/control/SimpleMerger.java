@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * TODO: Massively clean up this code!!!
  *
- * @version $Id: SimpleMerger.java,v 1.3 2005/09/16 18:13:11 shseo Exp $
+ * @version $Id: SimpleMerger.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public class SimpleMerger

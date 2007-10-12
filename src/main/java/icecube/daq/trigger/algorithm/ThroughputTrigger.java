@@ -26,7 +26,7 @@ import java.util.ArrayList;
  *  makes a new TriggerRequestPayload for each input TriggerRequestPayload
  *  and then pass them to GlobalTrigBag.java.
  *
- * @version $Id: ThroughputTrigger.java,v 1.21 2006/01/31 14:01:43 toale Exp $
+ * @version $Id: ThroughputTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public class ThroughputTrigger

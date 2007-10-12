@@ -33,7 +33,7 @@ import java.util.*;
  * This class receives TriggerRequestPayloads from each active GlobalTrigAlgorithm
  * , merges if they overlap and produces globalTrigEventPayload.
  *
- * @version $Id: GlobalTriggerBag.java,v 1.12 2006/03/16 19:08:25 shseo Exp $
+ * @version $Id: GlobalTriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public class GlobalTriggerBag

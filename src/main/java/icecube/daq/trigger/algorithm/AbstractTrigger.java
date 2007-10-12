@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java,v 1.27 2006/09/14 20:35:13 toale Exp $
+ * Version $Id: AbstractTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: August 19 2005
  *
@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java,v 1.27 2006/09/14 20:35:13 toale Exp $
+ * @version $Id: AbstractTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  * @author pat
  */
 public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor

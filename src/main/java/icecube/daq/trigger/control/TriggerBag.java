@@ -1,7 +1,7 @@
 /*
  * class: TriggerBag
  *
- * Version $Id: TriggerBag.java,v 1.8 2005/12/29 23:17:35 toale Exp $
+ * Version $Id: TriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: March 16 2005
  *
@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  *                                   +       {===============}
  *                                   +            Merge
  *
- * @version $Id: TriggerBag.java,v 1.8 2005/12/29 23:17:35 toale Exp $
+ * @version $Id: TriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
  * @author pat
  */
 public class TriggerBag

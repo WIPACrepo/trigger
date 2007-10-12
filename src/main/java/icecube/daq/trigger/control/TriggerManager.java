@@ -1,7 +1,7 @@
 /*
  * class: TriggerManager
  *
- * Version $Id: TriggerManager.java,v 1.24 2006/05/09 19:55:29 toale Exp $
+ * Version $Id: TriggerManager.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: October 25 2004
  *
@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger
  *
- * @version $Id: TriggerManager.java,v 1.24 2006/05/09 19:55:29 toale Exp $
+ * @version $Id: TriggerManager.java 2125 2007-10-12 18:27:05Z ksb $
  * @author pat
  */
 public class TriggerManager

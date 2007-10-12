@@ -1,7 +1,7 @@
 /*
  * class: VetoTrigger
  *
- * Version $Id: VetoTrigger.java,v 1.4 2006/02/02 12:49:35 shseo Exp $
+ * Version $Id: VetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: January 25 2006
  *
@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * This class is to provide commond methods for any N-VetoTrigger.
  *
- * @version $Id: VetoTrigger.java,v 1.4 2006/02/02 12:49:35 shseo Exp $
+ * @version $Id: VetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public abstract class VetoTrigger

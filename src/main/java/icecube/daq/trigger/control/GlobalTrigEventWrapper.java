@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
  *  and put in the payloadList.
  * This is called in GlobalTrigBag.java.
  *
- * @version $Id: GlobalTrigEventWrapper.java,v 1.19 2005/10/26 18:31:44 toale Exp $
+ * @version $Id: GlobalTrigEventWrapper.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public class GlobalTrigEventWrapper

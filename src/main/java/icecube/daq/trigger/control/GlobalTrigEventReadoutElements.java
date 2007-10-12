@@ -21,7 +21,7 @@ import java.util.*;
  * Required is Input of an unorganized ReadoutRequestelements (Vector).
  * Both timeOverlap and spaceOverlap will be handled here via SimpleMerger.java and SmartMerger.java.
  *
- * @version $Id: GlobalTrigEventReadoutElements.java,v 1.4 2005/09/16 18:13:11 shseo Exp $
+ * @version $Id: GlobalTrigEventReadoutElements.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public class GlobalTrigEventReadoutElements

@@ -1,7 +1,7 @@
 /*
  * class: AbstractGlobalTrigger
  *
- * Version $Id: AbstractGlobalTrigger.java,v 1.19 2006/03/16 19:08:25 shseo Exp $
+ * Version $Id: AbstractGlobalTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: August 30 2005
  *
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is to provide a common method for all triggers in GT.
  *
- * @version $Id: AbstractGlobalTrigger.java,v 1.19 2006/03/16 19:08:25 shseo Exp $
+ * @version $Id: AbstractGlobalTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public abstract class AbstractGlobalTrigger extends AbstractTrigger

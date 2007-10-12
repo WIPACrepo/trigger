@@ -1,7 +1,7 @@
 /*
  * class: Sorter
  *
- * Version $Id: Sorter.java,v 1.3 2005/10/21 22:06:49 shseo Exp $
+ * Version $Id: Sorter.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: July 15 2005
  *
@@ -22,7 +22,7 @@ import java.util.Iterator;
 /**
  * This class is to provide the earliest/latest UTC-timeStamp.
  *
- * @version $Id: Sorter.java,v 1.3 2005/10/21 22:06:49 shseo Exp $
+ * @version $Id: Sorter.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public class Sorter

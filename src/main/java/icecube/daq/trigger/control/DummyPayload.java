@@ -1,7 +1,7 @@
 /*
  * class: DummyPayload
  *
- * Version $Id: DummyPayload.java,v 1.2 2005/10/10 01:23:03 toale Exp $
+ * Version $Id: DummyPayload.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: October 7 2005
  *
@@ -18,7 +18,7 @@ import icecube.daq.payload.IUTCTime;
  * This class is a dummy payload that only has a UTC time associated with it.
  * Its main purpose is for truncating the Splicer.
  *
- * @version $Id: DummyPayload.java,v 1.2 2005/10/10 01:23:03 toale Exp $
+ * @version $Id: DummyPayload.java 2125 2007-10-12 18:27:05Z ksb $
  * @author pat
  */
 public class DummyPayload implements Spliceable, IPayload

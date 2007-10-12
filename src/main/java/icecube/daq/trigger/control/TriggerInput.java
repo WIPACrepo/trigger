@@ -1,7 +1,7 @@
 /*
  * class: TriggerInput
  *
- * Version $Id: TriggerInput.java,v 1.4 2005/10/18 19:18:06 toale Exp $
+ * Version $Id: TriggerInput.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: May 2 2005
  *
@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides a simple implementation of ITriggerInput
  *
- * @version $Id: TriggerInput.java,v 1.4 2005/10/18 19:18:06 toale Exp $
+ * @version $Id: TriggerInput.java 2125 2007-10-12 18:27:05Z ksb $
  * @author pat
  */
 public class TriggerInput

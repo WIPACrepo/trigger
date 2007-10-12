@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTriggerTwo
  *
- * Version $Id: TwoCoincidenceTrigger.java,v 1.17 2006/06/30 18:28:01 dwharton Exp $
+ * Version $Id: TwoCoincidenceTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: September 2 2005
  *
@@ -25,7 +25,7 @@ import java.util.ArrayList;
  * Two coincidence trigger algorithm which uses timeGate (using CoincidenceTriggerBag)
  * for safe release of a selected trigger.
  *
- * @version $Id: TwoCoincidenceTrigger.java,v 1.17 2006/06/30 18:28:01 dwharton Exp $
+ * @version $Id: TwoCoincidenceTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public class TwoCoincidenceTrigger

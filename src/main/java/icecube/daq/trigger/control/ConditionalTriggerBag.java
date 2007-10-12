@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java,v 1.14 2005/12/22 14:01:37 shseo Exp $
+ * Version $Id: ConditionalTriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: September 2 2005
  *
@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java,v 1.14 2005/12/22 14:01:37 shseo Exp $
+ * @version $Id: ConditionalTriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public class ConditionalTriggerBag

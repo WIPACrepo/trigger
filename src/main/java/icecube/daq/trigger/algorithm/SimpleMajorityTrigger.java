@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java,v 1.27 2006/09/14 20:35:13 toale Exp $
+ * Version $Id: SimpleMajorityTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: August 19 2005
  *
@@ -32,7 +32,7 @@ import org.apache.commons.logging.Log;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java,v 1.27 2006/09/14 20:35:13 toale Exp $
+ * @version $Id: SimpleMajorityTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  * @author pat
  */
 public class SimpleMajorityTrigger extends AbstractTrigger

@@ -36,7 +36,7 @@ import java.io.IOException;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTrigHandler.java,v 1.44 2006/08/08 20:01:24 vav111 Exp $
+ * @version $Id: GlobalTriggerHandler.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public class GlobalTriggerHandler

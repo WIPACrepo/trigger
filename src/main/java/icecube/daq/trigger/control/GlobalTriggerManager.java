@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java,v 1.31 2006/05/09 19:57:57 toale Exp $
+ * @version $Id: GlobalTriggerManager.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public class GlobalTriggerManager

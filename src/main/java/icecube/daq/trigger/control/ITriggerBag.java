@@ -1,7 +1,7 @@
 /*
  * class: ITriggerBag
  *
- * Version $Id: ITriggerBag.java,v 1.3 2005/12/29 23:17:35 toale Exp $
+ * Version $Id: ITriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: March 16 2005
  *
@@ -19,7 +19,7 @@ import icecube.daq.payload.splicer.PayloadFactory;
  *
  * Interface for trigger bag
  *
- * @version $Id: ITriggerBag.java,v 1.3 2005/12/29 23:17:35 toale Exp $
+ * @version $Id: ITriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
  * @author pat
  */
 public interface ITriggerBag

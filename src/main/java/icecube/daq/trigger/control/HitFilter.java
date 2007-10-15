@@ -17,13 +17,13 @@ import icecube.daq.trigger.config.DomSet;
 public class HitFilter
 {
 
+    public static final long SYNC_DOMID = 0x1e5b72775d19L;
+    public static final long TRIG_DOMID = 0x1d165fc478caL;
+
     /**
      * DomSet to use
      */
     private DomSet domSet;
-
-    private String sync = "1e5b72775d19";
-    private String trig = "1d165fc478ca";
 
     private int domSetId = -1;
 
@@ -74,30 +74,15 @@ public class HitFilter
         //    return false;
         //}
 
-        String domId = hit.getDOMID().getDomIDAsString().toLowerCase();
-        boolean isSync = (domId.compareTo(sync) == 0);
-        boolean isTrig = (domId.compareTo(trig) == 0);
+        long domId = hit.getDOMID().getDomIDAsLong();
 
         if (domSetId == 0) {
-            if (isSync) {
-                return true;
-            } else {
-                return false;
-            }
+            return domId == SYNC_DOMID;
         } else if (domSetId == 1) {
-            if (isTrig) {
-                return true;
-            } else {
-                return false;
-            }
+            return domId == TRIG_DOMID;
         } else {
-            if (isSync || isTrig) {
-                return false;
-            } else {
-                return true;
-            }
+            return domId != SYNC_DOMID && domId != TRIG_DOMID;
         }
-
 
     }
 

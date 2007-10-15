@@ -25,54 +25,56 @@ import junit.textui.TestRunner;
 
 import org.apache.log4j.BasicConfigurator;
 
-class BogusPayload
-    extends MockPayload
-{
-    private static final int LENGTH = 1;
-
-    BogusPayload(long timeVal)
-    {
-        super(timeVal);
-    }
-
-    public Object deepCopy()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public int getPayloadInterfaceType()
-    {
-        return -999;
-    }
-
-    public int getPayloadLength()
-    {
-        return LENGTH;
-    }
-
-    public int getPayloadType()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public int writePayload(boolean writeLoaded,
-                                     PayloadDestination dest)
-        throws IOException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public int writePayload(boolean writeLoaded, int offset,
-                                     ByteBuffer buf)
-        throws IOException
-    {
-        throw new Error("Unimplemented");
-    }
-}
-
 public class TriggerBagTest
     extends TestCase
 {
+    class BogusPayload
+        extends MockPayload
+    {
+        public static final int INTERFACE_TYPE = -999;
+
+        private static final int LENGTH = 1;
+
+        BogusPayload(long timeVal)
+        {
+            super(timeVal);
+        }
+
+        public Object deepCopy()
+        {
+            throw new Error("Unimplemented");
+        }
+
+        public int getPayloadInterfaceType()
+        {
+            return INTERFACE_TYPE;
+        }
+
+        public int getPayloadLength()
+        {
+            return LENGTH;
+        }
+
+        public int getPayloadType()
+        {
+            throw new Error("Unimplemented");
+        }
+
+        public int writePayload(boolean writeLoaded,
+                                PayloadDestination dest)
+            throws IOException
+        {
+            throw new Error("Unimplemented");
+        }
+
+        public int writePayload(boolean writeLoaded, int offset,
+                                ByteBuffer buf)
+            throws IOException
+        {
+            throw new Error("Unimplemented");
+        }
+    }
+
     private static final MockAppender appender =
         new MockAppender(/*org.apache.log4j.Level.ALL*/)/*.setVerbose(true)*/;
 

@@ -52,7 +52,6 @@ public class TriggerManagerTest
 
         splicer.start();
 
-        MockHit hit = null;
         for (int i = 0; i < numObjs; i++) {
             tails[ i % numTails].push(new MockHit((long) (i + 1) * 10000L));
         }
@@ -132,16 +131,6 @@ public class TriggerManagerTest
         TriggerManager trigMgr = new TriggerManager();
         runWithRealSplicer(trigMgr);
     }
-
-/*
-    public void testThreadedSplicer()
-        throws SplicerException
-    {
-        TriggerManager trigMgr = new TriggerManager();
-        trigMgr.enableThread();
-        runWithRealSplicer(trigMgr);
-    }
-*/
 
     public void testMockSplicer()
         throws SplicerException

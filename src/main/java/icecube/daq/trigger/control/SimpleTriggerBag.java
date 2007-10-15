@@ -93,6 +93,7 @@ public class SimpleTriggerBag
             payload.loadPayload();
         } catch (Exception e) {
             log.error("Error loading payload", e);
+            return;
         }
 
         // show this input to the monitor

@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTrigger
  *
- * Version $Id: CoincidenceTrigger.java 2147 2007-10-17 15:55:45Z dglo $
+ * Version $Id: CoincidenceTrigger.java 2148 2007-10-17 16:17:24Z dglo $
  *
  * Date: September 2 2005
  *
@@ -28,7 +28,7 @@ import java.util.Vector;
 /**
  * This class is to provide methods common to all coincidence triggers.
  *
- * @version $Id: CoincidenceTrigger.java 2147 2007-10-17 15:55:45Z dglo $
+ * @version $Id: CoincidenceTrigger.java 2148 2007-10-17 16:17:24Z dglo $
  * @author shseo
  */
 public abstract class CoincidenceTrigger
@@ -171,6 +171,7 @@ public abstract class CoincidenceTrigger
             }catch(NullPointerException e)
             {
                 log.error("ReadoutRequest should not be null in CoincidenceTrigger!");
+                return false;
             }
         } else {
             log.error("Unexpected payload type passed to CoincidenceTrigger");
@@ -187,6 +188,7 @@ public abstract class CoincidenceTrigger
             }catch(NullPointerException e)
             {
                 log.error("ReadoutRequest should not be null in CoincidenceTrigger!");
+                return false;
             }
         } else {
             log.error("Unexpected payload type passed to CoincidenceTrigger");

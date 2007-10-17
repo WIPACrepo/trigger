@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java 2147 2007-10-17 15:55:45Z dglo $
+ * Version $Id: ConditionalTriggerBag.java 2148 2007-10-17 16:17:24Z dglo $
  *
  * Date: September 2 2005
  *
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java 2147 2007-10-17 15:55:45Z dglo $
+ * @version $Id: ConditionalTriggerBag.java 2148 2007-10-17 16:17:24Z dglo $
  * @author shseo
  */
 public class ConditionalTriggerBag
@@ -86,6 +86,7 @@ public class ConditionalTriggerBag
             newPayload.loadPayload();
         } catch (Exception e) {
             log.error("Error loading newPayload", e);
+            return;
         }
 
         //--accept only configured triggers.
@@ -196,8 +197,10 @@ public class ConditionalTriggerBag
                 vecTriggers = tTrigger.getPayloads();
             } catch (IOException e) {
                 log.error("Couldn't get payloads", e);
+                return false;
             } catch (DataFormatException e) {
                 log.error("Couldn't get payloads", e);
+                return false;
             }
 
             //--find triggerIDs
@@ -210,8 +213,10 @@ public class ConditionalTriggerBag
                     ((ILoadablePayload) tPayload).loadPayload();
                 } catch (IOException e) {
                     log.error("Couldn't load payload", e);
+                    continue;
                 } catch (DataFormatException e) {
                     log.error("Couldn't load payload", e);
+                    continue;
                 }
 
                 Integer tTriggerId = new Integer(mtCoincidenceTriggerAlgorithm.getTriggerId(tPayload));

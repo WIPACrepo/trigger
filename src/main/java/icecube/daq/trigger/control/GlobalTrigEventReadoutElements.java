@@ -16,40 +16,30 @@ import icecube.daq.payload.splicer.PayloadFactory;
 
 import java.util.*;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * This class is to produce final ReadoutRequestElement for one GlobalTrigEvent.
  * Required is Input of an unorganized ReadoutRequestelements (Vector).
  * Both timeOverlap and spaceOverlap will be handled here via SimpleMerger.java and SmartMerger.java.
  *
- * @version $Id: GlobalTrigEventReadoutElements.java,v 1.4 2005/09/16 18:13:11 shseo Exp $
+ * @version $Id: GlobalTrigEventReadoutElements.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public class GlobalTrigEventReadoutElements
 {
-    /**
-     * Log object for this class
-     */
-    private static final Log log = LogFactory.getLog(GlobalTrigEventReadoutElements.class);
-
     private TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY = new TriggerRequestPayloadFactory();
-    private TriggerRequestPayloadFactory triggerFactory = null;
+    private TriggerRequestPayloadFactory triggerFactory;
 
-    Sorter mtSorter = new Sorter();
-    SimpleMerger mtSimpleMerger = null;
-    SmartMerger mtSmartMerger = null;
+    private SimpleMerger mtSimpleMerger;
+    private SmartMerger mtSmartMerger;
 
-    Vector mVecFinalReadoutElements = new Vector();
+    private Vector mVecFinalReadoutElements = new Vector();
 
-    List mListGlobal_II = new ArrayList();
-    List mListString_II = new ArrayList();
-    List mListModule_II = new ArrayList();
+    private List mListGlobal_II = new ArrayList();
+    private List mListString_II = new ArrayList();
+    private List mListModule_II = new ArrayList();
 
-    List mListGlobal_IT = new ArrayList();
-    List mListString_IT = new ArrayList();
-    List mListModule_IT = new ArrayList();
+    private List mListGlobal_IT = new ArrayList();
+    private List mListModule_IT = new ArrayList();
 
     /**
      * Create an instance of this class.
@@ -59,7 +49,6 @@ public class GlobalTrigEventReadoutElements
     public GlobalTrigEventReadoutElements()
     {
         mtSimpleMerger = new SimpleMerger();
-        mtSimpleMerger.setTimeGap_option(1); //No_TimeGap
         mtSmartMerger = new SmartMerger();
 
         setPayloadFactory(DEFAULT_TRIGGER_FACTORY);
@@ -69,11 +58,11 @@ public class GlobalTrigEventReadoutElements
      * This method is to classify each ReadoutElement according to its ReadoutTypes.
      * This will produce GlobalList, StringList and  ModuleList.
      *
-     * @param vecInputElements
+     * @param inputElements
      */
-    public void classifyReadoutTypes(Vector vecInputElements)
+    private void classifyReadoutTypes(List inputElements)
     {
-        Iterator iterElements = vecInputElements.iterator();
+        Iterator iterElements = inputElements.iterator();
         while(iterElements.hasNext())
         {
             IReadoutRequestElement element = (IReadoutRequestElement) iterElements.next();
@@ -82,7 +71,7 @@ public class GlobalTrigEventReadoutElements
 
             switch(readoutType){
                 //IIIT-GLOBAL needs to be separated out as II-GLOBAL and IT-GLOBAL.
-                case IReadoutRequestElement.READOUT_TYPE_IIIT_GLOBAL:
+                case IReadoutRequestElement.READOUT_TYPE_GLOBAL:
 
                     IReadoutRequestElement element_II = triggerFactory.createReadoutRequestElement(
                                                 IReadoutRequestElement.READOUT_TYPE_II_GLOBAL,
@@ -135,90 +124,54 @@ public class GlobalTrigEventReadoutElements
      *
      * @return
      */
-    public List getCurrentEventReadoutTypeLists()
+    private List getCurrentEventReadoutTypeLists()
     {
-        List listCurrentReaoutTypeLists = new ArrayList();
+        List listCurrentReadoutTypeLists = new ArrayList();
 
-        if(0 != mListGlobal_II.size()) listCurrentReaoutTypeLists.add(mListGlobal_II);
-        if(0 != mListString_II.size()) listCurrentReaoutTypeLists.add(mListString_II);
-        if(0 != mListModule_II.size()) listCurrentReaoutTypeLists.add(mListModule_II);
+        if(0 != mListGlobal_II.size()) listCurrentReadoutTypeLists.add(mListGlobal_II);
+        if(0 != mListString_II.size()) listCurrentReadoutTypeLists.add(mListString_II);
+        if(0 != mListModule_II.size()) listCurrentReadoutTypeLists.add(mListModule_II);
 
-        if(0 != mListGlobal_IT.size()) listCurrentReaoutTypeLists.add(mListGlobal_IT);
-        if(0 != mListString_IT.size()) listCurrentReaoutTypeLists.add(mListString_IT);
-        if(0 != mListModule_IT.size()) listCurrentReaoutTypeLists.add(mListModule_IT);
+        if(0 != mListGlobal_IT.size()) listCurrentReadoutTypeLists.add(mListGlobal_IT);
+        if(0 != mListModule_IT.size()) listCurrentReadoutTypeLists.add(mListModule_IT);
 
-        return listCurrentReaoutTypeLists;
+        return listCurrentReadoutTypeLists;
     }
     /**
-     * 
-     *
-     * @return
-     */
-    public Hashtable getHashCurrentEventReadoutTypeLists()
-    {
-        Hashtable hashCurrentEventReadoutTypeLists = new Hashtable();
-
-        if(null != mListGlobal_II)
-        {
-            hashCurrentEventReadoutTypeLists.put(new Integer(IReadoutRequestElement.READOUT_TYPE_II_GLOBAL), mListGlobal_II);
-        }
-        if(null != mListString_II)
-        {
-            hashCurrentEventReadoutTypeLists.put(new Integer(IReadoutRequestElement.READOUT_TYPE_II_STRING), mListString_II);
-        }
-        if(null != mListModule_II)
-        {
-            hashCurrentEventReadoutTypeLists.put(new Integer(IReadoutRequestElement.READOUT_TYPE_II_MODULE), mListModule_II);
-        }
-        if(null != mListGlobal_IT)
-        {
-            hashCurrentEventReadoutTypeLists.put(new Integer(IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL), mListGlobal_IT);
-        }
-        if(null != mListModule_IT)
-        {
-            hashCurrentEventReadoutTypeLists.put(new Integer(IReadoutRequestElement.READOUT_TYPE_IT_MODULE), mListModule_IT);
-        }
-
-        return hashCurrentEventReadoutTypeLists;
-    }
-    /**
-     * This mehtod is the main method and called by GlobalTrigEventWrapper.java.
+     * This method is the main method and called by GlobalTrigEventWrapper.java.
      * This returns final vector of ReadoutRequestElements for a GTEvent.
      *
-     * @param vecInputReadoutElements
+     * @param inputElements
      * @return
      */
-    public Vector getManagedFinalReadoutRequestElements(Vector vecInputReadoutElements)
+    public Vector getManagedFinalReadoutRequestElements(List inputElements)
     {
         initialize();
 
-        classifyReadoutTypes(vecInputReadoutElements);
+        classifyReadoutTypes(inputElements);
 
         //Each element of this list is another list (of ReadoutType) containing ReadoutElements.
         List listCurrentEventReadoutTypeLists = getCurrentEventReadoutTypeLists();
         List listSimpleMergedSameReadoutLists = new ArrayList();
-        List listSameReadoutTypeElements = new ArrayList();
-
         for(int i=0; i<listCurrentEventReadoutTypeLists.size(); i++)
         {
-            listSameReadoutTypeElements = (List) listCurrentEventReadoutTypeLists.get(i);
+            List listSameReadoutTypeElements =
+                (List) listCurrentEventReadoutTypeLists.get(i);
 
             if(listSameReadoutTypeElements.size() > 1)
             {
-                mtSimpleMerger.merge(listSameReadoutTypeElements);
-                listSimpleMergedSameReadoutLists.add((List) mtSimpleMerger.getListSimpleMergedSameReadoutElements());
+                listSimpleMergedSameReadoutLists.add(mtSimpleMerger.merge(listSameReadoutTypeElements));
 
             } else
             {
-                listSimpleMergedSameReadoutLists.add((List) listSameReadoutTypeElements);
+                listSimpleMergedSameReadoutLists.add(listSameReadoutTypeElements);
             }
         }
 
         if(listSimpleMergedSameReadoutLists.size() > 1)
         {
             mtSmartMerger.merge(listSimpleMergedSameReadoutLists);
-            //List listFinalElements = mtSmartMerger.getFinalReadoutElementsTimeOrdered_All();
-            mVecFinalReadoutElements.addAll((List) mtSmartMerger.getFinalReadoutElementsTimeOrdered_All());
+            mVecFinalReadoutElements.addAll(mtSmartMerger.getFinalReadoutElementsTimeOrdered_All());
 
         }else if(1 == listSimpleMergedSameReadoutLists.size()) //--> no need for smartMerge.
         {
@@ -232,20 +185,16 @@ public class GlobalTrigEventReadoutElements
      */
     public void initialize()
     {
-        mListGlobal_II = new ArrayList();
-        mListString_II = new ArrayList();
-        mListModule_II = new ArrayList();
-        mListGlobal_IT = new ArrayList();
-        mListModule_IT = new ArrayList();
+        mListGlobal_II.clear();
+        mListString_II.clear();
+        mListModule_II.clear();
+        mListGlobal_IT.clear();
+        mListModule_IT.clear();
 
-        mVecFinalReadoutElements = new Vector();
+        mVecFinalReadoutElements.clear();
 
     }
 
-   /* public void setPayloadFactory(PayloadFactory payloadFactory) {
-
-        triggerFactory = (TriggerRequestPayloadFactory) payloadFactory;
-    }  */
     public void setPayloadFactory(PayloadFactory triggerFactory) {
        this.triggerFactory = (TriggerRequestPayloadFactory) triggerFactory;
        mtSimpleMerger.setPayloadFactory(triggerFactory);
@@ -256,6 +205,5 @@ public class GlobalTrigEventReadoutElements
     {
         mtSimpleMerger.setTimeGap_option(iTimeGap_option);
     }
-
 
 }

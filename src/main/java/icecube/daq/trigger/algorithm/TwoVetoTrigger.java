@@ -1,7 +1,7 @@
 /*
  * class: TwoVetoTrigger
  *
- * Version $Id: TwoVetoTrigger.java,v 1.2 2006/06/30 18:28:04 dwharton Exp $
+ * Version $Id: TwoVetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: January 25 2006
  *
@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is accept all incoming triggers but to veto two configured triggers.
  *
- * @version $Id: TwoVetoTrigger.java,v 1.2 2006/06/30 18:28:04 dwharton Exp $
+ * @version $Id: TwoVetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public class TwoVetoTrigger

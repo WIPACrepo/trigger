@@ -1,7 +1,7 @@
 /*
  * interface: ITrigger
  *
- * Version $Id: ITriggerConfig.java,v 1.10 2006/06/16 21:10:29 vav111 Exp $
+ * Version $Id: ITriggerConfig.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: January 3 2005
  *
@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * This interface defines the configuration aspect of a trigger.
  *
- * @version $Id: ITriggerConfig.java,v 1.10 2006/06/16 21:10:29 vav111 Exp $
+ * @version $Id: ITriggerConfig.java 2125 2007-10-12 18:27:05Z ksb $
  * @author pat
  */
 public interface ITriggerConfig

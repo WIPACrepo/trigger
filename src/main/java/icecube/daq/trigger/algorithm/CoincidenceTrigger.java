@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTrigger
  *
- * Version $Id: CoincidenceTrigger.java,v 1.21 2006/01/27 10:49:55 shseo Exp $
+ * Version $Id: CoincidenceTrigger.java 2148 2007-10-17 16:17:24Z dglo $
  *
  * Date: September 2 2005
  *
@@ -19,7 +19,6 @@ import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.IReadoutRequest;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.Sorter;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -29,7 +28,7 @@ import java.util.Vector;
 /**
  * This class is to provide methods common to all coincidence triggers.
  *
- * @version $Id: CoincidenceTrigger.java,v 1.21 2006/01/27 10:49:55 shseo Exp $
+ * @version $Id: CoincidenceTrigger.java 2148 2007-10-17 16:17:24Z dglo $
  * @author shseo
  */
 public abstract class CoincidenceTrigger
@@ -70,7 +69,7 @@ public abstract class CoincidenceTrigger
         try {
             setEarliestTimeInConditionalTrigBag(dummy_one);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Couldn't set earliest time", e);
         }
 
         if(!isConfigured()) {
@@ -148,7 +147,7 @@ public abstract class CoincidenceTrigger
      * @param payload2
      * @return
      */
-    public boolean isTimeOverlap(TriggerRequestPayload payload1, TriggerRequestPayload payload2)
+    public boolean isTimeOverlap(ITriggerRequestPayload payload1, ITriggerRequestPayload payload2)
     {
         boolean bIsOverlap = false;
 
@@ -172,6 +171,7 @@ public abstract class CoincidenceTrigger
             }catch(NullPointerException e)
             {
                 log.error("ReadoutRequest should not be null in CoincidenceTrigger!");
+                return false;
             }
         } else {
             log.error("Unexpected payload type passed to CoincidenceTrigger");
@@ -188,6 +188,7 @@ public abstract class CoincidenceTrigger
             }catch(NullPointerException e)
             {
                 log.error("ReadoutRequest should not be null in CoincidenceTrigger!");
+                return false;
             }
         } else {
             log.error("Unexpected payload type passed to CoincidenceTrigger");
@@ -216,7 +217,7 @@ public abstract class CoincidenceTrigger
      * @param tPayload_2
      * @return
      */
-    public boolean isCoincidentTrigger(TriggerRequestPayload tPayload_1, TriggerRequestPayload tPayload_2)
+    public boolean isCoincidentTrigger(ITriggerRequestPayload tPayload_1, ITriggerRequestPayload tPayload_2)
     {
         boolean bIsTimeOverlap = false;
         boolean bIsDifferentTriggerId = false;
@@ -237,7 +238,7 @@ public abstract class CoincidenceTrigger
      * @param tPayload_2
      * @return
      */
-    public boolean isDifferentTriggerId(TriggerRequestPayload tPayload_1, TriggerRequestPayload tPayload_2)
+    public boolean isDifferentTriggerId(ITriggerRequestPayload tPayload_1, ITriggerRequestPayload tPayload_2)
     {
         if(getTriggerId(tPayload_1) != getTriggerId(tPayload_2))
         {

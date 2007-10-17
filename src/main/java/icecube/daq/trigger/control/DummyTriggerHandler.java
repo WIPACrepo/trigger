@@ -13,11 +13,12 @@ package icecube.daq.trigger.control;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.IReadoutRequestElement;
 import icecube.daq.trigger.IReadoutRequest;
+import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.*;
 import icecube.daq.payload.impl.SourceID4B;
+import icecube.daq.util.DOMRegistry;
 
 import java.util.List;
 import java.util.Vector;
@@ -44,17 +45,17 @@ public class DummyTriggerHandler
     /**
      * Bag of triggers to issue
      */
-    protected ITriggerBag triggerBag = null;
+    private ITriggerBag triggerBag;
 
     /**
      * output destination
      */
-    protected IPayloadDestinationCollection payloadDestination = null;
+    private IPayloadDestinationCollection payloadDestination;
 
     /**
      * Default output factory
      */
-    protected TriggerRequestPayloadFactory outputFactory = null;
+    private TriggerRequestPayloadFactory outputFactory;
 
     /**
      * SourceId of this TriggerHandler.
@@ -64,22 +65,25 @@ public class DummyTriggerHandler
     /**
      * earliest thing of interest to the analysis
      */
-    private IPayload earliestPayloadOfInterest = null;
+    private IPayload earliestPayloadOfInterest;
 
+    private int numHitsPerTrigger = 1000;
     private int count;
+
+    private DOMRegistry domRegistry;
 
     /**
      * Default constructor
      */
     public DummyTriggerHandler() {
-        this(new SourceID4B(4000));
+        this(new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
-    public DummyTriggerHandler(ISourceID sourceId) {
+    private DummyTriggerHandler(ISourceID sourceId) {
         this(sourceId, new TriggerRequestPayloadFactory());
     }
 
-    public DummyTriggerHandler(ISourceID sourceId, TriggerRequestPayloadFactory outputFactory) {
+    protected DummyTriggerHandler(ISourceID sourceId, TriggerRequestPayloadFactory outputFactory) {
         this.sourceId = sourceId;
         this.outputFactory = outputFactory;
         init();
@@ -104,6 +108,7 @@ public class DummyTriggerHandler
      * @param trigger trigger to be added
      */
     public void addTrigger(ITriggerControl trigger) {
+        log.info("Triggers added to DummyTriggerBag are ignored");
     }
 
     /**
@@ -112,6 +117,7 @@ public class DummyTriggerHandler
      * @param triggers
      */
     public void addTriggers(List triggers) {
+        log.info("Triggers added to DummyTriggerBag are ignored");
     }
 
     /**
@@ -135,6 +141,16 @@ public class DummyTriggerHandler
         this.payloadDestination = payloadDestination;
     }
 
+    IPayloadDestinationCollection getPayloadDestination()
+    {
+        return payloadDestination;
+    }
+
+    public void setNumHitsPerTrigger(int numHitsPerTrigger)
+    {
+        this.numHitsPerTrigger = numHitsPerTrigger;
+    }
+
     /**
      * Method to process payloads, assumes that they are time ordered.
      * @param payload payload to process
@@ -143,7 +159,7 @@ public class DummyTriggerHandler
         IHitPayload hit = (IHitPayload) payload;
 
         // need to make TRP and add to trigger bag
-        if (count % 1000 == 0) {
+        if (count % numHitsPerTrigger == 0) {
 
             log.info("Creating Trigger...");
 
@@ -153,13 +169,13 @@ public class DummyTriggerHandler
             Vector readouts = new Vector();
             IUTCTime timeMinus = hitTime.getOffsetUTCTime(-8000);
             IUTCTime timePlus = hitTime.getOffsetUTCTime(8000);
-            readouts.add(TriggerRequestPayloadFactory.createReadoutRequestElement(IReadoutRequestElement.READOUT_TYPE_IIIT_GLOBAL,
+            readouts.add(TriggerRequestPayloadFactory.createReadoutRequestElement(IReadoutRequestElement.READOUT_TYPE_GLOBAL,
                                                                                   timeMinus, timePlus, null, null));
             IReadoutRequest readout = TriggerRequestPayloadFactory.createReadoutRequest(sourceId, count, readouts);
 
             // create trigger
-            TriggerRequestPayload triggerPayload
-                    = (TriggerRequestPayload) outputFactory.createPayload(count,
+            ITriggerRequestPayload triggerPayload
+                    = (ITriggerRequestPayload) outputFactory.createPayload(count,
                                                                           0,
                                                                           0,
                                                                           sourceId,
@@ -195,6 +211,14 @@ public class DummyTriggerHandler
     }
 
     /**
+     * getter for count
+     * @return count
+     */
+    public int getCount() {
+        return count;
+    }
+
+    /**
      * getter for SourceID
      * @return sourceID
      */
@@ -208,23 +232,29 @@ public class DummyTriggerHandler
      *   if any of those overlap, they are merged
      */
     public void issueTriggers() {
+        if (null == payloadDestination) {
+            log.error("PayloadDestination has not been set!");
+            throw new RuntimeException("PayloadDestination has not been set!");
+        }
+
         while (triggerBag.hasNext()) {
-            TriggerRequestPayload trigger = triggerBag.next();
+            ITriggerRequestPayload trigger = (ITriggerRequestPayload) triggerBag.next();
 
             // issue the trigger
-            if (null == payloadDestination) {
-                log.error("PayloadDestination has not been set!");
-                throw new RuntimeException("PayloadDestination has not been set!");
-            } else {
-                try {
-		    log.info("Writing Trigger...");
-                    payloadDestination.writePayload(trigger);
-                } catch (IOException e) {
-                    log.error("Failed to write triggers");
-                    throw new RuntimeException(e);
-                }
-                // now recycle it
-                trigger.recycle();
+            RuntimeException rte;
+            try {
+                log.info("Writing Trigger...");
+                payloadDestination.writePayload(trigger);
+                rte = null;
+            } catch (IOException e) {
+                log.error("Failed to write triggers");
+                rte = new RuntimeException(e);
+            }
+            // now recycle it
+            trigger.recycle();
+
+            if (rte != null) {
+                throw rte;
             }
 
         }
@@ -235,8 +265,16 @@ public class DummyTriggerHandler
         return earliestPayloadOfInterest;
     }
 
-    protected void setEarliestPayloadOfInterest(IPayload earliest) {
+    private void setEarliestPayloadOfInterest(IPayload earliest) {
         earliestPayloadOfInterest = earliest;
+    }
+
+    public void setDOMRegistry(DOMRegistry registry) {
+	domRegistry = registry;
+    }
+
+    public DOMRegistry getDOMRegistry() {
+	return domRegistry;
     }
 
 }

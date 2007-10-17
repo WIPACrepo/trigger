@@ -1,7 +1,7 @@
 /*
  * class: ITriggerBag
  *
- * Version $Id: ITriggerBag.java,v 1.3 2005/12/29 23:17:35 toale Exp $
+ * Version $Id: ITriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: March 16 2005
  *
@@ -10,18 +10,16 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.ILoadablePayload;
-import icecube.daq.payload.IPayload;
 import icecube.daq.payload.splicer.PayloadFactory;
 
 /**
  *
  * Interface for trigger bag
  *
- * @version $Id: ITriggerBag.java,v 1.3 2005/12/29 23:17:35 toale Exp $
+ * @version $Id: ITriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
  * @author pat
  */
 public interface ITriggerBag
@@ -45,10 +43,10 @@ public interface ITriggerBag
     boolean hasNext();
 
     /**
-     * get next trigger from bag
-     * @return next available trigger
+     * get next payload from bag
+     * @return next available payload
      */
-    TriggerRequestPayload next();
+    ILoadablePayload next();
 
     /**
      * get the current time of the bag

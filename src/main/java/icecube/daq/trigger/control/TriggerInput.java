@@ -1,7 +1,7 @@
 /*
  * class: TriggerInput
  *
- * Version $Id: TriggerInput.java,v 1.4 2005/10/18 19:18:06 toale Exp $
+ * Version $Id: TriggerInput.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: May 2 2005
  *
@@ -11,10 +11,8 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.payload.ILoadablePayload;
-import icecube.daq.payload.IPayload;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.splicer.Payload;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.IHitDataPayload;
 import icecube.daq.trigger.ICompositePayload;
@@ -34,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides a simple implementation of ITriggerInput
  *
- * @version $Id: TriggerInput.java,v 1.4 2005/10/18 19:18:06 toale Exp $
+ * @version $Id: TriggerInput.java 2125 2007-10-12 18:27:05Z ksb $
  * @author pat
  */
 public class TriggerInput
@@ -51,12 +49,12 @@ public class TriggerInput
      */
     private List inputList;
 
-    private int count = 0;
+    private int count;
 
     /**
      * flag to indicate if we should flush
      */
-    private boolean flushing = false;
+    private boolean flushing;
 
     /**
      * default constructor
@@ -108,16 +106,16 @@ public class TriggerInput
             // for each contained window...
             if (window1.isContained()) {
 
-                window1.setOverlaping(false);
+                window1.setOverlapping(false);
 
                 for (int j=i+1; j<inputList.size(); j++) {
                     PayloadWindow window2 = (PayloadWindow) inputList.get(j);
-                    // check ovelaps with all uncontained windows
+                    // check overlaps with all uncontained windows
                     if (!window2.isContained()) {
 
                         if ( (0 >= window1.firstTime.compareTo(window2.lastTime)) &&
                              (0 <= window1.lastTime.compareTo(window2.firstTime)) ) {
-                            window1.setOverlaping(true);
+                            window1.setOverlapping(true);
                         }
 
                     }
@@ -150,7 +148,7 @@ public class TriggerInput
             // if flushing, just return true
             // otherwise check if it is free to go
             if ( (flushing) ||
-                 (window.isContained() && !window.isOverlaping()) ) {
+                 (window.isContained() && !window.isOverlapping()) ) {
                 return true;
             }
         }
@@ -160,7 +158,7 @@ public class TriggerInput
 
     /**
      * get next available payload
-     * @return next IPayload
+     * @return next ILoadablePayload
      */
     public ILoadablePayload next() {
 
@@ -170,7 +168,7 @@ public class TriggerInput
             // if flushing, just return the payload
             // otherwise check if it is free to go
             if ( (flushing) ||
-                 (window.isContained() && !window.isOverlaping()) ) {
+                 (window.isContained() && !window.isOverlapping()) ) {
                 inputList.remove(i);
                 return window.getPayload();
             }
@@ -193,9 +191,9 @@ public class TriggerInput
     private class PayloadWindow {
 
         private ILoadablePayload payload;
-        public IUTCTime firstTime;
+        private IUTCTime firstTime;
         private IUTCTime lastTime;
-        private boolean overlaping;
+        private boolean overlapping;
         private boolean contained;
 
         private PayloadWindow(ILoadablePayload payload) {
@@ -255,18 +253,24 @@ public class TriggerInput
             return contained;
         }
 
-        private boolean isOverlaping() {
-            return overlaping;
+        private boolean isOverlapping() {
+            return overlapping;
         }
 
         private void setContained(boolean contained) {
             this.contained = contained;
         }
 
-        private void setOverlaping(boolean overlaping) {
-            this.overlaping = overlaping;
+        private void setOverlapping(boolean overlapping) {
+            this.overlapping = overlapping;
         }
 
+        public String toString()
+        {
+            return "PayloadWindow[" + firstTime + "," + lastTime + "]" +
+                (overlapping ? ",overlapping" : "") +
+                (contained ? ",contained" : "");
+        }
     }
 
 }

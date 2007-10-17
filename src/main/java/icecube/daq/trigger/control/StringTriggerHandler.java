@@ -1,5 +1,6 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.payload.*;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -34,11 +35,25 @@ public class StringTriggerHandler
         super(sourceId, outputFactory);
     }
 
+    private static TriggerRequestPayloadFactory
+        getOutputFactory(SpliceableFactory inputFactory)
+    {
+        final int id = PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST;
+
+        MasterPayloadFactory factory = (MasterPayloadFactory) inputFactory;
+
+        return (TriggerRequestPayloadFactory) factory.getPayloadFactory(id);
+    }
+
     /**
      * Method to process payloads, assumes that they are time ordered.
      * @param payload payload to process
      */
     public void process(ILoadablePayload payload) {
+
+        if (payload == null) {
+            return;
+        }
 
         int interfaceType = payload.getPayloadInterfaceType();
 
@@ -47,17 +62,17 @@ public class StringTriggerHandler
              (interfaceType == PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)) {
 
             // loop over triggers
-            for (Object aTriggerList : triggerList) {
+            for (Object aTriggerList : getTriggerList()) {
                 ITriggerControl trigger = (ITriggerControl) aTriggerList;
                 try {
                     trigger.runTrigger(payload);
                 } catch (TriggerException e) {
-                    log.error("Exception while running trigger: " + e);
+                    log.error("Exception while running trigger", e);
                 }
             }
 
         } else {
-            log.warn("TriggerHandler only knows about either hitPayloads or TriggerRequestPayloads!");
+            log.warn("StringTriggerHandler only knows about hitPayloads!");
         }
 
         // Check triggerBag and issue triggers
@@ -71,10 +86,14 @@ public class StringTriggerHandler
         addTrigger(createDefaultTrigger());
     }
 
+    protected ITriggerBag createTriggerBag()
+    {
+        return new SimpleTriggerBag();
+    }
+
     public void setMasterPayloadFactory(MasterPayloadFactory masterFactory) {
         this.masterFactory = masterFactory;
-        outputFactory = (TriggerRequestPayloadFactory)
-                masterFactory.getPayloadFactory(PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST);
+        setOutputFactory(getOutputFactory(masterFactory));
     }
 
     /**

@@ -19,8 +19,8 @@ import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.payload.splicer.Payload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
 import java.util.List;
@@ -49,7 +49,7 @@ public class DummyTriggerManager
     /**
      * The factory used to produce IHitPayloads for this object to use.
      */
-    private SpliceableFactory inputFactory = null;
+    private SpliceableFactory inputFactory;
 
     /**
      * splicer associated with this manager
@@ -60,11 +60,6 @@ public class DummyTriggerManager
      * marks the begining position of each new spliced buffer, modulo the decrement due to shifting
      */
     private int start;
-
-    /**
-     * size of last input list
-     */
-    private int lastInputListSize;
 
     /**
      * Default constructor.
@@ -86,7 +81,8 @@ public class DummyTriggerManager
      * @param inputFactory SpiceableFactory used by Splicer
      */
     public DummyTriggerManager(SpliceableFactory inputFactory) {
-        this(inputFactory, new SourceID4B(4000));
+        this(inputFactory,
+             new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
     /**
@@ -95,16 +91,23 @@ public class DummyTriggerManager
      * @param sourceId SourceId of this TriggerManager
      */
     public DummyTriggerManager(SpliceableFactory inputFactory, ISourceID sourceId) {
-        super(sourceId);
+        super(sourceId, getOutputFactory(inputFactory));
         this.inputFactory = inputFactory;
-        this.outputFactory = (TriggerRequestPayloadFactory)
-                ((MasterPayloadFactory) inputFactory).getPayloadFactory(PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST);
         init();
+    }
+
+    private static TriggerRequestPayloadFactory
+        getOutputFactory(SpliceableFactory inputFactory)
+    {
+        final int id = PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST;
+
+        MasterPayloadFactory factory = (MasterPayloadFactory) inputFactory;
+
+        return (TriggerRequestPayloadFactory) factory.getPayloadFactory(id);
     }
 
     private void init() {
         start = 0;
-        lastInputListSize = 0;
     }
 
     /**
@@ -125,7 +128,7 @@ public class DummyTriggerManager
 
         // Loop over the new objects in the splicer
         int numberOfObjectsInSplicer = splicedObjects.size();
-        lastInputListSize = numberOfObjectsInSplicer - (start - decrement);
+        int lastInputListSize = numberOfObjectsInSplicer - (start - decrement);
 
         if (lastInputListSize > 0) {
             for (int index = start-decrement; numberOfObjectsInSplicer != index; index++) {
@@ -157,10 +160,6 @@ public class DummyTriggerManager
         this.inputFactory = inputFactory;
     }
 
-    public int getLastInputListSize() {
-        return lastInputListSize;
-    }
-
     /**
      * setter for splicer
      * @param splicer splicer associated with this object
@@ -187,10 +186,10 @@ public class DummyTriggerManager
      */
     public void disposed(SplicerChangedEvent event) {
         if (log.isInfoEnabled()) {
-            log.info("Recieved Splicer DISPOSED");
+            log.info("Received Splicer DISPOSED");
         }
         try {
-            payloadDestination.closeAllPayloadDestinations();
+            getPayloadDestination().closeAllPayloadDestinations();
         } catch (IOException e) {
             log.error("Error closing PayloadDestination", e);
         }
@@ -203,10 +202,10 @@ public class DummyTriggerManager
      */
     public void failed(SplicerChangedEvent event) {
         if (log.isErrorEnabled()) {
-            log.error("Recieved Splicer FAILED");
+            log.error("Received Splicer FAILED");
         }
         try {
-            payloadDestination.closeAllPayloadDestinations();
+            getPayloadDestination().closeAllPayloadDestinations();
         } catch (IOException e) {
             log.error("Error closing PayloadDestination", e);
         }
@@ -237,11 +236,10 @@ public class DummyTriggerManager
      */
     public void stopped(SplicerChangedEvent event) {
         if (log.isInfoEnabled()) {
-            log.info("Recieved Splicer STOPPED");
+            log.info("Received Splicer STOPPED");
         }
         try {
-            //payloadDestination.closeAllPayloadDestinations();
-            payloadDestination.stopAllPayloadDestinations();
+            getPayloadDestination().stopAllPayloadDestinations();
         } catch (IOException e) {
             log.error("Error closing PayloadDestination", e);
         }
@@ -272,14 +270,10 @@ public class DummyTriggerManager
 
         Iterator iter = event.getAllSpliceables().iterator();
         while (iter.hasNext()) {
-            Payload payload = (Payload) iter.next();
+            ILoadablePayload payload = (ILoadablePayload) iter.next();
             payload.recycle();
         }
 
-    }
-
-    public void flush() {
-        super.flush();
     }
 
     public Splicer getSplicer() {

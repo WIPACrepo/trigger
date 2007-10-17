@@ -1,7 +1,7 @@
 /*
  * class: MinBiasTrigger
  *
- * Version $Id: MinBiasTrigger.java,v 1.20 2006/09/14 20:35:13 toale Exp $
+ * Version $Id: MinBiasTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: August 27 2005
  *
@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  * This class implements a simple minimum bias trigger. It simply counts hits and
  * applies a prescale for determining when a trigger should be formed.
  *
- * @version $Id: MinBiasTrigger.java,v 1.20 2006/09/14 20:35:13 toale Exp $
+ * @version $Id: MinBiasTrigger.java 2125 2007-10-12 18:27:05Z ksb $
  * @author pat
  */
 public class MinBiasTrigger extends AbstractTrigger

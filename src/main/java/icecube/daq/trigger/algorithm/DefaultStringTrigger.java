@@ -93,8 +93,8 @@ public class DefaultStringTrigger
         // THIS IS DONE HERE SINCE IT USUALLY HAPPENS IN fromTrigger()
         IPayload earliest = new DummyPayload(hit.getHitTimeUTC().getOffsetUTCTime(0.1));
         setEarliestPayloadOfInterest(earliest);
-
-        reportTrigger((ILoadablePayload) hit);
+        
+        reportTrigger((ILoadablePayload) hit.deepCopy());
 
     }
 

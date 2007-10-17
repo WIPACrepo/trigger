@@ -1,7 +1,7 @@
 /*
  * class: TriggerBag
  *
- * Version $Id: TriggerBag.java,v 1.8 2005/12/29 23:17:35 toale Exp $
+ * Version $Id: TriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: March 16 2005
  *
@@ -10,7 +10,6 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.IReadoutRequest;
@@ -21,7 +20,7 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.payload.splicer.Payload;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.splicer.PayloadFactory;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
@@ -53,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  *                                   +       {===============}
  *                                   +            Merge
  *
- * @version $Id: TriggerBag.java,v 1.8 2005/12/29 23:17:35 toale Exp $
+ * @version $Id: TriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
  * @author pat
  */
 public class TriggerBag
@@ -108,7 +107,7 @@ public class TriggerBag
     /**
      * flag to indicate we are flushing
      */
-    private boolean flushing = false;
+    private boolean flushing;
 
     /**
      * Payload monitor object.
@@ -119,7 +118,7 @@ public class TriggerBag
      * default constructor
      */
     public TriggerBag() {
-        this(-1, -1, new SourceID4B(4000));
+        this(new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
     /**
@@ -158,6 +157,7 @@ public class TriggerBag
             payload.loadPayload();
         } catch (Exception e) {
             log.error("Error loading payload", e);
+            return;
         }
 
         // show this input to the monitor
@@ -224,7 +224,7 @@ public class TriggerBag
 
         if (log.isDebugEnabled()) {
             log.debug("TriggerList has " + payloadList.size() + " payloads");
-            log.debug("   TimeGate at " + timeGate.getUTCTimeAsLong());
+            log.debug("   TimeGate at " + timeGate);
         }
 
     }
@@ -259,8 +259,9 @@ public class TriggerBag
         while (iter.hasNext()) {
             ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
             if (log.isDebugEnabled()) {
-                log.debug("Checking trigger from " + trigger.getFirstTimeUTC().getUTCTimeAsLong()
-                         + " to " + trigger.getLastTimeUTC().getUTCTimeAsLong());
+                log.debug("Checking trigger from " + trigger.getFirstTimeUTC() +
+                          " to " + trigger.getLastTimeUTC() +
+                          " against " + timeGate);
             }
             if ( (flushing) ||
                  (0 < timeGate.compareTo(trigger.getLastTimeUTC())) ) {
@@ -277,19 +278,19 @@ public class TriggerBag
      *
      * @return the next trigger
      */
-    public synchronized TriggerRequestPayload next() {
+    public synchronized ITriggerRequestPayload next() {
 
         // iterate over triggerList and check against timeGate
         Iterator iter = payloadList.iterator();
         while (iter.hasNext()) {
-            TriggerRequestPayload trigger = (TriggerRequestPayload) iter.next();
-            double timeDiff = timeGate.timeDiff_ns(trigger.getLastTimeUTC());
+            ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
             if ( (flushing) ||
                  (0 < timeGate.compareTo(trigger.getLastTimeUTC())) ) {
                 iter.remove();
                 if (log.isDebugEnabled()) {
-                    log.debug("Releasing trigger from " + trigger.getFirstTimeUTC().getUTCTimeAsLong()
-                             + " to " + trigger.getLastTimeUTC().getUTCTimeAsLong()
+                    double timeDiff = timeGate.timeDiff_ns(trigger.getLastTimeUTC());
+                    log.debug("Releasing trigger from " + trigger.getFirstTimeUTC()
+                             + " to " + trigger.getLastTimeUTC()
                              + " with timeDiff = " + timeDiff);
                 }
                 // show this output to the monitor
@@ -309,7 +310,7 @@ public class TriggerBag
      */
     public void setTimeGate(IUTCTime time) {
         if (log.isDebugEnabled()) {
-            log.debug("Updating timeGate to " + time.getUTCTimeAsLong());
+            log.debug("Updating timeGate to " + time);
         }
         timeGate = time;
     }
@@ -364,7 +365,7 @@ public class TriggerBag
         while (!stack.isEmpty()) {
 
             // check trigger type to see if this is a merged trigger
-            TriggerRequestPayload next = (TriggerRequestPayload) stack.removeFirst();
+            ITriggerRequestPayload next = (ITriggerRequestPayload) stack.removeFirst();
             if (0 > next.getTriggerType()) {
                 // if it is, get the subPayloads and add them to the stack
                 if (log.isDebugEnabled()) {
@@ -377,7 +378,8 @@ public class TriggerBag
                     }
                     Iterator iter = subs.iterator();
                     while (iter.hasNext()) {
-                        Payload payload = (Payload) iter.next();
+                        ILoadablePayload payload =
+                            (ILoadablePayload) iter.next();
                         // must load or bad things happen
                         try {
                             payload.loadPayload();
@@ -394,22 +396,23 @@ public class TriggerBag
             } else {
                 // if it is not, add it to the list of subTriggers
                 if (log.isDebugEnabled()) {
-                    log.debug("  SubTrigger from " + next.getSourceID().getSourceID()
+                    log.debug("  SubTrigger from " + next.getSourceID()
                               + " has type " + next.getTriggerType());
-                    List hitList = null;
+                    List hitList;
                     try {
                         hitList = next.getPayloads();
                     } catch (Exception e) {
                         log.error("Error getting list of hits", e);
+                        hitList = null;
                     }
-                    for (int i=0; i<hitList.size(); i++)  {
+                    for (int i=0; hitList != null && i < hitList.size(); i++) {
                         IHitPayload hit = (IHitPayload) hitList.get(i);
                         try {
                             ((ILoadablePayload) hit).loadPayload();
                         } catch (Exception e) {
                             log.error("Error loading hit", e);
                         }
-                        log.debug("    Hit " + i + ": " + hit.getHitTimeUTC().getUTCTimeAsLong());
+                        log.debug("    Hit " + i + ": " + hit.getHitTimeUTC());
                     }
                 }
                 subTriggers.add(next);
@@ -491,7 +494,7 @@ public class TriggerBag
                                                                                            readoutElements);
 
         // create the new trigger
-        TriggerRequestPayload newTrigger = (TriggerRequestPayload) triggerFactory.createPayload(triggerUID,
+        ITriggerRequestPayload newTrigger = (ITriggerRequestPayload) triggerFactory.createPayload(triggerUID,
                                                                                                 triggerType,
                                                                                                 triggerConfigID,
                                                                                                 triggerSourceID,
@@ -507,7 +510,7 @@ public class TriggerBag
         // recycle old subTriggers
         Iterator iter = subTriggers.iterator();
         while (iter.hasNext()) {
-            ((TriggerRequestPayload) iter.next()).recycle();
+            ((ILoadablePayload) iter.next()).recycle();
         }
     }
 
@@ -553,10 +556,10 @@ public class TriggerBag
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Payload1: FirstTime = " + startOfPayload1.getUTCTimeAsLong()
-                      + " LastTime = " + endOfPayload1.getUTCTimeAsLong());
-            log.debug("Payload2: FirstTime = " + startOfPayload2.getUTCTimeAsLong()
-                      + " LastTime = " + endOfPayload2.getUTCTimeAsLong());
+            log.debug("Payload1: FirstTime = " + startOfPayload1
+                      + " LastTime = " + endOfPayload1);
+            log.debug("Payload2: FirstTime = " + startOfPayload2
+                      + " LastTime = " + endOfPayload2);
         }
 
         if ( (0 < startOfPayload1.compareTo(endOfPayload2)) ||

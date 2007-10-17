@@ -16,11 +16,10 @@ import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.payload.splicer.Payload;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.splicer.PayloadFactory;
 import icecube.daq.payload.impl.UTCTime8B;
 import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.ITriggerRequestPayload;
@@ -34,7 +33,7 @@ import java.util.*;
  * This class receives TriggerRequestPayloads from each active GlobalTrigAlgorithm
  * , merges if they overlap and produces globalTrigEventPayload.
  *
- * @version $Id: GlobalTriggerBag.java,v 1.12 2006/03/16 19:08:25 shseo Exp $
+ * @version $Id: GlobalTriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
  * @author shseo
  */
 public class GlobalTriggerBag
@@ -48,14 +47,13 @@ public class GlobalTriggerBag
     /**
      * internal list of triggers
      */
-    public Vector payloadList = new Vector();
+    private Vector payloadList = new Vector();
 
     /**
      * set of overlapping triggers to merge
      */
-    protected static List mergeList = new ArrayList();
+    private static List mergeList = new ArrayList();
 
-    private final TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY = new TriggerRequestPayloadFactory();
     /**
      * The factory used to create triggers
      */
@@ -64,9 +62,9 @@ public class GlobalTriggerBag
     /**
      * triggers that occur earlier than this time are free to be released
      */
-    protected IUTCTime timeGate = new UTCTime8B(-1);
+    private IUTCTime timeGate = new UTCTime8B(-1);
 
-    protected GlobalTrigEventWrapper mtGlobalTrigEventWrapper;
+    private GlobalTrigEventWrapper mtGlobalTrigEventWrapper;
 
     /**
      * UID for newly merged triggers
@@ -74,24 +72,9 @@ public class GlobalTriggerBag
     private int triggerUID;
 
     /**
-     * type for newly merged triggers
-     */
-    private int triggerType;
-
-    /**
-     * config ID for newly merged triggers
-     */
-    private int triggerConfigID;
-
-    /**
-     * source ID for newly merged triggers
-     */
-    private ISourceID triggerSourceID;
-
-    /**
      * flag to indicate we are flushing
      */
-    private boolean flushing = false;
+    private boolean flushing;
 
     private int miTimeGateWindow;
 
@@ -107,7 +90,7 @@ public class GlobalTriggerBag
      */
     public GlobalTriggerBag()
     {
-        this(-1, -1, new SourceID4B(6000));
+        this(-1, -1, new SourceID4B(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID));
     }
     /**
       * constructor
@@ -119,14 +102,10 @@ public class GlobalTriggerBag
     public GlobalTriggerBag(int type, int configID, ISourceID sourceID)
     {
         triggerUID = 0;
-        triggerType = type;
-        triggerConfigID = configID;
-        triggerSourceID = sourceID;
 
         mtGlobalTrigEventWrapper = new GlobalTrigEventWrapper();
+        mtGlobalTrigEventWrapper.setTimeGap_option(1);
 
-        //--todo: need to rework...?
-        setTimeGap_option(1);//No_TimeGap
         this.init();
 
         monitor = new PayloadBagMonitor();
@@ -142,6 +121,7 @@ public class GlobalTriggerBag
              currentPayload.loadPayload();
          } catch (Exception e) {
              log.error("Error loading currentPayload", e);
+             return;
          }
 
         // show this input to the monitor
@@ -210,7 +190,7 @@ public class GlobalTriggerBag
 
             if (log.isDebugEnabled()) {
                 log.debug("TriggerList has " + payloadList.size() + " payloads");
-                log.debug("   TimeGate at " + timeGate.getUTCTimeAsLong());
+                log.debug("   TimeGate at " + timeGate);
             }
      }
 
@@ -233,12 +213,12 @@ public class GlobalTriggerBag
         return false;
     }
 
-    public TriggerRequestPayload next() {
+    public ITriggerRequestPayload next() {
 
         // iterate over triggerList and check against timeGate
         Iterator iter = payloadList.iterator();
         while (iter.hasNext()) {
-            TriggerRequestPayload trigger = (TriggerRequestPayload) iter.next();
+            ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
             double timeDiff = timeGate.timeDiff_ns(trigger.getLastTimeUTC());
             if ( (flushing) ||
                  (0 < timeGate.compareTo(trigger.getLastTimeUTC())) ) {
@@ -249,7 +229,7 @@ public class GlobalTriggerBag
                 //GTEventNumber should be assigned here.
                 triggerUID++;
                 mtGlobalTrigEventWrapper.wrapFinalEvent(trigger, triggerUID);
-                trigger = (TriggerRequestPayload) mtGlobalTrigEventWrapper.getGlobalTrigEventPayload_final();
+                trigger = (ITriggerRequestPayload) mtGlobalTrigEventWrapper.getGlobalTrigEventPayload_final();
 
                 // show this output to the monitor
                 monitor.recordOutput(trigger);
@@ -259,46 +239,6 @@ public class GlobalTriggerBag
         }
 
         return null;
-    }
-    /**
-     * checks the top-level trigger for sub-triggers
-     *
-     * @param trigger top-level trigger
-     * @return vector of sub-triggers
-     */
-    private static List getSubTriggers(IPayload trigger) {
-
-        Vector subTriggers = new Vector();
-        LinkedList stack = new LinkedList();
-        stack.add(trigger);
-
-        while (!stack.isEmpty()) {
-
-            // check trigger type to see if this is a merged trigger
-            TriggerRequestPayload next = (TriggerRequestPayload) stack.removeFirst();
-            if (0 > next.getTriggerType()) {
-                // if it is, get the subPayloads and add them to the stack
-                try {
-                    stack.addAll(next.getPayloads());
-                } catch (Exception e) {
-                    log.error("Error accessing sub-payloads", e);
-                }
-            } else {
-                // if it is not, add it to the list of subTriggers
-                if (log.isDebugEnabled()) {
-                    log.debug("  SubTrigger from " + next.getSourceID().getSourceID()
-                              + " has type " + next.getTriggerType());
-                }
-                subTriggers.add(next);
-            }
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("  Returning " + subTriggers.size() + " subTriggers");
-        }
-
-        return subTriggers;
-
     }
 
     public IUTCTime getTimeGate() {
@@ -347,10 +287,10 @@ public class GlobalTriggerBag
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Payload1: FirstTime = " + startOfPayload1.getUTCTimeAsLong()
-                      + " LastTime = " + endOfPayload1.getUTCTimeAsLong());
-            log.debug("Payload2: FirstTime = " + startOfPayload2.getUTCTimeAsLong()
-                      + " LastTime = " + endOfPayload2.getUTCTimeAsLong());
+            log.debug("Payload1: FirstTime = " + startOfPayload1
+                      + " LastTime = " + endOfPayload1);
+            log.debug("Payload2: FirstTime = " + startOfPayload2
+                      + " LastTime = " + endOfPayload2);
         }
 
         if ( (0 < startOfPayload1.compareTo(endOfPayload2)) ||
@@ -377,18 +317,18 @@ public class GlobalTriggerBag
     public void setTimeGate(IUTCTime time)
     {
         if (log.isDebugEnabled()) {
-            log.debug("Updating timeGate to " + time.getUTCTimeAsLong());
+            log.debug("Updating timeGate to " + time);
         }
         //System.out.println("------------------------------------------------------");
         //System.out.println("in BAG: MAX-TIME-GATE-WINDOW = " + miTimeGateWindow);
         timeGate = time.getOffsetUTCTime((double) miTimeGateWindow);
-        //System.out.println("print timeGate = " + timeGate.getUTCTimeAsLong());
+        //System.out.println("print timeGate = " + timeGate);
         //System.out.println("------------------------------------------------------");
     }
 
     /**
      * This method should be called in a class where configuration mbean is obtained.
-     * todo. this mehtod fits better in Config.java class...?
+     * todo. this method fits better in Config.java class...?
      * @param iConfiguredMaxTimeWindow
      */
     public void setMaxTimeGateWindow(int iConfiguredMaxTimeWindow)
@@ -433,4 +373,8 @@ public class GlobalTriggerBag
         mtGlobalTrigEventWrapper.setTimeGap_option(iTimeGap_option);
     }
 
+    protected GlobalTrigEventWrapper getGlobalTrigEventWrapper()
+    {
+        return mtGlobalTrigEventWrapper;
+    }
 }

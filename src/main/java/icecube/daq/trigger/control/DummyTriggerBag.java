@@ -10,21 +10,18 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.impl.TriggerRequestPayload;
+import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.splicer.PayloadFactory;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * This class implements a collection specific to IPayload's.
@@ -49,11 +46,6 @@ public class DummyTriggerBag
 {
 
     /**
-     * Log object for this class
-     */
-    private static final Log log = LogFactory.getLog(DummyTriggerBag.class);
-
-    /**
      * internal list of triggers
      */
     private List payloadList = new ArrayList();
@@ -62,7 +54,7 @@ public class DummyTriggerBag
      * default constructor
      */
     public DummyTriggerBag() {
-        this(-1, -1, new SourceID4B(4000));
+        this(new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
     /**
@@ -116,8 +108,7 @@ public class DummyTriggerBag
      * @return true if there is a releasable trigger
      */
     public synchronized boolean hasNext() {
-        Iterator iter = payloadList.iterator();
-        return iter.hasNext();
+        return payloadList.size() > 0;
     }
 
     /**
@@ -125,9 +116,12 @@ public class DummyTriggerBag
      *
      * @return the next trigger
      */
-    public synchronized TriggerRequestPayload next() {
-        Iterator iter = payloadList.iterator();
-        return (TriggerRequestPayload) iter.next();
+    public synchronized ITriggerRequestPayload next() {
+        if (hasNext()) {
+            return (ITriggerRequestPayload) payloadList.remove(0);
+        }
+
+        return null;
     }
 
     /**

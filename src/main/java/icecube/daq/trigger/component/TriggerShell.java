@@ -10,9 +10,9 @@ import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
 
-import icecube.daq.payload.ByteBufferCache;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.MasterPayloadFactory;
+import icecube.daq.payload.VitreousBufferCache;
 
 import icecube.daq.payload.splicer.Payload;
 
@@ -84,7 +84,7 @@ class DevNullAnalysis
 
     /**
      * Returns the {@link SpliceableFactory} that should be used to create the
-     * {@link Spliceable Splicable} objects used by this
+     * {@link Spliceable Spliceable} objects used by this
      * object.
      *
      * @return the SpliceableFactory that creates Spliceable objects.
@@ -197,8 +197,7 @@ public class TriggerShell
         super(name, id);
 
         // Create the buffer cache and the payload factory
-        IByteBufferCache bufferCache =
-            new ByteBufferCache(256, 250000000L, 225000000L, name);
+        IByteBufferCache bufferCache = new VitreousBufferCache();
         addCache(bufferCache);
 
         MasterPayloadFactory masterFactory =

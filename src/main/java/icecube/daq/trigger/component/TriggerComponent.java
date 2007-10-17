@@ -10,7 +10,6 @@ import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
 import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.IByteBufferCache;
-import icecube.daq.payload.ByteBufferCache;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.VitreousBufferCache;
@@ -23,12 +22,17 @@ import icecube.daq.trigger.control.GlobalTriggerManager;
 import icecube.daq.trigger.control.ITriggerControl;
 import icecube.daq.trigger.control.DummyTriggerManager;
 import icecube.daq.trigger.config.TriggerBuilder;
+import icecube.daq.util.DOMRegistry;
 
 import java.nio.ByteBuffer;
 import java.io.IOException;
 
 import java.util.List;
 import java.util.Iterator;
+import java.util.HashMap;
+
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,8 +43,16 @@ public class TriggerComponent
 {
     private static final Log log = LogFactory.getLog(TriggerComponent.class);
 
-    private static final String AMANDA_HOST = "triggerdaq2";
-    private static final int AMANDA_PORT = 12014;
+    /** svn version information */
+    private static final HashMap SVN_VER_INFO;
+    static {
+	SVN_VER_INFO = new HashMap(4);
+	SVN_VER_INFO.put("id",  "$Id: TriggerComponent.java 2146 2007-10-17 01:37:59Z ksb $");
+	SVN_VER_INFO.put("url", "$URL: http://code.icecube.wisc.edu/daq/projects/trigger/releases/Grange/src/main/java/icecube/daq/trigger/component/TriggerComponent.java $");
+    }
+
+    public static final String DEFAULT_AMANDA_HOST = "triggerdaq2";
+    public static final int DEFAULT_AMANDA_PORT = 12014;
 
     protected ISourceID sourceId;
     protected IByteBufferCache bufferCache;
@@ -53,10 +65,20 @@ public class TriggerComponent
     protected String triggerConfigFileName = null;
     protected List currentTriggers = null;
 
+    private String amandaHost = DEFAULT_AMANDA_HOST;
+    private int amandaPort = DEFAULT_AMANDA_PORT;
 
     public TriggerComponent(String name, int id) {
+        this(name, id, DEFAULT_AMANDA_HOST, DEFAULT_AMANDA_PORT);
+    }
+
+    public TriggerComponent(String name, int id,
+                            String amandaHost, int amandaPort) {
         super(name, id);
         
+        this.amandaHost = amandaHost;
+        this.amandaPort = amandaPort;
+
         // Create the source id of this component
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
 
@@ -115,7 +137,7 @@ public class TriggerComponent
         }
         if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
             try {
-                inputEngine.addReverseConnection(AMANDA_HOST, AMANDA_PORT,
+                inputEngine.addReverseConnection(amandaHost, amandaPort,
                                                  bufferCache);
             } catch (IOException ioe) {
                 log.error("Couldn't connect to Amanda TWR", ioe);
@@ -168,6 +190,17 @@ public class TriggerComponent
         }
         triggerManager.addTriggers(currentTriggers);
 
+	// Setup DOMRegistry
+	try {
+	    triggerManager.setDOMRegistry(DOMRegistry.loadRegistry(globalConfigurationDir));
+	} catch (ParserConfigurationException pce) {
+	    log.error("Error loading the DOMRegistry", pce);
+	} catch (SAXException se) {
+	    log.error("Error loading the DOMRegistry", se);
+	} catch (IOException ioe) {
+	    log.error("Error loading the DOMRegistry", ioe);
+	}
+
     }
 
     public ITriggerManager getTriggerManager(){
@@ -176,5 +209,15 @@ public class TriggerComponent
 
     public ISourceID getSourceID(){
         return sourceId;
+    }
+
+    /**
+     * Return this component's svn version info as a HashMap.
+     *
+     * @return svn version info (id, url) as a HashMap
+     */
+    public HashMap getVersionInfo()
+    {
+	return SVN_VER_INFO;
     }
 }

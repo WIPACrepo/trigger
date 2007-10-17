@@ -1,7 +1,7 @@
 /*
  * class: TriggerReadout
  *
- * Version $Id: TriggerReadout.java,v 1.1 2005/11/23 16:38:06 toale Exp $
+ * Version $Id: TriggerReadout.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: November 23 2005
  *
@@ -17,7 +17,7 @@ import icecube.daq.trigger.IReadoutRequestElement;
 /**
  * This class represents a trigger readout.
  *
- * @version $Id: TriggerReadout.java,v 1.1 2005/11/23 16:38:06 toale Exp $
+ * @version $Id: TriggerReadout.java 2125 2007-10-12 18:27:05Z ksb $
  * @author pat
  */
 public class TriggerReadout
@@ -31,7 +31,7 @@ public class TriggerReadout
     /**
      * Default readout type.
      */
-    private static final int DEFAULT_READOUT_TYPE = IReadoutRequestElement.READOUT_TYPE_IIIT_GLOBAL;
+    private static final int DEFAULT_READOUT_TYPE = IReadoutRequestElement.READOUT_TYPE_GLOBAL;
 
     /**
      * String value of readout type.
@@ -177,7 +177,7 @@ public class TriggerReadout
      */
     public String getTypeAsString() {
         switch (type) {
-            case IReadoutRequestElement.READOUT_TYPE_IIIT_GLOBAL :
+            case IReadoutRequestElement.READOUT_TYPE_GLOBAL :
                 return IIIT_GLOBAL;
             case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL :
                 return II_GLOBAL;
@@ -202,7 +202,7 @@ public class TriggerReadout
      */
     private int checkType(int type) {
         switch (type) {
-            case IReadoutRequestElement.READOUT_TYPE_IIIT_GLOBAL :
+            case IReadoutRequestElement.READOUT_TYPE_GLOBAL :
             case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL :
             case IReadoutRequestElement.READOUT_TYPE_II_STRING :
             case IReadoutRequestElement.READOUT_TYPE_II_MODULE :

@@ -41,6 +41,9 @@ public class MockTriggerRequest
 
     private ArrayList payloadList = new ArrayList();
 
+    private DataFormatException getPayDFException;
+    private IOException getPayIOException;
+
     public MockTriggerRequest(long firstVal, long lastVal)
     {
         this(firstVal, lastVal, -1, -1);
@@ -128,6 +131,12 @@ public class MockTriggerRequest
     public Vector getPayloads()
         throws IOException, DataFormatException
     {
+        if (getPayDFException != null) {
+            throw getPayDFException;
+        } else if (getPayIOException != null) {
+            throw getPayIOException;
+        }
+
         return new Vector(payloadList);
     }
 
@@ -171,6 +180,18 @@ public class MockTriggerRequest
         throw new Error("Unimplemented");
     }
 
+    public void setGetPayloadsException(Exception ex)
+    {
+        if (ex instanceof DataFormatException) {
+            getPayDFException = (DataFormatException) ex;
+        } else if (ex instanceof IOException) {
+            getPayIOException = (IOException) ex;
+        } else {
+            throw new Error("Unknown exception type " +
+                            ex.getClass().getName() + ": " + ex);
+        }
+    }
+
     public void setReadoutRequest(IReadoutRequest rdoutReq)
     {
         this.rdoutReq = rdoutReq;
@@ -195,7 +216,7 @@ public class MockTriggerRequest
 
     public String toString()
     {
-        return "MockTriggerRequest:Type#" + type + ",srcId#" + srcId +
-            "[" + firstTime + "," + lastTime + "]";
+        return "MockTriggerRequest:type#" + type + ",cfg#" + cfgId +
+            ",srcId#" + srcId + "[" + firstTime + "," + lastTime + "]";
     }
 }

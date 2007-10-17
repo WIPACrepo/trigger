@@ -48,6 +48,17 @@ public class MockReadoutRequest
         elems.add(elem);
     }
 
+    public void add(int type, long firstTime, long lastTime, long domId,
+                    int srcId)
+    {
+        if (elems == null) {
+            elems = new ArrayList();
+        }
+
+        elems.add(new MockReadoutRequestElement(type, firstTime, lastTime,
+                                                domId, srcId));
+    }
+
     public Vector getReadoutRequestElements()
     {
         Vector vec;

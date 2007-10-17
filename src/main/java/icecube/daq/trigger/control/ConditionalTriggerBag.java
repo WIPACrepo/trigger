@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ConditionalTriggerBag.java 2147 2007-10-17 15:55:45Z dglo $
  *
  * Date: September 2 2005
  *
@@ -15,7 +15,6 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.algorithm.CoincidenceTrigger;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 
 import java.util.*;
 import java.util.zip.DataFormatException;
@@ -29,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ConditionalTriggerBag.java 2147 2007-10-17 15:55:45Z dglo $
  * @author shseo
  */
 public class ConditionalTriggerBag
@@ -117,11 +116,11 @@ public class ConditionalTriggerBag
             Iterator iter = payloadListInConditionalBag.iterator();
             while (iter.hasNext())
             {
-                TriggerRequestPayload existingPayload = (TriggerRequestPayload) iter.next();
+                ITriggerRequestPayload existingPayload = (ITriggerRequestPayload) iter.next();
 
                 //--check if CoincidenceTrigger
-                if (mtCoincidenceTriggerAlgorithm.isCoincidentTrigger((TriggerRequestPayload) existingPayload,
-                                                             (TriggerRequestPayload) newPayload))
+                if (mtCoincidenceTriggerAlgorithm.isCoincidentTrigger(existingPayload,
+                                                             (ITriggerRequestPayload) newPayload))
                 {
                     if (log.isDebugEnabled()) {
                         log.debug("Two payloads are coincident");
@@ -295,12 +294,12 @@ public class ConditionalTriggerBag
      *
      * @return
      */
-    public TriggerRequestPayload next() {
+    public ITriggerRequestPayload next() {
         //-- iterate over triggerList and check against timeGate
         Iterator iter = payloadListInConditionalBag.iterator();
         while (iter.hasNext())
         {
-            TriggerRequestPayload trigger = (TriggerRequestPayload) iter.next();
+            ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
             double timeDiff = getTimeGate().timeDiff_ns(trigger.getLastTimeUTC());
             if ( flushing || 0 < getTimeGate().compareTo(trigger.getLastTimeUTC()) )
             {
@@ -311,7 +310,7 @@ public class ConditionalTriggerBag
                 //--GTEventNumber should be assigned here.
                 triggerUID++;
                 getGlobalTrigEventWrapper().wrapFinalEvent(trigger, triggerUID);
-                trigger = (TriggerRequestPayload) getGlobalTrigEventWrapper().getGlobalTrigEventPayload_final();
+                trigger = (ITriggerRequestPayload) getGlobalTrigEventWrapper().getGlobalTrigEventPayload_final();
 
                 return trigger;
             }

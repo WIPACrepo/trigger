@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTrigger
  *
- * Version $Id: CoincidenceTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: CoincidenceTrigger.java 2147 2007-10-17 15:55:45Z dglo $
  *
  * Date: September 2 2005
  *
@@ -19,7 +19,6 @@ import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.IReadoutRequest;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.Sorter;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -29,7 +28,7 @@ import java.util.Vector;
 /**
  * This class is to provide methods common to all coincidence triggers.
  *
- * @version $Id: CoincidenceTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: CoincidenceTrigger.java 2147 2007-10-17 15:55:45Z dglo $
  * @author shseo
  */
 public abstract class CoincidenceTrigger
@@ -148,7 +147,7 @@ public abstract class CoincidenceTrigger
      * @param payload2
      * @return
      */
-    public boolean isTimeOverlap(TriggerRequestPayload payload1, TriggerRequestPayload payload2)
+    public boolean isTimeOverlap(ITriggerRequestPayload payload1, ITriggerRequestPayload payload2)
     {
         boolean bIsOverlap = false;
 
@@ -216,7 +215,7 @@ public abstract class CoincidenceTrigger
      * @param tPayload_2
      * @return
      */
-    public boolean isCoincidentTrigger(TriggerRequestPayload tPayload_1, TriggerRequestPayload tPayload_2)
+    public boolean isCoincidentTrigger(ITriggerRequestPayload tPayload_1, ITriggerRequestPayload tPayload_2)
     {
         boolean bIsTimeOverlap = false;
         boolean bIsDifferentTriggerId = false;
@@ -237,7 +236,7 @@ public abstract class CoincidenceTrigger
      * @param tPayload_2
      * @return
      */
-    public boolean isDifferentTriggerId(TriggerRequestPayload tPayload_1, TriggerRequestPayload tPayload_2)
+    public boolean isDifferentTriggerId(ITriggerRequestPayload tPayload_1, ITriggerRequestPayload tPayload_2)
     {
         if(getTriggerId(tPayload_1) != getTriggerId(tPayload_2))
         {

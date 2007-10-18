@@ -33,7 +33,7 @@ import java.util.*;
  * This class receives TriggerRequestPayloads from each active GlobalTrigAlgorithm
  * , merges if they overlap and produces globalTrigEventPayload.
  *
- * @version $Id: GlobalTriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: GlobalTriggerBag.java 2154 2007-10-18 17:49:38Z dglo $
  * @author shseo
  */
 public class GlobalTriggerBag
@@ -48,11 +48,6 @@ public class GlobalTriggerBag
      * internal list of triggers
      */
     private Vector payloadList = new Vector();
-
-    /**
-     * set of overlapping triggers to merge
-     */
-    private static List mergeList = new ArrayList();
 
     /**
      * The factory used to create triggers
@@ -141,8 +136,7 @@ public class GlobalTriggerBag
                  log.debug("Adding currentPayload to a full bag");
              }
 
-            //--prepare mergeList as empty.
-            mergeList.clear();
+             List mergeList = null;
 
             //--loop over existing triggers to check timeOverlap w/ currentTrigger.
             Iterator iter = payloadList.iterator();
@@ -153,6 +147,9 @@ public class GlobalTriggerBag
                 if (overlap(previousPayload, currentPayload)) {
                     if (log.isDebugEnabled()) {
                         log.debug("Payload overlaps with another");
+                    }
+                    if (mergeList == null) {
+                        mergeList = new ArrayList();
                     }
                     if(!mergeList.contains(previousPayload))
                     {
@@ -167,7 +164,7 @@ public class GlobalTriggerBag
             }
 
             //--merge if neccessary, else add new currentPayload to list
-            if (!mergeList.isEmpty()) {
+            if (mergeList != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Lets merge " + mergeList.size() + " payloads");
                 }

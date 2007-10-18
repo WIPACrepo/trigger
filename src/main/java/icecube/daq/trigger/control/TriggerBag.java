@@ -1,7 +1,7 @@
 /*
  * class: TriggerBag
  *
- * Version $Id: TriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: TriggerBag.java 2154 2007-10-18 17:49:38Z dglo $
  *
  * Date: March 16 2005
  *
@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  *                                   +       {===============}
  *                                   +            Merge
  *
- * @version $Id: TriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: TriggerBag.java 2154 2007-10-18 17:49:38Z dglo $
  * @author pat
  */
 public class TriggerBag
@@ -68,11 +68,6 @@ public class TriggerBag
      * internal list of triggers
      */
     private List payloadList = new ArrayList();
-
-    /**
-     * set of overlapping triggers to merge
-     */
-    private List mergeList = new ArrayList();
 
     /**
      * The factory used to create triggers
@@ -178,8 +173,7 @@ public class TriggerBag
                 log.debug("Adding payload to a full bag");
             }
 
-            // clear mergeList
-            mergeList.clear();
+            List mergeList = null;
 
             // loop over existing triggers
             Iterator iter = payloadList.iterator();
@@ -190,6 +184,9 @@ public class TriggerBag
                 if (overlap(payload, next)) {
                     if (log.isDebugEnabled()) {
                         log.debug("Payload overlaps with another");
+                    }
+                    if (mergeList == null) {
+                        mergeList = new ArrayList();
                     }
                     if (!mergeList.contains(payload)) {
                         mergeList.add(payload);
@@ -203,13 +200,13 @@ public class TriggerBag
             }
 
             // merge if neccessary, else add new payload to list
-            if (!mergeList.isEmpty()) {
+            if (mergeList != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Lets merge " + mergeList.size() + " payloads");
                 }
                 // sort to be safe
                 Collections.sort(mergeList);
-                merge();
+                merge(mergeList);
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("No need to merge");
@@ -431,7 +428,7 @@ public class TriggerBag
      * Merge payloads
      * combine payloads in mergeList and remove them from triggerList
      */
-    private void merge() {
+    private void merge(List mergeList) {
 
         triggerUID++;
 

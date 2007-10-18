@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java 2148 2007-10-17 16:17:24Z dglo $
+ * Version $Id: ConditionalTriggerBag.java 2154 2007-10-18 17:49:38Z dglo $
  *
  * Date: September 2 2005
  *
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java 2148 2007-10-17 16:17:24Z dglo $
+ * @version $Id: ConditionalTriggerBag.java 2154 2007-10-18 17:49:38Z dglo $
  * @author shseo
  */
 public class ConditionalTriggerBag
@@ -44,11 +44,6 @@ public class ConditionalTriggerBag
     public String msCoincidenceTriggerAlgorithmName;
 
     public Vector payloadListInConditionalBag = new Vector();
-
-    /**
-     * set of overlapping triggers to merge
-     */
-    protected static List mergeListForConditionalBag = new ArrayList();
 
     public boolean flushing;
 
@@ -110,8 +105,7 @@ public class ConditionalTriggerBag
                 log.debug("Adding newPayload to a full bag");
             }
 
-            //--mergeList should be emptied before adding.
-            mergeListForConditionalBag.clear();
+            List mergeListForConditionalBag = null;
 
             //--loop over existing triggers to check timeOverlap w/ currentTrigger.
             Iterator iter = payloadListInConditionalBag.iterator();
@@ -125,6 +119,10 @@ public class ConditionalTriggerBag
                 {
                     if (log.isDebugEnabled()) {
                         log.debug("Two payloads are coincident");
+                    }
+                    if(mergeListForConditionalBag == null)
+                    {
+                        mergeListForConditionalBag = new ArrayList();
                     }
                     if(!mergeListForConditionalBag.contains(existingPayload))
                     {
@@ -142,7 +140,7 @@ public class ConditionalTriggerBag
             }
 
             //--merge if neccessary, else add newPayload to list
-            if (!mergeListForConditionalBag.isEmpty()) {
+            if (mergeListForConditionalBag != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Lets merge " + mergeListForConditionalBag.size() + " payloads for "
                             + msCoincidenceTriggerAlgorithmName);

@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java 2155 2007-10-18 18:24:29Z dglo $
+ * Version $Id: ConditionalTriggerBag.java 2157 2007-10-18 21:42:19Z dglo $
  *
  * Date: September 2 2005
  *
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java 2155 2007-10-18 18:24:29Z dglo $
+ * @version $Id: ConditionalTriggerBag.java 2157 2007-10-18 21:42:19Z dglo $
  * @author shseo
  */
 public class ConditionalTriggerBag
@@ -38,6 +38,12 @@ public class ConditionalTriggerBag
      * Log object for this class
      */
     private static final Log log = LogFactory.getLog(ConditionalTriggerBag.class);
+
+    /** No 'next' value is known. */
+    private static final int NEXT_UNKNOWN = -1;
+    /** There is no 'next' value. */
+    private static final int NEXT_NONE = Integer.MIN_VALUE;
+
     private CoincidenceTrigger mtCoincidenceTriggerAlgorithm;
     private List mListConfiguredTriggerIDs;
     private boolean mbContainAllTriggerIDsRequired;
@@ -55,6 +61,10 @@ public class ConditionalTriggerBag
     private boolean mbNeedUpdate;
     private DummyPayload mtUpdater;
     private List mListUnqualifiedTriggers = new ArrayList();
+
+    /** The index of the 'next' value (can be NEXT_UNKNOWN or NEXT_NONE). */
+    private int nextIndex = NEXT_UNKNOWN;
+
     /**
      * Create an instance of this class.
      * Default constructor is declared, but private, to stop accidental
@@ -88,6 +98,9 @@ public class ConditionalTriggerBag
         if(!mtCoincidenceTriggerAlgorithm.isConfiguredTrigger((ITriggerRequestPayload)newPayload)){
             return;
         }
+
+        // reset 'next' index
+        nextIndex = NEXT_UNKNOWN;
 
         //--add to internal list
         if (payloadListInConditionalBag.isEmpty()) {
@@ -258,7 +271,36 @@ public class ConditionalTriggerBag
         }
     }
 
+    /**
+     * Find the index of the 'next' value used by hasNext() and next().
+     * NOTE: Sets the internal 'nextIndex' value.
+     */
+    private void findNextIndex()
+    {
+        // remove invalid triggers before processing further.
+        initUpdateInfo();
+        removeUnqualifiedTriggers();
+
+        // assume we won't find anything
+        nextIndex = NEXT_NONE;
+
+        for (int i = 0; i < payloadListInConditionalBag.size(); i++) {
+            ITriggerRequestPayload trigger =
+                (ITriggerRequestPayload) payloadListInConditionalBag.get(i);
+
+            // if flushing, just return true
+            // otherwise check if it can be released
+            if (flushing ||
+                0 < getTimeGate().compareTo(trigger.getLastTimeUTC()))
+            {
+                nextIndex = i;
+                break;
+            }
+        }
+    }
+
     public void flush() {
+        nextIndex = NEXT_UNKNOWN;
         flushing = true;
     }
 
@@ -267,22 +309,13 @@ public class ConditionalTriggerBag
      * by comparing against timeGate.
      * @return
      */
-    public boolean hasNext() {
-        //--remove invalid triggers before processing further.
-        initUpdateInfo();
-        removeUnqualifiedTriggers();
-        //--iterate over triggerList and check against timeGate
-        Iterator iter = payloadListInConditionalBag.iterator();
-
-        while (iter.hasNext())
-        {
-            ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
-
-            if (flushing || 0 < getTimeGate().compareTo(trigger.getLastTimeUTC())) {
-                return true;
-            }
+    public synchronized boolean hasNext()
+    {
+        if (nextIndex == NEXT_UNKNOWN) {
+            findNextIndex();
         }
-        return false;
+
+        return (nextIndex != NEXT_NONE);
     }
 
     /**
@@ -290,28 +323,35 @@ public class ConditionalTriggerBag
      *
      * @return
      */
-    public ITriggerRequestPayload next() {
-        //-- iterate over triggerList and check against timeGate
-        Iterator iter = payloadListInConditionalBag.iterator();
-        while (iter.hasNext())
-        {
-            ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
-            double timeDiff = getTimeGate().timeDiff_ns(trigger.getLastTimeUTC());
-            if ( flushing || 0 < getTimeGate().compareTo(trigger.getLastTimeUTC()) )
-            {
-                iter.remove();
-                if (log.isDebugEnabled()) {
-                    log.debug("Releasing trigger with timeDiff = " + timeDiff);
-                }
-                //--GTEventNumber should be assigned here.
-                triggerUID++;
-                getGlobalTrigEventWrapper().wrapFinalEvent(trigger, triggerUID);
-                trigger = (ITriggerRequestPayload) getGlobalTrigEventWrapper().getGlobalTrigEventPayload_final();
-
-                return trigger;
-            }
+    public synchronized ITriggerRequestPayload next()
+    {
+        if (nextIndex == NEXT_UNKNOWN) {
+            findNextIndex();
         }
-        return null;
+
+        // save and reset next index
+        int curIndex = nextIndex;
+        nextIndex = NEXT_UNKNOWN;
+
+        // if there isn't one, return null
+        if (curIndex == NEXT_NONE) {
+            return null;
+        }
+
+        ITriggerRequestPayload trigger =
+            (ITriggerRequestPayload) payloadListInConditionalBag.remove(curIndex);
+
+        if (log.isDebugEnabled()) {
+            double timeDiff = getTimeGate().timeDiff_ns(trigger.getLastTimeUTC());
+            log.debug("Releasing trigger with timeDiff = " + timeDiff);
+        }
+
+        //--GTEventNumber should be assigned here.
+        triggerUID++;
+        getGlobalTrigEventWrapper().wrapFinalEvent(trigger, triggerUID);
+        trigger = (ITriggerRequestPayload) getGlobalTrigEventWrapper().getGlobalTrigEventPayload_final();
+
+        return trigger;
     }
 
     /**

@@ -1,7 +1,7 @@
 /*
  * class: TriggerInput
  *
- * Version $Id: TriggerInput.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: TriggerInput.java 2157 2007-10-18 21:42:19Z dglo $
  *
  * Date: May 2 2005
  *
@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides a simple implementation of ITriggerInput
  *
- * @version $Id: TriggerInput.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: TriggerInput.java 2157 2007-10-18 21:42:19Z dglo $
  * @author pat
  */
 public class TriggerInput
@@ -43,6 +43,11 @@ public class TriggerInput
      * Log object for this class
      */
     private static final Log log = LogFactory.getLog(TriggerInput.class);
+
+    /** No 'next' value is known. */
+    private static final int NEXT_UNKNOWN = -1;
+    /** There is no 'next' value. */
+    private static final int NEXT_NONE = Integer.MIN_VALUE;
 
     /**
      * internal list of payloads
@@ -55,6 +60,9 @@ public class TriggerInput
      * flag to indicate if we should flush
      */
     private boolean flushing;
+
+    /** The index of the 'next' value (can be NEXT_UNKNOWN or NEXT_NONE). */
+    private int nextIndex = NEXT_UNKNOWN;
 
     /**
      * default constructor
@@ -79,6 +87,9 @@ public class TriggerInput
             log.error("Data format exception while loading payload", dfe);
             return;
         }
+
+        // reset 'next' index
+        nextIndex = NEXT_UNKNOWN;
 
         PayloadWindow newWindow = new PayloadWindow(payload);
         IUTCTime currentTime = newWindow.firstTime;
@@ -127,54 +138,74 @@ public class TriggerInput
     }
 
     /**
+     * Find the index of the 'next' value used by hasNext() and next().
+     * NOTE: Sets the internal 'nextIndex' value.
+     */
+    private void findNextIndex()
+    {
+        // assume we won't find anything
+        nextIndex = NEXT_NONE;
+
+        for (int i=0; i<inputList.size(); i++) {
+            PayloadWindow window = (PayloadWindow) inputList.get(i);
+
+            // if flushing, just return true
+            // otherwise check if it is free to go
+            if (flushing || window.isContained() && !window.isOverlapping())
+            {
+                nextIndex = i;
+                break;
+            }
+        }
+    }
+
+    /**
      * allow all payloads to be sucked out
      */
     public void flush() {
+        nextIndex = NEXT_UNKNOWN;
         flushing = true;
         log.info("Flushing: Total count = " + count);
     }
 
     /**
-     * check if there is a payload which is fully contained and does not overlap with
-     * payloads that are not contained
+     * check if there is a payload which is fully contained and does not
+     * overlap with payloads that are not contained
      *
      * @return true if there is, false otherwise
      */
-    public boolean hasNext() {
-
-        // loop over all payloads in list
-        for (int i=0; i<inputList.size(); i++) {
-            PayloadWindow window = (PayloadWindow) inputList.get(i);
-            // if flushing, just return true
-            // otherwise check if it is free to go
-            if ( (flushing) ||
-                 (window.isContained() && !window.isOverlapping()) ) {
-                return true;
-            }
+    public synchronized boolean hasNext()
+    {
+        if (nextIndex == NEXT_UNKNOWN) {
+            findNextIndex();
         }
 
-        return false;
+        return (nextIndex != NEXT_NONE);
     }
 
     /**
      * get next available payload
      * @return next ILoadablePayload
      */
-    public ILoadablePayload next() {
-
-        // loop over all payloads in list
-        for (int i=0; i<inputList.size(); i++) {
-            PayloadWindow window = (PayloadWindow) inputList.get(i);
-            // if flushing, just return the payload
-            // otherwise check if it is free to go
-            if ( (flushing) ||
-                 (window.isContained() && !window.isOverlapping()) ) {
-                inputList.remove(i);
-                return window.getPayload();
-            }
+    public synchronized ILoadablePayload next()
+    {
+        if (nextIndex == NEXT_UNKNOWN) {
+            findNextIndex();
         }
 
-        return null;
+        // save and reset next index
+        int curIndex = nextIndex;
+        nextIndex = NEXT_UNKNOWN;
+
+        // if there isn't one, return null
+        if (curIndex == NEXT_NONE) {
+            return null;
+        }
+
+        PayloadWindow window =
+            (PayloadWindow) inputList.remove(curIndex);
+
+        return window.getPayload();
     }
 
     /**

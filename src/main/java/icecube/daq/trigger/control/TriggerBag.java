@@ -1,7 +1,7 @@
 /*
  * class: TriggerBag
  *
- * Version $Id: TriggerBag.java 2155 2007-10-18 18:24:29Z dglo $
+ * Version $Id: TriggerBag.java 2157 2007-10-18 21:42:19Z dglo $
  *
  * Date: March 16 2005
  *
@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  *                                   +       {===============}
  *                                   +            Merge
  *
- * @version $Id: TriggerBag.java 2155 2007-10-18 18:24:29Z dglo $
+ * @version $Id: TriggerBag.java 2157 2007-10-18 21:42:19Z dglo $
  * @author pat
  */
 public class TriggerBag
@@ -63,6 +63,11 @@ public class TriggerBag
      * Log object for this class
      */
     private static final Log log = LogFactory.getLog(TriggerBag.class);
+
+    /** No 'next' value is known. */
+    private static final int NEXT_UNKNOWN = -1;
+    /** There is no 'next' value. */
+    private static final int NEXT_NONE = Integer.MIN_VALUE;
 
     /**
      * internal list of triggers
@@ -109,6 +114,9 @@ public class TriggerBag
      */
     private PayloadBagMonitor monitor;
 
+    /** The index of the 'next' value (can be NEXT_UNKNOWN or NEXT_NONE). */
+    private int nextIndex = NEXT_UNKNOWN;
+
     /**
      * default constructor
      */
@@ -154,6 +162,9 @@ public class TriggerBag
             log.error("Error loading payload", e);
             return;
         }
+
+        // reset 'next' index
+        nextIndex = NEXT_UNKNOWN;
 
         // show this input to the monitor
         monitor.recordInput(payload);
@@ -229,9 +240,34 @@ public class TriggerBag
     }
 
     /**
+     * Find the index of the 'next' value used by hasNext() and next().
+     * NOTE: Sets the internal 'nextIndex' value.
+     */
+    private void findNextIndex()
+    {
+        // assume we won't find anything
+        nextIndex = NEXT_NONE;
+
+        for (int i = 0; i < payloadList.size(); i++) {
+            ITriggerRequestPayload trigger =
+                (ITriggerRequestPayload) payloadList.get(i);
+
+            // if flushing, just return true
+            // otherwise check if it can be released
+            if (flushing ||
+                0 < timeGate.compareTo(trigger.getLastTimeUTC()))
+            {
+                nextIndex = i;
+                break;
+            }
+        }
+    }
+
+    /**
      * method to flush the bag, allow all payloads to go free
      */
     public void flush() {
+        nextIndex = NEXT_UNKNOWN;
         flushing = true;
     }
 
@@ -251,25 +287,13 @@ public class TriggerBag
      *
      * @return true if there is a releasable trigger
      */
-    public synchronized boolean hasNext() {
-
-        // iterate over triggerList and check against timeGate
-        Iterator iter = payloadList.iterator();
-        while (iter.hasNext()) {
-            ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
-            if (log.isDebugEnabled()) {
-                log.debug("Checking trigger from " + trigger.getFirstTimeUTC() +
-                          " to " + trigger.getLastTimeUTC() +
-                          " against " + timeGate);
-            }
-            if ( (flushing) ||
-                 (0 < timeGate.compareTo(trigger.getLastTimeUTC())) ) {
-                return true;
-            }
+    public synchronized boolean hasNext()
+    {
+        if (nextIndex == NEXT_UNKNOWN) {
+            findNextIndex();
         }
 
-        return false;
-
+        return (nextIndex != NEXT_NONE);
     }
 
     /**
@@ -277,29 +301,35 @@ public class TriggerBag
      *
      * @return the next trigger
      */
-    public synchronized ITriggerRequestPayload next() {
-
-        // iterate over triggerList and check against timeGate
-        Iterator iter = payloadList.iterator();
-        while (iter.hasNext()) {
-            ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
-            if ( (flushing) ||
-                 (0 < timeGate.compareTo(trigger.getLastTimeUTC())) ) {
-                iter.remove();
-                if (log.isDebugEnabled()) {
-                    double timeDiff = timeGate.timeDiff_ns(trigger.getLastTimeUTC());
-                    log.debug("Releasing trigger from " + trigger.getFirstTimeUTC()
-                             + " to " + trigger.getLastTimeUTC()
-                             + " with timeDiff = " + timeDiff);
-                }
-                // show this output to the monitor
-                monitor.recordOutput(trigger);
-
-                return trigger;
-            }
+    public synchronized ITriggerRequestPayload next()
+    {
+        if (nextIndex == NEXT_UNKNOWN) {
+            findNextIndex();
         }
 
-        return null;
+        // save and reset next index
+        int curIndex = nextIndex;
+        nextIndex = NEXT_UNKNOWN;
+
+        // if there isn't one, return null
+        if (curIndex == NEXT_NONE) {
+            return null;
+        }
+
+        ITriggerRequestPayload trigger =
+            (ITriggerRequestPayload) payloadList.remove(curIndex);
+
+        if (log.isDebugEnabled()) {
+            double timeDiff = timeGate.timeDiff_ns(trigger.getLastTimeUTC());
+            log.debug("Releasing trigger from " + trigger.getFirstTimeUTC() +
+                      " to " + trigger.getLastTimeUTC() +
+                      " with timeDiff = " + timeDiff);
+        }
+
+        // show this output to the monitor
+        monitor.recordOutput(trigger);
+
+        return trigger;
     }
 
     /**
@@ -505,6 +535,7 @@ public class TriggerBag
         // remove individual triggers from triggerList and add new merged trigger
         payloadList.removeAll(mergeList);
         payloadList.add(newTrigger);
+        nextIndex = NEXT_UNKNOWN;
 
         // recycle old subTriggers
         Iterator iter = subTriggers.iterator();

@@ -33,7 +33,7 @@ import java.util.*;
  * This class receives TriggerRequestPayloads from each active GlobalTrigAlgorithm
  * , merges if they overlap and produces globalTrigEventPayload.
  *
- * @version $Id: GlobalTriggerBag.java 2155 2007-10-18 18:24:29Z dglo $
+ * @version $Id: GlobalTriggerBag.java 2157 2007-10-18 21:42:19Z dglo $
  * @author shseo
  */
 public class GlobalTriggerBag
@@ -43,6 +43,11 @@ public class GlobalTriggerBag
      * Log object for this class
      */
     private static final Log log = LogFactory.getLog(GlobalTriggerBag.class);
+
+    /** No 'next' value is known. */
+    private static final int NEXT_UNKNOWN = -1;
+    /** There is no 'next' value. */
+    private static final int NEXT_NONE = Integer.MIN_VALUE;
 
     /**
      * internal list of triggers
@@ -77,6 +82,9 @@ public class GlobalTriggerBag
      * Payload monitor object.
      */
     private PayloadBagMonitor monitor;
+
+    /** The index of the 'next' value (can be NEXT_UNKNOWN or NEXT_NONE). */
+    private int nextIndex = NEXT_UNKNOWN;
 
     /**
      * Create an instance of this class.
@@ -118,6 +126,9 @@ public class GlobalTriggerBag
              log.error("Error loading currentPayload", e);
              return;
          }
+
+        // reset 'next' index
+        nextIndex = NEXT_UNKNOWN;
 
         // show this input to the monitor
         monitor.recordInput(currentPayload);
@@ -196,51 +207,80 @@ public class GlobalTriggerBag
             }
      }
 
+    /**
+     * Find the index of the 'next' value used by hasNext() and next().
+     * NOTE: Sets the internal 'nextIndex' value.
+     */
+    private void findNextIndex()
+    {
+        // assume we won't find anything
+        nextIndex = NEXT_NONE;
+
+        for (int i = 0; i < payloadList.size(); i++) {
+            ITriggerRequestPayload trigger =
+                (ITriggerRequestPayload) payloadList.get(i);
+
+            // if flushing, just return true
+            // otherwise check if it can be released
+            if (flushing ||
+                0 < timeGate.compareTo(trigger.getLastTimeUTC()))
+            {
+                nextIndex = i;
+                break;
+            }
+        }
+    }
+
     public void flush() {
+        nextIndex = NEXT_UNKNOWN;
         flushing = true;
     }
     private void init() {
+        nextIndex = NEXT_UNKNOWN;
         flushing = false;
     }
-    public boolean hasNext() {
-        // iterate over triggerList and check against timeGate
-        Iterator iter = payloadList.iterator();
-        while (iter.hasNext()) {
-            ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
-            if ( (flushing) ||
-                 (0 < timeGate.compareTo(trigger.getLastTimeUTC())) ) {
-                return true;
-            }
+
+    public synchronized boolean hasNext()
+    {
+        if (nextIndex == NEXT_UNKNOWN) {
+            findNextIndex();
         }
-        return false;
+
+        return (nextIndex != NEXT_NONE);
     }
 
-    public ITriggerRequestPayload next() {
-
-        // iterate over triggerList and check against timeGate
-        Iterator iter = payloadList.iterator();
-        while (iter.hasNext()) {
-            ITriggerRequestPayload trigger = (ITriggerRequestPayload) iter.next();
-            double timeDiff = timeGate.timeDiff_ns(trigger.getLastTimeUTC());
-            if ( (flushing) ||
-                 (0 < timeGate.compareTo(trigger.getLastTimeUTC())) ) {
-                iter.remove();
-                if (log.isDebugEnabled()) {
-                    log.debug("Releasing trigger with timeDiff = " + timeDiff);
-                }
-                //GTEventNumber should be assigned here.
-                triggerUID++;
-                mtGlobalTrigEventWrapper.wrapFinalEvent(trigger, triggerUID);
-                trigger = (ITriggerRequestPayload) mtGlobalTrigEventWrapper.getGlobalTrigEventPayload_final();
-
-                // show this output to the monitor
-                monitor.recordOutput(trigger);
-
-                return trigger;
-            }
+    public synchronized ITriggerRequestPayload next()
+    {
+        if (nextIndex == NEXT_UNKNOWN) {
+            findNextIndex();
         }
 
-        return null;
+        // save and reset next index
+        int curIndex = nextIndex;
+        nextIndex = NEXT_UNKNOWN;
+
+        // if there isn't one, return null
+        if (curIndex == NEXT_NONE) {
+            return null;
+        }
+
+        ITriggerRequestPayload trigger =
+            (ITriggerRequestPayload) payloadList.remove(curIndex);
+
+        if (log.isDebugEnabled()) {
+            double timeDiff = timeGate.timeDiff_ns(trigger.getLastTimeUTC());
+            log.debug("Releasing trigger with timeDiff = " + timeDiff);
+        }
+
+        //GTEventNumber should be assigned here.
+        triggerUID++;
+        mtGlobalTrigEventWrapper.wrapFinalEvent(trigger, triggerUID);
+        trigger = (ITriggerRequestPayload) mtGlobalTrigEventWrapper.getGlobalTrigEventPayload_final();
+
+        // show this output to the monitor
+        monitor.recordOutput(trigger);
+
+        return trigger;
     }
 
     public IUTCTime getTimeGate() {

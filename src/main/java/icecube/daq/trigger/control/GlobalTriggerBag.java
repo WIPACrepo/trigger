@@ -33,7 +33,7 @@ import java.util.*;
  * This class receives TriggerRequestPayloads from each active GlobalTrigAlgorithm
  * , merges if they overlap and produces globalTrigEventPayload.
  *
- * @version $Id: GlobalTriggerBag.java 2154 2007-10-18 17:49:38Z dglo $
+ * @version $Id: GlobalTriggerBag.java 2155 2007-10-18 18:24:29Z dglo $
  * @author shseo
  */
 public class GlobalTriggerBag
@@ -101,7 +101,7 @@ public class GlobalTriggerBag
         mtGlobalTrigEventWrapper = new GlobalTrigEventWrapper();
         mtGlobalTrigEventWrapper.setTimeGap_option(1);
 
-        this.init();
+        init();
 
         monitor = new PayloadBagMonitor();
 
@@ -140,6 +140,7 @@ public class GlobalTriggerBag
 
             //--loop over existing triggers to check timeOverlap w/ currentTrigger.
             Iterator iter = payloadList.iterator();
+            boolean addedPayload = false;
             while (iter.hasNext()) {
                 IPayload previousPayload = (IPayload) iter.next();
 
@@ -151,11 +152,15 @@ public class GlobalTriggerBag
                     if (mergeList == null) {
                         mergeList = new ArrayList();
                     }
+                    // XXX - is uniqueness check really needed?
                     if(!mergeList.contains(previousPayload))
                     {
                         mergeList.add(previousPayload);
                     }
-                    mergeList.add(currentPayload);
+                    if (!addedPayload) {
+                        mergeList.add(currentPayload);
+                        addedPayload = true;
+                    }
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug("Payload does not overlap");
@@ -194,7 +199,7 @@ public class GlobalTriggerBag
     public void flush() {
         flushing = true;
     }
-    public void init() {
+    private void init() {
         flushing = false;
     }
     public boolean hasNext() {
@@ -296,12 +301,12 @@ public class GlobalTriggerBag
                 log.debug("  NO OVERLAP");
             }
             return false;
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("  OVERLAP!!!");
-            }
-            return true;
         }
+
+        if (log.isDebugEnabled()) {
+            log.debug("  OVERLAP!!!");
+        }
+        return true;
 
     }
     /**

@@ -1,7 +1,7 @@
 /*
  * class: TriggerInput
  *
- * Version $Id: TriggerInput.java 2157 2007-10-18 21:42:19Z dglo $
+ * Version $Id: TriggerInput.java 2161 2007-10-19 14:56:25Z dglo $
  *
  * Date: May 2 2005
  *
@@ -21,8 +21,8 @@ import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.eventbuilder.IEventPayload;
 import icecube.daq.eventbuilder.IReadoutDataPayload;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.DataFormatException;
 import java.io.IOException;
 
@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides a simple implementation of ITriggerInput
  *
- * @version $Id: TriggerInput.java 2157 2007-10-18 21:42:19Z dglo $
+ * @version $Id: TriggerInput.java 2161 2007-10-19 14:56:25Z dglo $
  * @author pat
  */
 public class TriggerInput
@@ -52,7 +52,7 @@ public class TriggerInput
     /**
      * internal list of payloads
      */
-    private List inputList;
+    private List<PayloadWindow> inputList;
 
     private int count;
 
@@ -68,7 +68,7 @@ public class TriggerInput
      * default constructor
      */
     public TriggerInput() {
-        inputList = new ArrayList();
+        inputList = new ArrayList<PayloadWindow>();
     }
 
     /**
@@ -97,8 +97,7 @@ public class TriggerInput
         count++;
 
         // update containment
-        for (int i=0; i<inputList.size(); i++) {
-            PayloadWindow window = (PayloadWindow) inputList.get(i);
+        for (PayloadWindow window : inputList) {
 
             // if window was already contained it is still contained
             if (!window.isContained()) {
@@ -113,14 +112,14 @@ public class TriggerInput
 
         // now check for overlaps
         for (int i=0; i<inputList.size(); i++) {
-            PayloadWindow window1 = (PayloadWindow) inputList.get(i);
+            PayloadWindow window1 = inputList.get(i);
             // for each contained window...
             if (window1.isContained()) {
 
                 window1.setOverlapping(false);
 
                 for (int j=i+1; j<inputList.size(); j++) {
-                    PayloadWindow window2 = (PayloadWindow) inputList.get(j);
+                    PayloadWindow window2 = inputList.get(j);
                     // check overlaps with all uncontained windows
                     if (!window2.isContained()) {
 
@@ -147,7 +146,7 @@ public class TriggerInput
         nextIndex = NEXT_NONE;
 
         for (int i=0; i<inputList.size(); i++) {
-            PayloadWindow window = (PayloadWindow) inputList.get(i);
+            PayloadWindow window = inputList.get(i);
 
             // if flushing, just return true
             // otherwise check if it is free to go
@@ -202,8 +201,7 @@ public class TriggerInput
             return null;
         }
 
-        PayloadWindow window =
-            (PayloadWindow) inputList.remove(curIndex);
+        PayloadWindow window = inputList.remove(curIndex);
 
         return window.getPayload();
     }

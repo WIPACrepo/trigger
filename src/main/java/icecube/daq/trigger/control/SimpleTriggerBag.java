@@ -62,7 +62,8 @@ public class SimpleTriggerBag
     /**
      * internal list of triggers
      */
-    private List payloadList = new ArrayList();
+    private List<ILoadablePayload> payloadList =
+        new ArrayList<ILoadablePayload>();
 
     /**
      * triggers that occur earlier than this time are free to be released
@@ -112,7 +113,7 @@ public class SimpleTriggerBag
 
         // add to internal list
         payloadList.add(payload);
-        Collections.sort(payloadList);
+        Collections.sort((List) payloadList);
 
         if (log.isDebugEnabled()) {
             log.debug("TriggerList has " + payloadList.size() + " payloads");
@@ -131,8 +132,7 @@ public class SimpleTriggerBag
         nextIndex = NEXT_NONE;
 
         for (int i = 0; i < payloadList.size(); i++) {
-            ILoadablePayload payload =
-                (ILoadablePayload) payloadList.get(i);
+            ILoadablePayload payload = payloadList.get(i);
 
             // if flushing, just return true
             // otherwise check if it can be released
@@ -198,8 +198,7 @@ public class SimpleTriggerBag
             return null;
         }
 
-        ILoadablePayload payload =
-            (ILoadablePayload) payloadList.remove(curIndex);
+        ILoadablePayload payload = payloadList.remove(curIndex);
 
         if (log.isDebugEnabled()) {
             IUTCTime payTime = getPayloadTime(payload);

@@ -1,7 +1,7 @@
 /*
  * class: TriggerBag
  *
- * Version $Id: TriggerBag.java 2157 2007-10-18 21:42:19Z dglo $
+ * Version $Id: TriggerBag.java 2161 2007-10-19 14:56:25Z dglo $
  *
  * Date: March 16 2005
  *
@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  *                                   +       {===============}
  *                                   +            Merge
  *
- * @version $Id: TriggerBag.java 2157 2007-10-18 21:42:19Z dglo $
+ * @version $Id: TriggerBag.java 2161 2007-10-19 14:56:25Z dglo $
  * @author pat
  */
 public class TriggerBag
@@ -72,7 +72,8 @@ public class TriggerBag
     /**
      * internal list of triggers
      */
-    private List payloadList = new ArrayList();
+    private List<ILoadablePayload> payloadList =
+        new ArrayList<ILoadablePayload>();
 
     /**
      * The factory used to create triggers
@@ -187,10 +188,8 @@ public class TriggerBag
             List mergeList = null;
 
             // loop over existing triggers
-            Iterator iter = payloadList.iterator();
             boolean addedPayload = false;
-            while (iter.hasNext()) {
-                IPayload next = (IPayload) iter.next();
+            for (ILoadablePayload next : payloadList) {
 
                 // check for overlap
                 if (overlap(payload, next)) {
@@ -205,10 +204,8 @@ public class TriggerBag
                         addedPayload = true;
                     }
                     mergeList.add(next);
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Payload does not overlap");
-                    }
+                } else if (log.isDebugEnabled()) {
+                    log.debug("Payload does not overlap");
                 }
             }
 
@@ -228,7 +225,7 @@ public class TriggerBag
             }
 
             // sort list
-            Collections.sort(payloadList);
+            Collections.sort((List) payloadList);
 
         }
 

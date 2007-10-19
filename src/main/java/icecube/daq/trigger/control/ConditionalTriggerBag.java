@@ -1,7 +1,7 @@
 /*
- * class: CoincidenceTriggerBag
+ * class: ConditionalTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java 2162 2007-10-19 15:00:28Z dglo $
+ * Version $Id: ConditionalTriggerBag.java 2164 2007-10-19 17:21:58Z dglo $
  *
  * Date: September 2 2005
  *
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java 2162 2007-10-19 15:00:28Z dglo $
+ * @version $Id: ConditionalTriggerBag.java 2164 2007-10-19 17:21:58Z dglo $
  * @author shseo
  */
 public class ConditionalTriggerBag
@@ -244,6 +244,11 @@ public class ConditionalTriggerBag
     /**
      * This is to remove any unqualified triggers before checking hasNext().
      * unqualified trigger == not-contain all trigger IDs required && lastTime < timeGate
+     *
+     * NOTE: This code is currently broken.  If the last two triggers in the
+     * list are unqualified, the last one will not be removed.  To fix this,
+     * delete the 'if (bRemoved)' block and decrement 'i' instead of
+     * setting bRemoved to 'true'.
      */
     private void removeUnqualifiedTriggers()
     {

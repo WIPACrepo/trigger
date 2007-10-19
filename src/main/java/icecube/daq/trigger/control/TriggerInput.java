@@ -1,7 +1,7 @@
 /*
  * class: TriggerInput
  *
- * Version $Id: TriggerInput.java 2163 2007-10-19 16:07:06Z dglo $
+ * Version $Id: TriggerInput.java 2165 2007-10-19 17:24:08Z dglo $
  *
  * Date: May 2 2005
  *
@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides a simple implementation of ITriggerInput
  *
- * @version $Id: TriggerInput.java 2163 2007-10-19 16:07:06Z dglo $
+ * @version $Id: TriggerInput.java 2165 2007-10-19 17:24:08Z dglo $
  * @author pat
  */
 public class TriggerInput
@@ -92,23 +92,23 @@ public class TriggerInput
         nextIndex = NEXT_UNKNOWN;
 
         PayloadWindow newWindow = new PayloadWindow(payload);
-        IUTCTime currentTime = newWindow.firstTime;
-        inputList.add(newWindow);
-        count++;
+        long currentTime = newWindow.firstTime;
 
         // update containment
         for (PayloadWindow window : inputList) {
-
             // if window was already contained it is still contained
             if (!window.isContained()) {
 
                 // see if it is now contained
-                if (0 < currentTime.compareTo(window.lastTime)) {
+                if (currentTime > window.lastTime) {
                     window.setContained(true);
                 }
-
             }
         }
+
+        // add new window
+        inputList.add(newWindow);
+        count++;
 
         // now check for overlaps
         for (int i=0; i<inputList.size(); i++) {
@@ -123,17 +123,16 @@ public class TriggerInput
                     // check overlaps with all uncontained windows
                     if (!window2.isContained()) {
 
-                        if ( (0 >= window1.firstTime.compareTo(window2.lastTime)) &&
-                             (0 <= window1.lastTime.compareTo(window2.firstTime)) ) {
+                        if (window1.firstTime <= window2.lastTime &&
+                            window1.lastTime >= window2.firstTime)
+                        {
                             window1.setOverlapping(true);
+                            break;
                         }
-
                     }
-
                 }
             }
         }
-
     }
 
     /**
@@ -201,9 +200,7 @@ public class TriggerInput
             return null;
         }
 
-        PayloadWindow window = inputList.remove(curIndex);
-
-        return window.getPayload();
+        return inputList.remove(curIndex).getPayload();
     }
 
     /**
@@ -220,8 +217,8 @@ public class TriggerInput
     private class PayloadWindow {
 
         private ILoadablePayload payload;
-        private IUTCTime firstTime;
-        private IUTCTime lastTime;
+        private long firstTime;
+        private long lastTime;
         private boolean overlapping;
         private boolean contained;
 
@@ -229,49 +226,63 @@ public class TriggerInput
             this.payload = payload;
 
             // get firstTime and lastTime from appropriate interface
+            IUTCTime firstUTC;
+            IUTCTime lastUTC;
             switch (payload.getPayloadInterfaceType()) {
                 case PayloadInterfaceRegistry.I_PAYLOAD :
-                    firstTime = payload.getPayloadTimeUTC();
-                    lastTime = firstTime;
+                    firstUTC = payload.getPayloadTimeUTC();
+                    lastUTC = firstUTC;
                     break;
                 case PayloadInterfaceRegistry.I_TRIGGER_PAYLOAD :
-                    firstTime = ((ITriggerPayload) payload).getPayloadTimeUTC();
-                    lastTime = firstTime;
+                    firstUTC = ((ITriggerPayload) payload).getPayloadTimeUTC();
+                    lastUTC = firstUTC;
                     break;
                 case PayloadInterfaceRegistry.I_HIT_PAYLOAD :
-                    firstTime = ((IHitPayload) payload).getHitTimeUTC();
-                    lastTime = firstTime;
+                    firstUTC = ((IHitPayload) payload).getHitTimeUTC();
+                    lastUTC = firstUTC;
                     break;
                 case PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD :
-                    firstTime = ((IHitDataPayload) payload).getHitTimeUTC();
-                    lastTime = firstTime;
+                    firstUTC = ((IHitDataPayload) payload).getHitTimeUTC();
+                    lastUTC = firstUTC;
                     break;
                 case PayloadInterfaceRegistry.I_COMPOSITE_PAYLOAD :
-                    firstTime = ((ICompositePayload) payload).getFirstTimeUTC();
-                    lastTime = ((ICompositePayload) payload).getLastTimeUTC();
+                    firstUTC = ((ICompositePayload) payload).getFirstTimeUTC();
+                    lastUTC = ((ICompositePayload) payload).getLastTimeUTC();
                     break;
                 case PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD :
-                    firstTime = ((ITriggerRequestPayload) payload).getFirstTimeUTC();
-                    lastTime = ((ITriggerRequestPayload) payload).getLastTimeUTC();
+                    firstUTC = ((ITriggerRequestPayload) payload).getFirstTimeUTC();
+                    lastUTC = ((ITriggerRequestPayload) payload).getLastTimeUTC();
                     break;
                 case PayloadInterfaceRegistry.I_READOUT_REQUEST_PAYLOAD :
-                    firstTime = null;
-                    lastTime = null;
+                    firstUTC = null;
+                    lastUTC = null;
                     break;
                 case PayloadInterfaceRegistry.I_READOUT_DATA_PAYLOAD :
-                    firstTime = ((IReadoutDataPayload) payload).getFirstTimeUTC();
-                    lastTime = ((IReadoutDataPayload) payload).getLastTimeUTC();
+                    firstUTC = ((IReadoutDataPayload) payload).getFirstTimeUTC();
+                    lastUTC = ((IReadoutDataPayload) payload).getLastTimeUTC();
                     break;
                 case PayloadInterfaceRegistry.I_EVENT_PAYLOAD :
-                    firstTime = ((IEventPayload) payload).getFirstTimeUTC();
-                    lastTime = ((IEventPayload) payload).getLastTimeUTC();
+                    firstUTC = ((IEventPayload) payload).getFirstTimeUTC();
+                    lastUTC = ((IEventPayload) payload).getLastTimeUTC();
                     break;
                 default :
-                    firstTime = null;
-                    lastTime = null;
+                    log.error("Unexpected interface type #" +
+                              payload.getPayloadInterfaceType());
+                    firstUTC = null;
+                    lastUTC = null;
                     break;
             }
 
+            if (firstUTC == null) {
+                firstTime = -1L;
+            } else {
+                firstTime = firstUTC.getUTCTimeAsLong();
+            }
+            if (lastUTC == null) {
+                lastTime = -1L;
+            } else {
+                lastTime = lastUTC.getUTCTimeAsLong();
+            }
         }
 
         private ILoadablePayload getPayload() {

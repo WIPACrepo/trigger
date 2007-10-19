@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java 2157 2007-10-18 21:42:19Z dglo $
+ * Version $Id: ConditionalTriggerBag.java 2160 2007-10-19 14:23:58Z dglo $
  *
  * Date: September 2 2005
  *
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java 2157 2007-10-18 21:42:19Z dglo $
+ * @version $Id: ConditionalTriggerBag.java 2160 2007-10-19 14:23:58Z dglo $
  * @author shseo
  */
 public class ConditionalTriggerBag
@@ -49,7 +49,7 @@ public class ConditionalTriggerBag
     private boolean mbContainAllTriggerIDsRequired;
     private String msCoincidenceTriggerAlgorithmName;
 
-    private Vector payloadListInConditionalBag = new Vector();
+    private List payloadListInConditionalBag = new ArrayList();
 
     private boolean flushing;
 
@@ -400,11 +400,11 @@ public class ConditionalTriggerBag
 
     public Vector getVectorPayloadsInConditonalTriggerBag()
     {
-        return payloadListInConditionalBag;
+        return new Vector(payloadListInConditionalBag);
     }
     private void setVectorPayloadsInConditonalTriggerBag(Vector vecPayloads)
     {
-        payloadListInConditionalBag.removeAllElements();
-        payloadListInConditionalBag.add(vecPayloads);
+        payloadListInConditionalBag.clear();
+        payloadListInConditionalBag.addAll(vecPayloads);
     }
 }

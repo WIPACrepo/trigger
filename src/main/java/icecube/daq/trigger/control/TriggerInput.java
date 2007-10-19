@@ -1,7 +1,7 @@
 /*
  * class: TriggerInput
  *
- * Version $Id: TriggerInput.java 2161 2007-10-19 14:56:25Z dglo $
+ * Version $Id: TriggerInput.java 2163 2007-10-19 16:07:06Z dglo $
  *
  * Date: May 2 2005
  *
@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides a simple implementation of ITriggerInput
  *
- * @version $Id: TriggerInput.java 2161 2007-10-19 14:56:25Z dglo $
+ * @version $Id: TriggerInput.java 2163 2007-10-19 16:07:06Z dglo $
  * @author pat
  */
 public class TriggerInput
@@ -150,7 +150,7 @@ public class TriggerInput
 
             // if flushing, just return true
             // otherwise check if it is free to go
-            if (flushing || window.isContained() && !window.isOverlapping())
+            if (flushing || (window.isContained() && !window.isOverlapping()))
             {
                 nextIndex = i;
                 break;

@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java 2161 2007-10-19 14:56:25Z dglo $
+ * Version $Id: ConditionalTriggerBag.java 2162 2007-10-19 15:00:28Z dglo $
  *
  * Date: September 2 2005
  *
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java 2161 2007-10-19 14:56:25Z dglo $
+ * @version $Id: ConditionalTriggerBag.java 2162 2007-10-19 15:00:28Z dglo $
  * @author shseo
  */
 public class ConditionalTriggerBag
@@ -257,9 +257,9 @@ public class ConditionalTriggerBag
                 }else{
                     ITriggerRequestPayload tPayload = payloadListInConditionalBag.get(i);
                     IUTCTime lastTime = tPayload.getLastTimeUTC();
-                    boolean containAll = ;
-                    if ((!containAllTriggerIDsRequired(tPayload) && getTimeGate().compareTo(lastTime) > 0) ||
-                        (!containAllTriggerIDsRequired(tPayload) && flushing))
+                    boolean containAll = containAllTriggerIDsRequired(tPayload);
+                    if ((!containAll && getTimeGate().compareTo(lastTime) > 0) ||
+                        (!containAll && flushing))
                     {
                         payloadListInConditionalBag.remove(i);
                         setUpdateInfo(new DummyPayload(tPayload.getFirstTimeUTC()));

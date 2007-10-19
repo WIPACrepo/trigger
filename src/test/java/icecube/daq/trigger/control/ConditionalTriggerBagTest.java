@@ -334,11 +334,9 @@ public class ConditionalTriggerBagTest
         assertFalse("Didn't expect 'next' trigger", bag.hasNext());
 
         assertEquals("Bad number of messages",
-                     2, appender.getNumberOfMessages());
+                     1, appender.getNumberOfMessages());
         assertEquals("Bad log message",
                      "Couldn't get payloads", appender.getMessage(0));
-        assertEquals("Bad log message",
-                     "Couldn't get payloads", appender.getMessage(1));
         appender.clear();
     }
 
@@ -368,11 +366,9 @@ public class ConditionalTriggerBagTest
         assertFalse("Didn't expect 'next' trigger", bag.hasNext());
 
         assertEquals("Bad number of messages",
-                     2, appender.getNumberOfMessages());
+                     1, appender.getNumberOfMessages());
         assertEquals("Bad log message",
                      "Couldn't get payloads", appender.getMessage(0));
-        assertEquals("Bad log message",
-                     "Couldn't get payloads", appender.getMessage(1));
         appender.clear();
     }
 
@@ -406,11 +402,9 @@ public class ConditionalTriggerBagTest
         assertFalse("Didn't expect 'next' trigger", bag.hasNext());
 
         assertEquals("Bad number of messages",
-                     2, appender.getNumberOfMessages());
+                     1, appender.getNumberOfMessages());
         assertEquals("Bad log message",
                      "Couldn't load payload", appender.getMessage(0));
-        assertEquals("Bad log message",
-                     "Couldn't load payload", appender.getMessage(1));
         appender.clear();
     }
 
@@ -443,11 +437,9 @@ public class ConditionalTriggerBagTest
         assertFalse("Didn't expect 'next' trigger", bag.hasNext());
 
         assertEquals("Bad number of messages",
-                     2, appender.getNumberOfMessages());
+                     1, appender.getNumberOfMessages());
         assertEquals("Bad log message",
                      "Couldn't load payload", appender.getMessage(0));
-        assertEquals("Bad log message",
-                     "Couldn't load payload", appender.getMessage(1));
         appender.clear();
     }
 

@@ -29,7 +29,6 @@ import java.io.IOException;
 
 import java.util.List;
 import java.util.Iterator;
-import java.util.HashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
@@ -42,14 +41,6 @@ public class TriggerComponent
     extends DAQComponent
 {
     private static final Log log = LogFactory.getLog(TriggerComponent.class);
-
-    /** svn version information */
-    private static final HashMap SVN_VER_INFO;
-    static {
-	SVN_VER_INFO = new HashMap(4);
-	SVN_VER_INFO.put("id",  "$Id: TriggerComponent.java 2146 2007-10-17 01:37:59Z ksb $");
-	SVN_VER_INFO.put("url", "$URL: http://code.icecube.wisc.edu/daq/projects/trigger/trunk/src/main/java/icecube/daq/trigger/component/TriggerComponent.java $");
-    }
 
     public static final String DEFAULT_AMANDA_HOST = "triggerdaq2";
     public static final int DEFAULT_AMANDA_PORT = 12014;
@@ -212,12 +203,12 @@ public class TriggerComponent
     }
 
     /**
-     * Return this component's svn version info as a HashMap.
+     * Return this component's svn version info as a String.
      *
-     * @return svn version info (id, url) as a HashMap
+     * @return svn version id as a String
      */
-    public HashMap getVersionInfo()
+    public String getVersionInfo()
     {
-	return SVN_VER_INFO;
+	return "$Id: TriggerComponent.java 2168 2007-10-20 01:15:02Z ksb $";
     }
 }

@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: TriggerHandler.java 2187 2007-10-24 21:10:07Z dglo $
  *
  * Date: October 25 2004
  *
@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: TriggerHandler.java 2187 2007-10-24 21:10:07Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -325,7 +325,7 @@ public class TriggerHandler
                 } else {
                     if (tPayload.getPayloadLength() == 0 &&
                         tPayload.getPayloadTimeUTC() == null &&
-                        ((Payload) tPayload).getPayloadBacking() == null)
+                        ((IPayload) tPayload).getPayloadBacking() == null)
                     {
                         log.error("Ignoring recycled payload");
                     } else {
@@ -333,7 +333,9 @@ public class TriggerHandler
                                   tPayload.getPayloadLength() + ", time=" +
                                   (tPayload.getPayloadTimeUTC() == null ?
                                    "null" : "" + tPayload.getPayloadTimeUTC()) +
-                                   ", buf=" + ((Payload) tPayload).getPayloadBacking());
+                                   ", buf=" +
+                                  ((IPayload) tPayload).getPayloadBacking() +
+                                  ")");
                     }
 
                     sourceId = -1;

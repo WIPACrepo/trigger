@@ -35,6 +35,7 @@ public class MockTriggerRequest
     private IUTCTime lastTime;
     private int type;
     private int cfgId;
+    private int uid;
 
     private ISourceID srcId;
     private IReadoutRequest rdoutReq;
@@ -57,12 +58,19 @@ public class MockTriggerRequest
     public MockTriggerRequest(long firstVal, long lastVal, int type, int cfgId,
                               int srcId)
     {
+        this(firstVal, lastVal, type, cfgId, srcId, -1);
+    }
+
+    public MockTriggerRequest(long firstVal, long lastVal, int type, int cfgId,
+                              int srcId, int uid)
+    {
         super(firstVal);
 
         this.firstTime = new MockUTCTime(firstVal);
         this.lastTime = new MockUTCTime(lastVal);
         this.type = type;
         this.cfgId = cfgId;
+        this.uid = uid;
 
         if (srcId >= 0) {
             setSourceID(srcId);
@@ -182,7 +190,7 @@ public class MockTriggerRequest
 
     public int getUID()
     {
-        throw new Error("Unimplemented");
+        return uid;
     }
 
     public void setGetPayloadsException(Exception ex)

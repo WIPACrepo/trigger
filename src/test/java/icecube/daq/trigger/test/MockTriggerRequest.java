@@ -140,6 +140,11 @@ public class MockTriggerRequest
         return new Vector(payloadList);
     }
 
+    public ByteBuffer getPayloadBacking()
+    {
+        return null;
+    }
+
     public int getPayloadInterfaceType()
     {
         return PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD;

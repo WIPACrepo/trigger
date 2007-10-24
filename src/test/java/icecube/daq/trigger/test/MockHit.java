@@ -77,6 +77,11 @@ public class MockHit
         throw new Error("Unimplemented");
     }
 
+    public ByteBuffer getPayloadBacking()
+    {
+        throw new Error("Unimplemented");
+    }
+
     public int getPayloadInterfaceType()
     {
         return PayloadInterfaceRegistry.I_HIT_PAYLOAD;

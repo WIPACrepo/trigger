@@ -98,6 +98,11 @@ public class ConditionalTriggerBagTest
             throw new Error("Unimplemented");
         }
 
+        public ByteBuffer getPayloadBacking()
+        {
+            throw new Error("Unimplemented");
+        }
+
         public int getPayloadInterfaceType()
         {
             return INTERFACE_TYPE;

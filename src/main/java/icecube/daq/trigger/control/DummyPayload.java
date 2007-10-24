@@ -1,7 +1,7 @@
 /*
  * class: DummyPayload
  *
- * Version $Id: DummyPayload.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: DummyPayload.java 2186 2007-10-24 21:09:02Z dglo $
  *
  * Date: October 7 2005
  *
@@ -14,11 +14,13 @@ import icecube.daq.splicer.Spliceable;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
 
+import java.nio.ByteBuffer;
+
 /**
  * This class is a dummy payload that only has a UTC time associated with it.
  * Its main purpose is for truncating the Splicer.
  *
- * @version $Id: DummyPayload.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: DummyPayload.java 2186 2007-10-24 21:09:02Z dglo $
  * @author pat
  */
 public class DummyPayload implements Spliceable, IPayload
@@ -28,6 +30,11 @@ public class DummyPayload implements Spliceable, IPayload
 
     public DummyPayload(IUTCTime payloadTimeUTC) {
         this.payloadTimeUTC = payloadTimeUTC;
+    }
+
+    public ByteBuffer getPayloadBacking()
+    {
+        throw new Error("Unimplemented");
     }
 
     /**

@@ -71,9 +71,13 @@ public class MockSplicer
             throw new OrderingException("Unimplemented");
         }
 
-        public StrandTail push(Spliceable spliceable)
+        public synchronized StrandTail push(Spliceable spliceable)
             throws OrderingException, ClosedStrandException
         {
+            if (state == Splicer.STOPPED) {
+                start(spliceable);
+            }
+
             if (tailState == Splicer.STOPPING) {
                 LOG.error("Attempt to push on top of LAST_POSSIBLE_SPLICEABLE");
             } else if (spliceable == Splicer.LAST_POSSIBLE_SPLICEABLE) {
@@ -112,7 +116,9 @@ public class MockSplicer
     {
         synchronized (rope) {
             rope.add(spl);
-            if (rope.size() > 5 && state == Splicer.STARTED) {
+            if (rope.size() > 5 &&
+                (state == Splicer.STARTED || state == Splicer.STOPPING))
+            {
                 int oldDec = ropeDec;
                 ropeDec = 0;
                 analysis.execute(rope, oldDec);
@@ -220,12 +226,33 @@ public class MockSplicer
 
     public void start()
     {
-        state = STARTED;
     }
 
-    public void start(Spliceable spliceable)
+    public synchronized void start(Spliceable spliceable)
     {
-        throw new Error("Unimplemented");
+        if (state == STARTED) {
+            return;
+        }
+
+        ArrayList empty = new ArrayList();
+
+        if (listeners.size() > 0) {
+            SplicerChangedEvent evt =
+                new SplicerChangedEvent(this, STARTING, spliceable, empty);
+            for (SplicerListener l : listeners) {
+                l.starting(evt);
+            }
+        }
+
+        state = STARTED;
+
+        if (listeners.size() > 0) {
+            SplicerChangedEvent evt =
+                new SplicerChangedEvent(this, STARTED, spliceable, empty);
+            for (SplicerListener l : listeners) {
+                l.started(evt);
+            }
+        }
     }
 
     public void stop()
@@ -258,9 +285,29 @@ public class MockSplicer
         }
 
         if (allStopped) {
+            ArrayList empty = new ArrayList();
+
+            if (listeners.size() > 0) {
+                SplicerChangedEvent evt =
+                    new SplicerChangedEvent(this, STOPPING,
+                                            LAST_POSSIBLE_SPLICEABLE, empty);
+                for (SplicerListener l : listeners) {
+                    l.stopping(evt);
+                }
+            }
+
             analysis.execute(rope, ropeDec);
             truncate(LAST_POSSIBLE_SPLICEABLE);
             state = STOPPED;
+
+            if (listeners.size() > 0) {
+                SplicerChangedEvent evt =
+                    new SplicerChangedEvent(this, STOPPED,
+                                            LAST_POSSIBLE_SPLICEABLE, empty);
+                for (SplicerListener l : listeners) {
+                    l.stopped(evt);
+                }
+            }
         }
     }
 

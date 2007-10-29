@@ -36,20 +36,15 @@ public class MockHit
         this.domId = domId;
     }
 
-    public int compareTo(Object obj)
+    public int compareSpliceable(Spliceable spl)
     {
-        if (obj == null) {
+        if (spl == null) {
             return 1;
-        } else if (!(obj instanceof IHitPayload)) {
-            return getClass().getName().compareTo(obj.getClass().getName());
+        } else if (!(spl instanceof IHitPayload)) {
+            return getClass().getName().compareTo(spl.getClass().getName());
         }
 
-        return compareTo((IHitPayload) obj);
-    }
-
-    public int compareTo(IHitPayload hit)
-    {
-        return getHitTimeUTC().compareTo(hit.getHitTimeUTC());
+        return getHitTimeUTC().compareTo(((IHitPayload) spl).getHitTimeUTC());
     }
 
     public Object deepCopy()

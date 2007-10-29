@@ -1,7 +1,7 @@
 /*
  * class: DummyPayload
  *
- * Version $Id: DummyPayload.java 2186 2007-10-24 21:09:02Z dglo $
+ * Version $Id: DummyPayload.java 2205 2007-10-29 20:44:05Z dglo $
  *
  * Date: October 7 2005
  *
@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
  * This class is a dummy payload that only has a UTC time associated with it.
  * Its main purpose is for truncating the Splicer.
  *
- * @version $Id: DummyPayload.java 2186 2007-10-24 21:09:02Z dglo $
+ * @version $Id: DummyPayload.java 2205 2007-10-29 20:44:05Z dglo $
  * @author pat
  */
 public class DummyPayload implements Spliceable, IPayload
@@ -67,8 +67,8 @@ public class DummyPayload implements Spliceable, IPayload
         return payloadTimeUTC;
     }
 
-    public int compareTo(Object object) {
-        return payloadTimeUTC.compareTo(((IPayload) object).getPayloadTimeUTC());
+    public int compareSpliceable(Spliceable spl) {
+        return payloadTimeUTC.compareTo(((IPayload) spl).getPayloadTimeUTC());
     }
 
     /**

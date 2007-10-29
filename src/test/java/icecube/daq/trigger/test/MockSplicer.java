@@ -319,7 +319,7 @@ public class MockSplicer
             int truncIdx = -1;
 
             while (rope.size() > 0 &&
-                   rope.get(0).compareTo(spliceable) <= 0)
+                   rope.get(0).compareSpliceable(spliceable) <= 0)
             {
                 Spliceable cutSpl = rope.remove(0);
                 cutRope.add(cutSpl);

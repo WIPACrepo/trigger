@@ -82,19 +82,16 @@ public class MockTriggerRequest
         payloadList.add(payload);
     }
 
-    public int compareTo(Object obj)
+    public int compareSpliceable(Spliceable spl)
     {
-        if (obj == null) {
+        if (spl == null) {
             return 1;
-        } else if (!(obj instanceof ICompositePayload)) {
-            return getClass().getName().compareTo(obj.getClass().getName());
+        } else if (!(spl instanceof ICompositePayload)) {
+            return getClass().getName().compareTo(spl.getClass().getName());
         }
 
-        return compareTo((ICompositePayload) obj);
-    }
+        ICompositePayload comp = (ICompositePayload) spl;
 
-    public int compareTo(ICompositePayload comp)
-    {
         int cmp = (comp.getTriggerType() - type);
         if (cmp == 0) {
             cmp = firstTime.compareTo(comp.getFirstTimeUTC());

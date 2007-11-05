@@ -1,7 +1,7 @@
 /*
  * class: TriggerManager
  *
- * Version $Id: TriggerManager.java 2242 2007-11-05 22:42:15Z dglo $
+ * Version $Id: TriggerManager.java 2243 2007-11-05 22:47:49Z dglo $
  *
  * Date: October 25 2004
  *
@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger
  *
- * @version $Id: TriggerManager.java 2242 2007-11-05 22:42:15Z dglo $
+ * @version $Id: TriggerManager.java 2243 2007-11-05 22:47:49Z dglo $
  * @author pat
  */
 public class TriggerManager
@@ -268,7 +268,7 @@ public class TriggerManager
      * @param event the event encapsulating this state change.
      */
     public void starting(SplicerChangedEvent event) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        // do nothing
     }
 
     /**
@@ -277,7 +277,7 @@ public class TriggerManager
      * @param event the event encapsulating this state change.
      */
     public void started(SplicerChangedEvent event) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        // do nothing
     }
 
     /**
@@ -302,7 +302,7 @@ public class TriggerManager
      * @param event the event encapsulating this state change.
      */
     public void stopping(SplicerChangedEvent event) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        // do nothing
     }
 
     /**

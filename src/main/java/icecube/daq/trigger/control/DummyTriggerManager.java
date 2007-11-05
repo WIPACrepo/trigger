@@ -217,7 +217,7 @@ public class DummyTriggerManager
      * @param event the event encapsulating this state change.
      */
     public void starting(SplicerChangedEvent event) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        // do nothing
     }
 
     /**
@@ -226,7 +226,7 @@ public class DummyTriggerManager
      * @param event the event encapsulating this state change.
      */
     public void started(SplicerChangedEvent event) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        // do nothing
     }
 
     /**
@@ -251,7 +251,7 @@ public class DummyTriggerManager
      * @param event the event encapsulating this state change.
      */
     public void stopping(SplicerChangedEvent event) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        // do nothing
     }
 
     /**

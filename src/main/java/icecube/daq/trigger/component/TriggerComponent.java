@@ -8,9 +8,9 @@ import icecube.daq.juggler.component.DAQConnector;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
-import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
@@ -52,12 +52,15 @@ public class TriggerComponent
     protected SpliceablePayloadReader inputEngine;
     protected PayloadDestinationOutputEngine outputEngine;
 
-    protected String globalConfigurationDir = null;
-    protected String triggerConfigFileName = null;
-    protected List currentTriggers = null;
+    protected String globalConfigurationDir;
+    protected String triggerConfigFileName;
+    protected List currentTriggers;
 
     private String amandaHost = DEFAULT_AMANDA_HOST;
     private int amandaPort = DEFAULT_AMANDA_PORT;
+
+    private boolean useCacheMaxVal;
+    private boolean useDummy;
 
     public TriggerComponent(String name, int id) {
         this(name, id, DEFAULT_AMANDA_HOST, DEFAULT_AMANDA_PORT);
@@ -73,29 +76,37 @@ public class TriggerComponent
         // Create the source id of this component
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
 
-        bufferCache = new VitreousBufferCache();
+        if (!useCacheMaxVal) {
+            bufferCache = new VitreousBufferCache();
+        } else {
+            bufferCache = new VitreousBufferCache(Long.MAX_VALUE);
+        }
         
         addCache(bufferCache);
-        addMBean("bufferCache", bufferCache);
-        MasterPayloadFactory masterFactory = new MasterPayloadFactory(bufferCache);
+        //addMBean("bufferCache", bufferCache);
 
         addMBean("jvm", new MemoryStatistics());
         addMBean("system", new SystemStatistics());
+
+        MasterPayloadFactory factory = new MasterPayloadFactory(bufferCache);
 
         // Now differentiate
         String inputType, outputType;
         if (name.equals(DAQCmdInterface.DAQ_GLOBAL_TRIGGER)) {
 
             // Global trigger
-            triggerManager = new GlobalTriggerManager(masterFactory, sourceId);
+            triggerManager = new GlobalTriggerManager(factory, sourceId);
 
             inputType = DAQConnector.TYPE_TRIGGER;
             outputType = DAQConnector.TYPE_GLOBAL_TRIGGER;
         } else {
 
             // Sub-detector triggers
-            triggerManager = new TriggerManager(masterFactory, sourceId);
-            //triggerManager = new DummyTriggerManager(masterFactory, sourceId);
+            if (!useDummy) {
+                triggerManager = new TriggerManager(factory, sourceId);
+            } else {
+                triggerManager = new DummyTriggerManager(factory, sourceId);
+            }
 
             if (name.equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
                 inputType = DAQConnector.TYPE_STRING_HIT;
@@ -119,8 +130,7 @@ public class TriggerComponent
 
         // Create and register io engines
         try {
-            inputEngine =
-                new SpliceablePayloadReader(name, splicer, masterFactory);
+            inputEngine = new SpliceablePayloadReader(name, splicer, factory);
         } catch (IOException ioe) {
             log.error("Couldn't create input reader");
             System.exit(1);
@@ -209,6 +219,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 2168 2007-10-20 01:15:02Z ksb $";
+	return "$Id: TriggerComponent.java 2241 2007-11-05 22:08:33Z jacobsen $";
     }
 }

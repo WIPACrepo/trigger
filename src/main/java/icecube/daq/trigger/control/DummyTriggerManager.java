@@ -78,7 +78,7 @@ public class DummyTriggerManager
 
     /**
      * Constructor
-     * @param inputFactory SpiceableFactory used by Splicer
+     * @param inputFactory SpliceableFactory used by Splicer
      */
     public DummyTriggerManager(SpliceableFactory inputFactory) {
         this(inputFactory,
@@ -87,7 +87,7 @@ public class DummyTriggerManager
 
     /**
      * Constructor
-     * @param inputFactory SpiceableFactory used by Splicer
+     * @param inputFactory SpliceableFactory used by Splicer
      * @param sourceId SourceId of this TriggerManager
      */
     public DummyTriggerManager(SpliceableFactory inputFactory, ISourceID sourceId) {

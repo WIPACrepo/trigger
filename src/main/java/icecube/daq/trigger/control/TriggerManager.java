@@ -1,7 +1,7 @@
 /*
  * class: TriggerManager
  *
- * Version $Id: TriggerManager.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: TriggerManager.java 2242 2007-11-05 22:42:15Z dglo $
  *
  * Date: October 25 2004
  *
@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger
  *
- * @version $Id: TriggerManager.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: TriggerManager.java 2242 2007-11-05 22:42:15Z dglo $
  * @author pat
  */
 public class TriggerManager
@@ -101,7 +101,7 @@ public class TriggerManager
 
     /**
      * Constructor
-     * @param inputFactory SpiceableFactory used by Splicer
+     * @param inputFactory SpliceableFactory used by Splicer
      */
     public TriggerManager(SpliceableFactory inputFactory) {
         this(inputFactory,
@@ -110,7 +110,7 @@ public class TriggerManager
 
     /**
      * Constructor
-     * @param inputFactory SpiceableFactory used by Splicer
+     * @param inputFactory SpliceableFactory used by Splicer
      * @param sourceId SourceId of this TriggerManager
      */
     public TriggerManager(SpliceableFactory inputFactory, ISourceID sourceId) {

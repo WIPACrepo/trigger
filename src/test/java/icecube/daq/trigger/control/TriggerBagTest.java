@@ -164,7 +164,7 @@ public class TriggerBagTest
         assertEquals("Bad number of messages",
                      1, appender.getNumberOfMessages());
         assertEquals("Bad log message",
-                     "Unexpected payload type passed to TriggerBag",
+                     "Unexpected payload type #-999 passed to TriggerBag",
                      appender.getMessage(0));
         appender.clear();
     }
@@ -189,7 +189,7 @@ public class TriggerBagTest
         assertEquals("Bad number of messages",
                      1, appender.getNumberOfMessages());
         assertEquals("Bad log message",
-                     "Unexpected payload type passed to TriggerBag",
+                     "Unexpected payload type #-999 passed to TriggerBag",
                      appender.getMessage(0));
         appender.clear();
     }

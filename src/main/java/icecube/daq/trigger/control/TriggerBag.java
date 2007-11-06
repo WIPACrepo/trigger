@@ -1,7 +1,7 @@
 /*
  * class: TriggerBag
  *
- * Version $Id: TriggerBag.java 2161 2007-10-19 14:56:25Z dglo $
+ * Version $Id: TriggerBag.java 2248 2007-11-06 17:20:27Z dglo $
  *
  * Date: March 16 2005
  *
@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  *                                   +       {===============}
  *                                   +            Merge
  *
- * @version $Id: TriggerBag.java 2161 2007-10-19 14:56:25Z dglo $
+ * @version $Id: TriggerBag.java 2248 2007-11-06 17:20:27Z dglo $
  * @author pat
  */
 public class TriggerBag
@@ -541,6 +541,36 @@ public class TriggerBag
         }
     }
 
+    private static long[] getTimes(IPayload payload)
+    {
+        IUTCTime startTime, endTime;
+        switch (payload.getPayloadInterfaceType()) {
+        case PayloadInterfaceRegistry.I_HIT_PAYLOAD:
+            startTime = ((IHitPayload) payload).getHitTimeUTC();
+            endTime = startTime;
+            break;
+        case PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD:
+            startTime = ((ITriggerRequestPayload) payload).getFirstTimeUTC();
+            endTime = ((ITriggerRequestPayload) payload).getLastTimeUTC();
+            break;
+        default:
+            log.error("Unexpected payload type #" +
+                      payload.getPayloadInterfaceType() +
+                      " passed to TriggerBag");
+            return null;
+        }
+
+        if (startTime == null || endTime == null) {
+            log.error("Bad start/end time for " + payload);
+            return null;
+        }
+
+        return new long[] {
+            startTime.getUTCTimeAsLong(),
+            endTime.getUTCTimeAsLong()
+        };
+    }
+
     /**
      * Check for overlap between two payloads
      *
@@ -550,47 +580,25 @@ public class TriggerBag
      */
     private static boolean overlap(IPayload payload1, IPayload payload2) {
 
-        // set times for first payload based on its type
-        int type1 = payload1.getPayloadInterfaceType();
-        IUTCTime startOfPayload1;
-        IUTCTime endOfPayload1;
-
-        if (type1 == PayloadInterfaceRegistry.I_HIT_PAYLOAD) {
-            startOfPayload1 = ((IHitPayload) payload1).getHitTimeUTC();
-            endOfPayload1   = startOfPayload1;
-        } else if (type1 == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
-            startOfPayload1 = ((ITriggerRequestPayload) payload1).getFirstTimeUTC();
-            endOfPayload1   = ((ITriggerRequestPayload) payload1).getLastTimeUTC();
-        } else {
-            log.error("Unexpected payload type passed to TriggerBag");
+        long[] times1 = getTimes(payload1);
+        if (times1 == null) {
             return false;
         }
 
-        // set times for second payload based on its type
-        int type2 = payload2.getPayloadInterfaceType();
-        IUTCTime startOfPayload2;
-        IUTCTime endOfPayload2;
-
-        if (type2 == PayloadInterfaceRegistry.I_HIT_PAYLOAD) {
-            startOfPayload2 = ((IHitPayload) payload2).getHitTimeUTC();
-            endOfPayload2   = startOfPayload2;
-        } else if (type2 == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
-            startOfPayload2 = ((ITriggerRequestPayload) payload2).getFirstTimeUTC();
-            endOfPayload2   = ((ITriggerRequestPayload) payload2).getLastTimeUTC();
-        } else {
-            log.error("Unexpected payload type passed to TriggerBag");
+        long[] times2 = getTimes(payload2);
+        if (times2 == null) {
             return false;
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Payload1: FirstTime = " + startOfPayload1
-                      + " LastTime = " + endOfPayload1);
-            log.debug("Payload2: FirstTime = " + startOfPayload2
-                      + " LastTime = " + endOfPayload2);
+            log.debug("Payload1: FirstTime = " + times1[0] +
+                      " LastTime = " + times1[1]);
+            log.debug("Payload2: FirstTime = " + times2[0] +
+                      " LastTime = " + times2[1]);
         }
 
-        if ( (0 < startOfPayload1.compareTo(endOfPayload2)) ||
-             (0 < startOfPayload2.compareTo(endOfPayload1)) ) {
+        // if the start of either payload is past the end of either payload...
+        if (times1[0] > times2[1] || times2[0] > times1[1]) {
             if (log.isDebugEnabled()) {
                 log.debug("  NO OVERLAP");
             }
@@ -603,5 +611,4 @@ public class TriggerBag
         return true;
 
     }
-
 }

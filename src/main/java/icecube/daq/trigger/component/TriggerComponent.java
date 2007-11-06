@@ -11,17 +11,20 @@ import icecube.daq.juggler.mbean.SystemStatistics;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.MasterPayloadFactory;
+import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerImpl;
+import icecube.daq.splicer.SpliceableFactory;
+import icecube.daq.trigger.config.TriggerBuilder;
 import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.control.GlobalTriggerManager;
 import icecube.daq.trigger.control.ITriggerControl;
 import icecube.daq.trigger.control.DummyTriggerManager;
-import icecube.daq.trigger.config.TriggerBuilder;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.util.DOMRegistry;
 
 import java.nio.ByteBuffer;
@@ -88,11 +91,12 @@ public class TriggerComponent
         addMBean("jvm", new MemoryStatistics());
         addMBean("system", new SystemStatistics());
 
-        MasterPayloadFactory factory = new MasterPayloadFactory(bufferCache);
+        SpliceableFactory factory;
 
         // Now differentiate
         String inputType, outputType;
         if (name.equals(DAQCmdInterface.DAQ_GLOBAL_TRIGGER)) {
+            factory = new MasterPayloadFactory(bufferCache);
 
             // Global trigger
             triggerManager = new GlobalTriggerManager(factory, sourceId);
@@ -100,6 +104,7 @@ public class TriggerComponent
             inputType = DAQConnector.TYPE_TRIGGER;
             outputType = DAQConnector.TYPE_GLOBAL_TRIGGER;
         } else {
+            factory = new MasterPayloadFactory(bufferCache);
 
             // Sub-detector triggers
             if (!useDummy) {
@@ -107,6 +112,16 @@ public class TriggerComponent
             } else {
                 triggerManager = new DummyTriggerManager(factory, sourceId);
             }
+
+            IByteBufferCache trigCache = new VitreousBufferCache();
+            addCache(DAQConnector.TYPE_TRIGGER, trigCache);
+
+            MasterPayloadFactory mpf =
+                new MasterPayloadFactory(trigCache);
+            final int trId = PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST;
+            TriggerRequestPayloadFactory trFactory =
+                (TriggerRequestPayloadFactory) mpf.getPayloadFactory(trId);
+            triggerManager.setOutputFactory(trFactory);
 
             if (name.equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
                 inputType = DAQConnector.TYPE_STRING_HIT;
@@ -219,6 +234,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 2241 2007-11-05 22:08:33Z jacobsen $";
+	return "$Id: TriggerComponent.java 2247 2007-11-06 16:57:04Z dglo $";
     }
 }

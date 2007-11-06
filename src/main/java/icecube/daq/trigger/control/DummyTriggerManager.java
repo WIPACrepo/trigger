@@ -91,19 +91,22 @@ public class DummyTriggerManager
      * @param sourceId SourceId of this TriggerManager
      */
     public DummyTriggerManager(SpliceableFactory inputFactory, ISourceID sourceId) {
-        super(sourceId, getOutputFactory(inputFactory));
-        this.inputFactory = inputFactory;
-        init();
+        this(inputFactory, sourceId, null);
     }
 
-    private static TriggerRequestPayloadFactory
-        getOutputFactory(SpliceableFactory inputFactory)
+    /**
+     * Constructor
+     * @param inputFactory SpliceableFactory used by Splicer
+     * @param sourceId SourceId of this TriggerManager
+     * @param outputFactory factory used to build triggers
+     */
+    private DummyTriggerManager(SpliceableFactory inputFactory,
+                                ISourceID sourceId,
+                                TriggerRequestPayloadFactory outputFactory)
     {
-        final int id = PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST;
-
-        MasterPayloadFactory factory = (MasterPayloadFactory) inputFactory;
-
-        return (TriggerRequestPayloadFactory) factory.getPayloadFactory(id);
+        super(sourceId, outputFactory);
+        this.inputFactory = inputFactory;
+        init();
     }
 
     private void init() {

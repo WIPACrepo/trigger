@@ -36,7 +36,7 @@ import java.io.IOException;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: GlobalTriggerHandler.java 2247 2007-11-06 16:57:04Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -272,7 +272,9 @@ public class GlobalTriggerHandler
        // ((GlobalTriggerBag) triggerBag).setTimeGap_option(getTimeGap_option());
 
         triggerBag = new GlobalTriggerBag();
-        triggerBag.setPayloadFactory(outputFactory);
+        if (outputFactory != null) {
+            triggerBag.setPayloadFactory(outputFactory);
+        }
 
         monitor = new TriggerHandlerMonitor();
         PayloadBagMonitor triggerBagMonitor = new PayloadBagMonitor();
@@ -680,6 +682,14 @@ public class GlobalTriggerHandler
     public int getTotalOutputMergedGlobalTriggers()
     {
         return miTotalOutputMergedGlobalTriggers;
+    }
+
+    public void setOutputFactory(TriggerRequestPayloadFactory factory)
+    {
+        outputFactory = factory;
+        if (outputFactory != null) {
+            triggerBag.setPayloadFactory(outputFactory);
+        }
     }
 
 }

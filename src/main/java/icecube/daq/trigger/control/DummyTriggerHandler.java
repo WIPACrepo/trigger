@@ -91,7 +91,9 @@ public class DummyTriggerHandler
 
     private void init() {
         triggerBag = new DummyTriggerBag(sourceId);
-        triggerBag.setPayloadFactory(outputFactory);
+        if (outputFactory != null) {
+            triggerBag.setPayloadFactory(outputFactory);
+        }
         count = 0;
     }
 
@@ -270,11 +272,18 @@ public class DummyTriggerHandler
     }
 
     public void setDOMRegistry(DOMRegistry registry) {
-	domRegistry = registry;
+        domRegistry = registry;
     }
 
     public DOMRegistry getDOMRegistry() {
-	return domRegistry;
+        return domRegistry;
     }
 
+    public void setOutputFactory(TriggerRequestPayloadFactory factory)
+    {
+        outputFactory = factory;
+        if (outputFactory != null) {
+            triggerBag.setPayloadFactory(outputFactory);
+        }
+    }
 }

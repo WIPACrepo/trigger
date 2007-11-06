@@ -1,7 +1,7 @@
 /*
  * class: TriggerManager
  *
- * Version $Id: TriggerManager.java 2243 2007-11-05 22:47:49Z dglo $
+ * Version $Id: TriggerManager.java 2247 2007-11-06 16:57:04Z dglo $
  *
  * Date: October 25 2004
  *
@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger
  *
- * @version $Id: TriggerManager.java 2243 2007-11-05 22:47:49Z dglo $
+ * @version $Id: TriggerManager.java 2247 2007-11-06 16:57:04Z dglo $
  * @author pat
  */
 public class TriggerManager
@@ -114,19 +114,21 @@ public class TriggerManager
      * @param sourceId SourceId of this TriggerManager
      */
     public TriggerManager(SpliceableFactory inputFactory, ISourceID sourceId) {
-        super(sourceId, getOutputFactory(inputFactory));
-        this.inputFactory = inputFactory;
-        init();
+        this(inputFactory, sourceId, null);
     }
 
-    private static TriggerRequestPayloadFactory
-        getOutputFactory(SpliceableFactory inputFactory)
+    /**
+     * Constructor
+     * @param inputFactory SpliceableFactory used by Splicer
+     * @param sourceId SourceId of this TriggerManager
+     * @param outputFactory factory used to build triggers
+     */
+    public TriggerManager(SpliceableFactory inputFactory, ISourceID sourceId,
+                          TriggerRequestPayloadFactory outputFactory)
     {
-        final int id = PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST;
-
-        MasterPayloadFactory factory = (MasterPayloadFactory) inputFactory;
-
-        return (TriggerRequestPayloadFactory) factory.getPayloadFactory(id);
+        super(sourceId, outputFactory);
+        this.inputFactory = inputFactory;
+        init();
     }
 
     protected void init() {

@@ -38,7 +38,8 @@ import org.apache.log4j.BasicConfigurator;
 public class StringTriggerHandlerTest
     extends TestCase
 {
-    private static final MockAppender appender = new MockAppender();
+    private static final MockAppender appender =
+        new MockAppender(/*org.apache.log4j.Level.ALL*/)/*.setVerbose(true)*/;
     private static final MockSourceID srcId =
         new MockSourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
 
@@ -176,6 +177,13 @@ public class StringTriggerHandlerTest
     {
         StringTriggerHandler trigMgr = new StringTriggerHandler(srcId);
         trigMgr.setMasterPayloadFactory(new MasterPayloadFactory());
+
+        assertEquals("Expected to see a log message",
+                     appender.getNumberOfMessages(), 1);
+        assertEquals("Bad log message",
+                     "This ITriggerBag does not use a PayloadFactory",
+                     appender.getMessage(0));
+        appender.clear();
     }
 
     public void testIssueNoDest()

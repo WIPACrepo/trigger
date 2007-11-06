@@ -10,6 +10,8 @@ import icecube.daq.splicer.StrandTail;
 
 import icecube.daq.trigger.IReadoutRequestElement;
 
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+
 import icecube.daq.trigger.algorithm.AmandaCalibLaserTrigger;
 import icecube.daq.trigger.algorithm.AmandaCalibT0Trigger;
 import icecube.daq.trigger.algorithm.AmandaM18Trigger;
@@ -156,6 +158,8 @@ public class AmandaTriggerEndToEndTest
 
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
         trigMgr.setSplicer(splicer);
+
+        trigMgr.setOutputFactory(new TriggerRequestPayloadFactory());
 
         final int numTails = 10;
         final int numObjs = numTails * 10;

@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 2187 2007-10-24 21:10:07Z dglo $
+ * Version $Id: TriggerHandler.java 2247 2007-11-06 16:57:04Z dglo $
  *
  * Date: October 25 2004
  *
@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 2187 2007-10-24 21:10:07Z dglo $
+ * @version $Id: TriggerHandler.java 2247 2007-11-06 16:57:04Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -139,7 +139,9 @@ public class TriggerHandler
     protected ITriggerBag createTriggerBag()
     {
         ITriggerBag bag = new TriggerBag(sourceId);
-        bag.setPayloadFactory(outputFactory);
+        if (outputFactory != null) {
+            bag.setPayloadFactory(outputFactory);
+        }
         return bag;
     }
 
@@ -536,6 +538,9 @@ public class TriggerHandler
     public void setOutputFactory(TriggerRequestPayloadFactory factory)
     {
         outputFactory = factory;
+        if (outputFactory != null) {
+            triggerBag.setPayloadFactory(outputFactory);
+        }
     }
 
 }

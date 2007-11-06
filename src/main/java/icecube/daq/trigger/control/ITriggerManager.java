@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerManager
  *
- * Version $Id: ITriggerManager.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ITriggerManager.java 2247 2007-11-06 16:57:04Z dglo $
  *
  * Date: March 31 2005
  *
@@ -10,13 +10,14 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.splicer.Splicer;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.splicer.Splicer;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
 /**
  * This interface defines the behavior of a TriggerManager
  *
- * @version $Id: ITriggerManager.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ITriggerManager.java 2247 2007-11-06 16:57:04Z dglo $
  * @author pat
  */
 public interface ITriggerManager
@@ -37,4 +38,5 @@ public interface ITriggerManager
 
     int getProcessingCount();
 
+    void setOutputFactory(TriggerRequestPayloadFactory factory);
 }

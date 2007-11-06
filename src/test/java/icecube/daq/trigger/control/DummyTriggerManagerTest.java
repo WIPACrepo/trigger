@@ -1,12 +1,13 @@
 package icecube.daq.trigger.control;
 
-import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.SourceIdRegistry;
 
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
+
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
@@ -121,6 +122,9 @@ public class DummyTriggerManagerTest
         throws SplicerException
     {
         DummyTriggerManager trigMgr = new DummyTriggerManager();
+
+        trigMgr.setOutputFactory(new TriggerRequestPayloadFactory());
+
         runWithRealSplicer(trigMgr);
     }
 
@@ -149,6 +153,8 @@ public class DummyTriggerManagerTest
 
         MockPayloadDestination dest = new MockPayloadDestination();
         trigMgr.setPayloadDestinationCollection(dest);
+
+        trigMgr.setOutputFactory(new TriggerRequestPayloadFactory());
 
         StrandTail[] tails = new StrandTail[numTails];
         for (int i = 0; i < tails.length; i++) {

@@ -1,12 +1,14 @@
 package icecube.daq.trigger.control;
 
-import icecube.daq.payload.MasterPayloadFactory;
+import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
+
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
@@ -129,6 +131,9 @@ public class TriggerManagerTest
         throws SplicerException
     {
         TriggerManager trigMgr = new TriggerManager();
+
+        trigMgr.setOutputFactory(new TriggerRequestPayloadFactory());
+
         runWithRealSplicer(trigMgr);
     }
 
@@ -142,6 +147,8 @@ public class TriggerManagerTest
 
         MockSplicer splicer = new MockSplicer(trigMgr);
         trigMgr.setSplicer(splicer);
+
+        trigMgr.setOutputFactory(new TriggerRequestPayloadFactory());
 
         loadAndRun(trigMgr);
 

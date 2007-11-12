@@ -36,7 +36,7 @@ import java.io.IOException;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 2247 2007-11-06 16:57:04Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 2272 2007-11-12 15:22:43Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -336,26 +336,12 @@ public class GlobalTriggerHandler
                             ITriggerRequestPayload trigReq =
                                 (ITriggerRequestPayload) tInputTrigger;
 
-                            ISourceID srcObj =
-                                trigReq.getSourceID();
-                            int srcId = (srcObj == null ? -1 :
-                                         srcObj.getSourceID());
-
-                            IUTCTime firstObj =
-                                trigReq.getFirstTimeUTC();
-                            long firstTime = (firstObj == null ? -1L :
-                                              firstObj.getUTCTimeAsLong());
-
-                            IUTCTime lastObj =
-                                trigReq.getLastTimeUTC();
-                            long lastTime = (lastObj == null ? -1L :
-                                              lastObj.getUTCTimeAsLong());
-
                             log.error("Bad merged trigger: uid " +
                                       trigReq.getUID() + " configId " +
                                       trigReq.getTriggerConfigID() + " src "+
-                                      srcId + " times [" + firstTime + "-" +
-                                      lastTime + "]");
+                                      trigReq.getSourceID() + " times [" +
+                                      trigReq.getFirstTimeUTC() + "-" +
+                                      trigReq.getLastTimeUTC() + "]");
                         }
                         continue;
                     }

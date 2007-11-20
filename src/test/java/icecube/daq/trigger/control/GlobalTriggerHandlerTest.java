@@ -426,6 +426,9 @@ public class GlobalTriggerHandlerTest
         final int badCfgId = 11;
         final int badUID = 123;
         final int badSrcId = SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID;
+        final String badSrcName =
+            SourceIdRegistry.getDAQNameFromSourceID(badSrcId) + "#" +
+            SourceIdRegistry.getDAQIdFromSourceID(badSrcId);
 
         trigReq = new BadTriggerRequest(badFirstTime, badLastTime, -1,
                                         badCfgId, badUID);
@@ -456,7 +459,7 @@ public class GlobalTriggerHandlerTest
                      1, appender.getNumberOfMessages());
         assertEquals("Bad log message",
                      "Bad merged trigger: uid " + badUID + " configId " +
-                     badCfgId + " src " + badSrcId + " times [" +
+                     badCfgId + " src " + badSrcName + " times [" +
                      badFirstTime + "-" + badLastTime + "]",
                      appender.getMessage(0));
         appender.clear();

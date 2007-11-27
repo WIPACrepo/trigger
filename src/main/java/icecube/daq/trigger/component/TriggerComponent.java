@@ -45,7 +45,7 @@ public class TriggerComponent
 {
     private static final Log log = LogFactory.getLog(TriggerComponent.class);
 
-    public static final String DEFAULT_AMANDA_HOST = "triggerdaq2";
+    public static final String DEFAULT_AMANDA_HOST = "ic-twrdaq00";
     public static final int DEFAULT_AMANDA_PORT = 12014;
 
     protected ISourceID sourceId;
@@ -234,6 +234,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 2247 2007-11-06 16:57:04Z dglo $";
+	return "$Id: TriggerComponent.java 2319 2007-11-27 18:35:03Z jacobsen $";
     }
 }

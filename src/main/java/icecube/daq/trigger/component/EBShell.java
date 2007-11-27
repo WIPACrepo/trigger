@@ -2,10 +2,11 @@ package icecube.daq.trigger.component;
 
 import icecube.daq.common.DAQCmdInterface;
 
+import icecube.daq.io.DAQComponentObserver;
+import icecube.daq.io.IOChannelParent;
 import icecube.daq.io.InputChannel;
-import icecube.daq.io.InputChannelParent;
-import icecube.daq.io.PayloadDestinationOutputEngine;
 import icecube.daq.io.PayloadReader;
+import icecube.daq.io.SingleOutputEngine;
 
 import icecube.daq.juggler.component.DAQCompServer;
 import icecube.daq.juggler.component.DAQComponent;
@@ -17,7 +18,7 @@ import icecube.daq.juggler.mbean.SystemStatistics;
 
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ILoadablePayload;
-import icecube.daq.payload.IPayloadDestinationCollection;
+import icecube.daq.payload.IPayloadOutput;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.MasterPayloadFactory;
@@ -46,7 +47,7 @@ class DevNullChannel
 {
     private IByteBufferCache bufMgr;
 
-    DevNullChannel(InputChannelParent parent, SelectableChannel channel,
+    DevNullChannel(IOChannelParent parent, SelectableChannel channel,
                    IByteBufferCache bufMgr, int bufSize)
         throws IOException
     {
@@ -59,6 +60,12 @@ class DevNullChannel
         throws IOException
     {
         bufMgr.returnBuffer(payBuf);
+    }
+
+    public void registerComponentObserver(DAQComponentObserver observer,
+                                          String notificationID)
+    {
+        throw new Error("Unimplemented");
     }
 }
 
@@ -104,8 +111,8 @@ public class EBShell
         PayloadReader rdoutDataIn = new DevNullReader(name);
         addMonitoredEngine(DAQConnector.TYPE_READOUT_DATA, rdoutDataIn);
 
-        PayloadDestinationOutputEngine rdoutReqOut =
-            new PayloadDestinationOutputEngine(name, id, name + "Output");
+        SingleOutputEngine rdoutReqOut =
+            new SingleOutputEngine(name, id, name + "Output");
         rdoutReqOut.registerBufferManager(bufferCache);
         addMonitoredEngine(DAQConnector.TYPE_READOUT_REQUEST, rdoutReqOut,
                            true);

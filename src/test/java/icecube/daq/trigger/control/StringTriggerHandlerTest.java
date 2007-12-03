@@ -196,11 +196,6 @@ public class StringTriggerHandlerTest
         } catch (RuntimeException rte) {
             // expect this to fail
         }
-
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
-        appender.clear();
     }
 
     public void testIssueEmpty()

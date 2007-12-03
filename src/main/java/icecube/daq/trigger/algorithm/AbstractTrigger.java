@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 2265 2007-11-08 20:25:22Z toale $
+ * Version $Id: AbstractTrigger.java 2360 2007-12-03 20:59:43Z dglo $
  *
  * Date: August 19 2005
  *
@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 2265 2007-11-08 20:25:22Z toale $
+ * @version $Id: AbstractTrigger.java 2360 2007-12-03 20:59:43Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor
@@ -360,11 +360,9 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
         switch (type) {
             case IReadoutRequestElement.READOUT_TYPE_GLOBAL:
                 if (null != stringId) {
-                    log.debug("ReadoutType = " + type + " but StringId is not NULL.");
                     stringId = null;
                 }
                 if (null != domId) {
-                    log.debug("ReadoutType = " + type + " but DomId is not NULL.");
                     domId = null;
                 }
                 timeMinus = firstTime.getOffsetUTCTime(-readoutConfig.getMinus());
@@ -372,11 +370,9 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
                 break;
             case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL:
                 if (null != stringId) {
-                    log.debug("ReadoutType = " + type + " but StringId is not NULL.");
                     stringId = null;
                 }
                 if (null != domId) {
-                    log.debug("ReadoutType = " + type + " but DomId is not NULL.");
                     domId = null;
                 }
                 if (sourceId.getSourceID() == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
@@ -394,7 +390,6 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
                     log.error("ReadoutType = " + type + " but StringId is NULL!");
                 }
                 if (null != domId) {
-                    log.debug("ReadoutType = " + type + " but DomId is not NULL.");
                     domId = null;
                 }
                 if (sourceId.getSourceID() == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
@@ -425,11 +420,9 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
                 break;
             case IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL:
                 if (null != stringId) {
-                    log.debug("ReadoutType = " + type + " but StringId is not NULL.");
                     stringId = null;
                 }
                 if (null != domId) {
-                    log.debug("ReadoutType = " + type + " but DomId is not NULL.");
                     domId = null;
                 }
                 if (sourceId.getSourceID() == SourceIdRegistry.INICE_TRIGGER_SOURCE_ID) {

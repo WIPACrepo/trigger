@@ -136,7 +136,7 @@ public class DummyTriggerHandler
     }
 
     /**
-     * sets payload destination
+     * sets payload output
      * @param payloadOutput destination of payloads
      */
     public void setPayloadOutput(IPayloadOutput payloadOutput) {

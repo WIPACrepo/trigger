@@ -192,9 +192,9 @@ public class DummyTriggerManager
             log.info("Received Splicer DISPOSED");
         }
         try {
-            getPayloadDestination().closeAllPayloadDestinations();
+            getPayloadOutput().close();
         } catch (IOException e) {
-            log.error("Error closing PayloadDestination", e);
+            log.error("Error closing PayloadOutput", e);
         }
     }
 
@@ -208,9 +208,9 @@ public class DummyTriggerManager
             log.error("Received Splicer FAILED");
         }
         try {
-            getPayloadDestination().closeAllPayloadDestinations();
+            getPayloadOutput().close();
         } catch (IOException e) {
-            log.error("Error closing PayloadDestination", e);
+            log.error("Error closing PayloadOutput", e);
         }
     }
 
@@ -242,9 +242,9 @@ public class DummyTriggerManager
             log.info("Received Splicer STOPPED");
         }
         try {
-            getPayloadDestination().stopAllPayloadDestinations();
+            getPayloadOutput().stop();
         } catch (IOException e) {
-            log.error("Error closing PayloadDestination", e);
+            log.error("Error closing PayloadOutput", e);
         }
     }
 

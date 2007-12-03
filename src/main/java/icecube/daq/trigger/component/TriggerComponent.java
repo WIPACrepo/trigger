@@ -164,7 +164,7 @@ public class TriggerComponent
         outputEngine = new PayloadDestinationOutputEngine(name, id,
                                                           name + "OutputEngine");
         outputEngine.registerBufferManager(bufferCache);
-        triggerManager.setPayloadDestinationCollection(outputEngine.getPayloadDestinationCollection());
+        triggerManager.setPayloadOutput(outputEngine.getPayloadDestinationCollection());
         addMonitoredEngine(outputType, outputEngine);
 
     }
@@ -234,6 +234,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 2319 2007-11-27 18:35:03Z jacobsen $";
+	return "$Id: TriggerComponent.java 2351 2007-12-03 17:19:40Z dglo $";
     }
 }

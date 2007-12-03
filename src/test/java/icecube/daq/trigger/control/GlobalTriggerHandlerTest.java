@@ -228,7 +228,7 @@ public class GlobalTriggerHandlerTest
         GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         trigMgr.issueTriggers();
         assertEquals("Bad number of payloads written",
@@ -240,7 +240,7 @@ public class GlobalTriggerHandlerTest
         GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         dest.setWritePayloadException(new IOException("Test"));
 
@@ -271,7 +271,7 @@ public class GlobalTriggerHandlerTest
         GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         MockHit hit = new MockHit(123456L);
 
@@ -294,7 +294,7 @@ public class GlobalTriggerHandlerTest
         GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         trigMgr.flush();
     }
@@ -304,7 +304,7 @@ public class GlobalTriggerHandlerTest
         GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         MockTrigger trig = new MockTrigger();
         //trig.setEarliestPayloadOfInterest(hit);
@@ -325,7 +325,7 @@ public class GlobalTriggerHandlerTest
         GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         GlobalTriggerTrigger trig = new GlobalTriggerTrigger();
         trig.setEarliestPayloadOfInterest(new MockHit(999L));
@@ -358,7 +358,7 @@ public class GlobalTriggerHandlerTest
         GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         GlobalTriggerTrigger trig = new GlobalTriggerTrigger();
         trig.setEarliestPayloadOfInterest(new MockHit(999L));
@@ -405,7 +405,7 @@ public class GlobalTriggerHandlerTest
         GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         GlobalTriggerTrigger trig = new GlobalTriggerTrigger();
         trig.setEarliestPayloadOfInterest(new MockHit(999L));
@@ -470,7 +470,7 @@ public class GlobalTriggerHandlerTest
         GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         GlobalTriggerTrigger trig = new GlobalTriggerTrigger();
         trig.setEarliestPayloadOfInterest(new MockHit(999L));

@@ -26,6 +26,10 @@ public class MockPayloadDestination
         throw new Error("Unimplemented");
     }
 
+    public void close() throws IOException {
+        closeAllPayloadDestinations();
+    }
+
     public void closeAllPayloadDestinations()
         throws IOException
     {
@@ -77,6 +81,10 @@ public class MockPayloadDestination
         throws IOException
     {
         // do nothing
+    }
+
+    public void stop() throws IOException {
+        stopAllPayloadDestinations();
     }
 
     public void stopPayloadDestination(ISourceID srcId)

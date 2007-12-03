@@ -1,7 +1,7 @@
 /*
  * class: TriggerManager
  *
- * Version $Id: TriggerManager.java 2247 2007-11-06 16:57:04Z dglo $
+ * Version $Id: TriggerManager.java 2351 2007-12-03 17:19:40Z dglo $
  *
  * Date: October 25 2004
  *
@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger
  *
- * @version $Id: TriggerManager.java 2247 2007-11-06 16:57:04Z dglo $
+ * @version $Id: TriggerManager.java 2351 2007-12-03 17:19:40Z dglo $
  * @author pat
  */
 public class TriggerManager
@@ -242,9 +242,9 @@ public class TriggerManager
             log.info("Received Splicer DISPOSED");
         }
         try {
-            getPayloadDestination().closeAllPayloadDestinations();
+            getPayloadOutput().close();
         } catch (IOException e) {
-            log.error("Error closing PayloadDestination", e);
+            log.error("Error closing PayloadOutput", e);
         }
     }
 
@@ -258,9 +258,9 @@ public class TriggerManager
             log.error("Received Splicer FAILED");
         }
         try {
-            getPayloadDestination().closeAllPayloadDestinations();
+            getPayloadOutput().close();
         } catch (IOException e) {
-            log.error("Error closing PayloadDestination", e);
+            log.error("Error closing PayloadOutput", e);
         }
     }
 
@@ -292,9 +292,9 @@ public class TriggerManager
             log.info("Received Splicer STOPPED");
         }
         try {
-            getPayloadDestination().stopAllPayloadDestinations();
+            getPayloadOutput().stop();
         } catch (IOException e) {
-            log.error("Error closing PayloadDestination", e);
+            log.error("Error closing PayloadOutput", e);
         }
     }
 

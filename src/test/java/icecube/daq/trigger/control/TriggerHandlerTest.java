@@ -181,7 +181,7 @@ public class TriggerHandlerTest
 
         try {
             trigMgr.issueTriggers();
-            fail("issueTriggers() should not work without PayloadDestination");
+            fail("issueTriggers() should not work without PayloadOutput");
         } catch (RuntimeException rte) {
             // expect this to fail
         }
@@ -197,7 +197,7 @@ public class TriggerHandlerTest
         TriggerHandler trigMgr = new TriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         trigMgr.issueTriggers();
         assertEquals("Bad number of payloads written",
@@ -209,7 +209,7 @@ public class TriggerHandlerTest
         TriggerHandler trigMgr = new TriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         dest.setWritePayloadException(new IOException("Test"));
 
@@ -241,7 +241,7 @@ public class TriggerHandlerTest
         TriggerHandler trigMgr = new TriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         MockHit hit = new MockHit(123456L);
 
@@ -261,7 +261,7 @@ public class TriggerHandlerTest
         TriggerHandler trigMgr = new TriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         trigMgr.flush();
     }
@@ -271,7 +271,7 @@ public class TriggerHandlerTest
         TriggerHandler trigMgr = new TriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         MockHit hit = new MockHit(234567L);
 
@@ -289,7 +289,7 @@ public class TriggerHandlerTest
         TriggerHandler trigMgr = new TriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         MockHit hit = new MockHit(345678L);
 
@@ -308,7 +308,7 @@ public class TriggerHandlerTest
         TriggerHandler trigMgr = new TriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         final int numHitsPerTrigger = 6;
 
@@ -338,7 +338,7 @@ public class TriggerHandlerTest
         TriggerHandler trigMgr = new TriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         MockTriggerRequest trigReq =
             new MockTriggerRequest(10000L, 20000L, 1, 11);
@@ -356,7 +356,7 @@ public class TriggerHandlerTest
         TriggerHandler trigMgr = new TriggerHandler();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         TriggerTrigger trig = new TriggerTrigger();
         trig.setEarliestPayloadOfInterest(new MockHit(234567L));

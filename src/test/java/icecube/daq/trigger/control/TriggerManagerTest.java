@@ -77,7 +77,7 @@ public class TriggerManagerTest
         throws SplicerException
     {
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
         trigMgr.setSplicer(splicer);
@@ -143,7 +143,7 @@ public class TriggerManagerTest
         TriggerManager trigMgr = new TriggerManager();
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         MockSplicer splicer = new MockSplicer(trigMgr);
         trigMgr.setSplicer(splicer);

@@ -154,7 +154,7 @@ public class AmandaTriggerEndToEndTest
         TriggerManager trigMgr = new TriggerManager(srcId);
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
         trigMgr.setSplicer(splicer);

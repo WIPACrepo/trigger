@@ -36,7 +36,7 @@ import java.io.IOException;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 2272 2007-11-12 15:22:43Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 2351 2007-12-03 17:19:40Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -71,7 +71,7 @@ public class GlobalTriggerHandler
     /**
      * output destination
      */
-    private IPayloadDestinationCollection payloadDestination;
+    private IPayloadOutput payloadOutput;
 
     /**
      * earliest thing of interest to the analysis
@@ -440,9 +440,8 @@ public class GlobalTriggerHandler
      */
     public void issueTriggers() {
 
-        if (null == payloadDestination) {
-            log.error("PayloadDestination has not been set!");
-            throw new RuntimeException("PayloadDestination has not been set!");
+        if (null == payloadOutput) {
+            throw new RuntimeException("PayloadOutput has not been set!");
         }
 
         if (log.isDebugEnabled()) {
@@ -508,7 +507,7 @@ public class GlobalTriggerHandler
 
             //--ship the GTEventPayload to its destinantion (i.e., EB).
             try {
-                payloadDestination.writePayload(GTEventPayload);
+                payloadOutput.writePayload(GTEventPayload);
             } catch (IOException e) {
                 log.error("Couldn't write payload", e);
             }
@@ -617,14 +616,14 @@ public class GlobalTriggerHandler
         return miTimeGap_option;
     }
 
-    public void setPayloadDestinationCollection(IPayloadDestinationCollection payloadDestination)
+    public void setPayloadOutput(IPayloadOutput payloadOutput)
     {
-        this.payloadDestination = payloadDestination;
+        this.payloadOutput = payloadOutput;
     }
 
-    public IPayloadDestinationCollection getPayloadDestination()
+    public IPayloadOutput getPayloadOutput()
     {
-        return payloadDestination;
+        return payloadOutput;
     }
 
     public List getListAvailableTriggerToRelease()

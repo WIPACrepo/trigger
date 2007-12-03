@@ -208,7 +208,7 @@ public class StringTriggerHandlerTest
         StringTriggerHandler trigMgr = new StringTriggerHandler(srcId);
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         trigMgr.issueTriggers();
         assertEquals("Bad number of payloads written",
@@ -220,7 +220,7 @@ public class StringTriggerHandlerTest
         StringTriggerHandler trigMgr = new StringTriggerHandler(srcId);
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         dest.setWritePayloadException(new IOException("Test"));
 
@@ -252,7 +252,7 @@ public class StringTriggerHandlerTest
         StringTriggerHandler trigMgr = new StringTriggerHandler(srcId);
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         MockHit hit = new MockHit(234567L);
 
@@ -272,7 +272,7 @@ public class StringTriggerHandlerTest
         StringTriggerHandler trigMgr = new StringTriggerHandler(srcId);
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         trigMgr.flush();
     }
@@ -282,7 +282,7 @@ public class StringTriggerHandlerTest
         StringTriggerHandler trigMgr = new StringTriggerHandler(srcId);
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         trigMgr.addToTriggerBag(new MockHit(100000L));
 
@@ -294,7 +294,7 @@ public class StringTriggerHandlerTest
         StringTriggerHandler trigMgr = new StringTriggerHandler(srcId);
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         MockHit hit = new MockHit(345678L);
 
@@ -313,7 +313,7 @@ public class StringTriggerHandlerTest
         StringTriggerHandler trigMgr = new StringTriggerHandler(srcId);
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         final int numHitsPerTrigger = 6;
 

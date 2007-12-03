@@ -73,7 +73,7 @@ public class DummyTriggerManagerTest
         trigMgr.setSplicer(splicer);
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         StrandTail[] tails = new StrandTail[numTails];
         for (int i = 0; i < tails.length; i++) {
@@ -152,7 +152,7 @@ public class DummyTriggerManagerTest
         trigMgr.setSplicer(splicer);
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadDestinationCollection(dest);
+        trigMgr.setPayloadOutput(dest);
 
         trigMgr.setOutputFactory(new TriggerRequestPayloadFactory());
 

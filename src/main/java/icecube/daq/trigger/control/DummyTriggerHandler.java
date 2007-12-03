@@ -50,7 +50,7 @@ public class DummyTriggerHandler
     /**
      * output destination
      */
-    private IPayloadDestinationCollection payloadDestination;
+    private IPayloadOutput payloadOutput;
 
     /**
      * Default output factory
@@ -137,15 +137,15 @@ public class DummyTriggerHandler
 
     /**
      * sets payload destination
-     * @param payloadDestination destination of payloads
+     * @param payloadOutput destination of payloads
      */
-    public void setPayloadDestinationCollection(IPayloadDestinationCollection payloadDestination) {
-        this.payloadDestination = payloadDestination;
+    public void setPayloadOutput(IPayloadOutput payloadOutput) {
+        this.payloadOutput = payloadOutput;
     }
 
-    IPayloadDestinationCollection getPayloadDestination()
+    IPayloadOutput getPayloadOutput()
     {
-        return payloadDestination;
+        return payloadOutput;
     }
 
     public void setNumHitsPerTrigger(int numHitsPerTrigger)
@@ -234,9 +234,8 @@ public class DummyTriggerHandler
      *   if any of those overlap, they are merged
      */
     public void issueTriggers() {
-        if (null == payloadDestination) {
-            log.error("PayloadDestination has not been set!");
-            throw new RuntimeException("PayloadDestination has not been set!");
+        if (null == payloadOutput) {
+            throw new RuntimeException("PayloadOutput has not been set!");
         }
 
         while (triggerBag.hasNext()) {
@@ -246,7 +245,7 @@ public class DummyTriggerHandler
             RuntimeException rte;
             try {
                 log.info("Writing Trigger...");
-                payloadDestination.writePayload(trigger);
+                payloadOutput.writePayload(trigger);
                 rte = null;
             } catch (IOException e) {
                 log.error("Failed to write triggers");

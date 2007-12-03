@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 2247 2007-11-06 16:57:04Z dglo $
+ * Version $Id: TriggerHandler.java 2351 2007-12-03 17:19:40Z dglo $
  *
  * Date: October 25 2004
  *
@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 2247 2007-11-06 16:57:04Z dglo $
+ * @version $Id: TriggerHandler.java 2351 2007-12-03 17:19:40Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -66,7 +66,7 @@ public class TriggerHandler
     /**
      * output destination
      */
-    private IPayloadDestinationCollection payloadDestination;
+    private IPayloadOutput payloadOutput;
 
     /**
      * earliest thing of interest to the analysis
@@ -241,15 +241,15 @@ public class TriggerHandler
 
     /**
      * sets payload destination
-     * @param payloadDestination destination of payloads
+     * @param payloadOutput destination of payloads
      */
-    public void setPayloadDestinationCollection(IPayloadDestinationCollection payloadDestination) {
-        this.payloadDestination = payloadDestination;
+    public void setPayloadOutput(IPayloadOutput payloadOutput) {
+        this.payloadOutput = payloadOutput;
     }
 
-    public IPayloadDestinationCollection getPayloadDestination()
+    public IPayloadOutput getPayloadOutput()
     {
-        return payloadDestination;
+        return payloadOutput;
     }
 
     /**
@@ -427,9 +427,8 @@ public class TriggerHandler
      *   if any of those overlap, they are merged
      */
     public void issueTriggers() {
-        if (null == payloadDestination) {
-            log.error("PayloadDestination has not been set!");
-            throw new RuntimeException("PayloadDestination has not been set!");
+        if (null == payloadOutput) {
+            throw new RuntimeException("PayloadOutput has not been set!");
         }
 
 
@@ -469,7 +468,7 @@ public class TriggerHandler
 
             RuntimeException rte;
             try {
-                payloadDestination.writePayload(payload);
+                payloadOutput.writePayload(payload);
                 rte = null;
             } catch (IOException e) {
                 log.error("Failed to write triggers");

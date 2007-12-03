@@ -114,7 +114,7 @@ public class GlobalTriggerHandlerTest
             new MockSourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
 
         GlobalTriggerHandler trigMgr =
-            new GlobalTriggerHandler(srcId, 1, factory);
+            new GlobalTriggerHandler(srcId, false, factory);
         assertNotNull("Monitor should not be null", trigMgr.getMonitor());
         assertEquals("Unexpected count difference",
                      0, trigMgr.getMonitor().getTriggerBagCountDifference());

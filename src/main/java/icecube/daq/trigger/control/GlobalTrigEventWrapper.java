@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
  *  and put in the payloadList.
  * This is called in GlobalTrigBag.java.
  *
- * @version $Id: GlobalTrigEventWrapper.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: GlobalTrigEventWrapper.java 2358 2007-12-03 20:54:26Z dglo $
  * @author shseo
  */
 public class GlobalTrigEventWrapper
@@ -69,7 +69,6 @@ public class GlobalTrigEventWrapper
         miTriggerUID = 0;
         miNumMergedGTevent = 0;
         mtGlobalTrigEventReadoutElements = new GlobalTrigEventReadoutElements();
-        mtGlobalTrigEventReadoutElements.setTimeGap_option(1);//No_TimeGap
         setPayloadFactory(DEFAULT_TRIGGER_FACTORY);
     }
     /**
@@ -389,9 +388,9 @@ public class GlobalTrigEventWrapper
      * Sets timeGateOption. This should be set in configuration.
      * @param iTimeGap_option
      */
-    protected void setTimeGap_option(int iTimeGap_option)
+    protected void setAllowTimeGap(boolean allowTimeGap)
     {
-        mtGlobalTrigEventReadoutElements.setTimeGap_option(iTimeGap_option);
+        mtGlobalTrigEventReadoutElements.setAllowTimeGap(allowTimeGap);
     }
 
 }

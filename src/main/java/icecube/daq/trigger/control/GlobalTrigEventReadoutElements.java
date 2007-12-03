@@ -21,7 +21,7 @@ import java.util.*;
  * Required is Input of an unorganized ReadoutRequestelements (Vector).
  * Both timeOverlap and spaceOverlap will be handled here via SimpleMerger.java and SmartMerger.java.
  *
- * @version $Id: GlobalTrigEventReadoutElements.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: GlobalTrigEventReadoutElements.java 2358 2007-12-03 20:54:26Z dglo $
  * @author shseo
  */
 public class GlobalTrigEventReadoutElements
@@ -201,9 +201,9 @@ public class GlobalTrigEventReadoutElements
        mtSmartMerger.setPayloadFactory(triggerFactory);
     }
 
-    public void setTimeGap_option(int iTimeGap_option)
+    public void setAllowTimeGap(boolean allowTimeGap)
     {
-        mtSimpleMerger.setTimeGap_option(iTimeGap_option);
+        mtSimpleMerger.setAllowTimeGap(allowTimeGap);
     }
 
 }

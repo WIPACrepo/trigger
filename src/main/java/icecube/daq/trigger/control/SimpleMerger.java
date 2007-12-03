@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * TODO: Massively clean up this code!!!
  *
- * @version $Id: SimpleMerger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: SimpleMerger.java 2358 2007-12-03 20:54:26Z dglo $
  * @author shseo
  */
 public class SimpleMerger
@@ -39,10 +39,7 @@ public class SimpleMerger
     private TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY = new TriggerRequestPayloadFactory();
     private TriggerRequestPayloadFactory triggerFactory;
 
-    private final int mi_TIMEGAP_NO = 1;
-    private final int mi_TIMEGAP_YES = 2;
-    private int DEFAULT_TIMEGAP_OPTION = mi_TIMEGAP_NO;
-    private int mi_TimeGap_option;
+    private boolean allowTimeGap;
 
     private Sorter tSorter = new Sorter();
 
@@ -57,7 +54,6 @@ public class SimpleMerger
     public SimpleMerger()
     {
         setPayloadFactory(DEFAULT_TRIGGER_FACTORY);
-        setTimeGap_option(DEFAULT_TIMEGAP_OPTION);
     }
     /**
      * This is the main method.
@@ -104,7 +100,7 @@ public class SimpleMerger
                         if(listSameIDElements.size() > 1)
                         {
                             try {
-                                listTimeManagedSameIDElements = manageTimeOverlap(listSameIDElements, mi_TimeGap_option);
+                                listTimeManagedSameIDElements = manageTimeOverlap(listSameIDElements, allowTimeGap);
                             } catch (Exception e) {
                                 log.error("Couldn't manage time overlap", e);
                             }
@@ -125,7 +121,7 @@ public class SimpleMerger
                 // thus, only Check timeOverlap, merge, and produce IReadoutRequestElement.
 
                 try {
-                    listTimeManagedSameIDElements = manageTimeOverlap(listSameReadoutElements, mi_TimeGap_option);
+                    listTimeManagedSameIDElements = manageTimeOverlap(listSameReadoutElements, allowTimeGap);
                 } catch (Exception e) {
                     log.error("Couldn't manage time overlap", e);
                 }
@@ -360,19 +356,17 @@ public class SimpleMerger
      *
      * @param listSameReadoutElementsSameID: list of ReadoutElements w/ the same ISourceID or IDOMID.
      */
-    private List manageTimeOverlap(List listSameReadoutElementsSameID, int iTimeGap_option) throws Exception {
+    private List manageTimeOverlap(List listSameReadoutElementsSameID, boolean allowTimeGap) throws Exception {
         List listTimeManagedElementsSameID = new ArrayList();
 
-        if(iTimeGap_option == mi_TIMEGAP_NO)
+        if(!allowTimeGap)
         {
             listTimeManagedElementsSameID = manageTimeOverlap_NoGap(listSameReadoutElementsSameID);
 
-        }else if(iTimeGap_option == mi_TIMEGAP_YES){
+        }else{
 
             listTimeManagedElementsSameID = manageTimeOverlap_Gap(listSameReadoutElementsSameID);
 
-        }else{
-            throw new NullPointerException("Unknown configuration detected in TimeGap_option");
         }
 
         return listTimeManagedElementsSameID;
@@ -409,8 +403,8 @@ public class SimpleMerger
     {
         this.triggerFactory = (TriggerRequestPayloadFactory) triggerFactory;
     }
-    public void setTimeGap_option(int iTimeGap_option)
+    public void setAllowTimeGap(boolean val)
     {
-        mi_TimeGap_option = iTimeGap_option;
+        allowTimeGap = val;
     }
 }

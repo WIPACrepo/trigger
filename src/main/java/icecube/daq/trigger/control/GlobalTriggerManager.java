@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java 2351 2007-12-03 17:19:40Z dglo $
+ * @version $Id: GlobalTriggerManager.java 2358 2007-12-03 20:54:26Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager
@@ -105,20 +105,20 @@ public class GlobalTriggerManager
         this(inputFactory, sourceID, DEFAULT_TIMEGAP_OPTION);
     }
 
-    public GlobalTriggerManager(SpliceableFactory inputFactory, ISourceID sourceID, int iTimeGap_option)
+    public GlobalTriggerManager(SpliceableFactory inputFactory, ISourceID sourceID, boolean allowTimeGap)
     {
-        this(inputFactory, sourceID, iTimeGap_option,
+        this(inputFactory, sourceID, allowTimeGap,
              DEFAULT_MAX_TIMEGATE_WINDOW);
     }
 
     public GlobalTriggerManager(SpliceableFactory inputFactory, ISourceID sourceID,
-                                int iTimeGap_option, int iMax_TimeGate_Window)
+                                boolean allowTimeGap, int iMax_TimeGate_Window)
     {
-        super(sourceID, iTimeGap_option, getOutputFactory(inputFactory));
+        super(sourceID, allowTimeGap, getOutputFactory(inputFactory));
         this.inputFactory = inputFactory;
 
         setMaxTimeGateWindow(iMax_TimeGate_Window);
-        setTimeGap_option(iTimeGap_option);
+        setAllowTimeGap(allowTimeGap);
 
         initialize();
     }

@@ -36,15 +36,14 @@ import java.io.IOException;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 2351 2007-12-03 17:19:40Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 2358 2007-12-03 20:54:26Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
         implements ITriggerHandler
 {
     public static final int DEFAULT_MAX_TIMEGATE_WINDOW = 0;
-    private static final int miTimeGap_Yes = 2;
-    public static final int DEFAULT_TIMEGAP_OPTION = miTimeGap_Yes;
+    public static final boolean DEFAULT_TIMEGAP_OPTION = true;
 
     private static final int PRINTOUT_FREQUENCY = 100000;
 
@@ -94,7 +93,7 @@ public class GlobalTriggerHandler
 
     //--assign Default value.
     private int miMaxTimeGateWindow = DEFAULT_MAX_TIMEGATE_WINDOW;
-    private int miTimeGap_option = DEFAULT_TIMEGAP_OPTION;
+    private boolean allowTimeGap = DEFAULT_TIMEGAP_OPTION;
 
     private int miTotalInputTriggers;
     private int miTotalNullInputTriggers;
@@ -133,17 +132,17 @@ public class GlobalTriggerHandler
              DEFAULT_TIMEGAP_OPTION, outputFactory);
     }
 
-    public GlobalTriggerHandler(ISourceID sourceID, int iTimeGap_Option)
+    public GlobalTriggerHandler(ISourceID sourceID, boolean allowTimeGap)
     {
-        this(sourceID, iTimeGap_Option, new TriggerRequestPayloadFactory());
+        this(sourceID, allowTimeGap, new TriggerRequestPayloadFactory());
     }
 
-    public GlobalTriggerHandler(ISourceID sourceID, int iTimeGap_Option, TriggerRequestPayloadFactory outputFactory) {
+    public GlobalTriggerHandler(ISourceID sourceID, boolean allowTimeGap, TriggerRequestPayloadFactory outputFactory) {
         this.sourceID = sourceID;
         this.outputFactory = outputFactory;
 
         this.init();
-        ((GlobalTriggerBag) triggerBag).setTimeGap_option(iTimeGap_Option);
+        ((GlobalTriggerBag) triggerBag).setAllowTimeGap(allowTimeGap);
     }
 
     public void addToTriggerBag(ILoadablePayload triggerPayload)
@@ -269,7 +268,7 @@ public class GlobalTriggerHandler
         //  Inside JBoss DAQ framework, those values are reset in enterRunning() stage.
         //  perhaps they need to be set in enterReady() stage, just right place to be.
        // ((GlobalTriggerBag) triggerBag).setMaxTimeGateWindow((int) getMaxTimeGateWindow());
-       // ((GlobalTriggerBag) triggerBag).setTimeGap_option(getTimeGap_option());
+       // ((GlobalTriggerBag) triggerBag).setAllowTimeGap(allowetTimeGap());
 
         triggerBag = new GlobalTriggerBag();
         if (outputFactory != null) {
@@ -282,7 +281,7 @@ public class GlobalTriggerHandler
         monitor.setTriggerBagMonitor(triggerBagMonitor);
 
         this.setMaxTimeGateWindow((int) getMaxTimeGateWindow());
-        this.setTimeGap_option(getTimeGap_option());
+        this.setAllowTimeGap(allowTimeGap());
     }
     /**
      * This is the main method.
@@ -600,20 +599,17 @@ public class GlobalTriggerHandler
      * todo: Thus this method should be called when GlobalTriggerHandler object is created
      * when GT is configured.
      *
-     * iTimeGap_option = 1 --> No_TimeGap
-     *                 = 2 --> Yes_TimeGap
-     *
-     * @param iTimeGap_option
+     * @param allowTimeGap <tt>true</tt> to allow time gaps
      */
-    public void setTimeGap_option(int iTimeGap_option)
+    public void setAllowTimeGap(boolean allowTimeGap)
     {
-        miTimeGap_option = iTimeGap_option;
-        ((GlobalTriggerBag) triggerBag).setTimeGap_option(iTimeGap_option);
+        this.allowTimeGap = allowTimeGap;
+        ((GlobalTriggerBag) triggerBag).setAllowTimeGap(allowTimeGap);
     }
 
-    public int getTimeGap_option()
+    public boolean allowTimeGap()
     {
-        return miTimeGap_option;
+        return allowTimeGap;
     }
 
     public void setPayloadOutput(IPayloadOutput payloadOutput)

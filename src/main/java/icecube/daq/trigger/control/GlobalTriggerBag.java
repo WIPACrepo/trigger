@@ -33,7 +33,7 @@ import java.util.*;
  * This class receives TriggerRequestPayloads from each active GlobalTrigAlgorithm
  * , merges if they overlap and produces globalTrigEventPayload.
  *
- * @version $Id: GlobalTriggerBag.java 2161 2007-10-19 14:56:25Z dglo $
+ * @version $Id: GlobalTriggerBag.java 2358 2007-12-03 20:54:26Z dglo $
  * @author shseo
  */
 public class GlobalTriggerBag
@@ -108,7 +108,6 @@ public class GlobalTriggerBag
         triggerUID = 0;
 
         mtGlobalTrigEventWrapper = new GlobalTrigEventWrapper();
-        mtGlobalTrigEventWrapper.setTimeGap_option(1);
 
         init();
 
@@ -409,9 +408,9 @@ public class GlobalTriggerBag
         this.monitor = monitor;
     }
 
-    public void setTimeGap_option(int iTimeGap_option)
+    public void setAllowTimeGap(boolean allowTimeGap)
     {
-        mtGlobalTrigEventWrapper.setTimeGap_option(iTimeGap_option);
+        mtGlobalTrigEventWrapper.setAllowTimeGap(allowTimeGap);
     }
 
     protected GlobalTrigEventWrapper getGlobalTrigEventWrapper()

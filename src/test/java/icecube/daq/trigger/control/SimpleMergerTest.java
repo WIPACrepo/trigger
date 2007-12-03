@@ -75,28 +75,6 @@ public class SimpleMergerTest
         appender.clear();
     }
 
-    public void testBadGapOption()
-    {
-        SimpleMerger merger = new SimpleMerger();
-        merger.setTimeGap_option(99);
-
-        ArrayList list = new ArrayList();
-        list.add(newElem(IReadoutRequestElement.READOUT_TYPE_II_GLOBAL,
-                         10000L, 11000L, 123456789L, 123));
-        list.add(newElem(IReadoutRequestElement.READOUT_TYPE_II_GLOBAL,
-                         20000L, 21000L, 234567890L, 234));
-
-        List mergedList = merger.merge(list);
-        assertEquals("Bad merged list size", 0, mergedList.size());
-
-        assertEquals("Bad number of messages",
-                     1, appender.getNumberOfMessages());
-        assertEquals("Bad log message",
-                     "Couldn't manage time overlap",
-                     appender.getMessage(0));
-        appender.clear();
-    }
-
     public void testBadType()
     {
         SimpleMerger merger = new SimpleMerger();
@@ -176,7 +154,7 @@ public class SimpleMergerTest
     public void testGapIIStringNoMerge()
     {
         SimpleMerger merger = new SimpleMerger();
-        merger.setTimeGap_option(2);
+        merger.setAllowTimeGap(true);
 
         final int srcId = 123;
 
@@ -219,7 +197,7 @@ public class SimpleMergerTest
     public void testGapIIStringMerge()
     {
         SimpleMerger merger = new SimpleMerger();
-        merger.setTimeGap_option(2);
+        merger.setAllowTimeGap(true);
 
         final int srcId = 123;
 

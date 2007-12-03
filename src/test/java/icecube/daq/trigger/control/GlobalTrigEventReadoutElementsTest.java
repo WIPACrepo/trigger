@@ -256,7 +256,7 @@ public class GlobalTrigEventReadoutElementsTest
     {
         GlobalTrigEventReadoutElements elems =
             new GlobalTrigEventReadoutElements();
-        elems.setTimeGap_option(2);
+        elems.setAllowTimeGap(true);
 
         final int baseSrcId =
             SourceIdRegistry.DOMHUB_SOURCE_ID;

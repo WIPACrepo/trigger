@@ -21,7 +21,7 @@ import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.SplicedAnalysis;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
-import icecube.daq.splicer.SplicerImpl;
+import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.SplicerListener;
 
 import java.io.IOException;
@@ -214,7 +214,7 @@ public class TriggerShell
         inputType = DAQConnector.TYPE_STRING_HIT;
 
         // Create splicer and introduce it to the trigger manager
-        Splicer splicer = new SplicerImpl(analysis);
+        Splicer splicer = new HKN1Splicer(analysis);
         analysis.setSplicer(splicer);
 
         // Create and register io engines

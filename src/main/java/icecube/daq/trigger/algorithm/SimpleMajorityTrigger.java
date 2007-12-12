@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: SimpleMajorityTrigger.java 2404 2007-12-12 19:54:24Z kael $
  *
  * Date: August 19 2005
  *
@@ -32,7 +32,7 @@ import org.apache.commons.logging.Log;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: SimpleMajorityTrigger.java 2404 2007-12-12 19:54:24Z kael $
  * @author pat
  */
 public class SimpleMajorityTrigger extends AbstractTrigger
@@ -202,25 +202,38 @@ public class SimpleMajorityTrigger extends AbstractTrigger
                 log.error("hitTimeUTC is null!!!");
             } else if (slidingTimeWindow.startTime() == null) {
                 log.error("SlidingTimeWindow startTime is null!!!");
-                for (int i=0; i<slidingTimeWindow.size(); i++) {
-                    IHitPayload h = (IHitPayload) slidingTimeWindow.hits.get(i);
-                    if (h == null) {
+                int i = 0;
+                Iterator it = slidingTimeWindow.hits.iterator();
+                
+                while ( it.hasNext() ) 
+                {
+                    i++;
+                    IHitPayload h = (IHitPayload) it.next();
+                    if (h == null)
+                    {
                         log.error("  Hit " + i + " is null");
-                    } else {
-                        if (h.getPayloadTimeUTC() == null) {
+                    } 
+                    else 
+                    {
+                        if (h.getPayloadTimeUTC() == null) 
+                        {
                             log.error("  Hit " + i + " has a null time");
-                        } else {
+                        } 
+                        else 
+                        {
                             log.error("  Hit " + i + " has time = " + h.getPayloadTimeUTC());
                         }
                     }
                 }
             }
-            if (hitTimeUTC.compareTo(slidingTimeWindow.startTime()) < 0) {
-                throw new TimeOutOfOrderException("Hit comes before start of sliding time window: Window is at "
-                                                                                 + slidingTimeWindow.startTime() + " Hit is at "
-                                                                                 + hitTimeUTC + " DOMId = "
-                                                                                 + hit.getDOMID().getDomIDAsString());
-            }
+            
+            if (hitTimeUTC.compareTo(slidingTimeWindow.startTime()) < 0) 
+                throw new TimeOutOfOrderException(
+                        "Hit comes before start of sliding time window: Window is at "
+                        + slidingTimeWindow.startTime() + " Hit is at "
+                        + hitTimeUTC + " DOMId = "
+                        + hit.getDOMID().getDomIDAsString());
+            
 
             /*
              * Hit falls within the slidingTimeWindow

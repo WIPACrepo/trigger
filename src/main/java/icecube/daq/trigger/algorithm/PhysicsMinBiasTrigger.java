@@ -134,10 +134,10 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
 	} else {
 	    // this hit comes after the end of the deadtime window, count it
 	    numberProcessed++;
+	    deadtimeWindow = hitTime.getOffsetUTCTime(deadtime);
 	    if (numberProcessed % prescale == 0) {
 		// report this as a trigger and update the deadtime window
 		formTrigger(hit, null, null);
-		deadtimeWindow = hitTime.getOffsetUTCTime(deadtime);
 	    } else {
 		// just update earliest time of interest
 		IPayload earliest = new DummyPayload(hitTime.getOffsetUTCTime(0.1));

@@ -113,6 +113,15 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
         }
         IHitPayload hit = (IHitPayload) payload;
 
+	// make sure spe bit is on for this hit
+	int type = AbstractTrigger.getHitType(hit);
+	if (type != AbstractTrigger.SPE_HIT) {
+	    if (log.isDebugEnabled()) {
+		log.debug("Hit type is " + hit.getTriggerType() + ", returning.");
+	    }
+	    return;
+	}
+
         // check hit filter
         if (!hitFilter.useHit(hit)) {
             if (log.isDebugEnabled()) {

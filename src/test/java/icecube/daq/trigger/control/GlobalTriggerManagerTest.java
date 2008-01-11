@@ -126,7 +126,7 @@ public class GlobalTriggerManagerTest
         loadAndRun(trigMgr, 10, 10);
 
         assertEquals("Bad number of payloads written",
-                     94, dest.getNumberWritten());
+                     100, dest.getNumberWritten());
 
         for (int i = 0; i < appender.getNumberOfMessages(); i++) {
             String msg = (String) appender.getMessage(i);

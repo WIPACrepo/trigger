@@ -201,7 +201,7 @@ public class AmandaTriggerEndToEndTest
         splicer.stop();
 
         assertEquals("Bad number of payloads written",
-                     numObjs - 6, dest.getNumberWritten());
+                     numObjs, dest.getNumberWritten());
 
         for (int i = 0; i < appender.getNumberOfMessages(); i++) {
             String msg = (String) appender.getMessage(i);

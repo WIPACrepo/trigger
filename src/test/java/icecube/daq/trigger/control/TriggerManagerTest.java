@@ -85,7 +85,7 @@ public class TriggerManagerTest
         loadAndRun(trigMgr);
 
         assertEquals("Bad number of payloads written",
-                     11, dest.getNumberWritten());
+                     12, dest.getNumberWritten());
 
         for (int i = 0; i < appender.getNumberOfMessages(); i++) {
             String msg = (String) appender.getMessage(i);

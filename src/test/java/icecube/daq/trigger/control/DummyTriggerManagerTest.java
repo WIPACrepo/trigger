@@ -101,7 +101,7 @@ public class DummyTriggerManagerTest
         splicer.stop();
 
         assertEquals("Bad number of payloads written",
-                     12, dest.getNumberWritten());
+                     13, dest.getNumberWritten());
 
         for (int i = 0; i < appender.getNumberOfMessages(); i++) {
             String msg = (String) appender.getMessage(i);

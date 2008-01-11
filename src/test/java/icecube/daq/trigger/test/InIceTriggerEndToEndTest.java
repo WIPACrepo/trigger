@@ -16,7 +16,6 @@ import icecube.daq.payload.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
-//import icecube.daq.splicer.StrandTail;
 
 import icecube.daq.trigger.control.TriggerManager;
 
@@ -87,7 +86,7 @@ public class InIceTriggerEndToEndTest
     extends TestCase
 {
     private static final MockAppender appender =
-        new MockAppender(org.apache.log4j.Level.ALL).setVerbose(true);
+        new MockAppender(/*org.apache.log4j.Level.ALL*/)/*.setVerbose(true)*/;
 
     private static ByteBuffer hitBuf;
     private static ByteBuffer stopMsg;
@@ -186,9 +185,8 @@ public class InIceTriggerEndToEndTest
     protected void tearDown()
         throws Exception
     {
-System.err.println("------------------------------- Not checking # of logmsgs");
-//        assertEquals("Bad number of log messages",
-//                     0, appender.getNumberOfMessages());
+        assertEquals("Bad number of log messages",
+                     0, appender.getNumberOfMessages());
 
         super.tearDown();
     }
@@ -211,8 +209,6 @@ System.err.println("------------------------------- Not checking # of logmsgs");
         trigMgr.addTrigger(trig);
 
         MockPayloadDestination dest = new MockPayloadDestination();
-System.err.println("------------------------------------------- DEST==verbose");
-dest.setVerbose(true);
         trigMgr.setPayloadOutput(dest);
 
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
@@ -265,8 +261,7 @@ dest.setVerbose(true);
         assertEquals("Bad number of payloads written",
                      numObjs / numHitsPerTrigger, dest.getNumberWritten());
 
-System.err.println("------------------------------------ Not checking logmsgs");
-//        checkLogMessages();
+        checkLogMessages();
     }
 
     private static final void waitUntilStopped(PayloadReader rdr,

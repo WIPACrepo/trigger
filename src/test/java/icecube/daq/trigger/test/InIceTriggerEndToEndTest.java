@@ -21,7 +21,6 @@ import icecube.daq.trigger.control.TriggerManager;
 
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
-import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.test.MockPayloadDestination;
 
 import java.io.IOException;
@@ -36,6 +35,8 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import junit.textui.TestRunner;
+
+import icecube.daq.io.DAQComponentIOProcess;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -221,7 +222,7 @@ public class InIceTriggerEndToEndTest
         rdr.registerComponentObserver(observer);
 
         rdr.start();
-        waitUntilStopped(rdr, splicer);
+        waitUntilStopped(rdr, splicer, "creation");
         assertTrue("PayloadReader in " + rdr.getPresentState() +
                    ", not Idle after creation", rdr.isStopped());
 
@@ -239,6 +240,7 @@ public class InIceTriggerEndToEndTest
         }
 
         rdr.startProcessing();
+        waitUntilRunning(rdr);
 
         for (int i = 0; i < numObjs; i++) {
             sendHit(tails[i % numTails], i + 1);
@@ -248,7 +250,7 @@ public class InIceTriggerEndToEndTest
             sendStopMsg(tails[i]);
         }
 
-        waitUntilStopped(rdr, splicer);
+        waitUntilStopped(rdr, splicer, "StopMsg");
 
         trigMgr.flush();
 
@@ -261,22 +263,64 @@ public class InIceTriggerEndToEndTest
         assertEquals("Bad number of payloads written",
                      numObjs / numHitsPerTrigger, dest.getNumberWritten());
 
-        checkLogMessages();
+        if (appender.getLevel().equals(org.apache.log4j.Level.ALL)) {
+            appender.clear();
+        } else {
+            checkLogMessages();
+        }
     }
 
-    private static final void waitUntilStopped(PayloadReader rdr,
-                                               Splicer splicer)
+    private static final int REPS = 100;
+    private static final int SLEEP_TIME = 100;
+
+    public static final void waitUntilRunning(DAQComponentIOProcess proc)
     {
-        for (int i = 0; i < 100 &&
-                 (!rdr.isStopped() || splicer.getState() != Splicer.STOPPED);
-             i++)
-        {
+        waitUntilRunning(proc, "");
+    }
+
+    public static final void waitUntilRunning(DAQComponentIOProcess proc,
+                                              String extra)
+    {
+        for (int i = 0; i < REPS && !proc.isRunning(); i++) {
             try {
-                Thread.sleep(100);
+                Thread.sleep(SLEEP_TIME);
             } catch (InterruptedException ie) {
                 // ignore interrupts
             }
         }
+
+        assertTrue("IOProcess in " + proc.getPresentState() +
+                   ", not Running after StartSig" + extra, proc.isRunning());
+    }
+
+    private static final void waitUntilStopped(DAQComponentIOProcess proc,
+                                               Splicer splicer,
+                                               String action)
+    {
+        waitUntilStopped(proc, splicer, action, "");
+    }
+
+    private static final void waitUntilStopped(DAQComponentIOProcess proc,
+                                               Splicer splicer,
+                                               String action,
+                                               String extra)
+    {
+        for (int i = 0; i < REPS &&
+                 (!proc.isStopped() || splicer.getState() != Splicer.STOPPED);
+             i++)
+        {
+            try {
+                Thread.sleep(SLEEP_TIME);
+            } catch (InterruptedException ie) {
+                // ignore interrupts
+            }
+        }
+
+        assertTrue("IOProcess in " + proc.getPresentState() +
+                   ", not Idle after " + action + extra, proc.isStopped());
+        assertTrue("Splicer in " + splicer.getStateString() +
+                   ", not STOPPED after " + action + extra,
+                   splicer.getState() == Splicer.STOPPED);
     }
 
     public static void main(String[] args)

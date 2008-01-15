@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 2353 2007-12-03 17:59:07Z dglo $
+ * Version $Id: TriggerHandler.java 2482 2008-01-15 22:13:37Z dglo $
  *
  * Date: October 25 2004
  *
@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 2353 2007-12-03 17:59:07Z dglo $
+ * @version $Id: TriggerHandler.java 2482 2008-01-15 22:13:37Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -441,6 +441,11 @@ public class TriggerHandler
 
         while (triggerBag.hasNext()) {
             IWriteablePayload payload = (IWriteablePayload) triggerBag.next();
+
+            if (payload == null) {
+                log.error("TriggerBag returned null next payload");
+                break;
+            }
 
             if (payload.getPayloadInterfaceType() == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
                 if (log.isDebugEnabled()) {

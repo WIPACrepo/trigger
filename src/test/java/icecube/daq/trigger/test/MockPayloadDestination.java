@@ -16,6 +16,7 @@ public class MockPayloadDestination
     private boolean verbose;
     private int numWritten;
     private IOException writeException;
+    private PayloadValidator validator;
 
     public MockPayloadDestination()
     {
@@ -67,6 +68,11 @@ public class MockPayloadDestination
         throw new Error("Unimplemented");
     }
 
+    public void setValidator(PayloadValidator validator)
+    {
+        this.validator = validator;
+    }
+
     public void setVerbose(boolean val)
     {
         verbose = val;
@@ -107,6 +113,10 @@ public class MockPayloadDestination
         }
 
         numWritten++;
+
+        if (validator != null) {
+            validator.validate(pay);
+        }
 
         if (verbose) {
             System.err.println("Wrote #" + numWritten + ": " + pay);

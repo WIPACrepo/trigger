@@ -8,6 +8,8 @@ import icecube.daq.io.NormalState;
 import icecube.daq.io.PayloadReader;
 import icecube.daq.io.SpliceablePayloadReader;
 
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
@@ -16,6 +18,8 @@ import icecube.daq.payload.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
+
+import icecube.daq.trigger.ITriggerRequestPayload;
 
 import icecube.daq.trigger.control.TriggerManager;
 
@@ -83,11 +87,71 @@ class Observer
     }
 }
 
+class InIceValidator
+    implements PayloadValidator
+{
+    private long timeStep;
+    private long timeSpan;
+
+    private long nextStart;
+    private long nextEnd;
+
+    /**
+     * Validate in-ice triggers.
+     *
+     * @param timeStep amount by which trigger times are incremented
+     */
+    InIceValidator(long timeStep, int reps)
+    {
+        this.timeStep = timeStep;
+        this.timeSpan = timeStep * (long) (reps - 1);
+
+        nextStart = timeStep;
+        nextEnd = nextStart + timeSpan;
+    }
+
+    private static long getUTC(IUTCTime time)
+    {
+        if (time == null) {
+            return -1L;
+        }
+
+        return time.getUTCTimeAsLong();
+    }
+
+    public void validate(IWriteablePayload payload)
+    {
+        if (!(payload instanceof ITriggerRequestPayload)) {
+            throw new Error("Unexpected payload " +
+                            payload.getClass().getName());
+        }
+
+        ITriggerRequestPayload tr = (ITriggerRequestPayload) payload;
+
+        long firstTime = getUTC(tr.getFirstTimeUTC());
+        long lastTime = getUTC(tr.getLastTimeUTC());
+
+        if (firstTime != nextStart) {
+            throw new Error("Expected first trigger time " + nextStart +
+                            ", not " + firstTime);
+        } else if (lastTime != nextEnd) {
+            throw new Error("Expected last trigger time " + nextEnd +
+                            ", not " + lastTime);
+        }
+
+        nextStart = lastTime + timeStep;
+        nextEnd = nextStart + timeSpan;
+    }
+}
+
 public class InIceTriggerEndToEndTest
     extends TestCase
 {
     private static final MockAppender appender =
         new MockAppender(/*org.apache.log4j.Level.ALL*/)/*.setVerbose(true)*/;
+
+    private static final MockSourceID srcId =
+        new MockSourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
 
     private static ByteBuffer hitBuf;
     private static ByteBuffer stopMsg;
@@ -124,7 +188,7 @@ public class InIceTriggerEndToEndTest
             factory.getPayloadFactory(payloadId);
     }
 
-    void sendHit(WritableByteChannel chan, int num)
+    void sendHit(WritableByteChannel chan, int num, long timeStep)
         throws IOException
     {
         final int bufLen = 38;
@@ -133,7 +197,7 @@ public class InIceTriggerEndToEndTest
             hitBuf = ByteBuffer.allocate(bufLen);
         }
 
-        long time = (long) num * 12345678L;
+        long time = (long) num * timeStep;
         int type = 1;
         int cfgId = 2;
         int srcId = SourceIdRegistry.SIMULATION_HUB_SOURCE_ID;
@@ -197,19 +261,22 @@ public class InIceTriggerEndToEndTest
     {
         final int numTails = 10;
         final int numObjs = numTails * 10;
+
+        final long timeStep = 12345678L;
         final int numHitsPerTrigger = 8;
 
         VitreousBufferCache cache = new VitreousBufferCache();
 
         MasterPayloadFactory factory = new MasterPayloadFactory(cache);
 
-        TriggerManager trigMgr = new TriggerManager();
+        TriggerManager trigMgr = new TriggerManager(srcId);
         trigMgr.setOutputFactory(getTriggerRequestFactory(factory));
 
         MockTrigger trig = new MockTrigger(numHitsPerTrigger);
         trigMgr.addTrigger(trig);
 
         MockPayloadDestination dest = new MockPayloadDestination();
+        dest.setValidator(new InIceValidator(timeStep, numHitsPerTrigger));
         trigMgr.setPayloadOutput(dest);
 
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
@@ -243,7 +310,7 @@ public class InIceTriggerEndToEndTest
         waitUntilRunning(rdr);
 
         for (int i = 0; i < numObjs; i++) {
-            sendHit(tails[i % numTails], i + 1);
+            sendHit(tails[i % numTails], i + 1, timeStep);
         }
 
         for (int i = 0; i < tails.length; i++) {

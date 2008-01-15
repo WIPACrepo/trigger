@@ -1,6 +1,8 @@
 package icecube.daq.trigger.test;
 
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.SourceIdRegistry;
 
 import icecube.daq.splicer.HKN1Splicer;
@@ -9,6 +11,7 @@ import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
 
 import icecube.daq.trigger.IReadoutRequestElement;
+import icecube.daq.trigger.ITriggerRequestPayload;
 
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
@@ -38,6 +41,56 @@ import org.apache.commons.logging.LogFactory;
 
 import org.apache.log4j.BasicConfigurator;
 
+class AmandaValidator
+    implements PayloadValidator
+{
+    private long timeInc;
+    private long nextStart;
+
+    /**
+     * Validate Amanda triggers.
+     *
+     * @param timeInc amount by which trigger times are incremented
+     */
+    AmandaValidator(long timeInc)
+    {
+        this.timeInc = timeInc;
+        nextStart = timeInc * 2L;
+    }
+
+    private static long getUTC(IUTCTime time)
+    {
+        if (time == null) {
+            return -1L;
+        }
+
+        return time.getUTCTimeAsLong();
+    }
+
+    public void validate(IWriteablePayload payload)
+    {
+        if (!(payload instanceof ITriggerRequestPayload)) {
+            throw new Error("Unexpected payload " +
+                            payload.getClass().getName());
+        }
+
+        ITriggerRequestPayload tr = (ITriggerRequestPayload) payload;
+
+        long firstTime = getUTC(tr.getFirstTimeUTC());
+        long lastTime = getUTC(tr.getLastTimeUTC());
+
+        if (firstTime != nextStart) {
+            throw new Error("Expected first trigger time " + nextStart +
+                            ", not " + firstTime);
+        } else if (lastTime != nextStart) {
+            throw new Error("Expected last trigger time " + nextStart +
+                            ", not " + lastTime);
+        }
+
+        nextStart = firstTime + timeInc;
+    }
+}
+
 public class AmandaTriggerEndToEndTest
     extends TestCase
 {
@@ -50,6 +103,23 @@ public class AmandaTriggerEndToEndTest
     public AmandaTriggerEndToEndTest(String name)
     {
         super(name);
+    }
+
+    private void checkLogMessages()
+    {
+        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
+            String msg = (String) appender.getMessage(i);
+
+            if (!(msg.startsWith("Clearing ") &&
+                  msg.endsWith(" rope entries")) &&
+                !msg.startsWith("Resetting counter ") &&
+                !msg.startsWith("Resetting decrement ") &&
+                !msg.startsWith("No match for timegate "))
+            {
+                fail("Bad log message#" + i + ": " + appender.getMessage(i));
+            }
+        }
+        appender.clear();
     }
 
     private AmandaTrigger makeAmandaTrigger(int typeBit)
@@ -151,25 +221,27 @@ public class AmandaTriggerEndToEndTest
     public void testEndToEnd()
         throws SplicerException
     {
+        final int numTails = 1;
+        final int numObjs = numTails * 10;
+
+        final long multiplier = 10000L;
+
         TriggerManager trigMgr = new TriggerManager(srcId);
+        trigMgr.setOutputFactory(new TriggerRequestPayloadFactory());
 
         MockPayloadDestination dest = new MockPayloadDestination();
+        dest.setValidator(new AmandaValidator(multiplier));
         trigMgr.setPayloadOutput(dest);
 
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
         trigMgr.setSplicer(splicer);
-
-        trigMgr.setOutputFactory(new TriggerRequestPayloadFactory());
-
-        final int numTails = 10;
-        final int numObjs = numTails * 10;
 
         trigMgr.addTrigger(makeAmandaTrigger(AmandaTrigger.M18));
         trigMgr.addTrigger(makeAmandaTrigger(AmandaTrigger.M24));
         trigMgr.addTrigger(makeAmandaTrigger(AmandaTrigger.MULT_FRAG_20));
         trigMgr.addTrigger(makeAmandaTrigger(AmandaTrigger.VOLUME));
         trigMgr.addTrigger(makeAmandaTrigger(AmandaTrigger.STRING));
-        trigMgr.addTrigger(makeAmandaTrigger(AmandaTrigger.RANDOM));
+        //trigMgr.addTrigger(makeAmandaTrigger(AmandaTrigger.RANDOM));
 
         StrandTail[] tails = new StrandTail[numTails];
         for (int i = 0; i < tails.length; i++) {
@@ -178,17 +250,26 @@ public class AmandaTriggerEndToEndTest
 
         splicer.start();
 
+        int mask = 0x0;
         for (int i = 0; i < numObjs; i++) {
-            long first = (long) (i + 1) * 10000L;
-            long last = ((long) (i + 2) * 10000L) - 1L;
-            MockTriggerRequest tr = new MockTriggerRequest(first, last);
+            long first = (long) (i + 1) * multiplier;
+            long last = ((long) (i + 2) * multiplier) - 1L;
+            MockTriggerRequest tr =
+                new MockTriggerRequest(first, last, -1, mask);
             tr.setSourceID(SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID);
             tails[ i % numTails].push(tr);
+
+            mask <<= 1;
+            if (mask == 0x0 || mask > 0x10) {
+                mask = 0x1;
+            }
         }
 
         for (int i = 0; i < tails.length; i++) {
             tails[i].push(StrandTail.LAST_POSSIBLE_SPLICEABLE);
         }
+
+        trigMgr.flush();
 
         for (int i = 0; i < 100 && splicer.getState() != Splicer.STOPPED; i++) {
             try {
@@ -201,21 +282,13 @@ public class AmandaTriggerEndToEndTest
         splicer.stop();
 
         assertEquals("Bad number of payloads written",
-                     numObjs, dest.getNumberWritten());
+                     numObjs - 1, dest.getNumberWritten());
 
-        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
-            String msg = (String) appender.getMessage(i);
-
-            if (!(msg.startsWith("Clearing ") &&
-                  msg.endsWith(" rope entries")) &&
-                !msg.startsWith("Resetting counter ") &&
-                !msg.startsWith("Resetting decrement ") &&
-                !msg.startsWith("No match for timegate "))
-            {
-                fail("Bad log message#" + i + ": " + appender.getMessage(i));
-            }
+        if (appender.getLevel().equals(org.apache.log4j.Level.ALL)) {
+            appender.clear();
+        } else {
+            checkLogMessages();
         }
-        appender.clear();
     }
 
     public static void main(String[] args)

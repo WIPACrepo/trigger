@@ -1,8 +1,6 @@
 package icecube.daq.trigger.test;
 
 import icecube.daq.payload.ISourceID;
-import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.SourceIdRegistry;
 
 import icecube.daq.splicer.HKN1Splicer;
@@ -11,7 +9,6 @@ import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
 
 import icecube.daq.trigger.IReadoutRequestElement;
-import icecube.daq.trigger.ITriggerRequestPayload;
 
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
@@ -40,56 +37,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.log4j.BasicConfigurator;
-
-class AmandaValidator
-    implements PayloadValidator
-{
-    private long timeInc;
-    private long nextStart;
-
-    /**
-     * Validate Amanda triggers.
-     *
-     * @param timeInc amount by which trigger times are incremented
-     */
-    AmandaValidator(long timeInc)
-    {
-        this.timeInc = timeInc;
-        nextStart = timeInc * 2L;
-    }
-
-    private static long getUTC(IUTCTime time)
-    {
-        if (time == null) {
-            return -1L;
-        }
-
-        return time.getUTCTimeAsLong();
-    }
-
-    public void validate(IWriteablePayload payload)
-    {
-        if (!(payload instanceof ITriggerRequestPayload)) {
-            throw new Error("Unexpected payload " +
-                            payload.getClass().getName());
-        }
-
-        ITriggerRequestPayload tr = (ITriggerRequestPayload) payload;
-
-        long firstTime = getUTC(tr.getFirstTimeUTC());
-        long lastTime = getUTC(tr.getLastTimeUTC());
-
-        if (firstTime != nextStart) {
-            throw new Error("Expected first trigger time " + nextStart +
-                            ", not " + firstTime);
-        } else if (lastTime != nextStart) {
-            throw new Error("Expected last trigger time " + nextStart +
-                            ", not " + lastTime);
-        }
-
-        nextStart = firstTime + timeInc;
-    }
-}
 
 public class AmandaTriggerEndToEndTest
     extends TestCase

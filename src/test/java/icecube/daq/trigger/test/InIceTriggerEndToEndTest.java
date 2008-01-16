@@ -3,8 +3,6 @@ package icecube.daq.trigger.test;
 import icecube.daq.io.PayloadReader;
 import icecube.daq.io.SpliceablePayloadReader;
 
-import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
@@ -13,8 +11,6 @@ import icecube.daq.payload.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
-
-import icecube.daq.trigger.ITriggerRequestPayload;
 
 import icecube.daq.trigger.control.TriggerManager;
 
@@ -41,63 +37,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.log4j.BasicConfigurator;
-
-class InIceValidator
-    implements PayloadValidator
-{
-    private long timeStep;
-    private long timeSpan;
-
-    private long nextStart;
-    private long nextEnd;
-
-    /**
-     * Validate in-ice triggers.
-     *
-     * @param timeStep amount by which trigger times are incremented
-     */
-    InIceValidator(long timeStep, int reps)
-    {
-        this.timeStep = timeStep;
-        this.timeSpan = timeStep * (long) (reps - 1);
-
-        nextStart = timeStep;
-        nextEnd = nextStart + timeSpan;
-    }
-
-    private static long getUTC(IUTCTime time)
-    {
-        if (time == null) {
-            return -1L;
-        }
-
-        return time.getUTCTimeAsLong();
-    }
-
-    public void validate(IWriteablePayload payload)
-    {
-        if (!(payload instanceof ITriggerRequestPayload)) {
-            throw new Error("Unexpected payload " +
-                            payload.getClass().getName());
-        }
-
-        ITriggerRequestPayload tr = (ITriggerRequestPayload) payload;
-
-        long firstTime = getUTC(tr.getFirstTimeUTC());
-        long lastTime = getUTC(tr.getLastTimeUTC());
-
-        if (firstTime != nextStart) {
-            throw new Error("Expected first trigger time " + nextStart +
-                            ", not " + firstTime);
-        } else if (lastTime != nextEnd) {
-            throw new Error("Expected last trigger time " + nextEnd +
-                            ", not " + lastTime);
-        }
-
-        nextStart = lastTime + timeStep;
-        nextEnd = nextStart + timeSpan;
-    }
-}
 
 public class InIceTriggerEndToEndTest
     extends TestCase

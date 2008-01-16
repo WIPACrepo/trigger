@@ -1,10 +1,5 @@
 package icecube.daq.trigger.test;
 
-import icecube.daq.common.DAQCmdInterface;
-
-import icecube.daq.io.DAQComponentObserver;
-import icecube.daq.io.ErrorState;
-import icecube.daq.io.NormalState;
 import icecube.daq.io.PayloadReader;
 import icecube.daq.io.SpliceablePayloadReader;
 
@@ -46,46 +41,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.log4j.BasicConfigurator;
-
-class Observer
-    implements DAQComponentObserver
-{
-    private boolean sinkStopNotificationCalled;
-    private boolean sinkErrorNotificationCalled;
-
-    boolean gotError()
-    {
-        return sinkErrorNotificationCalled;
-    }
-
-    boolean gotStop()
-    {
-        return sinkStopNotificationCalled;
-    }
-
-    public synchronized void update(Object object, String notificationID)
-    {
-        if (object instanceof NormalState){
-            NormalState state = (NormalState)object;
-            if (state == NormalState.STOPPED){
-                if (notificationID.equals(DAQCmdInterface.SINK)){
-                    sinkStopNotificationCalled = true;
-                } else {
-                    throw new Error("Unexpected notification update");
-                }
-            }
-        } else if (object instanceof ErrorState){
-            ErrorState state = (ErrorState)object;
-            if (state == ErrorState.UNKNOWN_ERROR){
-                if (notificationID.equals(DAQCmdInterface.SINK)){
-                    sinkErrorNotificationCalled = true;
-                } else {
-                    throw new Error("Unexpected notification update");
-                }
-            }
-        }
-    }
-}
 
 class InIceValidator
     implements PayloadValidator
@@ -282,7 +237,7 @@ public class InIceTriggerEndToEndTest
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
         trigMgr.setSplicer(splicer);
 
-        Observer observer = new Observer();
+        ComponentObserver observer = new ComponentObserver();
 
         SpliceablePayloadReader rdr =
             new SpliceablePayloadReader("hitReader", splicer, factory);

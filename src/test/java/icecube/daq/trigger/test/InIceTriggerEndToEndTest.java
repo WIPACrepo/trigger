@@ -14,6 +14,8 @@ import icecube.daq.splicer.SplicerException;
 
 import icecube.daq.trigger.control.TriggerManager;
 
+import icecube.daq.trigger.exceptions.TriggerException;
+
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
 import icecube.daq.trigger.test.MockPayloadDestination;
@@ -47,9 +49,6 @@ public class InIceTriggerEndToEndTest
     private static final MockSourceID srcId =
         new MockSourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
 
-    private static ByteBuffer hitBuf;
-    private static ByteBuffer stopMsg;
-
     public InIceTriggerEndToEndTest(String name)
     {
         super(name);
@@ -82,49 +81,6 @@ public class InIceTriggerEndToEndTest
             factory.getPayloadFactory(payloadId);
     }
 
-    void sendHit(WritableByteChannel chan, int num, long timeStep)
-        throws IOException
-    {
-        final int bufLen = 38;
-
-        if (hitBuf == null) {
-            hitBuf = ByteBuffer.allocate(bufLen);
-        }
-
-        long time = (long) num * timeStep;
-        int type = 1;
-        int cfgId = 2;
-        int srcId = SourceIdRegistry.SIMULATION_HUB_SOURCE_ID;
-        long domId = (long) num * 987654321L;
-        short mode = 0;
-
-        hitBuf.putInt(0, bufLen);
-        hitBuf.putInt(4, PayloadRegistry.PAYLOAD_ID_SIMPLE_HIT);
-        hitBuf.putLong(8, time);
-
-        hitBuf.putInt(16, type);
-        hitBuf.putInt(20, cfgId);
-        hitBuf.putInt(24, srcId);
-        hitBuf.putLong(28, domId);
-        hitBuf.putShort(36, mode);
-
-        hitBuf.position(0);
-        chan.write(hitBuf);
-    }
-
-    private static final void sendStopMsg(WritableByteChannel chan)
-        throws IOException
-    {
-        if (stopMsg == null) {
-            stopMsg = ByteBuffer.allocate(4);
-            stopMsg.putInt(0, 4);
-            stopMsg.limit(4);
-        }
-
-        stopMsg.position(0);
-        chan.write(stopMsg);
-    }
-
     protected void setUp()
         throws Exception
     {
@@ -151,14 +107,15 @@ public class InIceTriggerEndToEndTest
     }
 
     public void testEndToEnd()
-        throws IOException, SplicerException
+        throws IOException, TriggerException, SplicerException
     {
         final int numTails = 10;
         final int numObjs = numTails * 10;
 
-        final long timeStep = 12345678L;
-        final int numHitsPerTrigger = 8;
+        // load all triggers
+        TriggerCollection trigCfg = new SPSIcecubeAmanda008Triggers();
 
+        // set up in-ice trigger
         VitreousBufferCache cache = new VitreousBufferCache();
 
         MasterPayloadFactory factory = new MasterPayloadFactory(cache);
@@ -166,11 +123,10 @@ public class InIceTriggerEndToEndTest
         TriggerManager trigMgr = new TriggerManager(srcId);
         trigMgr.setOutputFactory(getTriggerRequestFactory(factory));
 
-        MockTrigger trig = new MockTrigger(numHitsPerTrigger);
-        trigMgr.addTrigger(trig);
+        trigCfg.addToHandler(trigMgr);
 
         MockPayloadDestination dest = new MockPayloadDestination();
-        dest.setValidator(new InIceValidator(timeStep, numHitsPerTrigger));
+        dest.setValidator(trigCfg.getInIceValidator());
         trigMgr.setPayloadOutput(dest);
 
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
@@ -203,13 +159,9 @@ public class InIceTriggerEndToEndTest
         rdr.startProcessing();
         waitUntilRunning(rdr);
 
-        for (int i = 0; i < numObjs; i++) {
-            sendHit(tails[i % numTails], i + 1, timeStep);
-        }
-
-        for (int i = 0; i < tails.length; i++) {
-            sendStopMsg(tails[i]);
-        }
+        // load data into input channels
+        trigCfg.sendInIceData(tails, numObjs);
+        trigCfg.sendInIceStops(tails);
 
         waitUntilStopped(rdr, splicer, "StopMsg");
 
@@ -222,7 +174,8 @@ public class InIceTriggerEndToEndTest
         }
 
         assertEquals("Bad number of payloads written",
-                     numObjs / numHitsPerTrigger, dest.getNumberWritten());
+                     trigCfg.getExpectedNumberOfInIcePayloads(numObjs),
+                     dest.getNumberWritten());
 
         if (appender.getLevel().equals(org.apache.log4j.Level.ALL)) {
             appender.clear();

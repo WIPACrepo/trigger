@@ -10,20 +10,9 @@ import icecube.daq.splicer.StrandTail;
 
 import icecube.daq.trigger.IReadoutRequestElement;
 
+import icecube.daq.trigger.exceptions.TriggerException;
+
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-
-import icecube.daq.trigger.algorithm.AmandaCalibLaserTrigger;
-import icecube.daq.trigger.algorithm.AmandaCalibT0Trigger;
-import icecube.daq.trigger.algorithm.AmandaM18Trigger;
-import icecube.daq.trigger.algorithm.AmandaM24Trigger;
-import icecube.daq.trigger.algorithm.AmandaMFrag20Trigger;
-import icecube.daq.trigger.algorithm.AmandaRandomTrigger;
-import icecube.daq.trigger.algorithm.AmandaSpaseTrigger;
-import icecube.daq.trigger.algorithm.AmandaStringTrigger;
-import icecube.daq.trigger.algorithm.AmandaTrigger;
-import icecube.daq.trigger.algorithm.AmandaVolumeTrigger;
-
-import icecube.daq.trigger.config.TriggerReadout;
 
 import icecube.daq.trigger.control.TriggerManager;
 
@@ -69,77 +58,6 @@ public class AmandaTriggerEndToEndTest
         appender.clear();
     }
 
-    private AmandaTrigger makeAmandaTrigger(int typeBit)
-    {
-        AmandaTrigger trig;
-        int type;
-        String name;
-
-        switch (typeBit) {
-        case AmandaTrigger.MULT_FRAG_20:
-            trig = new AmandaMFrag20Trigger();
-            name = "MFrag20";
-            type = 7;
-            break;
-        case AmandaTrigger.VOLUME:
-            trig = new AmandaVolumeTrigger();
-            name = "Volume";
-            type = 8;
-            break;
-        case AmandaTrigger.M18:
-            trig = new AmandaM18Trigger();
-            name = "M18";
-            type = 9;
-            break;
-        case AmandaTrigger.M24:
-            trig = new AmandaM24Trigger();
-            type = 10;
-            name = "M24";
-            break;
-        case AmandaTrigger.STRING:
-            trig = new AmandaStringTrigger();
-            type = 11;
-            name = "String";
-            break;
-        case AmandaTrigger.RANDOM:
-            trig = new AmandaRandomTrigger();
-            type = 12;
-            name = "Random";
-            break;
-        case AmandaTrigger.SPASE:
-            trig = new AmandaSpaseTrigger();
-            type = 13;
-            name = "Spase";
-            break;
-        case AmandaTrigger.CALIB_T0:
-            trig = new AmandaCalibT0Trigger();
-            type = 14;
-            name = "CalibT0";
-            break;
-        case AmandaTrigger.CALIB_LASER:
-            trig = new AmandaCalibLaserTrigger();
-            type = 15;
-            name = "CalibLaser"; 
-           break;
-        default:
-            throw new Error("Unknown trigger type #" + typeBit);
-        }
-
-        trig.setTriggerType(type);
-        trig.setTriggerName(name);
-
-        final int cfgId = 104;
-
-        trig.setSourceId(srcId);
-        trig.setTriggerConfigId(cfgId);
-
-        int rdoutType = IReadoutRequestElement.READOUT_TYPE_GLOBAL;
-
-        trig.addReadout(new TriggerReadout(0, -6000, 25000, 25000));
-
-        return trig;
-    }
-
     protected void setUp()
         throws Exception
     {
@@ -166,29 +84,28 @@ public class AmandaTriggerEndToEndTest
     }
 
     public void testEndToEnd()
-        throws SplicerException
+        throws SplicerException, TriggerException
     {
         final int numTails = 1;
         final int numObjs = numTails * 10;
 
         final long multiplier = 10000L;
 
+        // load all triggers
+        TriggerCollection trigCfg = new SPSIcecubeAmanda008Triggers();
+
+        // set up amanda trigger
         TriggerManager trigMgr = new TriggerManager(srcId);
         trigMgr.setOutputFactory(new TriggerRequestPayloadFactory());
 
+        trigCfg.addToHandler(trigMgr);
+
         MockPayloadDestination dest = new MockPayloadDestination();
-        dest.setValidator(new AmandaValidator(multiplier));
+        dest.setValidator(trigCfg.getAmandaValidator());
         trigMgr.setPayloadOutput(dest);
 
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
         trigMgr.setSplicer(splicer);
-
-        trigMgr.addTrigger(makeAmandaTrigger(AmandaTrigger.M18));
-        trigMgr.addTrigger(makeAmandaTrigger(AmandaTrigger.M24));
-        trigMgr.addTrigger(makeAmandaTrigger(AmandaTrigger.MULT_FRAG_20));
-        trigMgr.addTrigger(makeAmandaTrigger(AmandaTrigger.VOLUME));
-        trigMgr.addTrigger(makeAmandaTrigger(AmandaTrigger.STRING));
-        //trigMgr.addTrigger(makeAmandaTrigger(AmandaTrigger.RANDOM));
 
         StrandTail[] tails = new StrandTail[numTails];
         for (int i = 0; i < tails.length; i++) {
@@ -197,24 +114,9 @@ public class AmandaTriggerEndToEndTest
 
         splicer.start();
 
-        int mask = 0x0;
-        for (int i = 0; i < numObjs; i++) {
-            long first = (long) (i + 1) * multiplier;
-            long last = ((long) (i + 2) * multiplier) - 1L;
-            MockTriggerRequest tr =
-                new MockTriggerRequest(first, last, -1, mask);
-            tr.setSourceID(SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID);
-            tails[ i % numTails].push(tr);
-
-            mask <<= 1;
-            if (mask == 0x0 || mask > 0x10) {
-                mask = 0x1;
-            }
-        }
-
-        for (int i = 0; i < tails.length; i++) {
-            tails[i].push(StrandTail.LAST_POSSIBLE_SPLICEABLE);
-        }
+        // load data into input channels
+        trigCfg.sendAmandaData(tails, numObjs);
+        trigCfg.sendAmandaStops(tails);
 
         trigMgr.flush();
 
@@ -229,7 +131,8 @@ public class AmandaTriggerEndToEndTest
         splicer.stop();
 
         assertEquals("Bad number of payloads written",
-                     numObjs - 1, dest.getNumberWritten());
+                     trigCfg.getExpectedNumberOfAmandaPayloads(numObjs),
+                     dest.getNumberWritten());
 
         if (appender.getLevel().equals(org.apache.log4j.Level.ALL)) {
             appender.clear();

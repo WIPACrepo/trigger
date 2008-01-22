@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 2404 2007-12-12 19:54:24Z kael $
+ * Version $Id: SimpleMajorityTrigger.java 2512 2008-01-22 15:28:29Z dglo $
  *
  * Date: August 19 2005
  *
@@ -32,7 +32,7 @@ import org.apache.commons.logging.Log;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 2404 2007-12-12 19:54:24Z kael $
+ * @version $Id: SimpleMajorityTrigger.java 2512 2008-01-22 15:28:29Z dglo $
  * @author pat
  */
 public class SimpleMajorityTrigger extends AbstractTrigger
@@ -415,15 +415,14 @@ public class SimpleMajorityTrigger extends AbstractTrigger
      * and no further calls to runTrigger.
      */
     public void flush() {
+        boolean formLast = true;
+
         // see if we're above threshold, if so form a trigger
         if (onTrigger) {
             if (log.isDebugEnabled()) {
                 log.debug("Last Trigger is on, numberOfHitsInTriggerWindow = "
                           + numberOfHitsInTriggerWindow);
             }
-
-            // form last trigger
-            formTrigger(hitsWithinTriggerWindow, null, null);
         }
         //see if TimeWindow has enough hits to form a trigger before an out of bounds hit
         else if(slidingTimeWindow.aboveThreshold()) {
@@ -433,14 +432,21 @@ public class SimpleMajorityTrigger extends AbstractTrigger
 
             if (log.isDebugEnabled()) {
                 log.debug(" Last Trigger is now on, numberOfHitsInTriggerWindow = "
-                + numberOfHitsInTriggerWindow + " triggerWindowStart = "
-                + getTriggerWindowStart() + " triggerWindowStop = "
-                + getTriggerWindowStop());
+                + numberOfHitsInTriggerWindow
+                + (numberOfHitsInTriggerWindow == 0 ? "" :
+                   " triggerWindowStart = "
+                   + getTriggerWindowStart() + " triggerWindowStop = "
+                   + getTriggerWindowStop()));
             }
+        }
+        else {
+            formLast = false;
+        }
 
-            // form last trigger
+        // form last trigger
+        if (hitsWithinTriggerWindow.size() > 0 && formLast) {
             formTrigger(hitsWithinTriggerWindow, null, null);
-        }    
+        }
 
         // todo: Pat is this right?
         reset();

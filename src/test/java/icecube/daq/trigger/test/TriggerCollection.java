@@ -2,6 +2,7 @@ package icecube.daq.trigger.test;
 
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.PayloadRegistry;
+import icecube.daq.payload.RecordTypeRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 
 import icecube.daq.splicer.SplicerException;
@@ -32,6 +33,7 @@ public abstract class TriggerCollection
 
     private static ByteBuffer hitBuf;
     private static ByteBuffer stopMsg;
+    private static ByteBuffer trigBuf;
 
     private ArrayList<AbstractTrigger> list = new ArrayList<AbstractTrigger>();
 
@@ -99,6 +101,21 @@ public abstract class TriggerCollection
         return list;
     }
 
+    static int getAmandaConfigId(int trigType)
+    {
+        trigType -= 7;
+        if (trigType < 0 || trigType > 8) {
+            return -1;
+        }
+
+        int bit = 1;
+        for (int i = 1; i <= trigType; i++) {
+            bit <<= 1;
+        }
+
+        return bit;
+    }
+
     public abstract int getExpectedNumberOfAmandaPayloads(int numObjs);
 
     public abstract int getExpectedNumberOfInIcePayloads(int numObjs);
@@ -106,6 +123,15 @@ public abstract class TriggerCollection
     public abstract BaseValidator getAmandaValidator();
 
     public abstract BaseValidator getInIceValidator();
+
+    private static int trigUID = 1;
+
+    public abstract void sendAmandaData(WritableByteChannel[] tails,
+                                        int numObjs)
+        throws IOException;
+
+    public abstract void sendAmandaStops(WritableByteChannel[] tails)
+        throws IOException;
 
     static void sendHit(WritableByteChannel chan, long time, int tailIndex,
                         long domId)
@@ -118,7 +144,8 @@ public abstract class TriggerCollection
         }
 
         synchronized (hitBuf) {
-            final int type = 0x2;
+            final int recType =
+                RecordTypeRegistry.RECORD_TYPE_DOMHIT_ENGINEERING_FORMAT;
             final int cfgId = 2;
             final int srcId = SourceIdRegistry.SIMULATION_HUB_SOURCE_ID;
             final short mode = 0;
@@ -127,7 +154,7 @@ public abstract class TriggerCollection
             hitBuf.putInt(4, PayloadRegistry.PAYLOAD_ID_SIMPLE_HIT);
             hitBuf.putLong(8, time);
 
-            hitBuf.putInt(16, type);
+            hitBuf.putInt(16, recType);
             hitBuf.putInt(20, cfgId);
             hitBuf.putInt(24, srcId + tailIndex);
             hitBuf.putLong(28, domId);
@@ -137,12 +164,6 @@ public abstract class TriggerCollection
             chan.write(hitBuf);
         }
     }
-
-    public abstract void sendAmandaData(StrandTail[] tails, int numObjs)
-        throws SplicerException;
-
-    public abstract void sendAmandaStops(StrandTail[] tails)
-        throws SplicerException;
 
     public abstract void sendInIceData(WritableByteChannel[] tails,
                                        int numObjs)
@@ -163,6 +184,52 @@ public abstract class TriggerCollection
         synchronized (stopMsg) {
             stopMsg.position(0);
             chan.write(stopMsg);
+        }
+    }
+
+    static void sendTrigger(WritableByteChannel chan, long firstTime,
+                            long lastTime, int trigType, int srcId)
+        throws IOException
+    {
+        final int bufLen = 72;
+
+        if (trigBuf == null) {
+            trigBuf = ByteBuffer.allocate(bufLen);
+        }
+
+        synchronized (trigBuf) {
+            final int recType =
+                RecordTypeRegistry.RECORD_TYPE_TRIGGER_REQUEST;
+            final int uid = trigUID++;
+
+            int amCfgId = getAmandaConfigId(trigType);
+            if (amCfgId < 0) {
+                amCfgId = 0;
+            }
+
+            trigBuf.putInt(0, bufLen);
+            trigBuf.putInt(4, PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST);
+            trigBuf.putLong(8, firstTime);
+
+            trigBuf.putShort(16, (short) recType);
+            trigBuf.putInt(18, uid);
+            trigBuf.putInt(22, trigType);
+            trigBuf.putInt(26, amCfgId);
+            trigBuf.putInt(30, srcId);
+            trigBuf.putLong(34, firstTime);
+            trigBuf.putLong(42, lastTime);
+
+            trigBuf.putShort(50, (short) 0xff);
+            trigBuf.putInt(52, uid);
+            trigBuf.putInt(56, srcId);
+            trigBuf.putInt(60, 0);
+
+            trigBuf.putInt(64, 8);
+            trigBuf.putShort(68, (short) 1);
+            trigBuf.putShort(70, (short) 0);
+
+            trigBuf.position(0);
+            chan.write(trigBuf);
         }
     }
 }

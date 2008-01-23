@@ -115,7 +115,12 @@ public class MockPayloadDestination
         numWritten++;
 
         if (validator != null) {
-            validator.validate(pay);
+            try {
+                validator.validate(pay);
+            } catch (Error err) {
+                throw new Error("Payload #" + numWritten + ": " +
+                                err.getMessage() + "\n" + pay, err);
+            }
         }
 
         if (verbose) {

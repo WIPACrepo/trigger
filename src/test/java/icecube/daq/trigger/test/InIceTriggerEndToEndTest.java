@@ -1,6 +1,6 @@
 package icecube.daq.trigger.test;
 
-import icecube.daq.io.PayloadReader;
+import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.io.SpliceablePayloadReader;
 
 import icecube.daq.payload.MasterPayloadFactory;
@@ -32,8 +32,6 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import junit.textui.TestRunner;
-
-import icecube.daq.io.DAQComponentIOProcess;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -107,7 +105,7 @@ public class InIceTriggerEndToEndTest
     }
 
     public void testEndToEnd()
-        throws IOException, TriggerException, SplicerException
+        throws IOException, SplicerException, TriggerException
     {
         final int numTails = 10;
         final int numObjs = numTails * 10;
@@ -166,12 +164,6 @@ public class InIceTriggerEndToEndTest
         waitUntilStopped(rdr, splicer, "StopMsg");
 
         trigMgr.flush();
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ie) {
-            // ignore interrupts
-        }
 
         assertEquals("Bad number of payloads written",
                      trigCfg.getExpectedNumberOfInIcePayloads(numObjs),

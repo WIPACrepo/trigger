@@ -24,6 +24,7 @@ import java.nio.channels.WritableByteChannel;
 public class SPSIcecubeAmanda008Triggers
     extends TriggerCollection
 {
+    private boolean checkSequentialTimes;
     private int numHitsPerTrigger;
     private long timeBase;
     private long timeStep;
@@ -31,6 +32,14 @@ public class SPSIcecubeAmanda008Triggers
     public SPSIcecubeAmanda008Triggers()
         throws TriggerException
     {
+        this(true);
+    }
+
+    public SPSIcecubeAmanda008Triggers(boolean checkSequentialTimes)
+        throws TriggerException
+    {
+        this.checkSequentialTimes = checkSequentialTimes;
+
         AbstractTrigger trig;
 
         trig = createTrigger(3, -1, GLOBAL_TRIGGER, "ThroughputTrigger");
@@ -113,30 +122,30 @@ public class SPSIcecubeAmanda008Triggers
         return new InIceValidator();
     }
 
-    public void sendAmandaData(StrandTail[] tails, int numObjs)
-        throws SplicerException
+    public void sendAmandaData(WritableByteChannel[] tails, int numObjs)
+        throws IOException
     {
-        int mask = 0x0;
+        int trigType = 0;
         for (int i = 0; i < numObjs; i++) {
             long first = timeBase + (long) (i + 1) * timeStep;
             long last = timeBase + ((long) (i + 2) * timeStep) - 1L;
-            MockTriggerRequest tr =
-                new MockTriggerRequest(first, last, -1, mask);
-            tr.setSourceID(AMANDA_TRIGGER);
-            tails[ i % tails.length].push(tr);
 
-            mask <<= 1;
-            if (mask == 0x0 || mask > 0x10) {
-                mask = 0x1;
+            final int tailIndex = i % tails.length;
+            sendTrigger(tails[tailIndex], first, last, trigType,
+                        AMANDA_TRIGGER);
+
+            trigType++;
+            if (trigType < 7 || trigType > 11) {
+                trigType = 7;
             }
         }
     }
 
-    public void sendAmandaStops(StrandTail[] tails)
-        throws SplicerException
+    public void sendAmandaStops(WritableByteChannel[] tails)
+        throws IOException
     {
         for (int i = 0; i < tails.length; i++) {
-            tails[i].push(StrandTail.LAST_POSSIBLE_SPLICEABLE);
+            sendStopMsg(tails[i]);
         }
     }
 
@@ -198,12 +207,14 @@ public class SPSIcecubeAmanda008Triggers
             long firstTime = getUTC(tr.getFirstTimeUTC());
             long lastTime = getUTC(tr.getLastTimeUTC());
 
-            if (firstTime != nextStart) {
-                throw new Error("Expected first trigger time " + nextStart +
-                                ", not " + firstTime);
-            } else if (lastTime != nextStart) {
-                throw new Error("Expected last trigger time " + nextStart +
-                                ", not " + lastTime);
+            if (checkSequentialTimes) {
+                if (firstTime != nextStart) {
+                    throw new Error("Expected first trigger time " + nextStart +
+                                    ", not " + firstTime);
+                } else if (lastTime != nextStart) {
+                    throw new Error("Expected last trigger time " + nextStart +
+                                    ", not " + lastTime);
+                }
             }
 /*
 System.err.println("First: EXP "+nextStart+" ACT "+firstTime+" DIFF "+(firstTime-nextStart));
@@ -251,12 +262,14 @@ System.err.println(" Last: EXP "+nextEnd+" ACT "+lastTime+" DIFF "+(lastTime-nex
             long firstTime = getUTC(tr.getFirstTimeUTC());
             long lastTime = getUTC(tr.getLastTimeUTC());
 
-            if (firstTime != nextStart) {
-                throw new Error("Expected first trigger time " + nextStart +
-                                ", not " + firstTime);
-            } else if (lastTime != nextEnd) {
-                throw new Error("Expected last trigger time " + nextEnd +
-                                ", not " + lastTime);
+            if (checkSequentialTimes) {
+                if (firstTime != nextStart) {
+                    throw new Error("Expected first trigger time " + nextStart +
+                                    ", not " + firstTime);
+                } else if (lastTime != nextEnd) {
+                    throw new Error("Expected last trigger time " + nextEnd +
+                                    ", not " + lastTime);
+                }
             }
 /*
 System.err.println("First: EXP "+nextStart+" ACT "+firstTime+" DIFF "+(firstTime-nextStart));

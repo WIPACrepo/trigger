@@ -1,4 +1,4 @@
-package icecube.daq.trigger.test;
+package icecube.daq.trigger.control;
 
 import icecube.daq.eventbuilder.IEventPayload;
 import icecube.daq.eventbuilder.IReadoutDataPayload;
@@ -6,10 +6,8 @@ import icecube.daq.eventbuilder.IReadoutDataPayload;
 import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.IPayloadOutput;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.SourceIdRegistry;
 
 import icecube.daq.trigger.IHitDataPayload;
@@ -18,8 +16,7 @@ import icecube.daq.trigger.IReadoutRequest;
 import icecube.daq.trigger.IReadoutRequestElement;
 import icecube.daq.trigger.ITriggerRequestPayload;
 
-import java.io.IOException;
-
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -32,7 +29,10 @@ abstract class PayloadChecker
 {
     /** Log object. */
     private static final Log LOG =
-        LogFactory.getLog(PayloadValidator.class);
+        LogFactory.getLog(PayloadChecker.class);
+
+    private static final int SMT_TYPE =
+        TriggerRegistry.getTriggerType("SimpleMajorityTrigger");
 
     /**
      * Should we ignore readout request elements which fall outside the
@@ -192,6 +192,44 @@ abstract class PayloadChecker
     }
 
     /**
+     * Is there a SimpleMajorityTrigger inside the trigger request?
+     *
+     * @param tr trigger request
+     *
+     * @return <tt>true</tt> if the trigger request contains a
+     *         SimpleMajorityTrigger
+     */
+    private static boolean hasSMTTrigger(ITriggerRequestPayload tr)
+    {
+        loadPayload(tr);
+
+        if (tr.getSourceID().getSourceID() ==
+            SourceIdRegistry.INICE_TRIGGER_SOURCE_ID &&
+            tr.getTriggerType() == SMT_TYPE)
+        {
+            return true;
+        }
+
+        List payList;
+        try {
+            payList = tr.getPayloads();
+        } catch (Exception ex) {
+            LOG.error("Couldn't fetch payloads for " + tr, ex);
+            return false;
+        }
+
+        for (Object obj : payList) {
+            if (obj instanceof ITriggerRequestPayload) {
+                if (hasSMTTrigger((ITriggerRequestPayload) obj)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Is the second pair of times contained within the first set of
      * times?
      *
@@ -216,9 +254,14 @@ abstract class PayloadChecker
             last0.getUTCTimeAsLong() >= last1.getUTCTimeAsLong();
 
         if (!isContained && verbose) {
+            long firstDiff = 
+                first0.getUTCTimeAsLong() - first1.getUTCTimeAsLong();
+            long lastDiff = last0.getUTCTimeAsLong() - last1.getUTCTimeAsLong();
+
             LOG.error(descr0 + " interval [" + first0 + "-" + last0 +
                       "] does not contain " + descr1 + " interval [" + first1 +
-                      "-" + last1 + "]");
+                      "-" + last1 + "] diff [" + firstDiff + "-" + lastDiff +
+                      "]");
         }
 
         return isContained;
@@ -306,6 +349,7 @@ abstract class PayloadChecker
             return false;
         }
 
+        ArrayList evtHits = new ArrayList();
         for (Object obj : evt.getReadoutDataPayloads()) {
             IReadoutDataPayload rdp = (IReadoutDataPayload) obj;
             loadPayload(rdp);
@@ -325,6 +369,17 @@ abstract class PayloadChecker
             }
 
             validateReadoutDataPayload(rdp, verbose);
+
+            List rdpHits = rdp.getHitList();
+            if (rdpHits != null) {
+                evtHits.addAll(rdpHits);
+            }
+        }
+
+        if (hasSMTTrigger(trigReq) && evtHits.size() < 8) {
+            LOG.error(getEventString(evt) + " contains " + evtHits.size() +
+                      " hits, but should have at least 8");
+            return false;
         }
 
         return true;

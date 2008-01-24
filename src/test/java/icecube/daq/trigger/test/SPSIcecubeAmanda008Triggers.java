@@ -12,6 +12,8 @@ import icecube.daq.trigger.algorithm.AbstractTrigger;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.config.TriggerReadout;
 
+import icecube.daq.trigger.control.PayloadChecker;
+
 import icecube.daq.trigger.exceptions.TriggerException;
 
 import java.io.IOException;

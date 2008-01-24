@@ -22,6 +22,7 @@ import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.config.TriggerReadout;
 
 import icecube.daq.trigger.control.GlobalTriggerManager;
+import icecube.daq.trigger.control.PayloadChecker;
 import icecube.daq.trigger.control.TriggerManager;
 
 import icecube.daq.trigger.exceptions.TriggerException;

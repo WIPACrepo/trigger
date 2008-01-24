@@ -144,8 +144,7 @@ public abstract class TriggerCollection
         }
 
         synchronized (hitBuf) {
-            final int recType =
-                RecordTypeRegistry.RECORD_TYPE_DOMHIT_ENGINEERING_FORMAT;
+            final int recType = AbstractTrigger.SPE_HIT;
             final int cfgId = 2;
             final int srcId = SourceIdRegistry.SIMULATION_HUB_SOURCE_ID;
             final short mode = 0;

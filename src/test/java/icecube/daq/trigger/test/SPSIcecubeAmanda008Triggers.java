@@ -238,7 +238,7 @@ System.err.println(" Last: EXP "+nextEnd+" ACT "+lastTime+" DIFF "+(lastTime-nex
 
         InIceValidator()
         {
-            this.timeSpan = timeStep * (long) numHitsPerTrigger;
+            timeSpan = timeStep * (long) numHitsPerTrigger;
 
             nextStart = timeBase;
             nextEnd = nextStart + timeSpan;

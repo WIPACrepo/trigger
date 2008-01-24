@@ -167,13 +167,7 @@ public class AmandaTriggerEndToEndTest
         trigCfg.sendAmandaData(tails, numObjs);
         trigCfg.sendAmandaStops(tails);
 
-        for (int i = 0; i < 100 && splicer.getState() != Splicer.STOPPED; i++) {
-            try {
-                Thread.sleep(100);
-            } catch (Exception ex) {
-                // do nothing
-            }
-        }
+        waitUntilStopped(rdr, splicer, "StopMsg");
 
         trigMgr.flush();
 

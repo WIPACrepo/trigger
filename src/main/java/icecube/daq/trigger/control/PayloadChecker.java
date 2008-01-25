@@ -16,6 +16,8 @@ import icecube.daq.trigger.IReadoutRequest;
 import icecube.daq.trigger.IReadoutRequestElement;
 import icecube.daq.trigger.ITriggerRequestPayload;
 
+import icecube.daq.trigger.config.TriggerRegistry;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Check that payload contents are valid.
  */
-abstract class PayloadChecker
+public abstract class PayloadChecker
 {
     /** Log object. */
     private static final Log LOG =

@@ -505,33 +505,36 @@ public abstract class PayloadChecker
 
         IReadoutRequest rReq = tr.getReadoutRequest();
 
-        List elemList = rReq.getReadoutRequestElements();
+        if (rReq != null) {
+            List elemList = rReq.getReadoutRequestElements();
 
-        IReadoutRequestElement[] elems =
-            new IReadoutRequestElement[elemList.size()];
+            IReadoutRequestElement[] elems =
+                new IReadoutRequestElement[elemList.size()];
 
-        int nextElem = 0;
-        for (Object obj : elemList) {
-            IReadoutRequestElement elem = (IReadoutRequestElement) obj;
+            int nextElem = 0;
+            for (Object obj : elemList) {
+                IReadoutRequestElement elem = (IReadoutRequestElement) obj;
 
-            String elemDesc = getRRElementString(elem);
+                String elemDesc = getRRElementString(elem);
 
-            IUTCTime elemFirst = elem.getFirstTimeUTC();
-            IUTCTime elemLast = elem.getLastTimeUTC();
-            if (!validateInterval(elemDesc, elemFirst, elemLast, verbose)) {
-                return false;
+                IUTCTime elemFirst = elem.getFirstTimeUTC();
+                IUTCTime elemLast = elem.getLastTimeUTC();
+                if (!validateInterval(elemDesc, elemFirst, elemLast, verbose)) {
+                    return false;
+                }
+
+                /* XXX - only validate readout requests for global triggers */
+                if ((!IGNORE_NONGLOBAL_RREQS ||
+                     tr.getSourceID().getSourceID() ==
+                     SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID) &&
+                    !isIntervalContained(trDesc, trFirst, trLast, elemDesc,
+                                         elemFirst, elemLast, verbose))
+                {
+                    return false;
+                }
+
+                elems[nextElem++] = elem;
             }
-
-            /* XXX - only validate readout requests for global triggers */
-            if ((!IGNORE_NONGLOBAL_RREQS || tr.getSourceID().getSourceID() ==
-                 SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID) &&
-                !isIntervalContained(trDesc, trFirst, trLast,
-                                     elemDesc, elemFirst, elemLast, verbose))
-            {
-                return false;
-            }
-
-            elems[nextElem++] = elem;
         }
 
         List payList;

@@ -103,9 +103,9 @@ public class GlobalTrigEventWrapperTest
         GlobalTrigEventWrapper evtWrap = new GlobalTrigEventWrapper();
 
         MockReadoutRequest rr = new MockReadoutRequest();
-        rr.add(new MockReadoutRequestElement(1, 10000L, 20000L, 123L, 123));
+        rr.add(new MockReadoutRequestElement(1, 11000L, 12000L, 123L, 123));
 
-        MockTriggerRequest tr = new MockTriggerRequest(11000L, 12000L);
+        MockTriggerRequest tr = new MockTriggerRequest(10000L, 20000L);
         tr.setSourceID(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID);
         tr.setReadoutRequest(rr);
 

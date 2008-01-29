@@ -12,7 +12,7 @@ import icecube.daq.trigger.test.MockUTCTime;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -125,7 +125,7 @@ public class GlobalTrigEventReadoutElementsTest
                          itModuleFirstTime, itModuleLastTime, itModuleDomId,
                          itModuleSrcId));
 
-        Vector finalElems = elems.getManagedFinalReadoutRequestElements(list);
+        List finalElems = elems.getManagedFinalReadoutRequestElements(list);
 
         assertEquals("Bad number of returned elements",
                      list.size() - 1, finalElems.size());
@@ -232,7 +232,7 @@ public class GlobalTrigEventReadoutElementsTest
         list.add(newElem(IReadoutRequestElement.READOUT_TYPE_II_GLOBAL,
                          hFirstTime, hLastTime, hDomId, hSrcId));
 
-        Vector finalElems = elems.getManagedFinalReadoutRequestElements(list);
+        List finalElems = elems.getManagedFinalReadoutRequestElements(list);
 
         assertEquals("Bad number of returned elements", 1, finalElems.size());
 
@@ -279,7 +279,7 @@ public class GlobalTrigEventReadoutElementsTest
         list.add(newElem(IReadoutRequestElement.READOUT_TYPE_II_GLOBAL,
                          hFirstTime, hLastTime, hDomId, hSrcId));
 
-        Vector finalElems = elems.getManagedFinalReadoutRequestElements(list);
+        List finalElems = elems.getManagedFinalReadoutRequestElements(list);
 
         assertEquals("Bad number of returned elements", 2, finalElems.size());
 

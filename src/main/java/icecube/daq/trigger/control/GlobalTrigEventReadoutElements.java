@@ -14,14 +14,16 @@ import icecube.daq.trigger.IReadoutRequestElement;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.splicer.PayloadFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class is to produce final ReadoutRequestElement for one GlobalTrigEvent.
- * Required is Input of an unorganized ReadoutRequestelements (Vector).
+ * Required is Input of an unorganized ReadoutRequestelements (List).
  * Both timeOverlap and spaceOverlap will be handled here via SimpleMerger.java and SmartMerger.java.
  *
- * @version $Id: GlobalTrigEventReadoutElements.java 2566 2008-01-29 19:45:54Z dglo $
+ * @version $Id: GlobalTrigEventReadoutElements.java 2567 2008-01-29 19:47:37Z dglo $
  * @author shseo
  */
 public class GlobalTrigEventReadoutElements
@@ -142,7 +144,7 @@ public class GlobalTrigEventReadoutElements
      * @param inputElements
      * @return
      */
-    public Vector getManagedFinalReadoutRequestElements(List inputElements)
+    public List getManagedFinalReadoutRequestElements(List inputElements)
     {
         initialize();
 
@@ -166,7 +168,7 @@ public class GlobalTrigEventReadoutElements
             }
         }
 
-        Vector mVecFinalReadoutElements = new Vector();
+        List mVecFinalReadoutElements = new ArrayList();
 
         if(listSimpleMergedSameReadoutLists.size() > 1)
         {

@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
  *  and put in the payloadList.
  * This is called in GlobalTrigBag.java.
  *
- * @version $Id: GlobalTrigEventWrapper.java 2358 2007-12-03 20:54:26Z dglo $
+ * @version $Id: GlobalTrigEventWrapper.java 2567 2008-01-29 19:47:37Z dglo $
  * @author shseo
  */
 public class GlobalTrigEventWrapper
@@ -274,7 +274,7 @@ public class GlobalTrigEventWrapper
         if(vecGlobalReadoutRequestElements_Raw.size() > 1)
         {
             vecGlobalReadoutRequestElements_Final
-                = mtGlobalTrigEventReadoutElements.getManagedFinalReadoutRequestElements(vecGlobalReadoutRequestElements_Raw);
+                = new Vector(mtGlobalTrigEventReadoutElements.getManagedFinalReadoutRequestElements(vecGlobalReadoutRequestElements_Raw));
 
         }else if(vecGlobalReadoutRequestElements_Raw.size() == 1){
 

@@ -75,57 +75,57 @@ class TotalValidator
     }
 }
 
-class PayloadBridge
-    extends MockPayloadDestination
-{
-    private static ByteBuffer stopMsg;
-
-    private WritableByteChannel chan;
-
-    public PayloadBridge(WritableByteChannel chan)
-    {
-        this.chan = chan;
-    }
-
-    public void stopAllPayloadDestinations()
-        throws IOException
-    {
-        if (stopMsg == null) {
-            stopMsg = ByteBuffer.allocate(4);
-            stopMsg.putInt(0, 4);
-            stopMsg.limit(4);
-        }
-
-        synchronized (stopMsg) {
-            stopMsg.position(0);
-            chan.write(stopMsg);
-        }
-    }
-
-    public int writePayload(IWriteablePayload pay)
-        throws IOException
-    {
-        super.writePayload(pay);
-
-        int len;
-
-        if (chan == null) {
-            len = pay.getPayloadLength();
-        } else {
-            ByteBuffer buf = ByteBuffer.allocate(pay.getPayloadLength());
-
-            len = pay.writePayload(false, 0, buf);
-
-            chan.write(buf);
-        }
-
-        return len;
-    }
-}
-
 public class TotalTriggerEndToEndTest
     extends TestCase
 {
+    private static ByteBuffer stopMsg;
+
+    class PayloadBridge
+        extends MockPayloadDestination
+    {
+        private WritableByteChannel chan;
+
+        public PayloadBridge(WritableByteChannel chan)
+        {
+            this.chan = chan;
+        }
+
+        public void stopAllPayloadDestinations()
+            throws IOException
+        {
+            if (stopMsg == null) {
+                stopMsg = ByteBuffer.allocate(4);
+                stopMsg.putInt(0, 4);
+                stopMsg.limit(4);
+            }
+
+            synchronized (stopMsg) {
+                stopMsg.position(0);
+                chan.write(stopMsg);
+            }
+        }
+
+        public int writePayload(IWriteablePayload pay)
+            throws IOException
+        {
+            super.writePayload(pay);
+
+            int len;
+
+            if (chan == null) {
+                len = pay.getPayloadLength();
+            } else {
+                ByteBuffer buf = ByteBuffer.allocate(pay.getPayloadLength());
+
+                len = pay.writePayload(false, 0, buf);
+
+                chan.write(buf);
+            }
+
+            return len;
+        }
+    }
+
     private static final MockAppender appender =
 //        new MockAppender(/*org.apache.log4j.Level.ALL*/)/*.setVerbose(true)*/;
         new MockAppender(/*org.apache.log4j.Level.ALL*/).setVerbose(true);
@@ -236,10 +236,6 @@ public class TotalTriggerEndToEndTest
     {
         final int numTails = 10;
         final int numObjs = numTails * 10;
-
-        final long timeBase = 100000L;
-        final long timeStep = 5000L / 9L;
-        final int numHitsPerTrigger = 8;
 
         // load all triggers
         TriggerCollection trigCfg = new SPSIcecubeAmanda008Triggers();

@@ -56,7 +56,7 @@ class MockHitRequest
     public Vector getPayloads()
         throws IOException, DataFormatException
     {
-        throw new IOException("Unimplemented");
+        throw new Error("Unimplemented");
     }
 
     public IReadoutRequest getReadoutRequest()

@@ -68,7 +68,7 @@ public class MockSplicer
         public StrandTail push(List spliceables)
             throws OrderingException, ClosedStrandException
         {
-            throw new OrderingException("Unimplemented");
+            throw new Error("Unimplemented");
         }
 
         public synchronized StrandTail push(Spliceable spliceable)
@@ -109,7 +109,7 @@ public class MockSplicer
     public void addSpliceableChannel(SelectableChannel selChan)
         throws IOException
     {
-        throw new IOException("Unimplemented");
+        throw new Error("Unimplemented");
     }
 
     private void addSpliceable(Spliceable spl)
@@ -271,7 +271,7 @@ public class MockSplicer
     public void stop(Spliceable spliceable)
         throws OrderingException
     {
-        throw new OrderingException("Unimplemented");
+        throw new Error("Unimplemented");
     }
 
     private void tailStateChanged()

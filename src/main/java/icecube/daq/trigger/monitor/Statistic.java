@@ -1,7 +1,7 @@
 /*
  * class: Statistic
  *
- * Version $Id: Statistic.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: Statistic.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: May 7 2006
  *
@@ -14,20 +14,20 @@ package icecube.daq.trigger.monitor;
  * This class implements a simple statistic, keeping track of the average value as
  * well as min and max values.
  *
- * @version $Id: Statistic.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: Statistic.java 2629 2008-02-11 05:48:36Z dglo $
  * @author pat
  */
 public class Statistic
 {
 
-    double sum;
-    long count;
+    private double sum;
+    private long count;
 
-    double min;
-    double max;
+    private double min;
+    private double max;
 
-    boolean newMin;
-    boolean newMax;
+    private boolean newMin;
+    private boolean newMax;
 
     public Statistic() {
         sum = 0;

@@ -2,15 +2,12 @@ package icecube.daq.trigger.component;
 
 import icecube.daq.io.PayloadDestinationOutputEngine;
 import icecube.daq.io.SpliceablePayloadReader;
-
-import icecube.daq.juggler.component.DAQCompServer;
 import icecube.daq.juggler.component.DAQCompException;
+import icecube.daq.juggler.component.DAQCompServer;
 import icecube.daq.juggler.component.DAQComponent;
 import icecube.daq.juggler.component.DAQConnector;
-
 import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
-
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IPayloadDestinationCollection;
 import icecube.daq.payload.ISourceID;
@@ -19,30 +16,22 @@ import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.VitreousBufferCache;
-
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
-
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.SpliceableFactory;
-import icecube.daq.splicer.Splicer;
-import icecube.daq.splicer.SplicerImpl;
-import icecube.daq.splicer.SplicerChangedEvent;
 import icecube.daq.splicer.SplicedAnalysis;
+import icecube.daq.splicer.Splicer;
+import icecube.daq.splicer.SplicerChangedEvent;
 import icecube.daq.splicer.SplicerListener;
-
 import icecube.daq.trigger.IReadoutRequest;
 import icecube.daq.trigger.IReadoutRequestElement;
 import icecube.daq.trigger.ITriggerRequestPayload;
-
 import icecube.daq.trigger.impl.HitPayload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
 import java.io.IOException;
-
-import java.nio.ByteBuffer;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -336,7 +325,6 @@ public class SimpleTrigger
 
         IByteBufferCache trigMgr = new VitreousBufferCache();
         addCache(DAQConnector.TYPE_TRIGGER, trigMgr);
-        MasterPayloadFactory trigFactory = new MasterPayloadFactory(trigMgr);
 
         addMBean("jvm", new MemoryStatistics());
         addMBean("system", new SystemStatistics());

@@ -1,11 +1,12 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.trigger.exceptions.TriggerException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

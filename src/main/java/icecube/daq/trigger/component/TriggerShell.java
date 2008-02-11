@@ -1,31 +1,25 @@
 package icecube.daq.trigger.component;
 
 import icecube.daq.io.SpliceablePayloadReader;
-
+import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQCompServer;
 import icecube.daq.juggler.component.DAQComponent;
 import icecube.daq.juggler.component.DAQConnector;
-import icecube.daq.juggler.component.DAQCompException;
-
 import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
-
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.VitreousBufferCache;
-
 import icecube.daq.payload.splicer.Payload;
-
+import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.SplicedAnalysis;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
-import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.SplicerListener;
 
 import java.io.IOException;
-
 import java.util.Iterator;
 import java.util.List;
 
@@ -206,12 +200,7 @@ public class TriggerShell
         addMBean("jvm", new MemoryStatistics());
         addMBean("system", new SystemStatistics());
 
-        // Now differentiate
-        String inputType, outputType;
-
         DevNullAnalysis analysis = new DevNullAnalysis();
-
-        inputType = DAQConnector.TYPE_STRING_HIT;
 
         // Create splicer and introduce it to the trigger manager
         Splicer splicer = new HKN1Splicer(analysis);
@@ -227,7 +216,7 @@ public class TriggerShell
             System.exit(1);
             inputEngine = null;
         }
-        addMonitoredEngine(inputType, inputEngine);
+        addMonitoredEngine(DAQConnector.TYPE_STRING_HIT, inputEngine);
     }
 
     public static void main(String[] args)

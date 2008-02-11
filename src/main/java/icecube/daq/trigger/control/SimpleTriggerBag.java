@@ -10,19 +10,18 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.monitor.PayloadBagMonitor;
-import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.payload.splicer.PayloadFactory;
 import icecube.daq.payload.impl.UTCTime8B;
+import icecube.daq.payload.splicer.PayloadFactory;
+import icecube.daq.trigger.IHitPayload;
+import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.monitor.PayloadBagMonitor;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

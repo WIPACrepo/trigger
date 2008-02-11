@@ -3,9 +3,8 @@ package icecube.daq.trigger.test;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
 
-import java.nio.ByteBuffer;
-
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public abstract class BaseValidator
     implements PayloadValidator

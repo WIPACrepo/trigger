@@ -1,46 +1,22 @@
 package icecube.daq.trigger.component;
 
-import icecube.daq.common.DAQCmdInterface;
-
 import icecube.daq.io.DAQComponentObserver;
 import icecube.daq.io.IOChannelParent;
 import icecube.daq.io.InputChannel;
 import icecube.daq.io.PayloadReader;
 import icecube.daq.io.SingleOutputEngine;
-
+import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQCompServer;
 import icecube.daq.juggler.component.DAQComponent;
 import icecube.daq.juggler.component.DAQConnector;
-import icecube.daq.juggler.component.DAQCompException;
-
 import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
-
 import icecube.daq.payload.IByteBufferCache;
-import icecube.daq.payload.ILoadablePayload;
-import icecube.daq.payload.IPayloadOutput;
-import icecube.daq.payload.ISourceID;
-import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.MasterPayloadFactory;
-import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.VitreousBufferCache;
 
-import icecube.daq.trigger.control.ITriggerControl;
-import icecube.daq.trigger.control.ITriggerManager;
-
-import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
-
 import java.io.IOException;
-
 import java.nio.ByteBuffer;
-
 import java.nio.channels.SelectableChannel;
-
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 
 class DevNullChannel
     extends InputChannel
@@ -91,8 +67,6 @@ class DevNullReader
 public class EBShell
     extends DAQComponent
 {
-    private static final Log log = LogFactory.getLog(EBShell.class);
-
     private static final String COMPONENT_NAME = "ebShell";
     private static final int COMPONENT_ID = 0;
 

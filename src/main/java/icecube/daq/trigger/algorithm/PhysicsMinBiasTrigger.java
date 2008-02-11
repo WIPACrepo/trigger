@@ -11,21 +11,21 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.exceptions.UnknownParameterException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * This class implements a minimum bias trigger with a deadtime. It simply counts 
+ * This class implements a minimum bias trigger with a deadtime. It simply counts
  * hits that are not in a deadtime window and
  * applies a prescale for determining when a trigger should be formed.
  *

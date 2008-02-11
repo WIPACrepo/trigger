@@ -2,31 +2,23 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
-/*
-import icecube.daq.payload.MasterPayloadFactory;
-import icecube.daq.payload.SourceIdRegistry;
-*/
-
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
-
 import icecube.daq.trigger.exceptions.TriggerException;
-
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.test.MockPayloadDestination;
 import icecube.daq.trigger.test.MockReadoutRequest;
-import icecube.daq.trigger.test.MockTrigger;
-import icecube.daq.trigger.test.MockTriggerRequest;
 import icecube.daq.trigger.test.MockSplicer;
 import icecube.daq.trigger.test.MockTrigger;
+import icecube.daq.trigger.test.MockTrigger;
+import icecube.daq.trigger.test.MockTriggerRequest;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import junit.textui.TestRunner;
 
 import org.apache.log4j.BasicConfigurator;

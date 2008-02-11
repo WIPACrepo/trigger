@@ -1,7 +1,7 @@
 /*
  * class: Sorter
  *
- * Version $Id: Sorter.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: Sorter.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: July 15 2005
  *
@@ -12,17 +12,17 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.IReadoutRequestElement;
+import icecube.daq.trigger.ITriggerRequestPayload;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class is to provide the earliest/latest UTC-timeStamp.
  *
- * @version $Id: Sorter.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: Sorter.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public class Sorter

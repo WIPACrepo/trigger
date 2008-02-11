@@ -10,18 +10,18 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.monitor.PayloadBagMonitor;
-import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.splicer.PayloadFactory;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
+import icecube.daq.payload.splicer.PayloadFactory;
+import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.monitor.PayloadBagMonitor;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class implements a collection specific to IPayload's.

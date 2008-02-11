@@ -1,25 +1,26 @@
 package icecube.daq.trigger.monitor;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import icecube.icebucket.logging.LoggingConsumer;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.splicer.Payload;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
+import icecube.daq.payload.splicer.Payload;
+import icecube.daq.trigger.IReadoutRequest;
+import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.icebucket.logging.LoggingConsumer;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.io.IOException;
-import java.io.DataOutputStream;
+import java.nio.ByteBuffer;
 import java.util.Random;
 import java.util.Vector;
-import java.nio.ByteBuffer;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Created by IntelliJ IDEA.

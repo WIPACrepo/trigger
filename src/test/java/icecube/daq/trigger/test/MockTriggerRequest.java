@@ -8,21 +8,16 @@ import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.PayloadDestination;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.PayloadRegistry;
-
 import icecube.daq.splicer.Spliceable;
-
-import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.ICompositePayload;
+import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.IReadoutRequest;
 import icecube.daq.trigger.ITriggerRequestPayload;
 
 import java.io.IOException;
-
 import java.nio.ByteBuffer;
-
 import java.util.ArrayList;
 import java.util.Vector;
-
 import java.util.zip.DataFormatException;
 
 public class MockTriggerRequest

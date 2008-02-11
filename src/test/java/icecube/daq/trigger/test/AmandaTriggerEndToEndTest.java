@@ -2,42 +2,32 @@ package icecube.daq.trigger.test;
 
 import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.io.SpliceablePayloadReader;
-
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.VitreousBufferCache;
-
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
-
 import icecube.daq.trigger.IReadoutRequestElement;
-
+import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
-
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
-import icecube.daq.trigger.control.TriggerManager;
-
 import java.io.IOException;
-
 import java.nio.ByteBuffer;
-
 import java.nio.channels.Pipe;
 import java.nio.channels.WritableByteChannel;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import junit.textui.TestRunner;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.log4j.BasicConfigurator;
 
 public class AmandaTriggerEndToEndTest

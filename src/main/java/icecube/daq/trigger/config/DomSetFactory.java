@@ -1,18 +1,12 @@
 package icecube.daq.trigger.config;
 
-//import icecube.daq.trigger.config.db.DomSetNameLocal;
 //import icecube.daq.trigger.config.db.DomIdLocal;
 //import icecube.daq.trigger.config.db.DomSetLocal;
+//import icecube.daq.trigger.config.db.DomSetNameLocal;
 
-//import javax.naming.InitialContext;
 //import javax.naming.Context;
+//import javax.naming.InitialContext;
 //import javax.naming.NamingException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Properties;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,11 +22,6 @@ import org.apache.commons.logging.LogFactory;
  */
 public class DomSetFactory
 {
-
-    /**
-     * Logging object
-     */
-    private static final Log log = LogFactory.getLog(DomSetFactory.class);
 
     /**
      * JNDI context

@@ -10,9 +10,9 @@
 
 package icecube.daq.trigger.control;
 
+import icecube.daq.payload.splicer.PayloadFactory;
 import icecube.daq.trigger.IReadoutRequestElement;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-import icecube.daq.payload.splicer.PayloadFactory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,7 +23,7 @@ import java.util.List;
  * Required is Input of an unorganized ReadoutRequestelements (List).
  * Both timeOverlap and spaceOverlap will be handled here via SimpleMerger.java and SmartMerger.java.
  *
- * @version $Id: GlobalTrigEventReadoutElements.java 2567 2008-01-29 19:47:37Z dglo $
+ * @version $Id: GlobalTrigEventReadoutElements.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public class GlobalTrigEventReadoutElements

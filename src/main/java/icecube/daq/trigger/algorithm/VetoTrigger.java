@@ -1,7 +1,7 @@
 /*
  * class: VetoTrigger
  *
- * Version $Id: VetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: VetoTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: January 25 2006
  *
@@ -11,18 +11,18 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.IPayload;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.ITriggerRequestPayload;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import icecube.daq.trigger.exceptions.TriggerException;
 
 import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * This class is to provide commond methods for any N-VetoTrigger.
  *
- * @version $Id: VetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: VetoTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public abstract class VetoTrigger
@@ -34,7 +34,6 @@ public abstract class VetoTrigger
     private static final Log log = LogFactory.getLog(VetoTrigger.class);
 
     private int miNumIncomingSelectedTriggers;
-    private int miNumIncomingVetoedTriggers;
     /**
      * Create an instance of this class.
      * Default constructor is declared, but private, to stop accidental
@@ -65,7 +64,6 @@ public abstract class VetoTrigger
              }
          }else
          {
-             miNumIncomingVetoedTriggers++;
              log.debug("This Trigger is being vetoed.");
              //DummyPayload dummy = new DummyPayload(((ITriggerRequestPayload) payload).getFirstTimeUTC());
              //setEarliestPayloadOfInterest(dummy);

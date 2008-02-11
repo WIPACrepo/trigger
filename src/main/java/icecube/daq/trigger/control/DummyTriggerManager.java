@@ -10,22 +10,21 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.splicer.SpliceableFactory;
-import icecube.daq.splicer.Splicer;
-import icecube.daq.splicer.Spliceable;
-import icecube.daq.splicer.SplicerChangedEvent;
-import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.ILoadablePayload;
-import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID4B;
+import icecube.daq.splicer.Spliceable;
+import icecube.daq.splicer.SpliceableFactory;
+import icecube.daq.splicer.Splicer;
+import icecube.daq.splicer.SplicerChangedEvent;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
-import java.util.List;
-import java.util.Iterator;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

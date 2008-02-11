@@ -10,16 +10,21 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.payload.*;
-import icecube.daq.payload.splicer.PayloadFactory;
-import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.common.DAQCmdInterface;
+import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.payload.splicer.PayloadFactory;
+import icecube.daq.trigger.IReadoutRequest;
+import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
-import java.util.*;
-import java.util.zip.DataFormatException;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+import java.util.zip.DataFormatException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
  *  and put in the payloadList.
  * This is called in GlobalTrigBag.java.
  *
- * @version $Id: GlobalTrigEventWrapper.java 2567 2008-01-29 19:47:37Z dglo $
+ * @version $Id: GlobalTrigEventWrapper.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public class GlobalTrigEventWrapper

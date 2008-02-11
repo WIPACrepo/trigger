@@ -10,27 +10,23 @@
 
 package icecube.daq.trigger.algorithm;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.xml.sax.SAXException;
+import icecube.daq.payload.IPayload;
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.trigger.IHitPayload;
+import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.exceptions.TimeOutOfOrderException;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.exceptions.UnknownParameterException;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Iterator;
-import java.io.IOException;
 
-import icecube.daq.trigger.config.TriggerParameter;
-import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.exceptions.IllegalParameterValueException;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.exceptions.TimeOutOfOrderException;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.control.DummyPayload;
-import icecube.daq.payload.IPayload;
-import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.payload.IUTCTime;
-
-import javax.xml.parsers.ParserConfigurationException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * This class implements a string based trigger.  It will veto a number of doms from the top
@@ -466,7 +462,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
             IHitPayload hit = (IHitPayload) iter.next();
             int hitPosition = getTriggerHandler().getDOMRegistry().getStringMinor(hit.getDOMID().getDomIDAsString());
             int hitString = getTriggerHandler().getDOMRegistry().getStringMajor(hit.getDOMID().getDomIDAsString());
-            if(hitPosition<=numberOfVetoTopDoms||hitString!=string) {            
+            if(hitPosition<=numberOfVetoTopDoms||hitString!=string) {
                 if(log.isDebugEnabled())
                     log.debug("The event contains a hit in the veto region, vetoing event.");
 
@@ -704,10 +700,10 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
         configNumberOfVetoTopDoms = false;
         configMaxLength = false;
         configString = false;
-    
+
     }
 
-    private class SlidingTimeWindow {
+    private final class SlidingTimeWindow {
 
         private LinkedList hits;
 

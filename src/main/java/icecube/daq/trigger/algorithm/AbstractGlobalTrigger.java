@@ -1,7 +1,7 @@
 /*
  * class: AbstractGlobalTrigger
  *
- * Version $Id: AbstractGlobalTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: AbstractGlobalTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: August 30 2005
  *
@@ -10,47 +10,38 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.PayloadDestination;
 import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.control.ConditionalTriggerBag;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.GlobalTrigEventWrapper;
-import icecube.daq.trigger.control.ConditionalTriggerBag;
-import icecube.daq.payload.ILoadablePayload;
-import icecube.daq.payload.IWriteablePayload;
-import icecube.daq.payload.PayloadDestination;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
-import java.util.List;
 import java.util.ArrayList;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.List;
 
 /**
  * This class is to provide a common method for all triggers in GT.
  *
- * @version $Id: AbstractGlobalTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: AbstractGlobalTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public abstract class AbstractGlobalTrigger extends AbstractTrigger
 {
-    /**
-    * Log object for this class
-    */
-    private static final Log log = LogFactory.getLog(AbstractGlobalTrigger.class);
+    private GlobalTrigEventWrapper mtGlobalTrigEventWrapper = new GlobalTrigEventWrapper();
 
-    public GlobalTrigEventWrapper mtGlobalTrigEventWrapper = new GlobalTrigEventWrapper();
+    private ITriggerRequestPayload mtGlobalTrigEventPayload;
 
-    public ITriggerRequestPayload mtGlobalTrigEventPayload;
-
-    public List mListSelectedTriggers = new ArrayList();
-    public List mListOutputTriggers = new ArrayList();
+    private List mListSelectedTriggers = new ArrayList();
+    protected List mListOutputTriggers = new ArrayList();
     /**
      * output destination
      */
-    public PayloadDestination payloadDestination;
-    public int miMaxTimeGateWindowForCoincidenceTrigger;
+    private PayloadDestination payloadDestination;
+    private int miMaxTimeGateWindowForCoincidenceTrigger;
 
-    public ConditionalTriggerBag mtConditionalTriggerBag;
+    protected ConditionalTriggerBag mtConditionalTriggerBag;
     /**
      *  Constructor
       */

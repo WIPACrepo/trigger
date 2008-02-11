@@ -1,7 +1,7 @@
 /*
  * class: MinBiasTrigger
  *
- * Version $Id: MinBiasTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: MinBiasTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: August 27 2005
  *
@@ -12,12 +12,12 @@ package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.exceptions.UnknownParameterException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  * This class implements a simple minimum bias trigger. It simply counts hits and
  * applies a prescale for determining when a trigger should be formed.
  *
- * @version $Id: MinBiasTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: MinBiasTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  * @author pat
  */
 public class MinBiasTrigger extends AbstractTrigger

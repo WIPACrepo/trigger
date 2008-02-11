@@ -3,9 +3,9 @@ package icecube.daq.trigger.component;
 import icecube.daq.common.DAQCmdInterface;
 import icecube.daq.io.PayloadDestinationOutputEngine;
 import icecube.daq.io.SpliceablePayloadReader;
+import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQComponent;
 import icecube.daq.juggler.component.DAQConnector;
-import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
 import icecube.daq.payload.IByteBufferCache;
@@ -15,30 +15,26 @@ import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
-import icecube.daq.splicer.Splicer;
-import icecube.daq.splicer.SplicerImpl;
 import icecube.daq.splicer.SpliceableFactory;
+import icecube.daq.splicer.Splicer;
 import icecube.daq.trigger.config.TriggerBuilder;
-import icecube.daq.trigger.control.ITriggerManager;
-import icecube.daq.trigger.control.TriggerManager;
+import icecube.daq.trigger.control.DummyTriggerManager;
 import icecube.daq.trigger.control.GlobalTriggerManager;
 import icecube.daq.trigger.control.ITriggerControl;
-import icecube.daq.trigger.control.DummyTriggerManager;
+import icecube.daq.trigger.control.ITriggerManager;
+import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.util.DOMRegistry;
 
-import java.nio.ByteBuffer;
 import java.io.IOException;
-
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
-import org.xml.sax.SAXException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.xml.sax.SAXException;
 
 public class TriggerComponent
     extends DAQComponent
@@ -48,19 +44,16 @@ public class TriggerComponent
     public static final String DEFAULT_AMANDA_HOST = "ic-twrdaq00";
     public static final int DEFAULT_AMANDA_PORT = 12014;
 
-    protected ISourceID sourceId;
-    protected IByteBufferCache bufferCache;
-    protected ITriggerManager triggerManager;
-    protected Splicer splicer;
-    protected SpliceablePayloadReader inputEngine;
-    protected PayloadDestinationOutputEngine outputEngine;
+    private ISourceID sourceId;
+    private IByteBufferCache bufferCache;
+    private ITriggerManager triggerManager;
+    private Splicer splicer;
+    private SpliceablePayloadReader inputEngine;
+    private PayloadDestinationOutputEngine outputEngine;
 
-    protected String globalConfigurationDir;
-    protected String triggerConfigFileName;
-    protected List currentTriggers;
-
-    private String amandaHost = DEFAULT_AMANDA_HOST;
-    private int amandaPort = DEFAULT_AMANDA_PORT;
+    private String globalConfigurationDir;
+    private String triggerConfigFileName;
+    private List currentTriggers;
 
     private boolean useCacheMaxVal;
     private boolean useDummy;
@@ -72,9 +65,6 @@ public class TriggerComponent
     public TriggerComponent(String name, int id,
                             String amandaHost, int amandaPort) {
         super(name, id);
-        
-        this.amandaHost = amandaHost;
-        this.amandaPort = amandaPort;
 
         // Create the source id of this component
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
@@ -84,7 +74,7 @@ public class TriggerComponent
         } else {
             bufferCache = new VitreousBufferCache(Long.MAX_VALUE);
         }
-        
+
         addCache(bufferCache);
         //addMBean("bufferCache", bufferCache);
 
@@ -223,6 +213,10 @@ public class TriggerComponent
         return triggerManager;
     }
 
+    public String getTriggerConfigFileName(){
+        return triggerConfigFileName;
+    }
+
     public ISourceID getSourceID(){
         return sourceId;
     }
@@ -234,6 +228,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 2351 2007-12-03 17:19:40Z dglo $";
+	return "$Id: TriggerComponent.java 2629 2008-02-11 05:48:36Z dglo $";
     }
 }

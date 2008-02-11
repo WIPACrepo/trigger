@@ -1,7 +1,7 @@
 /*
  * class: TriggerXMLParser
  *
- * Version $Id: TriggerXMLParser.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: TriggerXMLParser.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: March 30 2005
  *
@@ -12,27 +12,27 @@ package icecube.daq.trigger.config;
 
 import icecube.daq.trigger.config.triggers.ActiveTriggers;
 
-import org.apache.commons.logging.LogFactory;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.logging.Log;
-import org.xml.sax.SAXException;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import java.io.File;
-import java.io.InputStream;
-import java.io.IOException;
-
+import org.xml.sax.SAXException;
 
 /**
  * This class creates jaxb trigger configuration objects from an xml file.
  *
- * @version $Id: TriggerXMLParser.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: TriggerXMLParser.java 2629 2008-02-11 05:48:36Z dglo $
  * @author pat
  */
 public class TriggerXMLParser

@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: CalibrationTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: August 27 2005
  *
@@ -10,14 +10,14 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.exceptions.IllegalParameterValueException;
-import icecube.daq.trigger.config.TriggerParameter;
-import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.trigger.IHitPayload;
+import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.exceptions.UnknownParameterException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: CalibrationTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  * @author pat
  */
 public class CalibrationTrigger extends AbstractTrigger

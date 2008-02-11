@@ -10,30 +10,32 @@
 
 package icecube.daq.trigger.control;
 
-//import icecube.daq.iniceTrig.framework.ITriggerBag;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.splicer.PayloadFactory;
-import icecube.daq.payload.impl.UTCTime8B;
 import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.payload.impl.UTCTime8B;
+import icecube.daq.payload.splicer.PayloadFactory;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.util.*;
 
 /**
  * This class receives TriggerRequestPayloads from each active GlobalTrigAlgorithm
  * , merges if they overlap and produces globalTrigEventPayload.
  *
- * @version $Id: GlobalTriggerBag.java 2358 2007-12-03 20:54:26Z dglo $
+ * @version $Id: GlobalTriggerBag.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public class GlobalTriggerBag

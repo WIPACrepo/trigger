@@ -1,7 +1,7 @@
 /*
  * interface: ITrigger
  *
- * Version $Id: ITriggerConfig.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ITriggerConfig.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: January 3 2005
  *
@@ -11,15 +11,15 @@
 package icecube.daq.trigger.config;
 
 import icecube.daq.payload.ISourceID;
-import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.exceptions.UnknownParameterException;
 
 import java.util.List;
 
 /**
  * This interface defines the configuration aspect of a trigger.
  *
- * @version $Id: ITriggerConfig.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ITriggerConfig.java 2629 2008-02-11 05:48:36Z dglo $
  * @author pat
  */
 public interface ITriggerConfig

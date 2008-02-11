@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTrigger
  *
- * Version $Id: CoincidenceTrigger.java 2148 2007-10-17 16:17:24Z dglo $
+ * Version $Id: CoincidenceTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: September 2 2005
  *
@@ -14,21 +14,22 @@ import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.IReadoutRequest;
+import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.Sorter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import icecube.daq.trigger.exceptions.TriggerException;
 
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * This class is to provide methods common to all coincidence triggers.
  *
- * @version $Id: CoincidenceTrigger.java 2148 2007-10-17 16:17:24Z dglo $
+ * @version $Id: CoincidenceTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public abstract class CoincidenceTrigger
@@ -39,11 +40,6 @@ public abstract class CoincidenceTrigger
     */
     private static final Log log = LogFactory.getLog(CoincidenceTrigger.class);
     private Sorter mtSorter = new Sorter();
-
-   /**
-    * earliest thing of interest to the analysis
-    */
-    private IPayload mtEarliestPayloadOfInterest;
 
     private int miNumIncomingConfiguredTriggers;
 

@@ -1,7 +1,7 @@
 /*
  * class: ThreeVetoTrigger
  *
- * Version $Id: ThreeVetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ThreeVetoTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: January 25 2006
  *
@@ -11,12 +11,12 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.config.TriggerParameter;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is accept all incoming triggers but to veto three configured triggers.
  *
- * @version $Id: ThreeVetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ThreeVetoTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public class ThreeVetoTrigger
@@ -52,20 +52,20 @@ public class ThreeVetoTrigger
     private static final int miConfiguredTrigId_2 = 2;
     private static final int miConfiguredTrigId_3 = 3;
 
-    private boolean mbConfiguredTriggerType_1 = false;
-    private boolean mbConfiguredTriggerConfigId_1 = false;
-    private boolean mbConfiguredSourceId_1 = false;
+    private boolean mbConfiguredTriggerType_1;
+    private boolean mbConfiguredTriggerConfigId_1;
+    private boolean mbConfiguredSourceId_1;
 
-    private boolean mbConfiguredTriggerType_2 = false;
-    private boolean mbConfiguredTriggerConfigId_2 = false;
-    private boolean mbConfiguredSourceId_2 = false;
+    private boolean mbConfiguredTriggerType_2;
+    private boolean mbConfiguredTriggerConfigId_2;
+    private boolean mbConfiguredSourceId_2;
 
-    private boolean mbConfiguredTriggerType_3 = false;
-    private boolean mbConfiguredTriggerConfigId_3 = false;
-    private boolean mbConfiguredSourceId_3 = false;
+    private boolean mbConfiguredTriggerType_3;
+    private boolean mbConfiguredTriggerConfigId_3;
+    private boolean mbConfiguredSourceId_3;
 
     private final int NUMBER_OF_REQUIRED_CONFIG_PARAMETERS = 9;
-    int miCountConfigurationParameters = 0;
+    private int miCountConfigurationParameters;
 
     /**
      * Create an instance of this class.

@@ -1,7 +1,7 @@
 /*
  * class: ITriggerBag
  *
- * Version $Id: ITriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ITriggerBag.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: March 16 2005
  *
@@ -10,16 +10,16 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.monitor.PayloadBagMonitor;
-import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.splicer.PayloadFactory;
+import icecube.daq.trigger.monitor.PayloadBagMonitor;
 
 /**
  *
  * Interface for trigger bag
  *
- * @version $Id: ITriggerBag.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ITriggerBag.java 2629 2008-02-11 05:48:36Z dglo $
  * @author pat
  */
 public interface ITriggerBag
@@ -33,7 +33,7 @@ public interface ITriggerBag
 
     /**
      * method to flush the bag, allow all payloads to go free
-     */ 
+     */
     void flush();
 
     /**

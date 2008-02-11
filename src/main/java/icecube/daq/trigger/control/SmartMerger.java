@@ -10,13 +10,13 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.IReadoutRequestElement;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.splicer.PayloadFactory;
+import icecube.daq.trigger.IReadoutRequestElement;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * TODO: Massively clean up this code!!!
  *
- * @version $Id: SmartMerger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: SmartMerger.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public class SmartMerger
@@ -319,7 +319,7 @@ public class SmartMerger
                                                           List listSmallerSameReadoutElements)
     {
         List listNewElements = new ArrayList();
-        
+
         for(int i=0; i < listSmallerSameReadoutElements.size(); i++)
         {
             IReadoutRequestElement tSmElement = (IReadoutRequestElement) listSmallerSameReadoutElements.get(i);

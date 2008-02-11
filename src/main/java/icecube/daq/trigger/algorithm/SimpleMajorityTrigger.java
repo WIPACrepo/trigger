@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 2512 2008-01-22 15:28:29Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: August 19 2005
  *
@@ -10,32 +10,31 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.exceptions.TimeOutOfOrderException;
-import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.exceptions.IllegalParameterValueException;
-import icecube.daq.trigger.config.TriggerParameter;
-import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.trigger.IHitPayload;
+import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.exceptions.TimeOutOfOrderException;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.exceptions.UnknownParameterException;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Iterator;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
-
+import org.apache.commons.logging.LogFactory;
 
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 2512 2008-01-22 15:28:29Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  * @author pat
  */
-public class SimpleMajorityTrigger extends AbstractTrigger
+public final class SimpleMajorityTrigger extends AbstractTrigger
 {
 
     /**
@@ -122,7 +121,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
             log.info("TriggerName set to " + super.triggerName);
         }
     }
-    
+
     /*
     *
     * Methods of ITriggerControl
@@ -164,7 +163,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
             }
             return;
         }
-        
+
         IUTCTime hitTimeUTC = hit.getHitTimeUTC();
 
         /*
@@ -204,36 +203,36 @@ public class SimpleMajorityTrigger extends AbstractTrigger
                 log.error("SlidingTimeWindow startTime is null!!!");
                 int i = 0;
                 Iterator it = slidingTimeWindow.hits.iterator();
-                
-                while ( it.hasNext() ) 
+
+                while ( it.hasNext() )
                 {
                     i++;
                     IHitPayload h = (IHitPayload) it.next();
                     if (h == null)
                     {
                         log.error("  Hit " + i + " is null");
-                    } 
-                    else 
+                    }
+                    else
                     {
-                        if (h.getPayloadTimeUTC() == null) 
+                        if (h.getPayloadTimeUTC() == null)
                         {
                             log.error("  Hit " + i + " has a null time");
-                        } 
-                        else 
+                        }
+                        else
                         {
                             log.error("  Hit " + i + " has time = " + h.getPayloadTimeUTC());
                         }
                     }
                 }
             }
-            
-            if (hitTimeUTC.compareTo(slidingTimeWindow.startTime()) < 0) 
+
+            if (hitTimeUTC.compareTo(slidingTimeWindow.startTime()) < 0)
                 throw new TimeOutOfOrderException(
                         "Hit comes before start of sliding time window: Window is at "
                         + slidingTimeWindow.startTime() + " Hit is at "
                         + hitTimeUTC + " DOMId = "
                         + hit.getDOMID().getDomIDAsString());
-            
+
 
             /*
              * Hit falls within the slidingTimeWindow
@@ -513,7 +512,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
         configTimeWindow = false;
     }
 
-    private class SlidingTimeWindow {
+    private final class SlidingTimeWindow {
 
         private LinkedList hits;
 

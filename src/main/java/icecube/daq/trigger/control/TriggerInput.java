@@ -1,7 +1,7 @@
 /*
  * class: TriggerInput
  *
- * Version $Id: TriggerInput.java 2165 2007-10-19 17:24:08Z dglo $
+ * Version $Id: TriggerInput.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: May 2 2005
  *
@@ -10,21 +10,21 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.payload.ILoadablePayload;
-import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.payload.IUTCTime;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.IHitDataPayload;
-import icecube.daq.trigger.ICompositePayload;
-import icecube.daq.trigger.ITriggerPayload;
-import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.eventbuilder.IEventPayload;
 import icecube.daq.eventbuilder.IReadoutDataPayload;
+import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.trigger.ICompositePayload;
+import icecube.daq.trigger.IHitDataPayload;
+import icecube.daq.trigger.IHitPayload;
+import icecube.daq.trigger.ITriggerPayload;
+import icecube.daq.trigger.ITriggerRequestPayload;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.DataFormatException;
-import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides a simple implementation of ITriggerInput
  *
- * @version $Id: TriggerInput.java 2165 2007-10-19 17:24:08Z dglo $
+ * @version $Id: TriggerInput.java 2629 2008-02-11 05:48:36Z dglo $
  * @author pat
  */
 public class TriggerInput
@@ -214,7 +214,7 @@ public class TriggerInput
     /**
      * private inner class to manage time windows and flags
      */
-    private class PayloadWindow {
+    private final class PayloadWindow {
 
         private ILoadablePayload payload;
         private long firstTime;

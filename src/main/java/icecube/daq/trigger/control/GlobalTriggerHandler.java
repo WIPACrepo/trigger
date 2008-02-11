@@ -10,33 +10,39 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.payload.*;
-import icecube.daq.payload.impl.UTCTime8B;
+import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IPayload;
+import icecube.daq.payload.IPayloadOutput;
+import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.payload.impl.UTCTime8B;
 import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.monitor.ITriggerMonitor;
-import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
-import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.trigger.config.ITriggerConfig;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.trigger.monitor.ITriggerMonitor;
+import icecube.daq.trigger.monitor.PayloadBagMonitor;
+import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
-//import icecube.daq.globalTrig.util.TriggerTestUtil;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+import java.util.zip.DataFormatException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.util.Vector;
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.zip.DataFormatException;
-import java.io.IOException;
 
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 2358 2007-12-03 20:54:26Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler

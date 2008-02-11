@@ -134,6 +134,8 @@ public abstract class PayloadChecker
             return "dom";
         case IReadoutRequestElement.READOUT_TYPE_IT_MODULE:
             return "module";
+        default:
+            break;
         }
 
         return "unknownRdoutType#" + rdoutType;
@@ -256,7 +258,7 @@ public abstract class PayloadChecker
             last0.getUTCTimeAsLong() >= last1.getUTCTimeAsLong();
 
         if (!isContained && verbose) {
-            long firstDiff = 
+            long firstDiff =
                 first0.getUTCTimeAsLong() - first1.getUTCTimeAsLong();
             long lastDiff = last0.getUTCTimeAsLong() - last1.getUTCTimeAsLong();
 
@@ -276,7 +278,7 @@ public abstract class PayloadChecker
      *
      * @return <tt>false</tt> if payload could not be loaded
      */
-    private static final boolean loadPayload(IPayload pay)
+    private static boolean loadPayload(IPayload pay)
     {
         ILoadablePayload loadable = (ILoadablePayload) pay;
 

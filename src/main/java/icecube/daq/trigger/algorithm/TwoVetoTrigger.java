@@ -1,7 +1,7 @@
 /*
  * class: TwoVetoTrigger
  *
- * Version $Id: TwoVetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: TwoVetoTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: January 25 2006
  *
@@ -11,12 +11,12 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.config.TriggerParameter;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is accept all incoming triggers but to veto two configured triggers.
  *
- * @version $Id: TwoVetoTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: TwoVetoTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public class TwoVetoTrigger
@@ -47,18 +47,18 @@ public class TwoVetoTrigger
     private static final int miConfiguredTrigId_1 = 1;
     private static final int miConfiguredTrigId_2 = 2;
 
-    boolean mbConfigTriggerType_1 = false;
-    boolean mbConfigTriggerConfigId_1 = false;
-    boolean mbConfigSourceId_1 = false;
-    boolean mbConfigTriggerType_2 = false;
-    boolean mbConfigTriggerConfigId_2 = false;
-    boolean mbConfigSourceId_2 = false;
-    boolean configTriggerType_3 = false;
-    boolean configTriggerConfigId_3 = false;
-    boolean configSourceId_3 = false;
+    private boolean mbConfigTriggerType_1;
+    private boolean mbConfigTriggerConfigId_1;
+    private boolean mbConfigSourceId_1;
+    private boolean mbConfigTriggerType_2;
+    private boolean mbConfigTriggerConfigId_2;
+    private boolean mbConfigSourceId_2;
+    private boolean configTriggerType_3;
+    private boolean configTriggerConfigId_3;
+    private boolean configSourceId_3;
 
     private final int NUMBER_OF_REQUIRED_CONFIG_PARAMETERS = 6;
-    int miCurrentNumberOfConfigurationParameters = 0;
+    private int miCurrentNumberOfConfigurationParameters;
 
     /**
      * Create an instance of this class.

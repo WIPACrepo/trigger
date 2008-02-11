@@ -1,12 +1,9 @@
 package icecube.daq.trigger.config;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -16,8 +13,6 @@ import java.util.List;
  */
 public final class TriggerRegistry
 {
-
-    private static final Log log = LogFactory.getLog(TriggerRegistry.class);
 
     private static final Integer SMT_TYPE   = new Integer(0);
     private static final Integer  CT_TYPE   = new Integer(1);

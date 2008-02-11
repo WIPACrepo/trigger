@@ -3,24 +3,20 @@ package icecube.daq.trigger.component;
 import icecube.daq.common.DAQCmdInterface;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQCompServer;
-import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.ISourceID;
-import icecube.daq.trigger.config.TriggerBuilder;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.trigger.config.ITriggerConfig;
+import icecube.daq.trigger.config.TriggerBuilder;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.control.GlobalTriggerManager;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class GlobalTriggerComponent
     extends TriggerComponent
 {
-
-    private static final Log log = LogFactory.getLog(GlobalTriggerComponent.class);
 
     private static final String COMPONENT_NAME = DAQCmdInterface.DAQ_GLOBAL_TRIGGER;
     private static final int COMPONENT_ID = 0;
@@ -52,13 +48,13 @@ public class GlobalTriggerComponent
         ISourceID amandaSourceId = SourceIdRegistry.getISourceIDFromNameAndId(DAQCmdInterface.DAQ_AMANDA_TRIGGER, 0);
         readouts.addAll(getReadouts(amandaSourceId));
 
-        ((GlobalTriggerManager) triggerManager).setMaxTimeGateWindow(getMaxReadoutTimeEarliest(readouts));
+        ((GlobalTriggerManager) getTriggerManager()).setMaxTimeGateWindow(getMaxReadoutTimeEarliest(readouts));
 
     }
 
     private List getReadouts(ISourceID sourceId) {
         List readouts = new ArrayList();
-        Iterator iter = TriggerBuilder.buildTriggers(triggerConfigFileName, sourceId).iterator();
+        Iterator iter = TriggerBuilder.buildTriggers(getTriggerConfigFileName(), sourceId).iterator();
         while (iter.hasNext()) {
             ITriggerConfig trigger = (ITriggerConfig) iter.next();
             readouts.addAll(trigger.getReadoutList());

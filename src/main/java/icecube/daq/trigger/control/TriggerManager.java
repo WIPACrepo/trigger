@@ -1,7 +1,7 @@
 /*
  * class: TriggerManager
  *
- * Version $Id: TriggerManager.java 2351 2007-12-03 17:19:40Z dglo $
+ * Version $Id: TriggerManager.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: October 25 2004
  *
@@ -10,26 +10,25 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.splicer.SpliceableFactory;
-import icecube.daq.splicer.Splicer;
-import icecube.daq.splicer.Spliceable;
-import icecube.daq.splicer.SplicerChangedEvent;
-import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
+import icecube.daq.splicer.Spliceable;
+import icecube.daq.splicer.SpliceableFactory;
+import icecube.daq.splicer.Splicer;
+import icecube.daq.splicer.SplicerChangedEvent;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.monitor.Statistic;
 
-import java.util.List;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger
  *
- * @version $Id: TriggerManager.java 2351 2007-12-03 17:19:40Z dglo $
+ * @version $Id: TriggerManager.java 2629 2008-02-11 05:48:36Z dglo $
  * @author pat
  */
 public class TriggerManager

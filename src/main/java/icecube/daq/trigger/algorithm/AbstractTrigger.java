@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 2360 2007-12-03 20:59:43Z dglo $
+ * Version $Id: AbstractTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: August 19 2005
  *
@@ -10,39 +10,36 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.trigger.config.ITriggerConfig;
-import icecube.daq.trigger.config.TriggerReadout;
-import icecube.daq.trigger.config.TriggerParameter;
-import icecube.daq.trigger.config.DomSet;
-import icecube.daq.trigger.config.DomSetFactory;
-import icecube.daq.trigger.control.ITriggerControl;
-import icecube.daq.trigger.control.ITriggerHandler;
-import icecube.daq.trigger.control.DummyPayload;
-import icecube.daq.trigger.control.HitFilter;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
-import icecube.daq.trigger.IReadoutRequestElement;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.monitor.ITriggerMonitor;
-import icecube.daq.trigger.monitor.TriggerMonitor;
-import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.splicer.Payload;
-import icecube.daq.trigger.exceptions.UnknownParameterException;
+import icecube.daq.trigger.IHitPayload;
+import icecube.daq.trigger.IReadoutRequest;
+import icecube.daq.trigger.IReadoutRequestElement;
+import icecube.daq.trigger.config.ITriggerConfig;
+import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.config.TriggerReadout;
+import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.trigger.control.HitFilter;
+import icecube.daq.trigger.control.ITriggerControl;
+import icecube.daq.trigger.control.ITriggerHandler;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.exceptions.UnknownParameterException;
+import icecube.daq.trigger.impl.TriggerRequestPayload;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.trigger.monitor.ITriggerMonitor;
+import icecube.daq.trigger.monitor.TriggerMonitor;
 import icecube.icebucket.monitor.ScalarFlowMonitor;
 import icecube.icebucket.monitor.simple.ScalarFlowMonitorImpl;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Vector;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 2360 2007-12-03 20:59:43Z dglo $
+ * @version $Id: AbstractTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor
@@ -87,20 +84,20 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
     public static final int LC_DOWN   = 0x20;
     public static final int LC_UP     = 0x40;
 
-    protected int triggerType;
-    protected int triggerConfigId;
-    protected ISourceID sourceId;
+    private int triggerType;
+    private int triggerConfigId;
+    private ISourceID sourceId;
     protected String triggerName;
-    protected List readouts = new ArrayList();
-    protected List parameters = new ArrayList();
+    private List readouts = new ArrayList();
+    private List parameters = new ArrayList();
 
-    protected IPayload earliestPayloadOfIterest = null;
+    private IPayload earliestPayloadOfIterest = null;
     private ITriggerHandler triggerHandler = null;
     protected TriggerRequestPayloadFactory triggerFactory = new TriggerRequestPayloadFactory();
     protected boolean onTrigger;
     protected int triggerCounter = 0;
-    protected int sentTriggerCounter = 0;
-    protected int printMod = 1000;
+    private int sentTriggerCounter = 0;
+    private int printMod = 1000;
 
     protected int triggerPrescale = 0;
     protected int domSetId = -1;
@@ -486,7 +483,7 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
         IUTCTime firstTime = ((IHitPayload) hits.get(0)).getPayloadTimeUTC();
         IUTCTime lastTime = ((IHitPayload) hits.get(numberOfHits-1)).getPayloadTimeUTC();
 
-        if ((log.isDebugEnabled() || log.isInfoEnabled()) 
+        if ((log.isDebugEnabled() || log.isInfoEnabled())
 	    && (triggerCounter % printMod == 0)) {
             log.info("New Trigger " + triggerCounter + " from " + triggerName + " includes " + numberOfHits
                      + " hits:  First time = "

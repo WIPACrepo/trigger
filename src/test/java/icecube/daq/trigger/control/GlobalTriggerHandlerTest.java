@@ -2,13 +2,10 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.trigger.IReadoutRequest;
 import icecube.daq.payload.SourceIdRegistry;
-
+import icecube.daq.trigger.IReadoutRequest;
 import icecube.daq.trigger.exceptions.TriggerException;
-
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.test.MockPayload;
@@ -19,17 +16,14 @@ import icecube.daq.trigger.test.MockTrigger;
 import icecube.daq.trigger.test.MockTriggerRequest;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
-
 import java.util.zip.DataFormatException;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import junit.textui.TestRunner;
 
 import org.apache.log4j.BasicConfigurator;

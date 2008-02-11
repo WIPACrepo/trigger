@@ -1,7 +1,7 @@
 /*
  * class: ThreeCoincidenceTrigger
  *
- * Version $Id: ThreeCoincidenceTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ThreeCoincidenceTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: September 6 2005
  *
@@ -10,14 +10,14 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.control.ConditionalTriggerBag;
 import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.control.ConditionalTriggerBag;
+import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  * Three coincidence trigger algorithm which uses timeGate (using CoincidenceTriggerBag)
  * for safe release of a selected trigger.
  *
- * @version $Id: ThreeCoincidenceTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ThreeCoincidenceTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public class ThreeCoincidenceTrigger
@@ -55,22 +55,21 @@ public class ThreeCoincidenceTrigger
     private static final int miConfiguredTrigId_2 = 2;
     private static final int miConfiguredTrigId_3 = 3;
 
-    private boolean mbConfiguredTriggerType_1 = false;
-    private boolean mbConfiguredTriggerConfigId_1 = false;
-    private boolean mbConfiguredSourceId_1 = false;
+    private boolean mbConfiguredTriggerType_1;
+    private boolean mbConfiguredTriggerConfigId_1;
+    private boolean mbConfiguredSourceId_1;
 
-    private boolean mbConfiguredTriggerType_2 = false;
-    private boolean mbConfiguredTriggerConfigId_2 = false;
-    private boolean mbConfiguredSourceId_2 = false;
+    private boolean mbConfiguredTriggerType_2;
+    private boolean mbConfiguredTriggerConfigId_2;
+    private boolean mbConfiguredSourceId_2;
 
-    private boolean mbConfiguredTriggerType_3 = false;
-    private boolean mbConfiguredTriggerConfigId_3 = false;
-    private boolean mbConfiguredSourceId_3 = false;
+    private boolean mbConfiguredTriggerType_3;
+    private boolean mbConfiguredTriggerConfigId_3;
+    private boolean mbConfiguredSourceId_3;
 
     private final int NUMBER_OF_REQUIRED_CONFIG_PARAMETERS = 9;
-    int miCountConfigurationParameters = 0;
+    private int miCountConfigurationParameters;
 
-    private boolean flushing = false;
     /**
      * Create an instance of this class.
      * Default constructor is declared, but private, to stop accidental

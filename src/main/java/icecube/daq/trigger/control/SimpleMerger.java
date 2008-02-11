@@ -10,12 +10,13 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.IReadoutRequestElement;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.splicer.PayloadFactory;
+import icecube.daq.trigger.IReadoutRequestElement;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * TODO: Massively clean up this code!!!
  *
- * @version $Id: SimpleMerger.java 2358 2007-12-03 20:54:26Z dglo $
+ * @version $Id: SimpleMerger.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public class SimpleMerger

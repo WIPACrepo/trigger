@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 2482 2008-01-15 22:13:37Z dglo $
+ * Version $Id: TriggerHandler.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: October 25 2004
  *
@@ -10,25 +10,32 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IPayload;
+import icecube.daq.payload.IPayloadOutput;
+import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.IWriteablePayload;
+import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.payload.impl.SourceID4B;
+import icecube.daq.payload.impl.UTCTime8B;
+import icecube.daq.payload.splicer.Payload;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.config.ITriggerConfig;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.monitor.ITriggerMonitor;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-import icecube.daq.payload.*;
-import icecube.daq.payload.splicer.Payload;
-import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.util.DOMRegistry;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.zip.DataFormatException;
-import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,7 +43,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 2482 2008-01-15 22:13:37Z dglo $
+ * @version $Id: TriggerHandler.java 2629 2008-02-11 05:48:36Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -321,9 +328,9 @@ public class TriggerHandler
                     log.error("Couldn't load payload", e);
                 }
                 ITriggerRequestPayload tPayload = (ITriggerRequestPayload) nextPayload;
-                int sourceId;
+                int srcId;
                 if (tPayload.getSourceID() != null) {
-                    sourceId = tPayload.getSourceID().getSourceID();
+                    srcId = tPayload.getSourceID().getSourceID();
                 } else {
                     if (tPayload.getPayloadLength() == 0 &&
                         tPayload.getPayloadTimeUTC() == null &&
@@ -340,10 +347,10 @@ public class TriggerHandler
                                   ")");
                     }
 
-                    sourceId = -1;
+                    srcId = -1;
                 }
-                if(sourceId == SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID
-                    || sourceId == SourceIdRegistry.STRINGPROCESSOR_SOURCE_ID){
+                if(srcId == SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID
+                    || srcId == SourceIdRegistry.STRINGPROCESSOR_SOURCE_ID){
                     count++;
 
                     // loop over triggers
@@ -356,9 +363,9 @@ public class TriggerHandler
                             log.error("Exception while running trigger", e);
                         }
                     }
-                }else if (sourceId != -1) {
+                }else if (srcId != -1) {
 
-                    log.error("SourceID " + sourceId + " should not send TriggerRequestPayloads!");
+                    log.error("SourceID " + srcId + " should not send TriggerRequestPayloads!");
                 }
             }else{
                     log.warn("TriggerHandler only knows about either hitPayloads or TriggerRequestPayloads!");

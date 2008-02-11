@@ -10,19 +10,24 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.IReadoutRequestElement;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-import icecube.daq.payload.*;
+import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IPayload;
+import icecube.daq.payload.IPayloadOutput;
+import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID4B;
+import icecube.daq.trigger.IHitPayload;
+import icecube.daq.trigger.IReadoutRequest;
+import icecube.daq.trigger.IReadoutRequestElement;
+import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
-import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -189,7 +194,7 @@ public class DummyTriggerHandler
 
         }
         count++;
-        
+
         setEarliestPayloadOfInterest(payload);
 
         issueTriggers();

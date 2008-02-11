@@ -1,7 +1,7 @@
 /*
  * class: ConditionalTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java 2164 2007-10-19 17:21:58Z dglo $
+ * Version $Id: ConditionalTriggerBag.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: September 2 2005
  *
@@ -16,9 +16,13 @@ import icecube.daq.payload.IUTCTime;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.algorithm.CoincidenceTrigger;
 
-import java.util.*;
-import java.util.zip.DataFormatException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+import java.util.zip.DataFormatException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java 2164 2007-10-19 17:21:58Z dglo $
+ * @version $Id: ConditionalTriggerBag.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public class ConditionalTriggerBag
@@ -46,7 +50,6 @@ public class ConditionalTriggerBag
 
     private CoincidenceTrigger mtCoincidenceTriggerAlgorithm;
     private List mListConfiguredTriggerIDs;
-    private boolean mbContainAllTriggerIDsRequired;
     private String msCoincidenceTriggerAlgorithmName;
 
     private List<ITriggerRequestPayload> payloadListInConditionalBag =
@@ -61,7 +64,6 @@ public class ConditionalTriggerBag
 
     private boolean mbNeedUpdate;
     private DummyPayload mtUpdater;
-    private List mListUnqualifiedTriggers = new ArrayList();
 
     /** The index of the 'next' value (can be NEXT_UNKNOWN or NEXT_NONE). */
     private int nextIndex = NEXT_UNKNOWN;
@@ -399,18 +401,8 @@ public class ConditionalTriggerBag
                     + msCoincidenceTriggerAlgorithmName);
     }
 
-    private List getListUnqualifiedTriggers()
-    {
-        return mListUnqualifiedTriggers;
-    }
-
     public Vector getVectorPayloadsInConditonalTriggerBag()
     {
         return new Vector(payloadListInConditionalBag);
-    }
-    private void setVectorPayloadsInConditonalTriggerBag(Vector vecPayloads)
-    {
-        payloadListInConditionalBag.clear();
-        payloadListInConditionalBag.addAll(vecPayloads);
     }
 }

@@ -10,23 +10,21 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.payload.IPayload;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.exceptions.UnknownParameterException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * This class receives unconditional-triggers,
  *  makes a new TriggerRequestPayload for each input TriggerRequestPayload
  *  and then pass them to GlobalTrigBag.java.
  *
- * @version $Id: ThroughputTrigger.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ThroughputTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public class ThroughputTrigger
@@ -37,9 +35,6 @@ public class ThroughputTrigger
      */
     private static final Log log = LogFactory.getLog(ThroughputTrigger.class);
 
-    //private GlobalTrigEventWrapper mtGlobalTrigEventWrapper;
-   // private IPayload mtGlobalTrigEventPayload;
-    private List mListSelectedPayload = new ArrayList();
     /**
      * Create an instance of this class.
      * Default constructor is declared, but private, to stop accidental

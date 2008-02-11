@@ -1,9 +1,8 @@
 package icecube.daq.trigger.test;
 
-import icecube.util.Poolable;
-
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.SourceIdRegistry;
+import icecube.util.Poolable;
 
 public class MockSourceID
     extends Poolable

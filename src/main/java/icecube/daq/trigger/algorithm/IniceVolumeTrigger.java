@@ -10,33 +10,29 @@
 
 package icecube.daq.trigger.algorithm;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.xml.sax.SAXException;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.io.IOException;
-
-import icecube.daq.trigger.config.TriggerParameter;
-import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.exceptions.IllegalParameterValueException;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.exceptions.TimeOutOfOrderException;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.trigger.IHitPayload;
+import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.StringMap;
+import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.exceptions.TimeOutOfOrderException;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.util.DeployedDOM;
 
-import javax.xml.parsers.ParserConfigurationException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
- * This class implements a simple topological trigger.  
+ * This class implements a simple topological trigger.
  * Then it will search for a given number of hits in 1) a configurable time window
  * and 2) in a volume composed of 7 strings with a hieght of some number of doms.
  *
@@ -492,7 +488,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	int centerPosition = getTriggerHandler().getDOMRegistry().getStringMinor(centerDom);
 
 	// get the vertical shift of the center string
-	int centerShift = stringMap.getVerticalOffset(new Integer(centerString));
+	int vShift = stringMap.getVerticalOffset(new Integer(centerString));
 
 	// calculate the range of DOM positions in this volume element
 	int minPos = centerPosition - volumeHeight;
@@ -517,7 +513,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 
 	    // calculate the range for this string
 	    int thisShift = stringMap.getVerticalOffset(new Integer(string));
-	    int omShift = thisShift - centerShift;
+	    int omShift = thisShift - vShift;
 
 	    minPos += omShift;
 	    if (minPos < 1) minPos = 1;
@@ -672,10 +668,10 @@ public class IniceVolumeTrigger extends AbstractTrigger {
         centerShift = 0;
         configVolumeHeight = false;
         configCenterShift = false;
-    
+
     }
 
-    private class SlidingTimeWindow {
+    private final class SlidingTimeWindow {
 
         private LinkedList hits;
 

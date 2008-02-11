@@ -2,20 +2,17 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.eventbuilder.IEventPayload;
 import icecube.daq.eventbuilder.IReadoutDataPayload;
-
 import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.SourceIdRegistry;
-
 import icecube.daq.trigger.IHitDataPayload;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.IReadoutRequest;
 import icecube.daq.trigger.IReadoutRequestElement;
 import icecube.daq.trigger.ITriggerRequestPayload;
-
 import icecube.daq.trigger.config.TriggerRegistry;
 
 import java.util.ArrayList;

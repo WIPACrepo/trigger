@@ -1,7 +1,6 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.trigger.ITriggerRequestPayload;
-
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.test.MockSourceID;
@@ -11,7 +10,6 @@ import icecube.daq.trigger.test.MockUTCTime;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import junit.textui.TestRunner;
 
 import org.apache.log4j.BasicConfigurator;

@@ -10,7 +10,6 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import junit.textui.TestRunner;
 
 import org.apache.log4j.BasicConfigurator;

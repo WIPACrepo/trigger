@@ -5,13 +5,11 @@ import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.test.MockTriggerRequest;
 
 import java.io.IOException;
-
 import java.util.zip.DataFormatException;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import junit.textui.TestRunner;
 
 import org.apache.log4j.BasicConfigurator;

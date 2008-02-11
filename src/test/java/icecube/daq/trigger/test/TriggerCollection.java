@@ -4,23 +4,16 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.RecordTypeRegistry;
 import icecube.daq.payload.SourceIdRegistry;
-
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
-
 import icecube.daq.trigger.algorithm.AbstractTrigger;
-
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.config.TriggerReadout;
-
 import icecube.daq.trigger.control.ITriggerHandler;
 
 import java.io.IOException;
-
 import java.nio.ByteBuffer;
-
 import java.nio.channels.WritableByteChannel;
-
 import java.util.ArrayList;
 import java.util.List;
 

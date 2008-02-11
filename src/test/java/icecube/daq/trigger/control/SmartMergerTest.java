@@ -1,9 +1,7 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.payload.SourceIdRegistry;
-
 import icecube.daq.trigger.IReadoutRequestElement;
-
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockReadoutRequestElement;
 
@@ -13,7 +11,6 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import junit.textui.TestRunner;
 
 import org.apache.log4j.BasicConfigurator;
@@ -871,7 +868,7 @@ public class SmartMergerTest
 
                 expList.add(newElem(stringType, firstTime, lt,
                                     smDomId, srcId));
-                                    
+
             }
             expList.add(large);
             if (lastTime > large.getLastTimeUTC().getUTCTimeAsLong()) {

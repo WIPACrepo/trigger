@@ -1,7 +1,6 @@
 package icecube.daq.trigger.test;
 
 import icecube.daq.common.DAQCmdInterface;
-
 import icecube.daq.io.DAQComponentObserver;
 import icecube.daq.io.ErrorState;
 import icecube.daq.io.NormalState;

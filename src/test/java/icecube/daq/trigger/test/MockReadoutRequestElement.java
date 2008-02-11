@@ -3,7 +3,6 @@ package icecube.daq.trigger.test;
 import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-
 import icecube.daq.trigger.IReadoutRequestElement;
 
 public class MockReadoutRequestElement

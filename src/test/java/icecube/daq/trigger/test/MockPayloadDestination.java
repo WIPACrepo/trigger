@@ -7,7 +7,6 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IWriteablePayload;
 
 import java.io.IOException;
-
 import java.util.Collection;
 
 public class MockPayloadDestination

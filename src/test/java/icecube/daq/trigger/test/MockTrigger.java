@@ -7,25 +7,19 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
-
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.IReadoutRequest;
 import icecube.daq.trigger.IReadoutRequestElement;
-
 import icecube.daq.trigger.config.ITriggerConfig;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.config.TriggerReadout;
-
 import icecube.daq.trigger.control.ITriggerControl;
 import icecube.daq.trigger.control.ITriggerHandler;
-
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-
 import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-
 import icecube.daq.trigger.monitor.ITriggerMonitor;
 import icecube.daq.trigger.monitor.TriggerMonitor;
 

@@ -6,13 +6,10 @@ import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadDestination;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.PayloadRegistry;
-
 import icecube.daq.splicer.Spliceable;
-
 import icecube.daq.trigger.IHitPayload;
 
 import java.io.IOException;
-
 import java.nio.ByteBuffer;
 
 public class MockHit
@@ -134,4 +131,3 @@ public class MockHit
         return "MockHit*" + getHitTimeUTC().getUTCTimeAsLong();
     }
 }
-

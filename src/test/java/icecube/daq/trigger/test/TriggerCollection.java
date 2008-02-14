@@ -179,6 +179,14 @@ public abstract class TriggerCollection
         }
     }
 
+    public void sendStops(WritableByteChannel[] tails)
+        throws IOException
+    {
+        for (int i = 0; i < tails.length; i++) {
+            sendStopMsg(tails[i]);
+        }
+    }
+
     static void sendTrigger(WritableByteChannel chan, long firstTime,
                             long lastTime, int trigType, int srcId)
         throws IOException

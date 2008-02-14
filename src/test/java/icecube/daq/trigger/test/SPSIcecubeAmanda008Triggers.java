@@ -139,9 +139,7 @@ public class SPSIcecubeAmanda008Triggers
     public void sendAmandaStops(WritableByteChannel[] tails)
         throws IOException
     {
-        for (int i = 0; i < tails.length; i++) {
-            sendStopMsg(tails[i]);
-        }
+        sendStops(tails);
     }
 
     public void sendInIceData(WritableByteChannel[] tails, int numObjs)
@@ -164,9 +162,7 @@ public class SPSIcecubeAmanda008Triggers
     public void sendInIceStops(WritableByteChannel[] tails)
         throws IOException
     {
-        for (int i = 0; i < tails.length; i++) {
-            sendStopMsg(tails[i]);
-        }
+        sendStops(tails);
     }
 
     class AmandaValidator

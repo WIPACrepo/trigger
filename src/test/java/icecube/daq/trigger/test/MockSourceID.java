@@ -23,7 +23,7 @@ public class MockSourceID
             return getClass().getName().compareTo(obj.getClass().getName());
         }
 
-        return id - ((ISourceID) obj).getSourceID();
+        return getSourceID() - ((ISourceID) obj).getSourceID();
     }
 
     public Object deepCopy()

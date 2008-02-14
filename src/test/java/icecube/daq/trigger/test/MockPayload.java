@@ -1,9 +1,9 @@
 package icecube.daq.trigger.test;
 
 import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IPayloadDestination;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
-import icecube.daq.payload.PayloadDestination;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 
 import java.io.IOException;
@@ -115,7 +115,7 @@ public abstract class MockPayload
     }
 
     public abstract int writePayload(boolean writeLoaded,
-                                     PayloadDestination dest)
+                                     IPayloadDestination dest)
         throws IOException;
 
     public abstract int writePayload(boolean writeLoaded, int offset,

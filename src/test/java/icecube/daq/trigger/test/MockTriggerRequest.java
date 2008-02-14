@@ -2,10 +2,10 @@ package icecube.daq.trigger.test;
 
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.IPayloadDestination;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
-import icecube.daq.payload.PayloadDestination;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.splicer.Spliceable;
@@ -207,7 +207,7 @@ public class MockTriggerRequest
         this.srcId = new MockSourceID(srcVal);
     }
 
-    public int writePayload(boolean writeLoaded, PayloadDestination dest)
+    public int writePayload(boolean writeLoaded, IPayloadDestination dest)
         throws IOException
     {
         throw new Error("Unimplemented");

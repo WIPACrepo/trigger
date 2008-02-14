@@ -1,7 +1,7 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.payload.ILoadablePayload;
-import icecube.daq.payload.PayloadDestination;
+import icecube.daq.payload.IPayloadDestination;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.test.MockPayload;
@@ -61,7 +61,7 @@ public class SimpleTriggerBagTest
         }
 
         public int writePayload(boolean writeLoaded,
-                                PayloadDestination dest)
+                                IPayloadDestination dest)
             throws IOException
         {
             throw new Error("Unimplemented");

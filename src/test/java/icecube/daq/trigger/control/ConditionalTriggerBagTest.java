@@ -1,6 +1,6 @@
 package icecube.daq.trigger.control;
 
-import icecube.daq.payload.PayloadDestination;
+import icecube.daq.payload.IPayloadDestination;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.algorithm.CoincidenceTrigger;
@@ -112,7 +112,7 @@ public class ConditionalTriggerBagTest
         }
 
         public int writePayload(boolean writeLoaded,
-                                PayloadDestination dest)
+                                IPayloadDestination dest)
             throws IOException
         {
             throw new Error("Unimplemented");

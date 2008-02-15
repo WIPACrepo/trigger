@@ -167,9 +167,7 @@ class DevNullAnalysis
             try {
                 pay.recycle();
             } catch (Exception ex) {
-                LOG.error("Couldn't recycle payload " +
-                          icecube.daq.payload.DebugDumper.toString(pay),
-                          ex);
+                LOG.error("Couldn't recycle payload " + pay, ex);
             }
         }
     }

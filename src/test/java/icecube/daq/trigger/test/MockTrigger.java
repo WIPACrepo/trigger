@@ -100,7 +100,7 @@ public class MockTrigger
         IHitPayload lastHit = hits.get(numberOfHits - 1);
 
         long offset =
-            lastHit.getHitTimeUTC().getOffsetUTCTime(0.1).getUTCTimeAsLong();
+            lastHit.getHitTimeUTC().getOffsetUTCTime(0.1).longValue();
         IPayload earliest = new MockHit(offset);
         setEarliestPayloadOfInterest(earliest);
 

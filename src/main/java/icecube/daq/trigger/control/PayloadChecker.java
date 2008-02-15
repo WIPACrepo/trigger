@@ -251,13 +251,12 @@ public abstract class PayloadChecker
                                                boolean verbose)
     {
         boolean isContained =
-            first0.getUTCTimeAsLong() <= first1.getUTCTimeAsLong() &&
-            last0.getUTCTimeAsLong() >= last1.getUTCTimeAsLong();
+            first0.longValue() <= first1.longValue() &&
+            last0.longValue() >= last1.longValue();
 
         if (!isContained && verbose) {
-            long firstDiff =
-                first0.getUTCTimeAsLong() - first1.getUTCTimeAsLong();
-            long lastDiff = last0.getUTCTimeAsLong() - last1.getUTCTimeAsLong();
+            long firstDiff = first0.longValue() - first1.longValue();
+            long lastDiff = last0.longValue() - last1.longValue();
 
             LOG.error(descr0 + " interval [" + first0 + "-" + last0 +
                       "] does not contain " + descr1 + " interval [" + first1 +
@@ -408,7 +407,7 @@ public abstract class PayloadChecker
             return false;
         }
 
-        if (first.getUTCTimeAsLong() > last.getUTCTimeAsLong()) {
+        if (first.longValue() > last.longValue()) {
             if (verbose) {
                 LOG.error("Bad " + descr + " interval [" + first + "-" + last +
                           "]");

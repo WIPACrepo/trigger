@@ -1,7 +1,7 @@
 /*
  * class: TriggerBag
  *
- * Version $Id: TriggerBag.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: TriggerBag.java 2657 2008-02-15 23:41:14Z dglo $
  *
  * Date: March 16 2005
  *
@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  *                                   +       {===============}
  *                                   +            Merge
  *
- * @version $Id: TriggerBag.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: TriggerBag.java 2657 2008-02-15 23:41:14Z dglo $
  * @author pat
  */
 public class TriggerBag
@@ -566,8 +566,8 @@ public class TriggerBag
         }
 
         return new long[] {
-            startTime.getUTCTimeAsLong(),
-            endTime.getUTCTimeAsLong()
+            startTime.longValue(),
+            endTime.longValue()
         };
     }
 

@@ -43,7 +43,7 @@ public abstract class MockPayload
             return -1;
         }
 
-        return (int) (mp.time.getUTCTimeAsLong() - time.getUTCTimeAsLong());
+        return (int) (mp.time.longValue() - time.longValue());
     }
 
     public abstract Object deepCopy();
@@ -75,7 +75,7 @@ public abstract class MockPayload
             return 0;
         }
 
-        final long timeVal = time.getUTCTimeAsLong();
+        final long timeVal = time.longValue();
 
         final long modValue = Integer.MAX_VALUE / 256;
 

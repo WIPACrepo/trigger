@@ -117,7 +117,7 @@ public class TriggerBagTest
         TriggerBag bag = new TriggerBag(type, cfgId, new MockSourceID(srcId));
         assertEquals("Bad size", 0, bag.size());
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
     }
 
     public void testAddHitLoadException()
@@ -154,7 +154,7 @@ public class TriggerBagTest
                      2, bag.getMonitor().getInputCountTotal());
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
 
         assertEquals("Bad number of messages",
                      1, appender.getNumberOfMessages());
@@ -179,7 +179,7 @@ public class TriggerBagTest
                      2, bag.getMonitor().getInputCountTotal());
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
 
         assertEquals("Bad number of messages",
                      1, appender.getNumberOfMessages());
@@ -204,7 +204,7 @@ public class TriggerBagTest
                      2, bag.getMonitor().getInputCountTotal());
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
     }
 
     public void testAddTR()
@@ -222,7 +222,7 @@ public class TriggerBagTest
                      2, bag.getMonitor().getInputCountTotal());
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
     }
 
     public void testAddHitAndMerge()
@@ -240,7 +240,7 @@ public class TriggerBagTest
                      2, bag.getMonitor().getInputCountTotal());
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
     }
 
     public void testAddTRAndMerge()
@@ -266,7 +266,7 @@ public class TriggerBagTest
                      3, bag.getMonitor().getInputCountTotal());
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
     }
 
     public void testSetTimeGate()
@@ -274,14 +274,14 @@ public class TriggerBagTest
         TriggerBag bag = new TriggerBag();
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
 
         final long newTime = 54321L;
 
         bag.setTimeGate(new MockUTCTime(newTime));
         assertNotNull("Null timeGate", bag.getTimeGate());
         assertEquals("Bad timeGate",
-                     newTime, bag.getTimeGate().getUTCTimeAsLong());
+                     newTime, bag.getTimeGate().longValue());
     }
 
     public void testNext()

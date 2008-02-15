@@ -1,7 +1,7 @@
 /*
  * class: TriggerInput
  *
- * Version $Id: TriggerInput.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: TriggerInput.java 2657 2008-02-15 23:41:14Z dglo $
  *
  * Date: May 2 2005
  *
@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides a simple implementation of ITriggerInput
  *
- * @version $Id: TriggerInput.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: TriggerInput.java 2657 2008-02-15 23:41:14Z dglo $
  * @author pat
  */
 public class TriggerInput
@@ -276,12 +276,12 @@ public class TriggerInput
             if (firstUTC == null) {
                 firstTime = -1L;
             } else {
-                firstTime = firstUTC.getUTCTimeAsLong();
+                firstTime = firstUTC.longValue();
             }
             if (lastUTC == null) {
                 lastTime = -1L;
             } else {
-                lastTime = lastUTC.getUTCTimeAsLong();
+                lastTime = lastUTC.longValue();
             }
         }
 

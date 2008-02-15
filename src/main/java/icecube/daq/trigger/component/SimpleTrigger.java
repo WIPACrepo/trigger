@@ -197,12 +197,12 @@ System.out.println("Hits/Trig initialized to " + numHitsPerTrigger);
 
         final IUTCTime time = hit.getHitTimeUTC();
 
-        long minTime = time.getUTCTimeAsLong() - offset;
+        long minTime = time.longValue() - offset;
         if (minTime < prevTime) {
             minTime = prevTime;
         }
 
-        final long maxTime = time.getUTCTimeAsLong() + offset;
+        final long maxTime = time.longValue() + offset;
         if (maxTime <= minTime) {
             ignoredCount++;
         } else {

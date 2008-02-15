@@ -116,7 +116,7 @@ public class GlobalTriggerBagTest
             new GlobalTriggerBag(type, cfgId, new MockSourceID(srcId));
         assertEquals("Bad size", 0, bag.size());
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
     }
 
     public void testAddLoadException()
@@ -153,7 +153,7 @@ public class GlobalTriggerBagTest
                      2, bag.getMonitor().getInputCountTotal());
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
     }
 
     public void testAddHits()
@@ -179,7 +179,7 @@ public class GlobalTriggerBagTest
                      2, bag.getMonitor().getInputCountTotal());
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
     }
 
     public void testAddTRAndMerge()
@@ -205,7 +205,7 @@ public class GlobalTriggerBagTest
                      3, bag.getMonitor().getInputCountTotal());
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
     }
 
     public void testSetTimeGate()
@@ -213,12 +213,12 @@ public class GlobalTriggerBagTest
         GlobalTriggerBag bag = new GlobalTriggerBag();
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
 
         bag.setTimeGate(new MockUTCTime(12345L));
         assertNotNull("Null timeGate", bag.getTimeGate());
         assertEquals("Bad timeGate",
-                     12345L, bag.getTimeGate().getUTCTimeAsLong());
+                     12345L, bag.getTimeGate().longValue());
 
         final int window = 1000;
 
@@ -227,7 +227,7 @@ public class GlobalTriggerBagTest
         assertNotNull("Null timeGate", bag.getTimeGate());
         assertEquals("Bad timeGate",
                      12345L + (window * 10),
-                     bag.getTimeGate().getUTCTimeAsLong());
+                     bag.getTimeGate().longValue());
     }
 
     public void testNext()

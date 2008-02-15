@@ -858,7 +858,7 @@ public class SmartMergerTest
                 IReadoutRequestElement.READOUT_TYPE_II_STRING;
 
             ArrayList expList = new ArrayList();
-            if (firstTime < large.getFirstTimeUTC().getUTCTimeAsLong()) {
+            if (firstTime < large.getFirstTimeUTC().longValue()) {
                 long lt;
                 if (lgFirstTime - 1L < lastTime) {
                     lt = lgFirstTime - 1L;
@@ -871,7 +871,7 @@ public class SmartMergerTest
 
             }
             expList.add(large);
-            if (lastTime > large.getLastTimeUTC().getUTCTimeAsLong()) {
+            if (lastTime > large.getLastTimeUTC().longValue()) {
                 long ft;
                 if (lgLastTime + 1L > firstTime) {
                     ft = lgLastTime + 1L;

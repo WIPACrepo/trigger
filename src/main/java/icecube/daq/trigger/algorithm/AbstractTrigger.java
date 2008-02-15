@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: AbstractTrigger.java 2657 2008-02-15 23:41:14Z dglo $
  *
  * Date: August 19 2005
  *
@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: AbstractTrigger.java 2657 2008-02-15 23:41:14Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor
@@ -458,8 +458,8 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
 
         if (log.isDebugEnabled()) {
             log.debug("Creating readout: Type = " + type);
-            log.debug("   FirstTime = " + timeMinus.getUTCTimeAsLong()/10.0
-                      + "  LastTime = " + timePlus.getUTCTimeAsLong()/10.0);
+            log.debug("   FirstTime = " + timeMinus.longValue()/10.0
+                      + "  LastTime = " + timePlus.longValue()/10.0);
         }
 
         return TriggerRequestPayloadFactory.createReadoutRequestElement(type, timeMinus, timePlus, domId, stringId);

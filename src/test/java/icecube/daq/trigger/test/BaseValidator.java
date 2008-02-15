@@ -15,7 +15,7 @@ public abstract class BaseValidator
             return -1L;
         }
 
-        return time.getUTCTimeAsLong();
+        return time.longValue();
     }
 
     static void dumpPayloadBytes(IWriteablePayload payload)

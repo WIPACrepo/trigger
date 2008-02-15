@@ -100,8 +100,8 @@ public class MockTriggerRequest
     public Object deepCopy()
     {
         MockTriggerRequest tr =
-            new MockTriggerRequest(firstTime.getUTCTimeAsLong(),
-                                   lastTime.getUTCTimeAsLong(), type, cfgId);
+            new MockTriggerRequest(firstTime.longValue(),
+                                   lastTime.longValue(), type, cfgId);
         if (srcId != null) {
             tr.srcId = (ISourceID) srcId.deepCopy();
         }

@@ -65,14 +65,14 @@ public class SorterTest
         list.add(new MockReadoutRequestElement(5, 27000L, 27999L, 555L, 567));
 
         assertEquals("Bad earliest time", tEarly,
-                     sorter.getUTCTimeEarliest(list).getUTCTimeAsLong());
+                     sorter.getUTCTimeEarliest(list).longValue());
         assertEquals("Bad earliest time", tEarly,
-                     sorter.getUTCTimeEarliest(list, false).getUTCTimeAsLong());
+                     sorter.getUTCTimeEarliest(list, false).longValue());
 
         assertEquals("Bad latest time", tLate,
-                     sorter.getUTCTimeLatest(list).getUTCTimeAsLong());
+                     sorter.getUTCTimeLatest(list).longValue());
         assertEquals("Bad latest time", tLate,
-                     sorter.getUTCTimeLatest(list, false).getUTCTimeAsLong());
+                     sorter.getUTCTimeLatest(list, false).longValue());
 
         final int listSize = list.size();
 
@@ -83,7 +83,7 @@ public class SorterTest
         for (Object obj : sortList) {
             MockReadoutRequestElement elem = (MockReadoutRequestElement) obj;
 
-            final long elemTime = elem.getFirstTimeUTC().getUTCTimeAsLong();
+            final long elemTime = elem.getFirstTimeUTC().longValue();
             if (prevTime > elemTime) {
                 fail("Previous time " + prevTime + " > " + elemTime +
                      " from " + elem);
@@ -121,10 +121,10 @@ public class SorterTest
         list.add(new MockTriggerRequest(27000L, 27999L));
 
         assertEquals("Bad earliest time", tEarly,
-                     sorter.getUTCTimeEarliest(list, true).getUTCTimeAsLong());
+                     sorter.getUTCTimeEarliest(list, true).longValue());
 
         assertEquals("Bad latest time", tLate,
-                     sorter.getUTCTimeLatest(list, true).getUTCTimeAsLong());
+                     sorter.getUTCTimeLatest(list, true).longValue());
     }
 
     public static void main(String[] args)

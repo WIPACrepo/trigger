@@ -80,18 +80,18 @@ public class TriggerInputTest
             req = (MockTriggerRequest) input.next();
             assertEquals("Unexpected first time from returned trigger " +
                          timeStr,
-                         firstMark, req.getFirstTimeUTC().getUTCTimeAsLong());
+                         firstMark, req.getFirstTimeUTC().longValue());
             assertEquals("Unexpected last time from returned trigger " +
                          timeStr,
-                         lastMark, req.getLastTimeUTC().getUTCTimeAsLong());
+                         lastMark, req.getLastTimeUTC().longValue());
 
             req = (MockTriggerRequest) input.next();
             assertEquals("Unexpected first time from returned trigger " +
                          timeStr,
-                         first1, req.getFirstTimeUTC().getUTCTimeAsLong());
+                         first1, req.getFirstTimeUTC().longValue());
             assertEquals("Unexpected last time from returned trigger " +
                          timeStr,
-                         last1, req.getLastTimeUTC().getUTCTimeAsLong());
+                         last1, req.getLastTimeUTC().longValue());
             assertEquals("Bad size for " + timeStr, 1, input.size());
         }
 
@@ -106,18 +106,18 @@ public class TriggerInputTest
             req = (MockTriggerRequest) input.next();
             assertEquals("Unexpected first time from returned trigger " +
                          timeStr,
-                         firstMark, req.getFirstTimeUTC().getUTCTimeAsLong());
+                         firstMark, req.getFirstTimeUTC().longValue());
             assertEquals("Unexpected last time from returned trigger " +
                          timeStr,
-                         lastMark, req.getLastTimeUTC().getUTCTimeAsLong());
+                         lastMark, req.getLastTimeUTC().longValue());
 
             req = (MockTriggerRequest) input.next();
             assertEquals("Unexpected first time from returned trigger " +
                          timeStr,
-                         first1, req.getFirstTimeUTC().getUTCTimeAsLong());
+                         first1, req.getFirstTimeUTC().longValue());
             assertEquals("Unexpected last time from returned trigger " +
                          timeStr,
-                         last1, req.getLastTimeUTC().getUTCTimeAsLong());
+                         last1, req.getLastTimeUTC().longValue());
         }
 
         assertEquals("Bad size for " + timeStr, 1, input.size());
@@ -125,9 +125,9 @@ public class TriggerInputTest
 
         req = (MockTriggerRequest) input.next();
         assertEquals("Unexpected first time from returned trigger " + timeStr,
-                     first2, req.getFirstTimeUTC().getUTCTimeAsLong());
+                     first2, req.getFirstTimeUTC().longValue());
         assertEquals("Unexpected last time from returned trigger " + timeStr,
-                     last2, req.getLastTimeUTC().getUTCTimeAsLong());
+                     last2, req.getLastTimeUTC().longValue());
 
         assertFalse("Didn't expect to have 'next' trigger for " + timeStr,
                     input.hasNext());

@@ -140,9 +140,9 @@ public class SimpleMergerTest
         IReadoutRequestElement elem =
             (IReadoutRequestElement) mergedList.get(0);
         assertEquals("Bad first time", aFirstTime,
-                     elem.getFirstTimeUTC().getUTCTimeAsLong());
+                     elem.getFirstTimeUTC().longValue());
         assertEquals("Bad last time", cLastTime,
-                     elem.getLastTimeUTC().getUTCTimeAsLong());
+                     elem.getLastTimeUTC().longValue());
         assertEquals("Bad DOM ID", aDomId,
                      elem.getDomID().longValue());
         assertEquals("Bad Source ID", aSrcId,
@@ -263,9 +263,9 @@ public class SimpleMergerTest
         IReadoutRequestElement elem =
             (IReadoutRequestElement) mergedList.get(0);
         assertEquals("Bad first time", aFirstTime,
-                     elem.getFirstTimeUTC().getUTCTimeAsLong());
+                     elem.getFirstTimeUTC().longValue());
         assertEquals("Bad last time", cLastTime,
-                     elem.getLastTimeUTC().getUTCTimeAsLong());
+                     elem.getLastTimeUTC().longValue());
         assertEquals("Bad DOM ID", aDomId,
                      elem.getDomID().longValue());
         assertEquals("Bad Source ID", aSrcId,
@@ -301,9 +301,9 @@ public class SimpleMergerTest
         IReadoutRequestElement elem =
             (IReadoutRequestElement) mergedList.get(0);
         assertEquals("Bad first time", aFirstTime,
-                     elem.getFirstTimeUTC().getUTCTimeAsLong());
+                     elem.getFirstTimeUTC().longValue());
         assertEquals("Bad last time", cLastTime,
-                     elem.getLastTimeUTC().getUTCTimeAsLong());
+                     elem.getLastTimeUTC().longValue());
         assertEquals("Bad DOM ID", aDomId,
                      elem.getDomID().longValue());
         assertEquals("Bad Source ID", aSrcId,

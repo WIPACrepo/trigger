@@ -60,7 +60,7 @@ public class DummyTriggerBagTest
             new DummyTriggerBag(type, cfgId, new MockSourceID(srcId));
         assertEquals("Bad size", 0, bag.size());
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
     }
 
     public void testAdd()
@@ -78,7 +78,7 @@ public class DummyTriggerBagTest
                      2, bag.size());
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
     }
 
     public void testSetTimeGate()
@@ -86,11 +86,11 @@ public class DummyTriggerBagTest
         DummyTriggerBag bag = new DummyTriggerBag();
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
 
         bag.setTimeGate(new MockUTCTime(12345L));
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
     }
 
     public void testNext()

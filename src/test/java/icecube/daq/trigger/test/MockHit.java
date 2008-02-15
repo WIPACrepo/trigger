@@ -46,7 +46,7 @@ public class MockHit
 
     public Object deepCopy()
     {
-        return new MockHit(getPayloadTimeUTC().getUTCTimeAsLong());
+        return new MockHit(getPayloadTimeUTC().longValue());
     }
 
     public boolean equals(Object obj)
@@ -128,6 +128,6 @@ public class MockHit
 
     public String toString()
     {
-        return "MockHit*" + getHitTimeUTC().getUTCTimeAsLong();
+        return "MockHit*" + getHitTimeUTC().longValue();
     }
 }

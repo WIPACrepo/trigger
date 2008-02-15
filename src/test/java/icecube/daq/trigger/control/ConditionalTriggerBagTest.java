@@ -176,7 +176,7 @@ public class ConditionalTriggerBagTest
             new ConditionalTriggerBag(type, cfgId, new MockSourceID(srcId));
         assertEquals("Bad size", 0, bag.size());
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
     }
 
     public void testAddHitLoadException()
@@ -233,7 +233,7 @@ public class ConditionalTriggerBagTest
         }
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
     }
 
     public void testAddTRAndMerge()
@@ -288,7 +288,7 @@ public class ConditionalTriggerBagTest
         }
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
     }
 
     public void testSetTimeGate()
@@ -296,14 +296,14 @@ public class ConditionalTriggerBagTest
         ConditionalTriggerBag bag = new ConditionalTriggerBag();
 
         assertNotNull("Null timeGate", bag.getTimeGate());
-        assertEquals("Bad timeGate", -1L, bag.getTimeGate().getUTCTimeAsLong());
+        assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
 
         final long newTime = 54321L;
 
         bag.setTimeGate(new MockUTCTime(newTime));
         assertNotNull("Null timeGate", bag.getTimeGate());
         assertEquals("Bad timeGate",
-                     newTime, bag.getTimeGate().getUTCTimeAsLong());
+                     newTime, bag.getTimeGate().longValue());
     }
 
     public void testContainsAllGetPayDFException()

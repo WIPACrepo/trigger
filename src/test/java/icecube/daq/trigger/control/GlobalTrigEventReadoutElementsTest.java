@@ -192,9 +192,9 @@ public class GlobalTrigEventReadoutElementsTest
 
             if (typeStr != null) {
                 assertEquals("Bad " + typeStr + " first time", firstTime,
-                             elem.getFirstTimeUTC().getUTCTimeAsLong());
+                             elem.getFirstTimeUTC().longValue());
                 assertEquals("Bad " + typeStr + " last time", lastTime,
-                             elem.getLastTimeUTC().getUTCTimeAsLong());
+                             elem.getLastTimeUTC().longValue());
                 assertEquals("Bad " + typeStr + " DOM ID", domId,
                              elem.getDomID().longValue());
                 assertEquals("Bad " + typeStr + " Source ID", srcId,
@@ -240,9 +240,9 @@ public class GlobalTrigEventReadoutElementsTest
                      IReadoutRequestElement.READOUT_TYPE_II_GLOBAL,
                      elem.getReadoutType());
         assertEquals("Bad first time", gFirstTime,
-                     elem.getFirstTimeUTC().getUTCTimeAsLong());
+                     elem.getFirstTimeUTC().longValue());
         assertEquals("Bad last time", hLastTime,
-                     elem.getLastTimeUTC().getUTCTimeAsLong());
+                     elem.getLastTimeUTC().longValue());
         assertEquals("Bad DOM ID", gDomId,
                      elem.getDomID().longValue());
         assertEquals("Bad Source ID", gSrcId,
@@ -316,9 +316,9 @@ public class GlobalTrigEventReadoutElementsTest
 
             if (typeStr != null) {
                 assertEquals("Bad " + typeStr + " first time", firstTime,
-                             elem.getFirstTimeUTC().getUTCTimeAsLong());
+                             elem.getFirstTimeUTC().longValue());
                 assertEquals("Bad " + typeStr + " last time", lastTime,
-                             elem.getLastTimeUTC().getUTCTimeAsLong());
+                             elem.getLastTimeUTC().longValue());
                 assertEquals("Bad " + typeStr + " DOM ID", domId,
                              elem.getDomID().longValue());
             }

@@ -54,7 +54,7 @@ public class DomSet
      * @return true if dom is in set, false otherwise
      */
     public boolean inSet(IDOMID dom) {
-        String domId = dom.getDomIDAsString().toLowerCase();
+        String domId = dom.toString().toLowerCase();
         return set.contains(domId);
     }
 

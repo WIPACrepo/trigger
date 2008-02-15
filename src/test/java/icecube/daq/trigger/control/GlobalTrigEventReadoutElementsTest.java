@@ -196,7 +196,7 @@ public class GlobalTrigEventReadoutElementsTest
                 assertEquals("Bad " + typeStr + " last time", lastTime,
                              elem.getLastTimeUTC().getUTCTimeAsLong());
                 assertEquals("Bad " + typeStr + " DOM ID", domId,
-                             elem.getDomID().getDomIDAsLong());
+                             elem.getDomID().longValue());
                 assertEquals("Bad " + typeStr + " Source ID", srcId,
                              elem.getSourceID().getSourceID());
             }
@@ -244,7 +244,7 @@ public class GlobalTrigEventReadoutElementsTest
         assertEquals("Bad last time", hLastTime,
                      elem.getLastTimeUTC().getUTCTimeAsLong());
         assertEquals("Bad DOM ID", gDomId,
-                     elem.getDomID().getDomIDAsLong());
+                     elem.getDomID().longValue());
         assertEquals("Bad Source ID", gSrcId,
                      elem.getSourceID().getSourceID());
     }
@@ -320,7 +320,7 @@ public class GlobalTrigEventReadoutElementsTest
                 assertEquals("Bad " + typeStr + " last time", lastTime,
                              elem.getLastTimeUTC().getUTCTimeAsLong());
                 assertEquals("Bad " + typeStr + " DOM ID", domId,
-                             elem.getDomID().getDomIDAsLong());
+                             elem.getDomID().longValue());
             }
         }
     }

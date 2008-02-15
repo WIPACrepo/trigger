@@ -20,7 +20,7 @@ public class MockDOMID
             return getClass().getName().compareTo(obj.getClass().getName());
         }
 
-        final long val = ((IDOMID) obj).getDomIDAsLong();
+        final long val = ((IDOMID) obj).longValue();
         if (domId < val) {
             return -1;
         } else if (domId > val) {
@@ -40,18 +40,9 @@ public class MockDOMID
         return compareTo(obj) == 0;
     }
 
-    public long getDomIDAsLong()
+    public long longValue()
     {
         return domId;
-    }
-
-    public String getDomIDAsString()
-    {
-        String str = Long.toHexString(domId);
-        while (str.length() < 12) {
-            str = "0" + str;
-        }
-        return str;
     }
 
     public int hashCode()
@@ -66,6 +57,10 @@ public class MockDOMID
 
     public String toString()
     {
-        return getDomIDAsString();
+        String str = Long.toHexString(domId);
+        while (str.length() < 12) {
+            str = "0" + str;
+        }
+        return str;
     }
 }

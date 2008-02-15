@@ -48,7 +48,7 @@ public abstract class PayloadChecker
      */
     private static String getDOMString(IDOMID dom)
     {
-        if (dom == null || dom.getDomIDAsLong() == 0xffffffffffffffffL) {
+        if (dom == null || dom.longValue() == 0xffffffffffffffffL) {
             return "";
         }
 

@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * TODO: Massively clean up this code!!!
  *
- * @version $Id: SimpleMerger.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: SimpleMerger.java 2656 2008-02-15 23:20:07Z dglo $
  * @author shseo
  */
 public class SimpleMerger
@@ -181,7 +181,7 @@ public class SimpleMerger
                 }else if(iReadoutType == IReadoutRequestElement.READOUT_TYPE_II_MODULE
                             || iReadoutType == IReadoutRequestElement.READOUT_TYPE_IT_MODULE)
                 {
-                    iDOMID_last = element_last.getDomID().getDomIDAsLong();
+                    iDOMID_last = element_last.getDomID().longValue();
                 }else{
                     log.error("wrong Readout type");
                 }
@@ -199,7 +199,7 @@ public class SimpleMerger
                         }else if(iReadoutType == IReadoutRequestElement.READOUT_TYPE_II_MODULE
                             || iReadoutType == IReadoutRequestElement.READOUT_TYPE_IT_MODULE)
                         {
-                            iDOMID_current = element_current.getDomID().getDomIDAsLong();
+                            iDOMID_current = element_current.getDomID().longValue();
                         }else{
                             log.error("wrong Readout type");
                         }

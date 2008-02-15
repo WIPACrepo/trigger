@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 2656 2008-02-15 23:20:07Z dglo $
  *
  * Date: August 19 2005
  *
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 2656 2008-02-15 23:20:07Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -159,7 +159,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         // check hit filter
         if (!hitFilter.useHit(hit)) {
             if (log.isDebugEnabled()) {
-                log.debug("Hit from DOM " + hit.getDOMID().getDomIDAsString() + " not in DomSet");
+                log.debug("Hit from DOM " + hit.getDOMID() + " not in DomSet");
             }
             return;
         }
@@ -231,7 +231,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
                         "Hit comes before start of sliding time window: Window is at "
                         + slidingTimeWindow.startTime() + " Hit is at "
                         + hitTimeUTC + " DOMId = "
-                        + hit.getDOMID().getDomIDAsString());
+                        + hit.getDOMID());
 
 
             /*

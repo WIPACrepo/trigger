@@ -268,7 +268,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                 throw new TimeOutOfOrderException("Hit comes before start of sliding time window: Window is at "
                                                                                  + slidingTimeWindow.startTime() + " Hit is at "
                                                                                  + hitTimeUTC + " DOMId = "
-                                                                                 + hit.getDOMID().getDomIDAsString());
+                                                                                 + hit.getDOMID());
             }
 
             /*
@@ -460,8 +460,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
         while(iter.hasNext()) {
             IHitPayload hit = (IHitPayload) iter.next();
-            int hitPosition = getTriggerHandler().getDOMRegistry().getStringMinor(hit.getDOMID().getDomIDAsString());
-            int hitString = getTriggerHandler().getDOMRegistry().getStringMajor(hit.getDOMID().getDomIDAsString());
+            int hitPosition = getTriggerHandler().getDOMRegistry().getStringMinor(hit.getDOMID().toString());
+            int hitString = getTriggerHandler().getDOMRegistry().getStringMajor(hit.getDOMID().toString());
             if(hitPosition<=numberOfVetoTopDoms||hitString!=string) {
                 if(log.isDebugEnabled())
                     log.debug("The event contains a hit in the veto region, vetoing event.");
@@ -474,13 +474,13 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
         while(iter2.hasNext()) {
             IHitPayload topHit = (IHitPayload) iter2.next();
-            int topPosition = getTriggerHandler().getDOMRegistry().getStringMinor(topHit.getDOMID().getDomIDAsString());
+            int topPosition = getTriggerHandler().getDOMRegistry().getStringMinor(topHit.getDOMID().toString());
             int numberOfHits = 0;
             Iterator iter3 = hitsWithinTriggerWindow.iterator();
 
             while(iter3.hasNext()) {
                 IHitPayload hit = (IHitPayload) iter3.next();
-                int hitPosition = getTriggerHandler().getDOMRegistry().getStringMinor(hit.getDOMID().getDomIDAsString());
+                int hitPosition = getTriggerHandler().getDOMRegistry().getStringMinor(hit.getDOMID().toString());
                 if(hitPosition>=topPosition && hitPosition<(topPosition+maxLength))
                     numberOfHits++;
             }
@@ -523,13 +523,13 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 //
 //        while(iter.hasNext()) {
 //            IHitPayload topHit = (IHitPayload) iter.next();
-//            int topPosition = getTriggerHandler().getDOMRegistry().getStringMinor(topHit.getDOMID().getDomIDAsString());
+//            int topPosition = getTriggerHandler().getDOMRegistry().getStringMinor(topHit.getDOMID().toString());
 //            int numberOfHits = 0;
 //            if(topPosition>numberOfVetoTopDoms) {
 //                Iterator iter2 = hitsWithinTriggerWindow.iterator();
 //                while(iter2.hasNext()) {
 //                    IHitPayload hit = (IHitPayload) iter2.next();
-//                    int hitPosition = getTriggerHandler().getDOMRegistry().getStringMinor(hit.getDOMID().getDomIDAsString());
+//                    int hitPosition = getTriggerHandler().getDOMRegistry().getStringMinor(hit.getDOMID().toString());
 //                    if(hitPosition>=topPosition && hitPosition<(topPosition+maxLength))
 //                        numberOfHits++;
 //                }

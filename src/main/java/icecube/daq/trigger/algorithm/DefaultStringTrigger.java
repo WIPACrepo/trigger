@@ -85,7 +85,7 @@ public class DefaultStringTrigger
         // check hit filter
         if (!hitFilter.useHit(hit)) {
             if (log.isDebugEnabled()) {
-                log.debug("Hit from DOM " + hit.getDOMID().getDomIDAsString() + " not in DomSet");
+                log.debug("Hit from DOM " + hit.getDOMID() + " not in DomSet");
             }
             return;
         }

@@ -262,7 +262,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
                 throw new TimeOutOfOrderException("Hit comes before start of sliding time window: Window is at "
                                                                                  + slidingTimeWindow.startTime() + " Hit is at "
                                                                                  + hitTimeUTC + " DOMId = "
-                                                                                 + hit.getDOMID().getDomIDAsString());
+                                                                                 + hit.getDOMID());
             }
 
             /*
@@ -457,7 +457,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	    int numberOfHits = 1;
 
 	    // get neighboring doms
-	    String centerId = center.getDOMID().getDomIDAsString();
+	    String centerId = center.getDOMID().toString();
 	    ArrayList<String> neighbors = getNeighboringDoms(centerId);
 
 	    // loop over all other hits and check to see if they are in the volume element
@@ -465,7 +465,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	    while (iter2.hasNext()) {
 		if (iter2 == iter1) continue;
 		IHitPayload neighbor = (IHitPayload) iter2.next();
-		String neighborId = neighbor.getDOMID().getDomIDAsString();
+		String neighborId = neighbor.getDOMID().toString();
 
 		if (neighbors.contains(neighborId)) {
 		    // we have a hit in the volume element

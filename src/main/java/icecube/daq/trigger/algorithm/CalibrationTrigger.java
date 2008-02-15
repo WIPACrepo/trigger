@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: CalibrationTrigger.java 2656 2008-02-15 23:20:07Z dglo $
  *
  * Date: August 27 2005
  *
@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: CalibrationTrigger.java 2656 2008-02-15 23:20:07Z dglo $
  * @author pat
  */
 public class CalibrationTrigger extends AbstractTrigger
@@ -116,7 +116,7 @@ public class CalibrationTrigger extends AbstractTrigger
         // check hit filter
         if (!hitFilter.useHit(hit)) {
             if (log.isDebugEnabled()) {
-                log.debug("Hit from DOM " + hit.getDOMID().getDomIDAsString() + " not in DomSet");
+                log.debug("Hit from DOM " + hit.getDOMID() + " not in DomSet");
             }
             return;
         }

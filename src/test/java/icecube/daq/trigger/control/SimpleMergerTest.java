@@ -144,7 +144,7 @@ public class SimpleMergerTest
         assertEquals("Bad last time", cLastTime,
                      elem.getLastTimeUTC().getUTCTimeAsLong());
         assertEquals("Bad DOM ID", aDomId,
-                     elem.getDomID().getDomIDAsLong());
+                     elem.getDomID().longValue());
         assertEquals("Bad Source ID", aSrcId,
                      elem.getSourceID().getSourceID());
     }
@@ -267,7 +267,7 @@ public class SimpleMergerTest
         assertEquals("Bad last time", cLastTime,
                      elem.getLastTimeUTC().getUTCTimeAsLong());
         assertEquals("Bad DOM ID", aDomId,
-                     elem.getDomID().getDomIDAsLong());
+                     elem.getDomID().longValue());
         assertEquals("Bad Source ID", aSrcId,
                      elem.getSourceID().getSourceID());
     }
@@ -305,7 +305,7 @@ public class SimpleMergerTest
         assertEquals("Bad last time", cLastTime,
                      elem.getLastTimeUTC().getUTCTimeAsLong());
         assertEquals("Bad DOM ID", aDomId,
-                     elem.getDomID().getDomIDAsLong());
+                     elem.getDomID().longValue());
         assertEquals("Bad Source ID", aSrcId,
                      elem.getSourceID().getSourceID());
     }

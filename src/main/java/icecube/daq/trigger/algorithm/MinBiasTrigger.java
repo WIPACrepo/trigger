@@ -1,7 +1,7 @@
 /*
  * class: MinBiasTrigger
  *
- * Version $Id: MinBiasTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: MinBiasTrigger.java 2656 2008-02-15 23:20:07Z dglo $
  *
  * Date: August 27 2005
  *
@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  * This class implements a simple minimum bias trigger. It simply counts hits and
  * applies a prescale for determining when a trigger should be formed.
  *
- * @version $Id: MinBiasTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: MinBiasTrigger.java 2656 2008-02-15 23:20:07Z dglo $
  * @author pat
  */
 public class MinBiasTrigger extends AbstractTrigger
@@ -106,7 +106,7 @@ public class MinBiasTrigger extends AbstractTrigger
         // check hit filter
         if (!hitFilter.useHit(hit)) {
             if (log.isDebugEnabled()) {
-                log.debug("Hit from DOM " + hit.getDOMID().getDomIDAsString() + " not in DomSet");
+                log.debug("Hit from DOM " + hit.getDOMID() + " not in DomSet");
             }
             return;
         }

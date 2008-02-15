@@ -74,7 +74,7 @@ public class HitFilter
         //    return false;
         //}
 
-        long domId = hit.getDOMID().getDomIDAsLong();
+        long domId = hit.getDOMID().longValue();
 
         if (domSetId == 0) {
             return domId == SYNC_DOMID;

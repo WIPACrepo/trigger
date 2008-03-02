@@ -71,7 +71,7 @@ public class MockHit
 
     public ByteBuffer getPayloadBacking()
     {
-        throw new Error("Unimplemented");
+        return null;
     }
 
     public int getPayloadInterfaceType()

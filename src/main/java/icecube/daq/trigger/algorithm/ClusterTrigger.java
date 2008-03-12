@@ -50,14 +50,11 @@ public class ClusterTrigger extends AbstractTrigger
     
     private LinkedList<IHitPayload> triggerQueue;
     
-    private final DOMRegistry domRegistry;
-
     private static final Logger logger = Logger.getLogger(ClusterTrigger.class);
     
     public ClusterTrigger()
     {
         triggerQueue    = new LinkedList<IHitPayload>();
-        domRegistry     = getTriggerHandler().getDOMRegistry();
         multiplicity    = 5;
         timeWindow      = 15000L;
         coherenceLength = 7;
@@ -112,13 +109,13 @@ public class ClusterTrigger extends AbstractTrigger
     
     private boolean processHitQueue()
     {
-        TreeMap<Integer, Integer> coherenceMap = new TreeMap<Integer, Integer>();
-
+    	final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
+        final TreeMap<Integer, Integer> coherenceMap = new TreeMap<Integer, Integer>();
         
         for (IHitPayload hit : triggerQueue)
         {
             long numericMBID = hit.getDOMID().longValue();
-            String mbid      = String.format("%012.12x", numericMBID);
+            String mbid      = String.format("%012x", numericMBID);
             int stringNumber = domRegistry.getStringMajor(mbid);
             int moduleNumber = domRegistry.getStringMinor(mbid);
             int m0 = Math.max(0, moduleNumber - coherenceUp);

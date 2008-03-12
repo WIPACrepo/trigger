@@ -176,6 +176,15 @@ public class TriggerComponent
      */
     public void configuring(String configName) throws DAQCompException {
 
+    	// Setup DOMRegistry as 1st thing to do ...
+    	try {
+    		triggerManager.setDOMRegistry(DOMRegistry.loadRegistry(globalConfigurationDir));
+    		log.info("loaded DOM registry");
+    	}
+    	catch (Exception ex) {
+    		throw new DAQCompException("Error loading DOM registry", ex);
+    	}
+    	
         // Lookup the trigger configuration
         String triggerConfiguration = null;
         String globalConfigurationFileName = globalConfigurationDir + "/" + configName + ".xml";
@@ -195,18 +204,7 @@ public class TriggerComponent
             trigger.setTriggerHandler(triggerManager);
         }
         triggerManager.addTriggers(currentTriggers);
-
-	// Setup DOMRegistry
-	try {
-	    triggerManager.setDOMRegistry(DOMRegistry.loadRegistry(globalConfigurationDir));
-	} catch (ParserConfigurationException pce) {
-	    log.error("Error loading the DOMRegistry", pce);
-	} catch (SAXException se) {
-	    log.error("Error loading the DOMRegistry", se);
-	} catch (IOException ioe) {
-	    log.error("Error loading the DOMRegistry", ioe);
-	}
-
+	
     }
 
     public ITriggerManager getTriggerManager(){
@@ -228,6 +226,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 2629 2008-02-11 05:48:36Z dglo $";
+	return "$Id: TriggerComponent.java 2789 2008-03-12 21:52:22Z kael $";
     }
 }

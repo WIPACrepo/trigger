@@ -23,7 +23,7 @@ import icecube.daq.util.DOMRegistry;
  * the following configuration parameters ...
  * <dl>
  * <dt>timeWindow</dt>
- * <dd>The time window, &Delta;t, express in "DAQ units" of 0.1 ns.</dd>
+ * <dd>The time window, &Delta;t, expressed in units of ns.</dd>
  * <dt>coherenceLength</dt>
  * <dd>The parameter M above - the cluster spatial search window.</dd>
  * <dt>multiplicity</dt>
@@ -67,7 +67,7 @@ public class ClusterTrigger extends AbstractTrigger
             IllegalParameterValueException
     {
         if (parameter.getName().equals("timeWindow"))
-            timeWindow = Long.parseLong(parameter.getValue());
+            timeWindow = Long.parseLong(parameter.getValue())/10L;
         else if (parameter.getName().equals("multiplicity"))
             multiplicity = Integer.parseInt(parameter.getValue());
         else if (parameter.getName().equals("coherenceLength"))

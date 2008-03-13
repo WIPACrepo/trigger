@@ -1,5 +1,6 @@
 package icecube.daq.trigger.algorithm;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
@@ -8,6 +9,7 @@ import org.apache.log4j.Logger;
 import icecube.daq.payload.IPayload;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -78,8 +80,7 @@ public class ClusterTrigger extends AbstractTrigger
     @Override
     public void flush()
     {
-        // TODO Auto-generated method stub
-
+        triggerQueue.clear();
     }
 
     @Override
@@ -89,19 +90,30 @@ public class ClusterTrigger extends AbstractTrigger
             throw new TriggerException(
                     "Payload object " + payload + " cannot be upcast to IHitPayload."
                     );
+        // This upcast should be safe now
+        IHitPayload hitPayload = (IHitPayload) payload;
+
+        // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
+        if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
+        
         triggerQueue.add((IHitPayload) payload);
         while (triggerQueue.size() > 1 &&
                 triggerQueue.getLast().getHitTimeUTC().longValue() - 
                 triggerQueue.getFirst().getHitTimeUTC().longValue() > timeWindow)
         {
             if (triggerQueue.size() > multiplicity && processHitQueue())
-            {
+            {   
                 formTrigger(triggerQueue, null, null);
                 triggerQueue.clear();
+                setEarliestPayloadOfInterest(new DummyPayload(
+                        hitPayload.getPayloadTimeUTC().getOffsetUTCTime(0.1)
+                        )
+                );
             }
             else
             {
                 triggerQueue.removeFirst();
+                setEarliestPayloadOfInterest(triggerQueue.peek());
             }
         }
 
@@ -111,6 +123,7 @@ public class ClusterTrigger extends AbstractTrigger
     {
     	final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
         final TreeMap<Integer, Integer> coherenceMap = new TreeMap<Integer, Integer>();
+        boolean trigger = false;
         
         for (IHitPayload hit : triggerQueue)
         {
@@ -118,7 +131,7 @@ public class ClusterTrigger extends AbstractTrigger
             String mbid      = String.format("%012x", numericMBID);
             int stringNumber = domRegistry.getStringMajor(mbid);
             int moduleNumber = domRegistry.getStringMinor(mbid);
-            int m0 = Math.max(0, moduleNumber - coherenceUp);
+            int m0 = Math.max( 1, moduleNumber - coherenceUp);
             int m1 = Math.min(60, moduleNumber + coherenceDown);
             for (int m = m0; m < m1; m++) 
             {
@@ -126,11 +139,28 @@ public class ClusterTrigger extends AbstractTrigger
                 int counter = 0;
                 if (coherenceMap.containsKey(logicalChannel)) counter = coherenceMap.get(logicalChannel);
                 counter += 1;
-                if (counter > multiplicity) return true;
-                coherenceMap.put(logicalChannel, counter + 1);
+                if (counter >= multiplicity) trigger = true;
+                coherenceMap.put(logicalChannel, counter);
             }
         }
-        return false;
+        
+        // No trigger so skip next operation
+        if (!trigger) return false;
+        
+        // Prune hits not in spatial cluster out of queue as these
+        // will be built into trigger very soon.
+        for (Iterator<IHitPayload> hitIt = triggerQueue.iterator(); hitIt.hasNext(); )
+        {
+            IHitPayload hit = hitIt.next();
+            long numericMBID = hit.getDOMID().longValue();
+            String mbid      = String.format("%012x", numericMBID);
+            int stringNumber = domRegistry.getStringMajor(mbid);
+            int moduleNumber = domRegistry.getStringMinor(mbid);
+            int logicalChannel = 64 * stringNumber + moduleNumber;
+            if (coherenceMap.get(logicalChannel) < multiplicity) hitIt.remove();
+        }
+        
+        return true;
     }
 
     public boolean isConfigured()

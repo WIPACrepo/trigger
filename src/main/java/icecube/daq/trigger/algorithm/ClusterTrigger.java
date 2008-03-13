@@ -67,7 +67,7 @@ public class ClusterTrigger extends AbstractTrigger
             IllegalParameterValueException
     {
         if (parameter.getName().equals("timeWindow"))
-            timeWindow = Long.parseLong(parameter.getValue())/10L;
+            timeWindow = Long.parseLong(parameter.getValue()) * 10L;
         else if (parameter.getName().equals("multiplicity"))
             multiplicity = Integer.parseInt(parameter.getValue());
         else if (parameter.getName().equals("coherenceLength"))

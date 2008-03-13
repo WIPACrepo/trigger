@@ -38,7 +38,13 @@ import icecube.daq.util.DOMRegistry;
  * Upon reaching this state, it must be checked whether the hits are clustered in space.
  * This is done by incrementing counters a length M/2 in either direction from the 
  * <i>logical channel</i> taking care not to cross string boundaries.  A space cluster will
- * also maintain counter[i] &ge; N for one or more <i>logical channel</i> locations.  
+ * also maintain counter[i] &ge; N for one or more <i>logical channel</i> locations.
+ * <p>
+ * The trigger that is formed should <i>only</i> contain those hits which are part of a
+ * space cluster.  That is, hits are not part of the trigger hit list unless they are
+ * clustered both in time and in space.  Simultaneous, multiple clusters will count toward
+ * a single single trigger and will not produce multiple triggers.
+ * 
  * @author kael
  *
  */
@@ -96,19 +102,16 @@ public class ClusterTrigger extends AbstractTrigger
         // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
         if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
         
-        triggerQueue.add((IHitPayload) payload);
-        while (triggerQueue.size() > 1 &&
-                triggerQueue.getLast().getHitTimeUTC().longValue() - 
-                triggerQueue.getFirst().getHitTimeUTC().longValue() > timeWindow)
+        while (triggerQueue.size() > 0 &&
+                hitPayload.getHitTimeUTC().longValue() -
+                triggerQueue.element().getHitTimeUTC().longValue() > timeWindow)
         {
             if (triggerQueue.size() > multiplicity && processHitQueue())
             {   
                 formTrigger(triggerQueue, null, null);
                 triggerQueue.clear();
-                setEarliestPayloadOfInterest(new DummyPayload(
-                        hitPayload.getPayloadTimeUTC().getOffsetUTCTime(0.1)
-                        )
-                );
+                setEarliestPayloadOfInterest(hitPayload);
+                return;
             }
             else
             {

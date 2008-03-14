@@ -102,6 +102,12 @@ public class ClusterTrigger extends AbstractTrigger
         // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
         if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
         
+        if (logger.isDebugEnabled()) 
+        {
+            logger.debug("Received eligible hit at UTC " + hitPayload.getHitTimeUTC() +
+                    " queue size = " + triggerQueue.size());
+        }
+        
         while (triggerQueue.size() > 0 &&
                 hitPayload.getHitTimeUTC().longValue() -
                 triggerQueue.element().getHitTimeUTC().longValue() > timeWindow)
@@ -116,7 +122,13 @@ public class ClusterTrigger extends AbstractTrigger
             else
             {
                 triggerQueue.removeFirst();
-                setEarliestPayloadOfInterest(triggerQueue.peek());
+                IHitPayload firstHitInQueue = triggerQueue.peek();
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Discard hit at " + firstHitInQueue.getHitTimeUTC() +
+                            " queue size = " + triggerQueue.size());
+                }
+                setEarliestPayloadOfInterest(firstHitInQueue);
             }
         }
 

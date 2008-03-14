@@ -175,7 +175,20 @@ public class ClusterTrigger extends AbstractTrigger
             int logicalChannel = 64 * stringNumber + moduleNumber;
             if (coherenceMap.containsKey(logicalChannel))
             {
-                if (coherenceMap.get(logicalChannel) < multiplicity) hitIt.remove();
+                int m = coherenceMap.get(logicalChannel);
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Logical channel [" + logicalChannel + "] = " + m);
+                }
+                if (m < multiplicity)
+                {
+                    if (logger.isDebugEnabled())
+                    {
+                        logger.debug("Removing logical channel " + logicalChannel + 
+                                " from trigger list");
+                    }
+                    hitIt.remove();
+                }
             }
             else
             {

@@ -173,7 +173,15 @@ public class ClusterTrigger extends AbstractTrigger
             int stringNumber = domRegistry.getStringMajor(mbid);
             int moduleNumber = domRegistry.getStringMinor(mbid);
             int logicalChannel = 64 * stringNumber + moduleNumber;
-            if (coherenceMap.get(logicalChannel) < multiplicity) hitIt.remove();
+            if (coherenceMap.containsKey(logicalChannel))
+            {
+                if (coherenceMap.get(logicalChannel) < multiplicity) hitIt.remove();
+            }
+            else
+            {
+                logger.warn("Logical channel not in coherenceMap: " + logicalChannel + 
+                        " - MBID: " + mbid);
+            }
         }
         
         return true;

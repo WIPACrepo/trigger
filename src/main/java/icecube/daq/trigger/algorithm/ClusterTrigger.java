@@ -121,11 +121,12 @@ public class ClusterTrigger extends AbstractTrigger
             }
             else
             {
-                triggerQueue.removeFirst();
+                IHitPayload discardedHit = triggerQueue.removeFirst();
                 IHitPayload firstHitInQueue = triggerQueue.peek();
+                if (firstHitInQueue == null) firstHitInQueue = hitPayload;
                 if (logger.isDebugEnabled())
                 {
-                    logger.debug("Discard hit at " + firstHitInQueue.getHitTimeUTC() +
+                    logger.debug("Discard hit at " + discardedHit.getHitTimeUTC() +
                             " queue size = " + triggerQueue.size());
                 }
                 setEarliestPayloadOfInterest(firstHitInQueue);

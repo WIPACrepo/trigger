@@ -117,7 +117,7 @@ public class ClusterTrigger extends AbstractTrigger
                 formTrigger(triggerQueue, null, null);
                 triggerQueue.clear();
                 setEarliestPayloadOfInterest(hitPayload);
-                return;
+                break;
             }
             else
             {
@@ -131,7 +131,7 @@ public class ClusterTrigger extends AbstractTrigger
                 setEarliestPayloadOfInterest(firstHitInQueue);
             }
         }
-
+        triggerQueue.add(hitPayload);
     }
     
     private boolean processHitQueue()

@@ -146,11 +146,12 @@ public class ClusterTrigger extends AbstractTrigger
         
         for (IHitPayload hit : triggerQueue)
         {
-            LogicalChannel ch = LogicalChannel.fromHitPayload(hit, domRegistry);
-            int m0 = Math.max( 1, ch.module - coherenceUp);
-            int m1 = Math.min(60, ch.module + coherenceDown);
+            LogicalChannel central = LogicalChannel.fromHitPayload(hit, domRegistry);
+            int m0 = Math.max( 1, central.module - coherenceUp);
+            int m1 = Math.min(60, central.module + coherenceDown);
             for (int m = m0; m <= m1; m++) 
             {
+                LogicalChannel ch = new LogicalChannel(central.string, m);
                 int counter = 0;
                 if (coherenceMap.containsKey(ch)) counter = coherenceMap.get(ch);
                 counter += 1;
@@ -170,20 +171,22 @@ public class ClusterTrigger extends AbstractTrigger
         // No trigger so skip next operation
         if (!trigger) return false;
         
+        // Remove sites in coherence map less than threshold
+        for (LogicalChannel ch : coherenceMap.keySet())
+        {
+            if (coherenceMap.get(ch) < multiplicity) coherenceMap.remove(ch);
+        }
+        
         // Prune hits not in spatial cluster out of queue as these
         // will be built into trigger very soon.
         for (Iterator<IHitPayload> hitIt = triggerQueue.iterator(); hitIt.hasNext(); )
         {
             IHitPayload hit = hitIt.next();
-            LogicalChannel logicalChannel = LogicalChannel.fromHitPayload(hit, domRegistry);
-            if (coherenceMap.containsKey(logicalChannel))
-            {
-                if (coherenceMap.get(logicalChannel) < multiplicity) hitIt.remove();
-            }
-            else
-            {
-                logger.warn("Logical channel not in coherenceMap: " + logicalChannel); 
-            }
+            LogicalChannel testCh = LogicalChannel.fromHitPayload(hit, domRegistry);
+            boolean clust = false;
+            for (LogicalChannel ch : coherenceMap.keySet())
+                if (ch.isNear(testCh, coherenceUp, coherenceDown)) clust = true;
+            if (!clust) hitIt.remove();
         }
         
         return true;
@@ -203,6 +206,19 @@ class LogicalChannel implements Comparable
     long numericMBID;
     String mbid;
     
+    LogicalChannel()
+    {
+        this(0, 0);
+    }
+    
+    LogicalChannel(int string, int module)
+    {
+        this.string = string;
+        this.module = module;
+        this.numericMBID = 0x00000000000L;
+        this.mbid   = "000000000000";
+    }
+    
     @Override
     public int hashCode()
     {
@@ -218,11 +234,29 @@ class LogicalChannel implements Comparable
         logCh.module        = registry.getStringMinor(logCh.mbid);
         return logCh;
     }
+    
+    /**
+     * Determine whether given channel is inside [up,down] radius of this
+     * channel.  
+     * @param ch test channel to compare
+     * @param up up radius
+     * @param down down radius
+     * @return true if within near neighborhood
+     */
+    boolean isNear(LogicalChannel ch, int up, int down)
+    {
+        if (this.string != ch.string) return false;
+        int intraStringSeparation = ch.module - this.module;
+        if ((intraStringSeparation < 0 && -intraStringSeparation <= up) ||
+                (intraStringSeparation > 0 && intraStringSeparation <= down) ||
+                intraStringSeparation == 0) return true;
+        return false;
+    }
 
     @Override
     public String toString()
     {
-        return String.format("(%d, %d) [%s]", string, module, mbid);
+        return String.format("(%d, %d)", string, module);
     }
 
     public int compareTo(Object o)

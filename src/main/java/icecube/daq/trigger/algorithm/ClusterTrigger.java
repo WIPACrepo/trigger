@@ -1,19 +1,18 @@
 package icecube.daq.trigger.algorithm;
 
+import icecube.daq.payload.IPayload;
+import icecube.daq.trigger.IHitPayload;
+import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.exceptions.UnknownParameterException;
+import icecube.daq.util.DOMRegistry;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
-
-import icecube.daq.payload.IPayload;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.config.TriggerParameter;
-import icecube.daq.trigger.control.DummyPayload;
-import icecube.daq.trigger.exceptions.IllegalParameterValueException;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.util.DOMRegistry;
 
 /**
  * The ClusterTrigger is a variant on the <i>StringTrigger</i> theme.  The ClusterTrigger
@@ -55,6 +54,7 @@ public class ClusterTrigger extends AbstractTrigger
     private int  coherenceLength;
     private int  coherenceUp;
     private int  coherenceDown;
+    private boolean configured;
     
     private LinkedList<IHitPayload> triggerQueue;
     
@@ -68,6 +68,7 @@ public class ClusterTrigger extends AbstractTrigger
         coherenceLength = 7;
         coherenceUp     = (coherenceLength - 1) / 2;
         coherenceDown   = coherenceLength / 2;
+        configured      = false;
     }
     
     @Override
@@ -81,6 +82,7 @@ public class ClusterTrigger extends AbstractTrigger
         else if (parameter.getName().equals("coherenceLength"))
             coherenceLength = Integer.parseInt(parameter.getValue());
         super.addParameter(parameter);
+        configured = true;
     }
 
     @Override
@@ -112,7 +114,7 @@ public class ClusterTrigger extends AbstractTrigger
                 hitPayload.getHitTimeUTC().longValue() -
                 triggerQueue.element().getHitTimeUTC().longValue() > timeWindow)
         {
-            if (triggerQueue.size() > multiplicity && processHitQueue())
+            if (triggerQueue.size() >= multiplicity && processHitQueue())
             {   
                 formTrigger(triggerQueue, null, null);
                 triggerQueue.clear();
@@ -121,14 +123,9 @@ public class ClusterTrigger extends AbstractTrigger
             }
             else
             {
-                IHitPayload discardedHit = triggerQueue.removeFirst();
+                triggerQueue.removeFirst();
                 IHitPayload firstHitInQueue = triggerQueue.peek();
                 if (firstHitInQueue == null) firstHitInQueue = hitPayload;
-                if (logger.isDebugEnabled())
-                {
-                    logger.debug("Discard hit at " + discardedHit.getHitTimeUTC() +
-                            " queue size = " + triggerQueue.size());
-                }
                 setEarliestPayloadOfInterest(firstHitInQueue);
             }
         }
@@ -138,25 +135,21 @@ public class ClusterTrigger extends AbstractTrigger
     private boolean processHitQueue()
     {
     	final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
-        final TreeMap<Integer, Integer> coherenceMap = new TreeMap<Integer, Integer>();
+        final TreeMap<LogicalChannel, Integer> coherenceMap = new TreeMap<LogicalChannel, Integer>();
         boolean trigger = false;
         
         for (IHitPayload hit : triggerQueue)
         {
-            long numericMBID = hit.getDOMID().longValue();
-            String mbid      = String.format("%012x", numericMBID);
-            int stringNumber = domRegistry.getStringMajor(mbid);
-            int moduleNumber = domRegistry.getStringMinor(mbid);
-            int m0 = Math.max( 1, moduleNumber - coherenceUp);
-            int m1 = Math.min(60, moduleNumber + coherenceDown);
-            for (int m = m0; m < m1; m++) 
+            LogicalChannel ch = LogicalChannel.fromHitPayload(hit, domRegistry);
+            int m0 = Math.max( 1, ch.module - coherenceUp);
+            int m1 = Math.min(60, ch.module + coherenceDown);
+            for (int m = m0; m <= m1; m++) 
             {
-                int logicalChannel = 64 * stringNumber + m;
                 int counter = 0;
-                if (coherenceMap.containsKey(logicalChannel)) counter = coherenceMap.get(logicalChannel);
+                if (coherenceMap.containsKey(ch)) counter = coherenceMap.get(ch);
                 counter += 1;
                 if (counter >= multiplicity) trigger = true;
-                coherenceMap.put(logicalChannel, counter);
+                coherenceMap.put(ch, counter);
             }
         }
         
@@ -168,32 +161,14 @@ public class ClusterTrigger extends AbstractTrigger
         for (Iterator<IHitPayload> hitIt = triggerQueue.iterator(); hitIt.hasNext(); )
         {
             IHitPayload hit = hitIt.next();
-            long numericMBID = hit.getDOMID().longValue();
-            String mbid      = String.format("%012x", numericMBID);
-            int stringNumber = domRegistry.getStringMajor(mbid);
-            int moduleNumber = domRegistry.getStringMinor(mbid);
-            int logicalChannel = 64 * stringNumber + moduleNumber;
+            LogicalChannel logicalChannel = LogicalChannel.fromHitPayload(hit, domRegistry);
             if (coherenceMap.containsKey(logicalChannel))
             {
-                int m = coherenceMap.get(logicalChannel);
-                if (logger.isDebugEnabled())
-                {
-                    logger.debug("Logical channel [" + logicalChannel + "] = " + m);
-                }
-                if (m < multiplicity)
-                {
-                    if (logger.isDebugEnabled())
-                    {
-                        logger.debug("Removing logical channel " + logicalChannel + 
-                                " from trigger list");
-                    }
-                    hitIt.remove();
-                }
+                if (coherenceMap.get(logicalChannel) < multiplicity) hitIt.remove();
             }
             else
             {
-                logger.warn("Logical channel not in coherenceMap: " + logicalChannel + 
-                        " - MBID: " + mbid);
+                logger.warn("Logical channel not in coherenceMap: " + logicalChannel); 
             }
         }
         
@@ -202,8 +177,41 @@ public class ClusterTrigger extends AbstractTrigger
 
     public boolean isConfigured()
     {
-        // TODO Auto-generated method stub
-        return true;
+        return configured;
     }
 
+}
+
+class LogicalChannel
+{
+    int string;
+    int module;
+    long numericMBID;
+    String mbid;
+    
+    @Override
+    public int hashCode()
+    {
+        return 64 * string + module - 1;
+    }
+    
+    static LogicalChannel fromHitPayload(IHitPayload hit, DOMRegistry registry)
+    {
+        LogicalChannel logCh = new LogicalChannel();
+        logCh.numericMBID   = hit.getDOMID().longValue();
+        logCh.mbid          = String.format("%012x", logCh.numericMBID);
+        logCh.string        = registry.getStringMajor(logCh.mbid);
+        logCh.module        = registry.getStringMinor(logCh.mbid);
+        return logCh;
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format("(%d, %d) [%s]", string, module, mbid);
+    }
+    
+    
+    
+    
 }

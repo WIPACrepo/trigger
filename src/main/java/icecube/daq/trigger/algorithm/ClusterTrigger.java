@@ -8,8 +8,10 @@ import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.util.DOMRegistry;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
@@ -106,7 +108,11 @@ public class ClusterTrigger extends AbstractTrigger
         
         if (logger.isDebugEnabled()) 
         {
-            logger.debug("Received eligible hit at UTC " + hitPayload.getHitTimeUTC() +
+            LogicalChannel logical = LogicalChannel.fromHitPayload(
+                    hitPayload, getTriggerHandler().getDOMRegistry());
+            logger.debug("Received hit at UTC " + 
+                    hitPayload.getHitTimeUTC() +
+                    " - logical channel " + logical + 
                     " queue size = " + triggerQueue.size());
         }
         
@@ -150,6 +156,14 @@ public class ClusterTrigger extends AbstractTrigger
                 counter += 1;
                 if (counter >= multiplicity) trigger = true;
                 coherenceMap.put(ch, counter);
+            }
+        }
+        
+        if (logger.isDebugEnabled())
+        {
+            for (LogicalChannel ch : coherenceMap.keySet())
+            {
+                logger.debug("Logical channel " + ch + " : " + coherenceMap.get(ch));
             }
         }
         

@@ -172,10 +172,8 @@ public class ClusterTrigger extends AbstractTrigger
         if (!trigger) return false;
         
         // Remove sites in coherence map less than threshold
-        for (LogicalChannel ch : coherenceMap.keySet())
-        {
-            if (coherenceMap.get(ch) < multiplicity) coherenceMap.remove(ch);
-        }
+        for (Iterator<Integer> it = coherenceMap.values().iterator(); it.hasNext(); )
+            if (it.next() < multiplicity) it.remove();
         
         // Prune hits not in spatial cluster out of queue as these
         // will be built into trigger very soon.

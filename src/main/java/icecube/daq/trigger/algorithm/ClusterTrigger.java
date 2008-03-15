@@ -182,7 +182,7 @@ public class ClusterTrigger extends AbstractTrigger
 
 }
 
-class LogicalChannel
+class LogicalChannel implements Comparable
 {
     int string;
     int module;
@@ -209,6 +209,22 @@ class LogicalChannel
     public String toString()
     {
         return String.format("(%d, %d) [%s]", string, module, mbid);
+    }
+
+    public int compareTo(Object o)
+    {
+        if (hashCode() < o.hashCode())
+            return -1;
+        else if (hashCode() > o.hashCode())
+            return 1;
+        else
+            return 0;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        return hashCode() == obj.hashCode();
     }
     
     

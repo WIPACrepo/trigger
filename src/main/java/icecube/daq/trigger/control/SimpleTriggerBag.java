@@ -112,7 +112,7 @@ public class SimpleTriggerBag
 
         // add to internal list
         payloadList.add(payload);
-        Collections.sort((List) payloadList);
+        Collections.sort((List) payloadList, new SpliceableComparator());
 
         if (log.isDebugEnabled()) {
             log.debug("TriggerList has " + payloadList.size() + " payloads");

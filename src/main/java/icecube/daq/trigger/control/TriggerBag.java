@@ -1,7 +1,7 @@
 /*
  * class: TriggerBag
  *
- * Version $Id: TriggerBag.java 2657 2008-02-15 23:41:14Z dglo $
+ * Version $Id: TriggerBag.java 2818 2008-03-18 18:42:01Z dglo $
  *
  * Date: March 16 2005
  *
@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  *                                   +       {===============}
  *                                   +            Merge
  *
- * @version $Id: TriggerBag.java 2657 2008-02-15 23:41:14Z dglo $
+ * @version $Id: TriggerBag.java 2818 2008-03-18 18:42:01Z dglo $
  * @author pat
  */
 public class TriggerBag
@@ -215,7 +215,7 @@ public class TriggerBag
                     log.debug("Lets merge " + mergeList.size() + " payloads");
                 }
                 // sort to be safe
-                Collections.sort(mergeList);
+                Collections.sort(mergeList, new SpliceableComparator());
                 merge(mergeList);
             } else {
                 if (log.isDebugEnabled()) {
@@ -225,7 +225,7 @@ public class TriggerBag
             }
 
             // sort list
-            Collections.sort((List) payloadList);
+            Collections.sort((List) payloadList, new SpliceableComparator());
 
         }
 

@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 2657 2008-02-15 23:41:14Z dglo $
+ * Version $Id: AbstractTrigger.java 2862 2008-03-28 15:03:05Z toale $
  *
  * Date: August 19 2005
  *
@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 2657 2008-02-15 23:41:14Z dglo $
+ * @version $Id: AbstractTrigger.java 2862 2008-03-28 15:03:05Z toale $
  * @author pat
  */
 public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor
@@ -84,9 +84,9 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
     public static final int LC_DOWN   = 0x20;
     public static final int LC_UP     = 0x40;
 
-    private int triggerType;
-    private int triggerConfigId;
-    private ISourceID sourceId;
+    protected int triggerType;
+    protected int triggerConfigId;
+    protected ISourceID sourceId;
     protected String triggerName;
     private List readouts = new ArrayList();
     private List parameters = new ArrayList();

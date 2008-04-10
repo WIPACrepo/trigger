@@ -216,7 +216,20 @@ public class MockTriggerRequest
     public int writePayload(boolean writeLoaded, int offset, ByteBuffer buf)
         throws IOException
     {
-        throw new Error("Unimplemented");
+        if (writeLoaded) {
+            throw new Error("Cannot write loaded payload");
+        } else if (offset != 0) {
+            throw new Error("Unexpected non-zero offset is " + offset);
+        } else if (buf.limit() < offset + LENGTH) {
+            throw new Error("Expected " + (offset + LENGTH) +
+                            "-byte buffer, not " + buf.limit());
+        }
+
+        for (char ch = 1; ch < LENGTH; ch++) {
+            buf.putChar(offset + (int) ch - 1, (char) ch);
+        }
+
+        return LENGTH;
     }
 
     public String toString()

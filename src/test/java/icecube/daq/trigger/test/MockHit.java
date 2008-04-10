@@ -122,7 +122,17 @@ public class MockHit
     public int writePayload(boolean writeLoaded, int offset, ByteBuffer buf)
         throws IOException
     {
-        System.err.println("Not writing MockHit to ByteBuffer");
+        if (writeLoaded) {
+            throw new Error("Cannot write loaded payload");
+        } else if (buf.limit() < offset + LENGTH) {
+            throw new Error("Expected " + (offset + LENGTH) +
+                            "-byte buffer, not " + buf.limit());
+        }
+
+        for (char ch = 1; ch < LENGTH; ch++) {
+            buf.putChar(offset + (int) ch - 1, (char) ch);
+        }
+
         return LENGTH;
     }
 

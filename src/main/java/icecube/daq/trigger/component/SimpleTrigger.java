@@ -1,6 +1,8 @@
 package icecube.daq.trigger.component;
 
-import icecube.daq.io.PayloadDestinationOutputEngine;
+import icecube.daq.io.DAQComponentOutputProcess;
+import icecube.daq.io.OutputChannel;
+import icecube.daq.io.PayloadOutputEngine;
 import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQCompServer;
@@ -9,9 +11,9 @@ import icecube.daq.juggler.component.DAQConnector;
 import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
 import icecube.daq.payload.IByteBufferCache;
-import icecube.daq.payload.IPayloadDestinationCollection;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
@@ -32,6 +34,7 @@ import icecube.daq.trigger.impl.HitPayload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -80,7 +83,8 @@ class Analysis
     private MasterPayloadFactory factory;
     private TriggerRequestPayloadFactory trigReqFactory;
 
-    private IPayloadDestinationCollection payloadDest;
+    private DAQComponentOutputProcess trigOut;
+    private OutputChannel trigChan;
 
     private Splicer splicer;
     private int listOffset;
@@ -98,8 +102,6 @@ class Analysis
     Analysis(MasterPayloadFactory factory)
     {
         this.factory = factory;
-
-System.out.println("Hits/Trig initialized to " + numHitsPerTrigger);
 
         final int type = PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST;
         trigReqFactory =
@@ -195,6 +197,16 @@ System.out.println("Hits/Trig initialized to " + numHitsPerTrigger);
     {
         final long offset = TIME_WINDOW / 20L;
 
+        if (trigChan == null) {
+            if (trigOut == null) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Trigger output has not been set");
+                }
+            }
+
+            trigChan = trigOut.getChannel();
+        }
+
         final IUTCTime time = hit.getHitTimeUTC();
 
         long minTime = time.longValue() - offset;
@@ -236,10 +248,17 @@ System.out.println("Hits/Trig initialized to " + numHitsPerTrigger);
                 (triggerCount, trigType, trigCfgId, SOURCE_ID, minObj, maxObj,
                  hits, rReq);
 
+            ByteBuffer trigBuf =
+                ByteBuffer.allocate(trigReq.getPayloadLength());
             try {
-                payloadDest.writePayload(trigReq);
+                ((IWriteablePayload) trigReq).writePayload(false, 0, trigBuf);
             } catch (IOException ioe) {
-                LOG.error("Couldn't write trigger", ioe);
+                LOG.error("Couldn't create payload", ioe);
+                trigBuf = null;
+            }
+
+            if (trigBuf != null) {
+                trigChan.receiveByteBuffer(trigBuf);
             }
 
             trigReq.recycle();
@@ -251,9 +270,10 @@ System.out.println("Hits/Trig initialized to " + numHitsPerTrigger);
         this.numHitsPerTrigger = numHitsPerTrigger;
     }
 
-    void setOutput(IPayloadDestinationCollection payloadDest)
+    void setOutput(DAQComponentOutputProcess trigOut)
     {
-        this.payloadDest = payloadDest;
+        this.trigOut = trigOut;
+        trigChan = null;
     }
 
     void setSplicer(Splicer splicer)
@@ -307,7 +327,7 @@ public class SimpleTrigger
     private static final String COMPONENT_NAME = "simpleTrigger";
 
     private SpliceablePayloadReader hitReader;
-    private PayloadDestinationOutputEngine gtWriter;
+    private PayloadOutputEngine gtWriter;
     private Analysis analysis;
 
     /**
@@ -344,12 +364,11 @@ public class SimpleTrigger
         }
         addMonitoredEngine(DAQConnector.TYPE_STRING_HIT, hitReader);
 
-        gtWriter = new PayloadDestinationOutputEngine(COMPONENT_NAME, compId,
-                                                      "gtOutput");
+        gtWriter = new PayloadOutputEngine(COMPONENT_NAME, compId, "gtOutput");
         addMonitoredEngine(DAQConnector.TYPE_TRIGGER, gtWriter, true);
 
-        gtWriter.registerBufferManager(trigMgr);
-        analysis.setOutput(gtWriter.getPayloadDestinationCollection());
+        //gtWriter.registerBufferManager(trigMgr);
+        analysis.setOutput(gtWriter);
     }
 
     /**

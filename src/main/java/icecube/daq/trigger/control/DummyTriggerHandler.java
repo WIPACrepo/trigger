@@ -10,11 +10,13 @@
 
 package icecube.daq.trigger.control;
 
+import icecube.daq.io.DAQComponentOutputProcess;
+import icecube.daq.io.OutputChannel;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.IPayloadOutput;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.trigger.IHitPayload;
@@ -26,6 +28,7 @@ import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Vector;
 
@@ -53,9 +56,14 @@ public class DummyTriggerHandler
     private ITriggerBag triggerBag;
 
     /**
-     * output destination
+     * output process
      */
-    private IPayloadOutput payloadOutput;
+    private DAQComponentOutputProcess payloadOutput;
+
+    /**
+     * output channel
+     */
+    private OutputChannel outChan;
 
     /**
      * Default output factory
@@ -144,11 +152,11 @@ public class DummyTriggerHandler
      * sets payload output
      * @param payloadOutput destination of payloads
      */
-    public void setPayloadOutput(IPayloadOutput payloadOutput) {
+    public void setPayloadOutput(DAQComponentOutputProcess payloadOutput) {
         this.payloadOutput = payloadOutput;
     }
 
-    IPayloadOutput getPayloadOutput()
+    DAQComponentOutputProcess getPayloadOutput()
     {
         return payloadOutput;
     }
@@ -246,22 +254,32 @@ public class DummyTriggerHandler
         while (triggerBag.hasNext()) {
             ITriggerRequestPayload trigger = (ITriggerRequestPayload) triggerBag.next();
 
-            // issue the trigger
-            RuntimeException rte;
+            // write trigger to a ByteBuffer
+            ByteBuffer trigBuf =
+                ByteBuffer.allocate(trigger.getPayloadLength());
             try {
-                log.info("Writing Trigger...");
-                payloadOutput.writePayload(trigger);
-                rte = null;
-            } catch (IOException e) {
-                log.error("Failed to write triggers");
-                rte = new RuntimeException(e);
+                ((IWriteablePayload) trigger).writePayload(false, 0, trigBuf);
+            } catch (IOException ioe) {
+                log.error("Couldn't create payload", ioe);
+                trigBuf = null;
             }
+
+            // if we haven't already, get the output channel
+            if (outChan == null) {
+                if (payloadOutput == null) {
+                    log.error("Trigger destination has not been set");
+                } else {
+                    outChan = payloadOutput.getChannel();
+                }
+            }
+
+            //--ship the trigger to its destination
+            if (trigBuf != null) {
+                outChan.receiveByteBuffer(trigBuf);
+            }
+
             // now recycle it
             trigger.recycle();
-
-            if (rte != null) {
-                throw rte;
-            }
 
         }
 

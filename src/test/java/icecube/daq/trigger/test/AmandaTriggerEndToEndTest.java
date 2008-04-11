@@ -119,9 +119,11 @@ public class AmandaTriggerEndToEndTest
 
         trigCfg.addToHandler(trigMgr);
 
-        MockPayloadDestination dest = new MockPayloadDestination();
-        dest.setValidator(trigCfg.getAmandaValidator());
-        trigMgr.setPayloadOutput(dest);
+        MockOutputProcess outProc = new MockOutputProcess();
+        outProc.setOutputChannel(new MockOutputChannel());
+        outProc.setValidator(trigCfg.getAmandaValidator());
+
+        trigMgr.setPayloadOutput(outProc);
 
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
         trigMgr.setSplicer(splicer);
@@ -163,7 +165,7 @@ public class AmandaTriggerEndToEndTest
 
         assertEquals("Bad number of payloads written",
                      trigCfg.getExpectedNumberOfAmandaPayloads(numObjs),
-                     dest.getNumberWritten());
+                     outProc.getNumberWritten());
 
         if (appender.getLevel().equals(org.apache.log4j.Level.ALL)) {
             appender.clear();

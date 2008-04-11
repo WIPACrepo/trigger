@@ -1,7 +1,8 @@
 package icecube.daq.trigger.component;
 
 import icecube.daq.common.DAQCmdInterface;
-import icecube.daq.io.PayloadDestinationOutputEngine;
+import icecube.daq.io.DAQComponentOutputProcess;
+import icecube.daq.io.PayloadOutputEngine;
 import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQComponent;
@@ -49,7 +50,7 @@ public class TriggerComponent
     private ITriggerManager triggerManager;
     private Splicer splicer;
     private SpliceablePayloadReader inputEngine;
-    private PayloadDestinationOutputEngine outputEngine;
+    private DAQComponentOutputProcess outputEngine;
 
     private String globalConfigurationDir;
     private String triggerConfigFileName;
@@ -151,10 +152,9 @@ public class TriggerComponent
             }
         }
         addMonitoredEngine(inputType, inputEngine);
-        outputEngine = new PayloadDestinationOutputEngine(name, id,
-                                                          name + "OutputEngine");
-        outputEngine.registerBufferManager(bufferCache);
-        triggerManager.setPayloadOutput(outputEngine.getPayloadDestinationCollection());
+        outputEngine = new PayloadOutputEngine(name, id, name + "OutputEngine");
+        //outputEngine.registerBufferManager(bufferCache);
+        triggerManager.setPayloadOutput(outputEngine);
         addMonitoredEngine(outputType, outputEngine);
 
     }
@@ -226,6 +226,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 2789 2008-03-12 21:52:22Z kael $";
+	return "$Id: TriggerComponent.java 2904 2008-04-11 17:38:14Z dglo $";
     }
 }

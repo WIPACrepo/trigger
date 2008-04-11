@@ -1,7 +1,7 @@
 /*
  * class: AbstractGlobalTrigger
  *
- * Version $Id: AbstractGlobalTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: AbstractGlobalTrigger.java 2904 2008-04-11 17:38:14Z dglo $
  *
  * Date: August 30 2005
  *
@@ -11,7 +11,6 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.ILoadablePayload;
-import icecube.daq.payload.PayloadDestination;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.control.ConditionalTriggerBag;
 import icecube.daq.trigger.control.DummyPayload;
@@ -24,7 +23,7 @@ import java.util.List;
 /**
  * This class is to provide a common method for all triggers in GT.
  *
- * @version $Id: AbstractGlobalTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: AbstractGlobalTrigger.java 2904 2008-04-11 17:38:14Z dglo $
  * @author shseo
  */
 public abstract class AbstractGlobalTrigger extends AbstractTrigger
@@ -35,10 +34,6 @@ public abstract class AbstractGlobalTrigger extends AbstractTrigger
 
     private List mListSelectedTriggers = new ArrayList();
     protected List mListOutputTriggers = new ArrayList();
-    /**
-     * output destination
-     */
-    private PayloadDestination payloadDestination;
     private int miMaxTimeGateWindowForCoincidenceTrigger;
 
     protected ConditionalTriggerBag mtConditionalTriggerBag;
@@ -77,15 +72,6 @@ public abstract class AbstractGlobalTrigger extends AbstractTrigger
             //--The firstTime here to set DummyPayload is the earliestReadoutTime.
             DummyPayload dummy = new DummyPayload(mtGlobalTrigEventPayload.getFirstTimeUTC());
             setEarliestPayloadOfInterest(dummy);
-/*
-            if(null != payloadDestination){
-                try {
-                    payloadDestination.writePayload(mtGlobalTrigEventPayload);
-                } catch (IOException e) {
-                    log.error("Couldn't write payload", e);
-                }
-            }
-*/
 
             //--every wrapped trigger should be reported to GlobalTrigBag.
             reportTrigger((ILoadablePayload) mtGlobalTrigEventPayload);
@@ -115,11 +101,6 @@ public abstract class AbstractGlobalTrigger extends AbstractTrigger
         }
 
         return mListOutputTriggers;
-    }
-
-    public void setPayloadDestination(PayloadDestination payloadDestination)
-    {
-        this.payloadDestination = payloadDestination;
     }
 
     public ConditionalTriggerBag getBag(){

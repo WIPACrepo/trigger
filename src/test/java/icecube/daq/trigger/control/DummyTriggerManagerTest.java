@@ -8,7 +8,8 @@ import icecube.daq.splicer.StrandTail;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
-import icecube.daq.trigger.test.MockPayloadDestination;
+import icecube.daq.trigger.test.MockOutputChannel;
+import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockSourceID;
 import icecube.daq.trigger.test.MockSplicer;
 import icecube.daq.trigger.test.MockTrigger;
@@ -68,8 +69,10 @@ public class DummyTriggerManagerTest
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
         trigMgr.setSplicer(splicer);
 
-        MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadOutput(dest);
+        MockOutputProcess outProc = new MockOutputProcess();
+        outProc.setOutputChannel(new MockOutputChannel());
+
+        trigMgr.setPayloadOutput(outProc);
 
         StrandTail[] tails = new StrandTail[numTails];
         for (int i = 0; i < tails.length; i++) {
@@ -97,7 +100,7 @@ public class DummyTriggerManagerTest
         splicer.stop();
 
         assertEquals("Bad number of payloads written",
-                     13, dest.getNumberWritten());
+                     13, outProc.getNumberWritten());
 
         for (int i = 0; i < appender.getNumberOfMessages(); i++) {
             String msg = (String) appender.getMessage(i);
@@ -147,8 +150,10 @@ public class DummyTriggerManagerTest
         MockSplicer splicer = new MockSplicer(trigMgr);
         trigMgr.setSplicer(splicer);
 
-        MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadOutput(dest);
+        MockOutputProcess outProc = new MockOutputProcess();
+        outProc.setOutputChannel(new MockOutputChannel());
+
+        trigMgr.setPayloadOutput(outProc);
 
         trigMgr.setOutputFactory(new TriggerRequestPayloadFactory());
 
@@ -180,7 +185,7 @@ public class DummyTriggerManagerTest
         splicer.stop();
 
         assertEquals("Bad number of payloads written",
-                     13, dest.getNumberWritten());
+                     13, outProc.getNumberWritten());
 
         trigMgr.reset();
     }

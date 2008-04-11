@@ -190,11 +190,7 @@ public class DummyTriggerManager
         if (log.isInfoEnabled()) {
             log.info("Received Splicer DISPOSED");
         }
-        try {
-            getPayloadOutput().close();
-        } catch (IOException e) {
-            log.error("Error closing PayloadOutput", e);
-        }
+        getPayloadOutput().destroyProcessor();
     }
 
     /**
@@ -206,11 +202,7 @@ public class DummyTriggerManager
         if (log.isErrorEnabled()) {
             log.error("Received Splicer FAILED");
         }
-        try {
-            getPayloadOutput().close();
-        } catch (IOException e) {
-            log.error("Error closing PayloadOutput", e);
-        }
+        getPayloadOutput().destroyProcessor();
     }
 
     /**
@@ -240,11 +232,7 @@ public class DummyTriggerManager
         if (log.isInfoEnabled()) {
             log.info("Received Splicer STOPPED");
         }
-        try {
-            getPayloadOutput().stop();
-        } catch (IOException e) {
-            log.error("Error closing PayloadOutput", e);
-        }
+        getPayloadOutput().forcedStopProcessing();
     }
 
     /**

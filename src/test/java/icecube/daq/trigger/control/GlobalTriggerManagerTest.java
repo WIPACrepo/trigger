@@ -9,7 +9,8 @@ import icecube.daq.splicer.StrandTail;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
-import icecube.daq.trigger.test.MockPayloadDestination;
+import icecube.daq.trigger.test.MockOutputChannel;
+import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockReadoutRequest;
 import icecube.daq.trigger.test.MockSplicer;
 import icecube.daq.trigger.test.MockTrigger;
@@ -109,8 +110,10 @@ public class GlobalTriggerManagerTest
     public void runWithRealSplicer(GlobalTriggerManager trigMgr)
         throws SplicerException
     {
-        MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadOutput(dest);
+        MockOutputProcess outProc = new MockOutputProcess();
+        outProc.setOutputChannel(new MockOutputChannel());
+
+        trigMgr.setPayloadOutput(outProc);
 
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
         trigMgr.setSplicer(splicer);
@@ -118,7 +121,7 @@ public class GlobalTriggerManagerTest
         loadAndRun(trigMgr, 10, 10);
 
         assertEquals("Bad number of payloads written",
-                     100, dest.getNumberWritten());
+                     100, outProc.getNumberWritten());
 
         for (int i = 0; i < appender.getNumberOfMessages(); i++) {
             String msg = (String) appender.getMessage(i);
@@ -173,8 +176,10 @@ public class GlobalTriggerManagerTest
         GlobalTriggerManager trigMgr = new GlobalTriggerManager();
         trigMgr.setReportingThreshold(10);
 
-        MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadOutput(dest);
+        MockOutputProcess outProc = new MockOutputProcess();
+        outProc.setOutputChannel(new MockOutputChannel());
+
+        trigMgr.setPayloadOutput(outProc);
 
         MockSplicer splicer = new MockSplicer(trigMgr);
         trigMgr.setSplicer(splicer);
@@ -182,7 +187,7 @@ public class GlobalTriggerManagerTest
         loadAndRun(trigMgr, 10, 10);
 
         assertEquals("Bad number of payloads written",
-                     100, dest.getNumberWritten());
+                     100, outProc.getNumberWritten());
 
         trigMgr.reset();
     }

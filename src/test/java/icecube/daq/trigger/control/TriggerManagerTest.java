@@ -9,7 +9,8 @@ import icecube.daq.splicer.StrandTail;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
-import icecube.daq.trigger.test.MockPayloadDestination;
+import icecube.daq.trigger.test.MockOutputChannel;
+import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockSourceID;
 import icecube.daq.trigger.test.MockSplicer;
 import icecube.daq.trigger.test.MockTrigger;
@@ -72,8 +73,10 @@ public class TriggerManagerTest
     public void runWithRealSplicer(TriggerManager trigMgr)
         throws SplicerException
     {
-        MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadOutput(dest);
+        MockOutputProcess outProc = new MockOutputProcess();
+        outProc.setOutputChannel(new MockOutputChannel());
+
+        trigMgr.setPayloadOutput(outProc);
 
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
         trigMgr.setSplicer(splicer);
@@ -81,7 +84,7 @@ public class TriggerManagerTest
         loadAndRun(trigMgr);
 
         assertEquals("Bad number of payloads written",
-                     12, dest.getNumberWritten());
+                     12, outProc.getNumberWritten());
 
         for (int i = 0; i < appender.getNumberOfMessages(); i++) {
             String msg = (String) appender.getMessage(i);
@@ -138,8 +141,10 @@ public class TriggerManagerTest
     {
         TriggerManager trigMgr = new TriggerManager();
 
-        MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadOutput(dest);
+        MockOutputProcess outProc = new MockOutputProcess();
+        outProc.setOutputChannel(new MockOutputChannel());
+
+        trigMgr.setPayloadOutput(outProc);
 
         MockSplicer splicer = new MockSplicer(trigMgr);
         trigMgr.setSplicer(splicer);
@@ -149,7 +154,7 @@ public class TriggerManagerTest
         loadAndRun(trigMgr);
 
         assertEquals("Bad number of payloads written",
-                     12, dest.getNumberWritten());
+                     12, outProc.getNumberWritten());
 
         trigMgr.reset();
     }

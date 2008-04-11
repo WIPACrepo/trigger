@@ -112,9 +112,11 @@ public class InIceTriggerEndToEndTest
 
         trigCfg.addToHandler(trigMgr);
 
-        MockPayloadDestination dest = new MockPayloadDestination();
-        dest.setValidator(trigCfg.getInIceValidator());
-        trigMgr.setPayloadOutput(dest);
+        MockOutputProcess outProc = new MockOutputProcess();
+        outProc.setOutputChannel(new MockOutputChannel());
+        outProc.setValidator(trigCfg.getInIceValidator());
+
+        trigMgr.setPayloadOutput(outProc);
 
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
         trigMgr.setSplicer(splicer);
@@ -156,7 +158,7 @@ public class InIceTriggerEndToEndTest
 
         assertEquals("Bad number of payloads written",
                      trigCfg.getExpectedNumberOfInIcePayloads(numObjs),
-                     dest.getNumberWritten());
+                     outProc.getNumberWritten());
 
         if (appender.getLevel().equals(org.apache.log4j.Level.ALL)) {
             appender.clear();

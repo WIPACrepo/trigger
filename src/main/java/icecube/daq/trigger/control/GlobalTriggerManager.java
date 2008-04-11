@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: GlobalTriggerManager.java 2904 2008-04-11 17:38:14Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager
@@ -226,20 +226,12 @@ public class GlobalTriggerManager
         if (log.isErrorEnabled()) {
             log.error("Received Splicer FAILED");
         }
-        try {
-            getPayloadOutput().close();
-        } catch (IOException e) {
-            log.error("Error closing PayloadOutput", e);
-        }
+        getPayloadOutput().forcedStopProcessing();
     }
 
     public void stopped(SplicerChangedEvent event) {
         log.info("Received Splicer STOPPED, flushing...");
-        try {
-            getPayloadOutput().stop();
-        } catch (IOException e) {
-            log.error("Error closing PayloadOutput");
-        }
+        getPayloadOutput().forcedStopProcessing();
     }
 
     public void starting(SplicerChangedEvent event) {
@@ -274,11 +266,7 @@ public class GlobalTriggerManager
         if (log.isInfoEnabled()) {
             log.info("Received Splicer DISPOSED");
         }
-        try {
-            getPayloadOutput().close();
-        } catch (IOException e) {
-            log.error("Error closing PayloadOutput", e);
-        }
+        getPayloadOutput().destroyProcessor();
     }
 
     public void flush() {

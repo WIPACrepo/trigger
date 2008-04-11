@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: TriggerHandler.java 2904 2008-04-11 17:38:14Z dglo $
  *
  * Date: October 25 2004
  *
@@ -10,9 +10,10 @@
 
 package icecube.daq.trigger.control;
 
+import icecube.daq.io.DAQComponentOutputProcess;
+import icecube.daq.io.OutputChannel;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.IPayloadOutput;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
@@ -32,6 +33,7 @@ import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -43,7 +45,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: TriggerHandler.java 2904 2008-04-11 17:38:14Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -71,9 +73,14 @@ public class TriggerHandler
     private int count;
 
     /**
-     * output destination
+     * output process
      */
-    private IPayloadOutput payloadOutput;
+    private DAQComponentOutputProcess payloadOutput;
+
+    /**
+     * output channel
+     */
+    private OutputChannel outChan;
 
     /**
      * earliest thing of interest to the analysis
@@ -250,11 +257,11 @@ public class TriggerHandler
      * sets payload output
      * @param payloadOutput destination of payloads
      */
-    public void setPayloadOutput(IPayloadOutput payloadOutput) {
+    public void setPayloadOutput(DAQComponentOutputProcess payloadOutput) {
         this.payloadOutput = payloadOutput;
     }
 
-    public IPayloadOutput getPayloadOutput()
+    public DAQComponentOutputProcess getPayloadOutput()
     {
         return payloadOutput;
     }
@@ -478,20 +485,36 @@ public class TriggerHandler
                 }
             }
 
-            RuntimeException rte;
+            // write trigger to a ByteBuffer
+            ByteBuffer trigBuf =
+                ByteBuffer.allocate(payload.getPayloadLength());
             try {
-                payloadOutput.writePayload(payload);
-                rte = null;
-            } catch (IOException e) {
-                log.error("Failed to write triggers");
-                rte = new RuntimeException(e);
+                ((IWriteablePayload) payload).writePayload(false, 0, trigBuf);
+            } catch (IOException ioe) {
+                log.error("Couldn't create payload", ioe);
+                trigBuf = null;
             }
+
+            // if we haven't already, get the output channel
+            if (outChan == null) {
+                if (payloadOutput == null) {
+                    log.error("Trigger destination has not been set");
+                } else {
+                    outChan = payloadOutput.getChannel();
+                    if (outChan == null) {
+                        throw new Error("Output channel has not been set in " +
+                                        payloadOutput);
+                    }
+                }
+            }
+
+            //--ship the trigger to its destination
+            if (trigBuf != null) {
+                outChan.receiveByteBuffer(trigBuf);
+            }
+
             // now recycle it
             payload.recycle();
-
-            if (rte != null) {
-                throw rte;
-            }
 
         }
 

@@ -7,8 +7,9 @@ import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
+import icecube.daq.trigger.test.MockOutputChannel;
+import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockPayload;
-import icecube.daq.trigger.test.MockPayloadDestination;
 import icecube.daq.trigger.test.MockSourceID;
 import icecube.daq.trigger.test.MockTrigger;
 import icecube.daq.trigger.test.MockTriggerRequest;
@@ -113,52 +114,30 @@ public class DummyTriggerHandlerTest
     {
         DummyTriggerHandler trigMgr = new DummyTriggerHandler();
 
-        MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadOutput(dest);
+        MockOutputProcess outProc = new MockOutputProcess();
+        outProc.setOutputChannel(new MockOutputChannel());
+
+        trigMgr.setPayloadOutput(outProc);
 
         trigMgr.issueTriggers();
         assertEquals("Bad number of payloads written",
-                    0, dest.getNumberWritten());
-    }
-
-    public void testIssueException()
-    {
-        DummyTriggerHandler trigMgr = new DummyTriggerHandler();
-
-        MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadOutput(dest);
-
-        dest.setWritePayloadException(new IOException("Test"));
-
-        trigMgr.addToTriggerBag(new MockTriggerRequest(100000L, 111111L, 0, 0));
-
-        try {
-            trigMgr.issueTriggers();
-            fail("issueTriggers() should have gotten an exception");
-        } catch (RuntimeException rte) {
-            // expect this to fail
-        }
-        assertEquals("Bad number of payloads written",
-                     0, dest.getNumberWritten());
-
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
-        appender.clear();
+                    0, outProc.getNumberWritten());
     }
 
     public void testIssueOne()
     {
         DummyTriggerHandler trigMgr = new DummyTriggerHandler();
 
-        MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadOutput(dest);
+        MockOutputProcess outProc = new MockOutputProcess();
+        outProc.setOutputChannel(new MockOutputChannel());
+
+        trigMgr.setPayloadOutput(outProc);
 
         trigMgr.addToTriggerBag(new MockTriggerRequest(100000L, 111111L, 0, 0));
 
         trigMgr.issueTriggers();
         assertEquals("Bad number of payloads written",
-                     1, dest.getNumberWritten());
+                     1, outProc.getNumberWritten());
     }
 
     public void testFlushEmpty()
@@ -172,8 +151,10 @@ public class DummyTriggerHandlerTest
     {
         DummyTriggerHandler trigMgr = new DummyTriggerHandler();
 
-        MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadOutput(dest);
+        MockOutputProcess outProc = new MockOutputProcess();
+        outProc.setOutputChannel(new MockOutputChannel());
+
+        trigMgr.setPayloadOutput(outProc);
 
         trigMgr.addToTriggerBag(new MockTriggerRequest(100000L, 111111L, 0, 0));
 
@@ -184,8 +165,10 @@ public class DummyTriggerHandlerTest
     {
         DummyTriggerHandler trigMgr = new DummyTriggerHandler();
 
-        MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadOutput(dest);
+        MockOutputProcess outProc = new MockOutputProcess();
+        outProc.setOutputChannel(new MockOutputChannel());
+
+        trigMgr.setPayloadOutput(outProc);
 
         MockHit hit = new MockHit(345678L);
 
@@ -196,15 +179,17 @@ public class DummyTriggerHandlerTest
         assertEquals("Bad number of input payloads",
                      1, trigMgr.getCount());
         assertEquals("Bad number of triggers written",
-                     1, dest.getNumberWritten());
+                     1, outProc.getNumberWritten());
     }
 
     public void testProcessManyHitsAndReset()
     {
         DummyTriggerHandler trigMgr = new DummyTriggerHandler();
 
-        MockPayloadDestination dest = new MockPayloadDestination();
-        trigMgr.setPayloadOutput(dest);
+        MockOutputProcess outProc = new MockOutputProcess();
+        outProc.setOutputChannel(new MockOutputChannel());
+
+        trigMgr.setPayloadOutput(outProc);
 
         final int numHitsPerTrigger = 6;
         trigMgr.setNumHitsPerTrigger(numHitsPerTrigger);
@@ -220,7 +205,8 @@ public class DummyTriggerHandlerTest
                          i + 1, trigMgr.getCount());
             assertEquals("Bad number of triggers written (" + (i + 1) +
                          " hits)",
-                         (i / numHitsPerTrigger) + 1, dest.getNumberWritten());
+                         (i / numHitsPerTrigger) + 1,
+                         outProc.getNumberWritten());
         }
 
         trigMgr.reset();

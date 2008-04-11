@@ -1,5 +1,6 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.io.OutputChannel;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.MasterPayloadFactory;
@@ -25,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class StringTriggerHandler
         extends TriggerHandler
-        implements IStringTriggerHandler {
+        implements IStringTriggerHandler, OutputChannel {
 
     private static final Log log = LogFactory.getLog(StringTriggerHandler.class);
 
@@ -126,15 +127,17 @@ public class StringTriggerHandler
         }
     }
 
-    /**
-     * This method is called when the destination is closed.
-     */
-    public void destinationClosed() {
-        flush();
-    }
-
     private ITriggerControl createDefaultTrigger() {
         return new DefaultStringTrigger();
     }
 
+    public OutputChannel getChannel()
+    {
+        return this;
+    }
+
+    public void sendLastAndStop()
+    {
+        flush();
+    }
 }

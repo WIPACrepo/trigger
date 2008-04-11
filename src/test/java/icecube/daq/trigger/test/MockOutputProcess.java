@@ -3,6 +3,7 @@ package icecube.daq.trigger.test;
 import icecube.daq.io.DAQComponentObserver;
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.OutputChannel;
+import icecube.daq.io.QueuedOutputChannel;
 import icecube.daq.payload.IByteBufferCache;
 
 import java.io.IOException;
@@ -18,14 +19,14 @@ public class MockOutputProcess
     {
     }
 
-    public OutputChannel addDataChannel(WritableByteChannel chan,
-                                        IByteBufferCache bufCache)
+    public QueuedOutputChannel addDataChannel(WritableByteChannel chan,
+                                              IByteBufferCache bufCache)
     {
         throw new Error("Unimplemented");
     }
 
-    public OutputChannel connect(IByteBufferCache bufCache,
-                                 WritableByteChannel chan, int srcId)
+    public QueuedOutputChannel connect(IByteBufferCache bufCache,
+                                       WritableByteChannel chan, int srcId)
         throws IOException
     {
         throw new Error("Unimplemented");

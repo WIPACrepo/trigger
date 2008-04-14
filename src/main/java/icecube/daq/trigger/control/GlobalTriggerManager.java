@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java 2904 2008-04-11 17:38:14Z dglo $
+ * @version $Id: GlobalTriggerManager.java 2922 2008-04-14 22:08:46Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager
@@ -226,7 +226,7 @@ public class GlobalTriggerManager
         if (log.isErrorEnabled()) {
             log.error("Received Splicer FAILED");
         }
-        getPayloadOutput().forcedStopProcessing();
+        getPayloadOutput().sendLastAndStop();
     }
 
     public void stopped(SplicerChangedEvent event) {

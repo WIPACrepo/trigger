@@ -2,7 +2,7 @@ package icecube.daq.trigger.component;
 
 import icecube.daq.common.DAQCmdInterface;
 import icecube.daq.io.DAQComponentOutputProcess;
-import icecube.daq.io.PayloadOutputEngine;
+import icecube.daq.io.SimpleOutputEngine;
 import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQComponent;
@@ -152,7 +152,7 @@ public class TriggerComponent
             }
         }
         addMonitoredEngine(inputType, inputEngine);
-        outputEngine = new PayloadOutputEngine(name, id, name + "OutputEngine");
+        outputEngine = new SimpleOutputEngine(name, id, name + "OutputEngine");
         //outputEngine.registerBufferManager(bufferCache);
         triggerManager.setPayloadOutput(outputEngine);
         addMonitoredEngine(outputType, outputEngine);
@@ -226,6 +226,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 2904 2008-04-11 17:38:14Z dglo $";
+	return "$Id: TriggerComponent.java 2921 2008-04-14 21:23:54Z dglo $";
     }
 }

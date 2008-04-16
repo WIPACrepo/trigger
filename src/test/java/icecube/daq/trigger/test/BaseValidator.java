@@ -2,13 +2,21 @@ package icecube.daq.trigger.test;
 
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
+import icecube.daq.payload.MasterPayloadFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public abstract class BaseValidator
     implements PayloadValidator
 {
+    private static final Log LOG = LogFactory.getLog(BaseValidator.class);
+
+    private MasterPayloadFactory factory;
+
     static long getUTC(IUTCTime time)
     {
         if (time == null) {
@@ -44,5 +52,22 @@ public abstract class BaseValidator
         }
 
         System.err.println("LEN "+len+" HEX "+strbuf.toString());
+    }
+
+    public void validate(ByteBuffer payBuf)
+    {
+        if (factory == null) {
+            factory = new MasterPayloadFactory();
+        }
+
+        IWriteablePayload payload;
+        try {
+            payload = factory.createPayload(0, payBuf, false);
+        } catch (Exception ex) {
+            LOG.error("Couldn't validate byte buffer", ex);
+            return;
+        }
+
+        validate(payload);
     }
 }

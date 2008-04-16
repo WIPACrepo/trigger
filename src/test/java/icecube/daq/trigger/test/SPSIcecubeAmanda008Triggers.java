@@ -1,7 +1,6 @@
 package icecube.daq.trigger.test;
 
 import icecube.daq.payload.IWriteablePayload;
-import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.PayloadChecker;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
@@ -15,24 +14,16 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * Triggers described in sps-icecube-amanda-008.xml
  */
 public class SPSIcecubeAmanda008Triggers
     extends TriggerCollection
 {
-    private static final Log LOG =
-        LogFactory.getLog(SPSIcecubeAmanda008Triggers.class);
-
     private boolean checkSequentialTimes;
     private int numHitsPerTrigger;
     private long timeBase;
     private long timeStep;
-
-    private MasterPayloadFactory factory;
 
     public SPSIcecubeAmanda008Triggers()
         throws TriggerException
@@ -190,23 +181,6 @@ public class SPSIcecubeAmanda008Triggers
             nextEnd = nextStart;
         }
 
-        public void validate(ByteBuffer payBuf)
-        {
-            if (factory == null) {
-                factory = new MasterPayloadFactory();
-            }
-
-            IWriteablePayload payload;
-            try {
-                payload = factory.createPayload(0, payBuf, false);
-            } catch (Exception ex) {
-                LOG.error("Couldn't validate byte buffer", ex);
-                return;
-            }
-
-            validate(payload);
-        }
-
         public void validate(IWriteablePayload payload)
         {
             if (!(payload instanceof ITriggerRequestPayload)) {
@@ -260,23 +234,6 @@ System.err.println(" Last: EXP "+nextEnd+" ACT "+lastTime+" DIFF "+(lastTime-nex
 
             nextStart = timeBase;
             nextEnd = nextStart + timeSpan;
-        }
-
-        public void validate(ByteBuffer payBuf)
-        {
-            if (factory == null) {
-                factory = new MasterPayloadFactory();
-            }
-
-            IWriteablePayload payload;
-            try {
-                payload = factory.createPayload(0, payBuf, false);
-            } catch (Exception ex) {
-                LOG.error("Couldn't validate byte buffer", ex);
-                return;
-            }
-
-            validate(payload);
         }
 
         public void validate(IWriteablePayload payload)

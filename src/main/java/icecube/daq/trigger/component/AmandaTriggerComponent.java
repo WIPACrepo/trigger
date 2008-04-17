@@ -15,6 +15,10 @@ public class AmandaTriggerComponent
         super(COMPONENT_NAME, COMPONENT_ID);
     }
 
+    public AmandaTriggerComponent(String amandaHost, int amandaPort) {
+        super(COMPONENT_NAME, COMPONENT_ID, amandaHost, amandaPort);
+    }
+
     public static void main(String[] args) throws DAQCompException {
         new DAQCompServer(new AmandaTriggerComponent(), args);
     }

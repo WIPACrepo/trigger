@@ -217,6 +217,11 @@ public class TriggerShell
         addMonitoredEngine(DAQConnector.TYPE_STRING_HIT, inputEngine);
     }
 
+    public String getVersionInfo()
+    {
+        return "$Id$";
+    }
+
     public static void main(String[] args)
         throws DAQCompException
     {

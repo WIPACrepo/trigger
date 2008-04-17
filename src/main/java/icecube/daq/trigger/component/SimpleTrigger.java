@@ -371,6 +371,11 @@ public class SimpleTrigger
         analysis.setOutput(gtWriter);
     }
 
+    public String getVersionInfo()
+    {
+        return "$Id$";
+    }
+
     /**
      * Handle a command-line option.
      *

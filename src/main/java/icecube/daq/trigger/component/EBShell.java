@@ -92,6 +92,11 @@ public class EBShell
                            true);
     }
 
+    public String getVersionInfo()
+    {
+        return "$Id$";
+    }
+
     public static void main(String[] args)
         throws DAQCompException
     {

@@ -159,6 +159,36 @@ public class TriggerComponent
 
     }
 
+    public void flush()
+    {
+        triggerManager.flush();
+    }
+
+    public IByteBufferCache getCache()
+    {
+        return bufferCache;
+    }
+
+    public long getPayloadsSent()
+    {
+        return ((SimpleOutputEngine) outputEngine).getTotalRecordsSent();
+    }
+
+    public SpliceablePayloadReader getReader()
+    {
+        return inputEngine;
+    }
+
+    public Splicer getSplicer()
+    {
+        return splicer;
+    }
+
+    public DAQComponentOutputProcess getWriter()
+    {
+        return outputEngine;
+    }
+
     /**
      * Tell trigger or other component where top level XML configuration tree lives
      */
@@ -226,6 +256,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 2921 2008-04-14 21:23:54Z dglo $";
+	return "$Id: TriggerComponent.java 2939 2008-04-17 19:35:45Z dglo $";
     }
 }

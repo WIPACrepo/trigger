@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerManager
  *
- * Version $Id: ITriggerHandler.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ITriggerHandler.java 2935 2008-04-17 19:25:42Z dglo $
  *
  * Date: March 31 2005
  *
@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * This interface defines the behavior of a TriggerHandler
  *
- * @version $Id: ITriggerHandler.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ITriggerHandler.java 2935 2008-04-17 19:25:42Z dglo $
  * @author pat
  */
 public interface ITriggerHandler extends IPayloadProducer
@@ -90,4 +90,9 @@ public interface ITriggerHandler extends IPayloadProducer
      */
     DOMRegistry getDOMRegistry();
 
+    /**
+     * Get the number of payloads processed.
+     * @return number of payloads processed
+     */
+    int getCount();
 }

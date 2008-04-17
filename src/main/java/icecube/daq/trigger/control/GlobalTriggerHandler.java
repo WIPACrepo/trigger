@@ -45,7 +45,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 2904 2008-04-11 17:38:14Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 2935 2008-04-17 19:25:42Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -666,6 +666,11 @@ public class GlobalTriggerHandler
 
     public DOMRegistry getDOMRegistry() {
 	return domRegistry;
+    }
+
+    public int getCount()
+    {
+        return miTotalInputTriggers;
     }
 
     public int getTotalInputTriggers()

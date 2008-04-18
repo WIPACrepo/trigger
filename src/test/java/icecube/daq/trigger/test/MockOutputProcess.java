@@ -67,6 +67,11 @@ public class MockOutputProcess
         throw new Error("Unimplemented");
     }
 
+    public long[] getRecordsSent()
+    {
+        throw new Error("Unimplemented");
+    }
+
     public boolean isConnected()
     {
         throw new Error("Unimplemented");

@@ -216,8 +216,16 @@ public class TriggerComponent
     	}
     	
         // Lookup the trigger configuration
-        String triggerConfiguration = null;
-        String globalConfigurationFileName = globalConfigurationDir + "/" + configName + ".xml";
+        String globalConfigurationFileName;
+        if (configName.endsWith(".xml")) {
+            globalConfigurationFileName =
+                globalConfigurationDir + "/" + configName;
+        } else {
+            globalConfigurationFileName =
+                globalConfigurationDir + "/" + configName + ".xml";
+        }
+
+        String triggerConfiguration;
         try {
             triggerConfiguration = GlobalConfiguration.getTriggerConfig(globalConfigurationFileName);
         } catch (Exception e) {
@@ -256,6 +264,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 2939 2008-04-17 19:35:45Z dglo $";
+	return "$Id: TriggerComponent.java 2953 2008-04-21 17:40:54Z dglo $";
     }
 }

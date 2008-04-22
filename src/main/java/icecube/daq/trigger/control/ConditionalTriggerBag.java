@@ -1,7 +1,7 @@
 /*
  * class: ConditionalTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: ConditionalTriggerBag.java 2961 2008-04-22 03:06:36Z dglo $
  *
  * Date: September 2 2005
  *
@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 import java.util.zip.DataFormatException;
 
 import org.apache.commons.logging.Log;
@@ -32,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: ConditionalTriggerBag.java 2961 2008-04-22 03:06:36Z dglo $
  * @author shseo
  */
 public class ConditionalTriggerBag
@@ -401,8 +400,8 @@ public class ConditionalTriggerBag
                     + msCoincidenceTriggerAlgorithmName);
     }
 
-    public Vector getVectorPayloadsInConditonalTriggerBag()
+    public List getPayloadsInConditonalTriggerBag()
     {
-        return new Vector(payloadListInConditionalBag);
+        return payloadListInConditionalBag;
     }
 }

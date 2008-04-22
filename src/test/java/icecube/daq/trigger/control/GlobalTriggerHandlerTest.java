@@ -19,7 +19,6 @@ import icecube.daq.trigger.test.MockTriggerRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 import java.util.zip.DataFormatException;
 
 import junit.framework.Test;
@@ -52,7 +51,7 @@ class BadTriggerRequest
         this.uid = uid;
     }
 
-    public Vector getPayloads()
+    public List getPayloads()
         throws IOException, DataFormatException
     {
         return null;

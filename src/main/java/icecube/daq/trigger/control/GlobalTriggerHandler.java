@@ -36,7 +36,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 import java.util.zip.DataFormatException;
 
 import org.apache.commons.logging.Log;
@@ -45,7 +44,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 2935 2008-04-17 19:25:42Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 2961 2008-04-22 03:06:36Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -332,19 +331,19 @@ public class GlobalTriggerHandler
                      log.debug("Total # of Merged Input Triggers so far = " + miTotalMergedInputTriggers);
                      log.debug("Now start processing merged trigger input");
                     boolean failedLoad = false;
-                    Vector vecSubPayloads;
+                    List subPayloads;
                     try {
-                        vecSubPayloads = ((ITriggerRequestPayload) tInputTrigger).getPayloads();
+                        subPayloads = ((ITriggerRequestPayload) tInputTrigger).getPayloads();
                     } catch (IOException e) {
                         log.error("Couldn't load payload", e);
-                        vecSubPayloads = null;
+                        subPayloads = null;
                         failedLoad = true;
                     } catch (DataFormatException e) {
                         log.error("Couldn't load payload", e);
-                        vecSubPayloads = null;
+                        subPayloads = null;
                         failedLoad = true;
                     }
-                    if (vecSubPayloads == null) {
+                    if (subPayloads == null) {
                         if (!failedLoad) {
                             ITriggerRequestPayload trigReq =
                                 (ITriggerRequestPayload) tInputTrigger;
@@ -359,9 +358,9 @@ public class GlobalTriggerHandler
                         continue;
                     }
                     //--Each component payload of the MergedPayload needs to be sent to its filter.
-                    for(int i=0; i<vecSubPayloads.size(); i++)
+                    for(int i=0; i<subPayloads.size(); i++)
                     {
-                        ITriggerRequestPayload subPayload = (ITriggerRequestPayload) vecSubPayloads.get(i);
+                        ITriggerRequestPayload subPayload = (ITriggerRequestPayload) subPayloads.get(i);
                         try {
                             ((ILoadablePayload) subPayload).loadPayload();
                         } catch (IOException e) {
@@ -370,7 +369,7 @@ public class GlobalTriggerHandler
                             log.error("Couldn't load payload", e);
                         }
 
-                        //sendPayloadToFilterDestinantion((IPayload) vecSubPayloads.get(i));
+                        //sendPayloadToFilterDestinantion((IPayload) subPayloads.get(i));
                         Iterator triggerIterator = configuredTriggerList.iterator();
                         while (triggerIterator.hasNext()) {
                             ITriggerControl configuredTrigger = (ITriggerControl) triggerIterator.next();

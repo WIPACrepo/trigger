@@ -12,7 +12,7 @@ import icecube.daq.trigger.test.MockTriggerRequest;
 import icecube.daq.trigger.test.MockUTCTime;
 
 import java.io.IOException;
-import java.util.Vector;
+import java.util.List;
 import java.util.zip.DataFormatException;
 
 import junit.framework.Test;
@@ -38,7 +38,7 @@ class MockHitRequest
         return getHitTimeUTC();
     }
 
-    public Vector getHitList()
+    public List getHitList()
     {
         throw new Error("Unimplemented");
     }
@@ -48,7 +48,7 @@ class MockHitRequest
         return getHitTimeUTC();
     }
 
-    public Vector getPayloads()
+    public List getPayloads()
         throws IOException, DataFormatException
     {
         throw new Error("Unimplemented");

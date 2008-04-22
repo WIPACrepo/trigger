@@ -23,7 +23,7 @@ import java.util.List;
  * Required is Input of an unorganized ReadoutRequestelements (List).
  * Both timeOverlap and spaceOverlap will be handled here via SimpleMerger.java and SmartMerger.java.
  *
- * @version $Id: GlobalTrigEventReadoutElements.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: GlobalTrigEventReadoutElements.java 2961 2008-04-22 03:06:36Z dglo $
  * @author shseo
  */
 public class GlobalTrigEventReadoutElements
@@ -183,7 +183,7 @@ public class GlobalTrigEventReadoutElements
         return mVecFinalReadoutElements;
     }
     /**
-     * After making each ReadoutRequestElement, do initialize.: Vector, List, etc....
+     * After making each ReadoutRequestElement, do initialize.
      */
     public void initialize()
     {

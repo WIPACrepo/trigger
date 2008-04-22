@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTrigger
  *
- * Version $Id: CoincidenceTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: CoincidenceTrigger.java 2961 2008-04-22 03:06:36Z dglo $
  *
  * Date: September 2 2005
  *
@@ -21,7 +21,6 @@ import icecube.daq.trigger.control.Sorter;
 import icecube.daq.trigger.exceptions.TriggerException;
 
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is to provide methods common to all coincidence triggers.
  *
- * @version $Id: CoincidenceTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: CoincidenceTrigger.java 2961 2008-04-22 03:06:36Z dglo $
  * @author shseo
  */
 public abstract class CoincidenceTrigger
@@ -87,8 +86,8 @@ public abstract class CoincidenceTrigger
         }else
         {
             log.debug("This is an UnConfigured Trigger.");
-            Vector payloadListsInConditionalTrigBag = mtConditionalTriggerBag.getVectorPayloadsInConditonalTriggerBag();
-            if(payloadListsInConditionalTrigBag.size() == 0){
+            List payloadsInConditionalTrigBag = mtConditionalTriggerBag.getPayloadsInConditonalTriggerBag();
+            if(payloadsInConditionalTrigBag.size() == 0){
                 DummyPayload dummy = new DummyPayload(payload.getPayloadTimeUTC());
                 setEarliestPayloadOfInterest(dummy);
             }
@@ -113,8 +112,8 @@ public abstract class CoincidenceTrigger
     public void cleanConditionalTriggerBag()
     {
         //--todo: need to update earliestPyalod (to flush) if conditionalBag contains only invalidtriggers
-        Vector payloadListsInConditionalTrigBag = mtConditionalTriggerBag.getVectorPayloadsInConditonalTriggerBag();
-        int iNumCaididateGTeventsInBag = payloadListsInConditionalTrigBag.size();
+        List payloadsInConditionalTrigBag = mtConditionalTriggerBag.getPayloadsInConditonalTriggerBag();
+        int iNumCaididateGTeventsInBag = payloadsInConditionalTrigBag.size();
         if( iNumCaididateGTeventsInBag == 0 && mtConditionalTriggerBag.needUpdate())
         {
             DummyPayload dummy = new DummyPayload(mtConditionalTriggerBag.getUpdater().getPayloadTimeUTC());
@@ -133,7 +132,7 @@ public abstract class CoincidenceTrigger
 
     public abstract boolean isConfiguredTrigger(ITriggerRequestPayload tPayload);
 
-    //public abstract List selectCoincidentTrigger(Vector payloadList);
+    //public abstract List selectCoincidentTrigger(List payloadList);
 
     //public abstract boolean isCoincidentTrigger(TriggerRequestPayload tPayload_1, TriggerRequestPayload tPayload_2);
     /**
@@ -150,8 +149,6 @@ public abstract class CoincidenceTrigger
         IReadoutRequest tReadoutRequest_payload1 = ((ITriggerRequestPayload) payload1).getReadoutRequest();
         IReadoutRequest tReadoutRequest_payload2 = ((ITriggerRequestPayload) payload2).getReadoutRequest();
 
-        Vector vecReadoutElement = new Vector();
-
         IUTCTime tStartTime_payload1 = null;
         IUTCTime tEndTime_payload1 = null;
         IUTCTime tStartTime_payload2 = null;
@@ -160,9 +157,9 @@ public abstract class CoincidenceTrigger
         int type1 = payload1.getPayloadInterfaceType();
         if (type1 == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
             try{
-                vecReadoutElement = tReadoutRequest_payload1.getReadoutRequestElements();
-                tStartTime_payload1 = mtSorter.getUTCTimeEarliest((List) vecReadoutElement, false);
-                tEndTime_payload1 = mtSorter.getUTCTimeLatest((List) vecReadoutElement, false);
+                List elems = tReadoutRequest_payload1.getReadoutRequestElements();
+                tStartTime_payload1 = mtSorter.getUTCTimeEarliest(elems, false);
+                tEndTime_payload1 = mtSorter.getUTCTimeLatest(elems, false);
 
             }catch(NullPointerException e)
             {
@@ -177,9 +174,9 @@ public abstract class CoincidenceTrigger
         int type2 = payload2.getPayloadInterfaceType();
         if (type2 == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
             try{
-                vecReadoutElement = tReadoutRequest_payload2.getReadoutRequestElements();
-                tStartTime_payload2 = mtSorter.getUTCTimeEarliest((List) vecReadoutElement, false);
-                tEndTime_payload2 = mtSorter.getUTCTimeLatest((List) vecReadoutElement, false);
+                List elems = tReadoutRequest_payload2.getReadoutRequestElements();
+                tStartTime_payload2 = mtSorter.getUTCTimeEarliest(elems, false);
+                tEndTime_payload2 = mtSorter.getUTCTimeLatest(elems, false);
 
             }catch(NullPointerException e)
             {

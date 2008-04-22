@@ -1,7 +1,7 @@
 /*
  * class: TriggerBag
  *
- * Version $Id: TriggerBag.java 2818 2008-03-18 18:42:01Z dglo $
+ * Version $Id: TriggerBag.java 2961 2008-04-22 03:06:36Z dglo $
  *
  * Date: March 16 2005
  *
@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  *                                   +       {===============}
  *                                   +            Merge
  *
- * @version $Id: TriggerBag.java 2818 2008-03-18 18:42:01Z dglo $
+ * @version $Id: TriggerBag.java 2961 2008-04-22 03:06:36Z dglo $
  * @author pat
  */
 public class TriggerBag
@@ -380,11 +380,11 @@ public class TriggerBag
      * checks the top-level trigger for sub-triggers
      *
      * @param trigger top-level trigger
-     * @return vector of sub-triggers
+     * @return list of sub-triggers
      */
     private static List getSubTriggers(IPayload trigger) {
 
-        Vector subTriggers = new Vector();
+        List subTriggers = new Vector();
         LinkedList stack = new LinkedList();
         stack.add(trigger);
 
@@ -398,7 +398,7 @@ public class TriggerBag
                     log.debug("  Already merged trigger: get sub-triggers");
                 }
                 try {
-                    Vector subs = next.getPayloads();
+                    List subs = next.getPayloads();
                     if (log.isDebugEnabled()) {
                         log.debug("   Adding " + subs.size() + " triggers to stack");
                     }
@@ -461,7 +461,7 @@ public class TriggerBag
 
         triggerUID++;
 
-        Vector subTriggers = new Vector();
+        List subTriggers = new Vector();
 
         // loop over payloads in set and find earliest and latest times
         IUTCTime earliestTime = new UTCTime8B(Long.MAX_VALUE);
@@ -514,7 +514,7 @@ public class TriggerBag
         }
 
         // create a readout request for the new trigger
-        Vector readoutElements = new Vector();
+        List readoutElements = new Vector();
         IReadoutRequest readoutRequest = TriggerRequestPayloadFactory.createReadoutRequest(triggerSourceID,
                                                                                            triggerUID,
                                                                                            readoutElements);

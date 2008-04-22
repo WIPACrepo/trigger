@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
  *  and put in the payloadList.
  * This is called in GlobalTrigBag.java.
  *
- * @version $Id: GlobalTrigEventWrapper.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: GlobalTrigEventWrapper.java 2961 2008-04-22 03:06:36Z dglo $
  * @author shseo
  */
 public class GlobalTrigEventWrapper
@@ -82,9 +82,9 @@ public class GlobalTrigEventWrapper
      * @param mergeList
      * @return
      */
-    private Vector collectReadoutElements(List mergeList)
+    private List collectReadoutElements(List mergeList)
     {
-        Vector vecGlobalReadoutRequestElements_Raw = new Vector();
+        List vecGlobalReadoutRequestElements_Raw = new Vector();
         Iterator iterMergeList = mergeList.iterator();
         while(iterMergeList.hasNext())
         {
@@ -105,10 +105,10 @@ public class GlobalTrigEventWrapper
      * @param mergeList
      * @return
      */
-    private Vector collectSubPayloads(List mergeList, boolean bIsFinalGTstage)
+    private List collectSubPayloads(List mergeList, boolean bIsFinalGTstage)
     {
-        Vector vecGlobalSubPayload = new Vector();
-        Vector vecLocalSubPayload = new Vector();
+        List vecGlobalSubPayload = new Vector();
+        List vecLocalSubPayload = new Vector();
         Iterator iterMergeList = mergeList.iterator();
 
         while(iterMergeList.hasNext())
@@ -158,21 +158,22 @@ public class GlobalTrigEventWrapper
         // tReadoutRequest is the same for a single payload.
         IReadoutRequest tReadoutRequest = tTriggerRequestPayload.getReadoutRequest();
 
-        Vector vecReadoutElement = new Vector();
+        List elems;
 
         if(null != tReadoutRequest){
 
-            vecReadoutElement = tReadoutRequest.getReadoutRequestElements();
-            tUTCTime_earliest = tSorter.getUTCTimeEarliest((List) vecReadoutElement, false);
-            tUTCTime_latest = tSorter.getUTCTimeLatest((List) vecReadoutElement, false);
+            elems = tReadoutRequest.getReadoutRequestElements();
+            tUTCTime_earliest = tSorter.getUTCTimeEarliest(elems, false);
+            tUTCTime_latest = tSorter.getUTCTimeLatest(elems, false);
 
         } else {//--Make sure ReadoutReqeust is null for Beacon, Stop triggers.
 
+            elems = new Vector();
             tUTCTime_earliest = tTriggerRequestPayload.getFirstTimeUTC();
             tUTCTime_latest = tTriggerRequestPayload.getLastTimeUTC();
         }
 
-        Vector vecSubpayloads = new Vector();
+        List vecSubpayloads = new Vector();
         vecSubpayloads.add(tTriggerRequestPayload);
 
         miTriggerUID++;
@@ -210,9 +211,9 @@ public class GlobalTrigEventWrapper
 
         log.debug("miTriggerUID (ConditionalTrigger counter #) = " + miTriggerUID);
 
-        Vector vecGlobalSubPayload = collectSubPayloads(mergeList, false);
+        List vecGlobalSubPayload = collectSubPayloads(mergeList, false);
 
-        Vector vecGlobalReadoutRequestElements_Raw = collectReadoutElements(mergeList);
+        List vecGlobalReadoutRequestElements_Raw = collectReadoutElements(mergeList);
 
         if (log.isDebugEnabled()) {
             log.debug("We have " + mergeList.size() + " selected conditionalTriggers to wrap.");
@@ -267,14 +268,14 @@ public class GlobalTrigEventWrapper
             miTriggerUID = 0;
         }
 
-        Vector vecGlobalSubPayload = collectSubPayloads(mergeList, true);
-        Vector vecGlobalReadoutRequestElements_Raw = collectReadoutElements(mergeList);
+        List vecGlobalSubPayload = collectSubPayloads(mergeList, true);
+        List vecGlobalReadoutRequestElements_Raw = collectReadoutElements(mergeList);
 
         if (log.isDebugEnabled()) {
             log.debug("We have " + mergeList.size() + " triggers to wrapMergingEvent");
         }
 
-        Vector vecGlobalReadoutRequestElements_Final;
+        List vecGlobalReadoutRequestElements_Final;
 
         if(vecGlobalReadoutRequestElements_Raw.size() > 1)
         {
@@ -346,11 +347,11 @@ public class GlobalTrigEventWrapper
      */
     public void wrapFinalEvent(ITriggerRequestPayload tGTEvent, int iEvtNumber)
     {
-        Vector vecReadoutRequestElements = ((IReadoutRequest) tGTEvent.getReadoutRequest()).getReadoutRequestElements();
+        List elems = ((IReadoutRequest) tGTEvent.getReadoutRequest()).getReadoutRequestElements();
 
         IReadoutRequest tReadoutRequest_final = TriggerRequestPayloadFactory.createReadoutRequest(tGTEvent.getSourceID(),
                                                                                     iEvtNumber,
-                                                                                    vecReadoutRequestElements);
+                                                                                    elems);
         try {
 
             mtGlobalTrigEventPayload_final = (ITriggerRequestPayload) triggerFactory.createPayload(iEvtNumber,

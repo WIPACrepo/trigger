@@ -6,7 +6,6 @@ import icecube.daq.trigger.IReadoutRequestElement;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class MockReadoutRequest
     implements IReadoutRequest
@@ -58,17 +57,13 @@ public class MockReadoutRequest
                                                 domId, srcId));
     }
 
-    public Vector getReadoutRequestElements()
+    public List getReadoutRequestElements()
     {
-        Vector vec;
-
         if (elems == null) {
-            vec = new Vector();
-        } else {
-            vec = new Vector(elems);
+            return new ArrayList();
         }
 
-        return vec;
+        return elems;
     }
 
     public ISourceID getSourceID()

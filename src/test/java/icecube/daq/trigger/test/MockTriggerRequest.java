@@ -17,7 +17,7 @@ import icecube.daq.trigger.ITriggerRequestPayload;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Vector;
+import java.util.List;
 import java.util.zip.DataFormatException;
 
 public class MockTriggerRequest
@@ -118,7 +118,7 @@ public class MockTriggerRequest
         return firstTime;
     }
 
-    public Vector getHitList()
+    public List getHitList()
     {
         throw new Error("Unimplemented");
     }
@@ -128,7 +128,7 @@ public class MockTriggerRequest
         return lastTime;
     }
 
-    public Vector getPayloads()
+    public List getPayloads()
         throws IOException, DataFormatException
     {
         if (getPayDFException != null) {
@@ -137,7 +137,7 @@ public class MockTriggerRequest
             throw getPayIOException;
         }
 
-        return new Vector(payloadList);
+        return payloadList;
     }
 
     public ByteBuffer getPayloadBacking()

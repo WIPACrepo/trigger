@@ -468,8 +468,7 @@ public class ConditionalTriggerBagTest
                          1, bag.getMonitor().getInputCountTotal());
         } else {
             assertEquals("Unexpected payload total",
-                         1,
-                         bag.getVectorPayloadsInConditonalTriggerBag().size());
+                         1, bag.getPayloadsInConditonalTriggerBag().size());
         }
 
         tr = new MockTriggerRequest(23456L, 30000L, 2, 22, GT_SRCID);
@@ -483,8 +482,7 @@ public class ConditionalTriggerBagTest
                          0, bag.getMonitor().getOutputCountTotal());
         } else {
             assertEquals("Unexpected payload total",
-                         2,
-                         bag.getVectorPayloadsInConditonalTriggerBag().size());
+                         2, bag.getPayloadsInConditonalTriggerBag().size());
         }
 
         tr = new MockTriggerRequest(34567L, 40000L, 3, 33, DH_SRCID);
@@ -497,8 +495,7 @@ public class ConditionalTriggerBagTest
                          0, bag.getMonitor().getOutputCountTotal());
         } else {
             assertEquals("Unexpected payload total",
-                         3,
-                         bag.getVectorPayloadsInConditonalTriggerBag().size());
+                         3, bag.getPayloadsInConditonalTriggerBag().size());
         }
 
         tr = new MockTriggerRequest(45678L, 50000L, 4, 44, GT_SRCID);
@@ -512,8 +509,7 @@ public class ConditionalTriggerBagTest
                          0, bag.getMonitor().getOutputCountTotal());
         } else {
             assertEquals("Unexpected payload total",
-                         3,
-                         bag.getVectorPayloadsInConditonalTriggerBag().size());
+                         3, bag.getPayloadsInConditonalTriggerBag().size());
         }
 
         tr = new MockTriggerRequest(56789L, 60000L, 5, 55, GT_SRCID);
@@ -527,8 +523,7 @@ public class ConditionalTriggerBagTest
                          0, bag.getMonitor().getOutputCountTotal());
         } else {
             assertEquals("Unexpected payload total",
-                         4,
-                         bag.getVectorPayloadsInConditonalTriggerBag().size());
+                         4, bag.getPayloadsInConditonalTriggerBag().size());
         }
 
         bag.setTimeGate(new MockUTCTime(31000L));

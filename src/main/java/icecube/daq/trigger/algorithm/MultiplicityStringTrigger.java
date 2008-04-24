@@ -214,6 +214,15 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
             return;
         }
 
+	// make sure this hit is on the proper string
+	int hitString = getTriggerHandler().getDOMRegistry().getStringMajor(hit.getDOMID().toString());
+	if (hitString != string) {
+	    if(log.isDebugEnabled())
+		log.debug("This hit is not on the proper string.");
+	    return;
+	}
+
+
         IUTCTime hitTimeUTC = hit.getHitTimeUTC();
 
         /*
@@ -458,14 +467,13 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
         Iterator iter = hitsWithinTriggerWindow.iterator();
 
+	// Veto events that have an intime hit in the veto region
         while(iter.hasNext()) {
             IHitPayload hit = (IHitPayload) iter.next();
             int hitPosition = getTriggerHandler().getDOMRegistry().getStringMinor(hit.getDOMID().toString());
-            int hitString = getTriggerHandler().getDOMRegistry().getStringMajor(hit.getDOMID().toString());
-            if(hitPosition<=numberOfVetoTopDoms||hitString!=string) {
-                if(log.isDebugEnabled())
+            if (hitPosition <= numberOfVetoTopDoms) {
+                if (log.isDebugEnabled())
                     log.debug("The event contains a hit in the veto region, vetoing event.");
-
                 return;
             }
         }

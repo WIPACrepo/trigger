@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java 2922 2008-04-14 22:08:46Z dglo $
+ * @version $Id: GlobalTriggerManager.java 3079 2008-05-27 20:55:17Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager
@@ -217,7 +217,10 @@ public class GlobalTriggerManager
     public void updateSplicer() {
         Spliceable update = (Spliceable) super.getEarliestPayloadOfInterest();
         if (null != update) {
-            log.debug("Truncating splicer at " + ((IPayload) update).getPayloadTimeUTC());
+            if (log.isDebugEnabled()) {
+                log.debug("Truncating splicer at " +
+                          ((IPayload) update).getPayloadTimeUTC());
+            }
             splicer.truncate(update);
         }
     }

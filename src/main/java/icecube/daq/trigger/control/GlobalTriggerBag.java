@@ -26,6 +26,7 @@ import icecube.daq.trigger.monitor.PayloadBagMonitor;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -35,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
  * This class receives TriggerRequestPayloads from each active GlobalTrigAlgorithm
  * , merges if they overlap and produces globalTrigEventPayload.
  *
- * @version $Id: GlobalTriggerBag.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: GlobalTriggerBag.java 3345 2008-08-01 22:08:24Z dglo $
  * @author shseo
  */
 public class GlobalTriggerBag
@@ -184,7 +185,7 @@ public class GlobalTriggerBag
                 if (log.isDebugEnabled()) {
                     log.debug("Lets merge " + mergeList.size() + " payloads");
                 }
-                Collections.sort(mergeList);
+                Collections.sort(mergeList, new TriggerComparator());
                 mtGlobalTrigEventWrapper.wrapMergingEvent(mergeList);
                 // remove individual triggers from triggerList and add new merged trigger
                 payloadList.removeAll(mergeList);
@@ -198,7 +199,7 @@ public class GlobalTriggerBag
                 payloadList.add(currentPayload);
             }
 
-            Collections.sort((List) payloadList);
+            Collections.sort((List) payloadList, new TriggerComparator());
         }
 
             if (log.isDebugEnabled()) {
@@ -418,5 +419,74 @@ public class GlobalTriggerBag
     protected GlobalTrigEventWrapper getGlobalTrigEventWrapper()
     {
         return mtGlobalTrigEventWrapper;
+    }
+
+    /**
+     * Sort triggers
+     */
+    public class TriggerComparator
+        implements Comparator
+    {
+        /**
+         * Compare two triggers.
+         */
+        public int compare(Object o1, Object o2)
+        {
+            if (o1 == null) {
+                if (o2 == null) {
+                    return 0;
+                }
+
+                return 1;
+            } else if (o2 == null) {
+                return -1;
+            } else if (!(o1 instanceof ITriggerRequestPayload)) {
+                if (!(o2 instanceof ITriggerRequestPayload)) {
+                    final String name1 = o1.getClass().getName();
+                    return name1.compareTo(o2.getClass().getName());
+                }
+
+                return 1;
+            } else if (!(o2 instanceof ITriggerRequestPayload)) {
+                return -1;
+            }
+
+            ITriggerRequestPayload tr1 = (ITriggerRequestPayload) o1;
+            ITriggerRequestPayload tr2 = (ITriggerRequestPayload) o2;
+
+            int val = tr1.getFirstTimeUTC().compareTo(tr2.getFirstTimeUTC());
+            if (val == 0) {
+                val = tr1.getLastTimeUTC().compareTo(tr2.getLastTimeUTC());
+                if (val == 0) {
+                    val = tr2.getUID() - tr1.getUID();
+                }
+            }
+
+            return val;
+        }
+
+        /**
+         * Is the specified object a member of the same class?
+         *
+         * @return <tt>true</tt> if specified object matches this class
+         */
+        public boolean equals(Object obj)
+        {
+            if (obj == null) {
+                return false;
+            }
+
+            return getClass().equals(obj.getClass());
+        }
+
+        /**
+         * Get sorter hash code.
+         *
+         * @return hash code for this class.
+         */
+        public int hashCode()
+        {
+            return getClass().hashCode();
+        }
     }
 }

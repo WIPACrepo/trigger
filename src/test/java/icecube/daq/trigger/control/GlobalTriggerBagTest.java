@@ -12,6 +12,8 @@ import icecube.daq.trigger.test.MockTriggerRequest;
 import icecube.daq.trigger.test.MockUTCTime;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
@@ -239,37 +241,119 @@ public class GlobalTriggerBagTest
         assertEquals("Unexpected input total",
                      0, bag.size());
 
-        MockTriggerRequest tr = new MockTriggerRequest(12345L, 20000L, 1, 11);
-        tr.setSourceID(666);
-        tr.setReadoutRequest(new MockReadoutRequest());
+        final int expSourceId = SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID;
 
-        bag.add(tr);
+        final long[][] times = {
+            { 12345L, 19999L },
+            { 23456L, 29999L },
+            { 34567L, 39999L },
+        };
+
+        for (int i = 0; i < times.length; i++) {
+            MockTriggerRequest tr =
+                new MockTriggerRequest(times[i][0], times[i][1], i + 1,
+                                       (i + 1) * 11, expSourceId, i + 1);
+            tr.setReadoutRequest(new MockReadoutRequest());
+
+            bag.add(tr);
+            assertEquals("Unexpected input total",
+                         i + 1, bag.getMonitor().getInputCountTotal());
+
+            assertEquals("Unexpected output total",
+                         0, bag.getMonitor().getOutputCountTotal());
+        }
+
+        for (int i = 0; i < times.length; i++) {
+            bag.setTimeGate(new MockUTCTime(times[i][0]));
+            assertFalse("Didn't expect to have a 'next' trigger #" + i,
+                        bag.hasNext());
+            assertNull("Didn't expect to get next trigger #" + i, bag.next());
+
+            bag.setTimeGate(new MockUTCTime(times[i][1]));
+            assertFalse("Didn't expect to have a 'next' trigger #" + i,
+                        bag.hasNext());
+            assertNull("Didn't expect to get trigger #" + i, bag.next());
+            assertEquals("Unexpected output total for trigger #" + i,
+                         i, bag.getMonitor().getOutputCountTotal());
+
+            bag.setTimeGate(new MockUTCTime(times[i][1] + 1L));
+            assertTrue("Expected to have a 'next' trigger", bag.hasNext());
+
+            ITriggerRequestPayload trp = bag.next();
+            assertNotNull("Expected to get trigger #" + i, trp);
+            assertEquals("Unexpected output total for trigger #" + i,
+                         i + 1, bag.getMonitor().getOutputCountTotal());
+            assertEquals("Unexpected trigger#" + i + " UID",
+                         i + 1, trp.getUID());
+            assertEquals("Unexpected trigger#" + i + " first time",
+                         times[i][0], trp.getFirstTimeUTC().longValue());
+            assertEquals("Unexpected trigger#" + i + " last time",
+                         times[i][1], trp.getLastTimeUTC().longValue());
+        }
+    }
+
+    class TimeArrayComparator
+        implements Comparator
+    {
+        public int compare(Object o1, Object o2)
+        {
+            long[] i1 = (long[]) o1;
+            long[] i2 = (long[]) o2;
+
+            int val = (int) (i1[0] - i2[0]);
+            if (val == 0) {
+                val = (int) (i1[1] - i2[1]);
+            }
+
+            return val;
+        }
+    }
+
+    public void testNextOrder()
+    {
+        GlobalTriggerBag bag = new GlobalTriggerBag();
         assertEquals("Unexpected input total",
-                     1, bag.getMonitor().getInputCountTotal());
+                     0, bag.size());
 
-        bag.add(new MockTriggerRequest(23456L, 30000L, 2, 22));
-        assertEquals("Unexpected input total",
-                     2, bag.getMonitor().getInputCountTotal());
-        assertEquals("Unexpected output total",
-                     0, bag.getMonitor().getOutputCountTotal());
+        final int expSourceId = SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID;
 
-        bag.setTimeGate(new MockUTCTime(10000L));
-        assertFalse("Didn't expect to have a 'next' trigger", bag.hasNext());
-        assertNull("Didn't expect to get next trigger", bag.next());
+        final long[][] times = {
+            { 23456L, 29999L },
+            { 34567L, 39999L },
+            { 12345L, 19999L },
+        };
 
-        bag.setTimeGate(new MockUTCTime(16666L));
-        assertFalse("Didn't expect to have a 'next' trigger", bag.hasNext());
-        assertNull("Didn't expect to get next trigger", bag.next());
-        assertEquals("Unexpected output total",
-                     0, bag.getMonitor().getOutputCountTotal());
+        for (int i = 0; i < times.length; i++) {
+            MockTriggerRequest tr =
+                new MockTriggerRequest(times[i][0], times[i][1], i + 1,
+                                       (i + 1) * 11, expSourceId, i + 1);
+            tr.setReadoutRequest(new MockReadoutRequest());
 
-        bag.setTimeGate(new MockUTCTime(20001L));
+            bag.add(tr);
+            assertEquals("Unexpected input total",
+                         i + 1, bag.getMonitor().getInputCountTotal());
+
+            assertEquals("Unexpected output total",
+                         0, bag.getMonitor().getOutputCountTotal());
+        }
+
+        Arrays.sort(times, new TimeArrayComparator());
+
+        bag.setTimeGate(new MockUTCTime(times[1][1] + 1L));
         assertTrue("Expected to have a 'next' trigger", bag.hasNext());
 
-        ITriggerRequestPayload trp = bag.next();
-        assertNotNull("Expected to get next trigger", trp);
-        assertEquals("Unexpected output total",
-                     1, bag.getMonitor().getOutputCountTotal());
+        for (int i = 0; i < times.length - 1; i++) {
+            ITriggerRequestPayload trp = bag.next();
+            assertNotNull("Expected to get trigger #" + i, trp);
+            assertEquals("Unexpected output total for trigger #" + i,
+                         i + 1, bag.getMonitor().getOutputCountTotal());
+            assertEquals("Unexpected trigger#" + i + " UID",
+                         i + 1, trp.getUID());
+            assertEquals("Unexpected trigger#" + i + " first time",
+                         times[i][0], trp.getFirstTimeUTC().longValue());
+            assertEquals("Unexpected trigger#" + i + " last time",
+                         times[i][1], trp.getLastTimeUTC().longValue());
+        }
     }
 
     public static void main(String[] args)

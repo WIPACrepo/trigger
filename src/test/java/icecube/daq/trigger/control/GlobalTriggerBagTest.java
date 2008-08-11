@@ -26,6 +26,9 @@ class MockHitRequest
     extends MockHit
     implements ITriggerRequestPayload
 {
+    private static int nextUID = 1;
+
+    private int uid = nextUID++;
     private IReadoutRequest rdoutReq;
 
     public MockHitRequest(long time)
@@ -61,7 +64,7 @@ class MockHitRequest
 
     public int getUID()
     {
-        throw new Error("Unimplemented");
+        return uid;
     }
 
     public void setReadoutRequest(IReadoutRequest rdoutReq)

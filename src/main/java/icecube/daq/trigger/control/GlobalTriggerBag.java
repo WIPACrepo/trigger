@@ -26,7 +26,6 @@ import icecube.daq.trigger.monitor.PayloadBagMonitor;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -36,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
  * This class receives TriggerRequestPayloads from each active GlobalTrigAlgorithm
  * , merges if they overlap and produces globalTrigEventPayload.
  *
- * @version $Id: GlobalTriggerBag.java 3422 2008-08-29 16:51:27Z dglo $
+ * @version $Id: GlobalTriggerBag.java 3424 2008-08-29 16:57:29Z dglo $
  * @author shseo
  */
 public class GlobalTriggerBag
@@ -367,6 +366,7 @@ public class GlobalTriggerBag
         timeGate = time.getOffsetUTCTime((double) miTimeGateWindow);
         //System.out.println("print timeGate = " + timeGate);
         //System.out.println("------------------------------------------------------");
+        nextIndex = NEXT_UNKNOWN;
     }
 
     /**

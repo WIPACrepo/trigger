@@ -16,6 +16,8 @@ import icecube.daq.trigger.test.MockUTCTime;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
@@ -126,8 +128,6 @@ public class ConditionalTriggerBagTest
         }
     }
 
-    private static final boolean DO_MONITORING = false;
-
     private static final int GT_SRCID =
         SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID;
     private static final int DH_SRCID =
@@ -203,10 +203,6 @@ public class ConditionalTriggerBagTest
 
     public void testAddTR()
     {
-        if (!DO_MONITORING) {
-            System.err.println("XXX - monitoring does not work");
-        }
-
         ConditionalTriggerBag bag = new ConditionalTriggerBag();
         assertEquals("Unexpected input total",
                      0, bag.getMonitor().getInputCountTotal());
@@ -219,18 +215,14 @@ public class ConditionalTriggerBagTest
         tr = new MockTriggerRequest(12345L, 20000L, 1, 11);
         tr.setReadoutRequest(new MockReadoutRequest());
         bag.add(tr);
-        if (DO_MONITORING) {
-            assertEquals("Unexpected input total",
-                         1, bag.getMonitor().getInputCountTotal());
-        }
+        assertEquals("Unexpected input total",
+                     1, bag.getMonitor().getInputCountTotal());
 
         tr = new MockTriggerRequest(23456L, 30000L, 2, 22);
         tr.setReadoutRequest(new MockReadoutRequest());
         bag.add(tr);
-        if (DO_MONITORING) {
-            assertEquals("Unexpected input total",
-                         2, bag.getMonitor().getInputCountTotal());
-        }
+        assertEquals("Unexpected input total",
+                     2, bag.getMonitor().getInputCountTotal());
 
         assertNotNull("Null timeGate", bag.getTimeGate());
         assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
@@ -238,10 +230,6 @@ public class ConditionalTriggerBagTest
 
     public void testAddTRAndMerge()
     {
-        if (!DO_MONITORING) {
-            System.err.println("XXX - monitoring does not work");
-        }
-
         ConditionalTriggerBag bag = new ConditionalTriggerBag();
         assertEquals("Unexpected input total",
                      0, bag.getMonitor().getInputCountTotal());
@@ -260,10 +248,8 @@ public class ConditionalTriggerBagTest
         //tr.addPayload(new MockTriggerRequest(13579L, 14567L));
 
         bag.add(tr);
-        if (DO_MONITORING) {
-            assertEquals("Unexpected input total",
-                         1, bag.getMonitor().getInputCountTotal());
-        }
+        assertEquals("Unexpected input total",
+                     1, bag.getMonitor().getInputCountTotal());
 
         rr = new MockReadoutRequest();
         rr.add(1, 19999L, 23456L, 11111L, 10);
@@ -271,10 +257,8 @@ public class ConditionalTriggerBagTest
         tr = new MockTriggerRequest(19999L, 23456L, 2, 11, 2000);
         tr.setReadoutRequest(rr);
         bag.add(tr);
-        if (DO_MONITORING) {
-            assertEquals("Unexpected input total",
-                         2, bag.getMonitor().getInputCountTotal());
-        }
+        assertEquals("Unexpected input total",
+                     2, bag.getMonitor().getInputCountTotal());
 
         rr = new MockReadoutRequest();
         rr.add(1, 17777L, 18888L, 111111L, 10);
@@ -282,10 +266,8 @@ public class ConditionalTriggerBagTest
         tr = new MockTriggerRequest(17777L, 18888L, 3, 33, 3000);
         tr.setReadoutRequest(rr);
         bag.add(tr);
-        if (DO_MONITORING) {
-            assertEquals("Unexpected input total",
-                         3, bag.getMonitor().getInputCountTotal());
-        }
+        assertEquals("Unexpected input total",
+                     3, bag.getMonitor().getInputCountTotal());
 
         assertNotNull("Null timeGate", bag.getTimeGate());
         assertEquals("Bad timeGate", -1L, bag.getTimeGate().longValue());
@@ -308,10 +290,6 @@ public class ConditionalTriggerBagTest
 
     public void testContainsAllGetPayDFException()
     {
-        if (!DO_MONITORING) {
-            System.err.println("XXX - monitoring does not work");
-        }
-
         ConditionalTriggerBag bag = new ConditionalTriggerBag();
         assertEquals("Unexpected input total",
                      0, bag.getMonitor().getInputCountTotal());
@@ -324,10 +302,8 @@ public class ConditionalTriggerBagTest
             new MockTriggerRequest(12345L, 20000L, 1, 11, GT_SRCID);
         tr.setGetPayloadsException(new DataFormatException("TestException"));
         bag.add(tr);
-        if (DO_MONITORING) {
-            assertEquals("Unexpected input total",
-                         1, bag.getMonitor().getInputCountTotal());
-        }
+        assertEquals("Unexpected input total",
+                     1, bag.getMonitor().getInputCountTotal());
 
         assertFalse("Didn't expect 'next' trigger", bag.hasNext());
 
@@ -340,10 +316,6 @@ public class ConditionalTriggerBagTest
 
     public void testContainsAllGetPayIOException()
     {
-        if (!DO_MONITORING) {
-            System.err.println("XXX - monitoring does not work");
-        }
-
         ConditionalTriggerBag bag = new ConditionalTriggerBag();
         assertEquals("Unexpected input total",
                      0, bag.getMonitor().getInputCountTotal());
@@ -356,10 +328,8 @@ public class ConditionalTriggerBagTest
             new MockTriggerRequest(12345L, 20000L, 1, 11, GT_SRCID);
         tr.setGetPayloadsException(new IOException("TestException"));
         bag.add(tr);
-        if (DO_MONITORING) {
-            assertEquals("Unexpected input total",
-                         1, bag.getMonitor().getInputCountTotal());
-        }
+        assertEquals("Unexpected input total",
+                     1, bag.getMonitor().getInputCountTotal());
 
         assertFalse("Didn't expect 'next' trigger", bag.hasNext());
 
@@ -372,10 +342,6 @@ public class ConditionalTriggerBagTest
 
     public void testContainsAllLoadDFException()
     {
-        if (!DO_MONITORING) {
-            System.err.println("XXX - monitoring does not work");
-        }
-
         ConditionalTriggerBag bag = new ConditionalTriggerBag();
         assertEquals("Unexpected input total",
                      0, bag.getMonitor().getInputCountTotal());
@@ -392,10 +358,8 @@ public class ConditionalTriggerBagTest
             new MockTriggerRequest(12345L, 20000L, 1, 11, GT_SRCID);
         tr.addPayload(subTR);
         bag.add(tr);
-        if (DO_MONITORING) {
-            assertEquals("Unexpected input total",
-                         1, bag.getMonitor().getInputCountTotal());
-        }
+        assertEquals("Unexpected input total",
+                     1, bag.getMonitor().getInputCountTotal());
 
         assertFalse("Didn't expect 'next' trigger", bag.hasNext());
 
@@ -408,10 +372,6 @@ public class ConditionalTriggerBagTest
 
     public void testContainsAllLoadIOException()
     {
-        if (!DO_MONITORING) {
-            System.err.println("XXX - monitoring does not work");
-        }
-
         ConditionalTriggerBag bag = new ConditionalTriggerBag();
         assertEquals("Unexpected input total",
                      0, bag.getMonitor().getInputCountTotal());
@@ -427,10 +387,8 @@ public class ConditionalTriggerBagTest
             new MockTriggerRequest(12345L, 20000L, 1, 11, GT_SRCID);
         tr.addPayload(subTR);
         bag.add(tr);
-        if (DO_MONITORING) {
-            assertEquals("Unexpected input total",
-                         1, bag.getMonitor().getInputCountTotal());
-        }
+        assertEquals("Unexpected input total",
+                     1, bag.getMonitor().getInputCountTotal());
 
         assertFalse("Didn't expect 'next' trigger", bag.hasNext());
 
@@ -443,153 +401,215 @@ public class ConditionalTriggerBagTest
 
     public void testRemoveUnqualified()
     {
-        if (!DO_MONITORING) {
-            System.err.println("XXX - monitoring does not work");
-        }
-
         ConditionalTriggerBag bag = new ConditionalTriggerBag();
         assertEquals("Unexpected input total",
                      0, bag.getMonitor().getInputCountTotal());
 
+        final int expSourceId = GT_SRCID;
+        final int trigCfgId = 123;
+
         MockCoincidenceTrigger cTrig = new MockCoincidenceTrigger();
-        cTrig.addConfiguredTriggerID(11);
-        cTrig.addConfiguredTriggerID(22);
-        cTrig.addConfiguredTriggerID(33);
-        cTrig.addConfiguredTriggerID(55);
+        cTrig.addConfiguredTriggerID(trigCfgId);
         bag.setConditionalTriggerAlgorithm(cTrig);
 
-        MockTriggerRequest tr;
+        final long[][] times = {
+            { 12345L, 19999L },
+            { 23456L, 29999L },
+            { 34567L, 39999L },
+            { 45678L, 49999L },
+            { 56789L, 59999L },
+            { 67890L, 69999L },
+        };
 
-        tr = new MockTriggerRequest(12345L, 20000L, 1, 11, GT_SRCID);
-        tr.setReadoutRequest(new MockReadoutRequest());
-        bag.add(tr);
-        if (DO_MONITORING) {
-            assertEquals("Unexpected input total",
-                         1, bag.getMonitor().getInputCountTotal());
-        } else {
-            assertEquals("Unexpected payload total",
-                         1, bag.getPayloadsInConditonalTriggerBag().size());
-        }
+        bag.setTimeGate(new MockUTCTime(1L));
 
-        tr = new MockTriggerRequest(23456L, 30000L, 2, 22, GT_SRCID);
-        tr.setReadoutRequest(new MockReadoutRequest());
-        tr.addPayload(new MockTriggerRequest(24680L, 25000L));
-        bag.add(tr);
-        if (DO_MONITORING) {
+        int numInput = 0;
+        for (int i = 0; i < times.length; i++) {
+            final int trigType = i + 1;
+
+            final boolean bogusCfgId = (i == (times.length / 2) + 1);
+            int cfgId;
+            if (bogusCfgId) {
+                cfgId = trigCfgId + 10;
+            } else {
+                cfgId = trigCfgId;
+            }
+
+            MockTriggerRequest tr =
+                new MockTriggerRequest(times[i][0], times[i][1], trigType,
+                                       cfgId, expSourceId, i + 1);
+            tr.setReadoutRequest(new MockReadoutRequest());
+            tr.addPayload(new MockTriggerRequest(times[i][0] + 111L,
+                                                 times[i][1] - 111L, trigType,
+                                                 trigCfgId));
+            bag.add(tr);
+
+            if (!bogusCfgId) {
+                numInput++;
+            }
+
+            assertFalse("Didn't expect a 'next' trigger #" + i, bag.hasNext());
             assertEquals("Unexpected input total",
-                         2, bag.getMonitor().getInputCountTotal());
+                         numInput, bag.getMonitor().getInputCountTotal());
             assertEquals("Unexpected output total",
                          0, bag.getMonitor().getOutputCountTotal());
-        } else {
-            assertEquals("Unexpected payload total",
-                         2, bag.getPayloadsInConditonalTriggerBag().size());
         }
 
-        tr = new MockTriggerRequest(34567L, 40000L, 3, 33, DH_SRCID);
-        tr.setReadoutRequest(new MockReadoutRequest());
-        bag.add(tr);
-        if (DO_MONITORING) {
-            assertEquals("Unexpected input total",
-                         3, bag.getMonitor().getInputCountTotal());
-            assertEquals("Unexpected output total",
-                         0, bag.getMonitor().getOutputCountTotal());
-        } else {
-            assertEquals("Unexpected payload total",
-                         3, bag.getPayloadsInConditonalTriggerBag().size());
-        }
-
-        tr = new MockTriggerRequest(45678L, 50000L, 4, 44, GT_SRCID);
-        tr.setReadoutRequest(new MockReadoutRequest());
-        tr.addPayload(new MockTriggerRequest(24680L, 25000L));
-        bag.add(tr);
-        if (DO_MONITORING) {
-            assertEquals("Unexpected input total",
-                         3, bag.getMonitor().getInputCountTotal());
-            assertEquals("Unexpected output total",
-                         0, bag.getMonitor().getOutputCountTotal());
-        } else {
-            assertEquals("Unexpected payload total",
-                         3, bag.getPayloadsInConditonalTriggerBag().size());
-        }
-
-        tr = new MockTriggerRequest(56789L, 60000L, 5, 55, GT_SRCID);
-        tr.setReadoutRequest(new MockReadoutRequest());
-        tr.addPayload(new MockTriggerRequest(59876L, 59999L));
-        bag.add(tr);
-        if (DO_MONITORING) {
-            assertEquals("Unexpected input total",
-                         4, bag.getMonitor().getInputCountTotal());
-            assertEquals("Unexpected output total",
-                         0, bag.getMonitor().getOutputCountTotal());
-        } else {
-            assertEquals("Unexpected payload total",
-                         4, bag.getPayloadsInConditonalTriggerBag().size());
-        }
-
-        bag.setTimeGate(new MockUTCTime(31000L));
+        bag.setTimeGate(new MockUTCTime(21000L));
         assertTrue("Expected a 'next' trigger", bag.hasNext());
         ITriggerRequestPayload nextTR = bag.next();
         assertNotNull("Expected next trigger", nextTR);
-        assertEquals("Bad trigger config ID", 11, nextTR.getTriggerConfigID());
+        assertEquals("Unexpected trigger UID", 1, nextTR.getUID());
+        assertEquals("Bad trigger config ID",
+                     trigCfgId, nextTR.getTriggerConfigID());
     }
 
     public void testNext()
     {
-        if (!DO_MONITORING) {
-            System.err.println("XXX - monitoring does not work");
-        }
-
         ConditionalTriggerBag bag = new ConditionalTriggerBag();
         assertEquals("Unexpected input total",
                      0, bag.getMonitor().getInputCountTotal());
 
+        final int expSourceId = GT_SRCID;
+        final int trigCfgId = 123;
+
         MockCoincidenceTrigger cTrig = new MockCoincidenceTrigger();
-        cTrig.addConfiguredTriggerID(11);
+        cTrig.addConfiguredTriggerID(trigCfgId);
         bag.setConditionalTriggerAlgorithm(cTrig);
 
-        MockTriggerRequest tr;
+        final long[][] times = {
+            { 12345L, 19999L },
+            { 23456L, 29999L },
+            { 34567L, 39999L },
+            { 45678L, 49999L },
+            { 56789L, 59999L },
+            { 67890L, 69999L },
+        };
 
-        tr = new MockTriggerRequest(12345L, 20000L, 1, 11, GT_SRCID);
-        tr.setReadoutRequest(new MockReadoutRequest());
-        tr.addPayload(new MockTriggerRequest(13579L, 19999L, 1, 11));
-        bag.add(tr);
-        if (DO_MONITORING) {
-            assertEquals("Unexpected input total",
-                         1, bag.getMonitor().getInputCountTotal());
-        }
+        bag.setTimeGate(new MockUTCTime(1L));
 
-        tr = new MockTriggerRequest(23456L, 30000L, 2, 22, GT_SRCID);
-        tr.setReadoutRequest(new MockReadoutRequest());
-        tr.addPayload(new MockTriggerRequest(23579L, 29999L, 1, 11));
-        bag.add(tr);
-        if (DO_MONITORING) {
+        for (int i = 0; i < times.length; i++) {
+            final int trigType = i + 1;
+
+            MockTriggerRequest tr =
+                new MockTriggerRequest(times[i][0], times[i][1], trigType,
+                                       trigCfgId, expSourceId, i + 1);
+            tr.setReadoutRequest(new MockReadoutRequest());
+            tr.addPayload(new MockTriggerRequest(times[i][0] + 123L,
+                                                 times[i][1] - 1L, trigType,
+                                                 trigCfgId));
+
+            bag.add(tr);
+            assertFalse("Didn't expect a 'next' trigger #" + i, bag.hasNext());
             assertEquals("Unexpected input total",
-                         2, bag.getMonitor().getInputCountTotal());
+                         i + 1, bag.getMonitor().getInputCountTotal());
             assertEquals("Unexpected output total",
                          0, bag.getMonitor().getOutputCountTotal());
         }
 
-        bag.setTimeGate(new MockUTCTime(10000L));
-        assertFalse("Didn't expect to have a 'next' trigger", bag.hasNext());
-        assertNull("Didn't expect to get next trigger", bag.next());
+        for (int i = 0; i < times.length; i++) {
+            bag.setTimeGate(new MockUTCTime(times[i][0]));
+            assertFalse("Didn't expect to have a 'next' trigger #" + i,
+                        bag.hasNext());
+            assertNull("Didn't expect to get next trigger #" + i, bag.next());
 
-        bag.setTimeGate(new MockUTCTime(16666L));
-        assertFalse("Didn't expect to have a 'next' trigger", bag.hasNext());
-        assertNull("Didn't expect to get next trigger", bag.next());
-        if (DO_MONITORING) {
+            bag.setTimeGate(new MockUTCTime(times[i][1]));
+            assertFalse("Didn't expect to have a 'next' trigger #" + i,
+                        bag.hasNext());
+            assertNull("Didn't expect to get trigger #" + i, bag.next());
+            assertEquals("Unexpected output total for trigger #" + i,
+                         i, bag.getMonitor().getOutputCountTotal());
+
+            bag.setTimeGate(new MockUTCTime(times[i][1] + 1L));
+            assertTrue("Expected to have a 'next' trigger #" + i,
+                       bag.hasNext());
+
+            ITriggerRequestPayload trp = bag.next();
+            assertNotNull("Expected to get trigger #" + i, trp);
+            assertEquals("Unexpected output total for trigger #" + i,
+                         i + 1, bag.getMonitor().getOutputCountTotal());
+            assertEquals("Unexpected trigger#" + i + " UID",
+                         i + 1, trp.getUID());
+            assertEquals("Unexpected trigger#" + i + " first time",
+                         times[i][0], trp.getFirstTimeUTC().longValue());
+            assertEquals("Unexpected trigger#" + i + " last time",
+                         times[i][1], trp.getLastTimeUTC().longValue());
+        }
+    }
+
+    class TimeArrayComparator
+        implements Comparator
+    {
+        public int compare(Object o1, Object o2)
+        {
+            long[] i1 = (long[]) o1;
+            long[] i2 = (long[]) o2;
+
+            int val = (int) (i1[0] - i2[0]);
+            if (val == 0) {
+                val = (int) (i1[1] - i2[1]);
+            }
+
+            return val;
+        }
+    }
+
+    public void testNextOrder()
+    {
+        ConditionalTriggerBag bag = new ConditionalTriggerBag();
+        assertEquals("Unexpected input total",
+                     0, bag.getMonitor().getInputCountTotal());
+
+        final int expSourceId = GT_SRCID;
+        final int trigCfgId = 123;
+
+        MockCoincidenceTrigger cTrig = new MockCoincidenceTrigger();
+        cTrig.addConfiguredTriggerID(trigCfgId);
+        bag.setConditionalTriggerAlgorithm(cTrig);
+
+        final long[][] times = {
+            { 23456L, 29999L },
+            { 34567L, 39999L },
+            { 12345L, 19999L },
+        };
+
+        bag.setTimeGate(new MockUTCTime(1L));
+
+        for (int i = 0; i < times.length; i++) {
+            final int trigType = i + 1;
+
+            MockTriggerRequest tr =
+                new MockTriggerRequest(times[i][0], times[i][1], trigType,
+                                       trigCfgId, expSourceId, i + 1);
+            tr.setReadoutRequest(new MockReadoutRequest());
+            tr.addPayload(new MockTriggerRequest(times[i][0] + 123L,
+                                                 times[i][1] - 1L, trigType,
+                                                 trigCfgId));
+
+            bag.add(tr);
+            assertFalse("Didn't expect a 'next' trigger #" + i, bag.hasNext());
+            assertEquals("Unexpected input total",
+                         i + 1, bag.getMonitor().getInputCountTotal());
             assertEquals("Unexpected output total",
                          0, bag.getMonitor().getOutputCountTotal());
         }
 
-        bag.setTimeGate(new MockUTCTime(20001L));
+        Arrays.sort(times, new TimeArrayComparator());
+
+        bag.setTimeGate(new MockUTCTime(times[1][1] + 1L));
         assertTrue("Expected to have a 'next' trigger", bag.hasNext());
 
-        ITriggerRequestPayload nextTR = bag.next();
-        assertNotNull("Expected to get next trigger", nextTR);
-        assertEquals("Bad trigger config ID", 11, nextTR.getTriggerConfigID());
-        if (DO_MONITORING) {
-            assertEquals("Unexpected output total",
-                         1, bag.getMonitor().getOutputCountTotal());
+        for (int i = 0; i < times.length - 1; i++) {
+            ITriggerRequestPayload trp = bag.next();
+            assertNotNull("Expected to get trigger #" + i, trp);
+            assertEquals("Unexpected output total for trigger #" + i,
+                         i + 1, bag.getMonitor().getOutputCountTotal());
+            assertEquals("Unexpected trigger#" + i + " UID",
+                         i + 1, trp.getUID());
+            assertEquals("Unexpected trigger#" + i + " first time",
+                         times[i][0], trp.getFirstTimeUTC().longValue());
+            assertEquals("Unexpected trigger#" + i + " last time",
+                         times[i][1], trp.getLastTimeUTC().longValue());
         }
     }
 

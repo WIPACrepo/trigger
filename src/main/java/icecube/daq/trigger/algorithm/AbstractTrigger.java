@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 3363 2008-08-08 19:41:32Z kael $
+ * Version $Id: AbstractTrigger.java 3423 2008-08-29 16:54:19Z dglo $
  *
  * Date: August 19 2005
  *
@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 3363 2008-08-08 19:41:32Z kael $
+ * @version $Id: AbstractTrigger.java 3423 2008-08-29 16:54:19Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor
@@ -577,7 +577,7 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
         buffer.append(triggerName + ":\n");
         buffer.append("\tTriggerType     = " + triggerType + "\n");
         buffer.append("\tTriggerConfigId = " + triggerConfigId + "\n");
-        buffer.append("\tSourceId        = " + sourceId.getSourceID() + "\n");
+        buffer.append("\tSourceId        = " + sourceId + "\n");
         if (!parameters.isEmpty()) {
             buffer.append("\tParameters:\n");
             Iterator iter = parameters.iterator();

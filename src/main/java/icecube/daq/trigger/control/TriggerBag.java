@@ -1,7 +1,7 @@
 /*
  * class: TriggerBag
  *
- * Version $Id: TriggerBag.java 2961 2008-04-22 03:06:36Z dglo $
+ * Version $Id: TriggerBag.java 3425 2008-08-29 17:00:05Z dglo $
  *
  * Date: March 16 2005
  *
@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  *                                   +       {===============}
  *                                   +            Merge
  *
- * @version $Id: TriggerBag.java 2961 2008-04-22 03:06:36Z dglo $
+ * @version $Id: TriggerBag.java 3425 2008-08-29 17:00:05Z dglo $
  * @author pat
  */
 public class TriggerBag
@@ -339,6 +339,7 @@ public class TriggerBag
             log.debug("Updating timeGate to " + time);
         }
         timeGate = time;
+        nextIndex = NEXT_UNKNOWN;
     }
 
     /**

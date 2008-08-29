@@ -1,7 +1,7 @@
 /*
  * class: ConditionalTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java 3427 2008-08-29 17:06:02Z dglo $
+ * Version $Id: ConditionalTriggerBag.java 3428 2008-08-29 17:08:43Z dglo $
  *
  * Date: September 2 2005
  *
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java 3427 2008-08-29 17:06:02Z dglo $
+ * @version $Id: ConditionalTriggerBag.java 3428 2008-08-29 17:08:43Z dglo $
  * @author shseo
  */
 public class ConditionalTriggerBag
@@ -170,7 +170,8 @@ public class ConditionalTriggerBag
                     }
                 }
 
-                Collections.sort((List) mergeListForConditionalBag);
+                Collections.sort((List) mergeListForConditionalBag,
+                                 new TriggerComparator());
                 //-- performed prevention of multiple wrapping in this stage: only single wrap !!!
                 getGlobalTrigEventWrapper().wrapMergingEvent(mergeListForConditionalBag,
                         mtCoincidenceTriggerAlgorithm.getTriggerType(),
@@ -188,7 +189,8 @@ public class ConditionalTriggerBag
                 payloadListInConditionalBag.add(trigger);
             }
 
-            Collections.sort((List) payloadListInConditionalBag);
+            Collections.sort((List) payloadListInConditionalBag,
+                             new TriggerComparator());
         }
 
         if (log.isDebugEnabled()) {
@@ -312,6 +314,17 @@ public class ConditionalTriggerBag
     public void flush() {
         nextIndex = NEXT_UNKNOWN;
         flushing = true;
+    }
+
+    /**
+     * Call parent's setTimeGate() method and reset nextIndex.
+     *
+     * @param time
+     */
+    public void setTimeGate(IUTCTime time)
+    {
+        super.setTimeGate(time);
+        nextIndex = NEXT_UNKNOWN;
     }
 
     /**

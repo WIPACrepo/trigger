@@ -242,23 +242,31 @@ public class GlobalTriggerBagTest
                      0, bag.size());
 
         final int expSourceId = SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID;
+        final int trigCfgId = 123;
 
         final long[][] times = {
             { 12345L, 19999L },
             { 23456L, 29999L },
             { 34567L, 39999L },
+            { 45678L, 49999L },
+            { 56789L, 59999L },
+            { 67890L, 69999L },
         };
 
+        bag.setTimeGate(new MockUTCTime(1L));
+
         for (int i = 0; i < times.length; i++) {
+            final int trigType = i + 1;
+
             MockTriggerRequest tr =
-                new MockTriggerRequest(times[i][0], times[i][1], i + 1,
-                                       (i + 1) * 11, expSourceId, i + 1);
+                new MockTriggerRequest(times[i][0], times[i][1], trigType,
+                                       trigCfgId, expSourceId, i + 1);
             tr.setReadoutRequest(new MockReadoutRequest());
 
             bag.add(tr);
+            assertFalse("Didn't expect a 'next' trigger #" + i, bag.hasNext());
             assertEquals("Unexpected input total",
                          i + 1, bag.getMonitor().getInputCountTotal());
-
             assertEquals("Unexpected output total",
                          0, bag.getMonitor().getOutputCountTotal());
         }
@@ -277,7 +285,8 @@ public class GlobalTriggerBagTest
                          i, bag.getMonitor().getOutputCountTotal());
 
             bag.setTimeGate(new MockUTCTime(times[i][1] + 1L));
-            assertTrue("Expected to have a 'next' trigger", bag.hasNext());
+            assertTrue("Expected to have a 'next' trigger #" + i,
+                       bag.hasNext());
 
             ITriggerRequestPayload trp = bag.next();
             assertNotNull("Expected to get trigger #" + i, trp);
@@ -316,6 +325,7 @@ public class GlobalTriggerBagTest
                      0, bag.size());
 
         final int expSourceId = SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID;
+        final int trigCfgId = 123;
 
         final long[][] times = {
             { 23456L, 29999L },
@@ -323,23 +333,27 @@ public class GlobalTriggerBagTest
             { 12345L, 19999L },
         };
 
+        bag.setTimeGate(new MockUTCTime(1L));
+
         for (int i = 0; i < times.length; i++) {
+            final int trigType = i + 1;
+
             MockTriggerRequest tr =
-                new MockTriggerRequest(times[i][0], times[i][1], i + 1,
-                                       (i + 1) * 11, expSourceId, i + 1);
+                new MockTriggerRequest(times[i][0], times[i][1], trigType,
+                                       trigCfgId, expSourceId, i + 1);
             tr.setReadoutRequest(new MockReadoutRequest());
 
             bag.add(tr);
+            assertFalse("Didn't expect a 'next' trigger #" + i, bag.hasNext());
             assertEquals("Unexpected input total",
                          i + 1, bag.getMonitor().getInputCountTotal());
-
             assertEquals("Unexpected output total",
                          0, bag.getMonitor().getOutputCountTotal());
         }
 
         Arrays.sort(times, new TimeArrayComparator());
 
-        bag.setTimeGate(new MockUTCTime(times[1][1] + 1L));
+        bag.setTimeGate(new MockUTCTime(times[times.length - 2][1] + 1L));
         assertTrue("Expected to have a 'next' trigger", bag.hasNext());
 
         for (int i = 0; i < times.length - 1; i++) {

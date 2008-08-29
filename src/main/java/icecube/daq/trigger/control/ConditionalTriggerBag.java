@@ -1,7 +1,7 @@
 /*
  * class: ConditionalTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java 2961 2008-04-22 03:06:36Z dglo $
+ * Version $Id: ConditionalTriggerBag.java 3427 2008-08-29 17:06:02Z dglo $
  *
  * Date: September 2 2005
  *
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java 2961 2008-04-22 03:06:36Z dglo $
+ * @version $Id: ConditionalTriggerBag.java 3427 2008-08-29 17:06:02Z dglo $
  * @author shseo
  */
 public class ConditionalTriggerBag
@@ -105,6 +105,9 @@ public class ConditionalTriggerBag
 
         // reset 'next' index
         nextIndex = NEXT_UNKNOWN;
+
+        // show this input to the monitor
+        getMonitor().recordInput(newPayload);
 
         //--add to internal list
         if (payloadListInConditionalBag.isEmpty()) {
@@ -357,6 +360,9 @@ public class ConditionalTriggerBag
         triggerUID++;
         getGlobalTrigEventWrapper().wrapFinalEvent(trigger, triggerUID);
         trigger = (ITriggerRequestPayload) getGlobalTrigEventWrapper().getGlobalTrigEventPayload_final();
+
+        // show this output to the monitor
+        getMonitor().recordOutput(trigger);
 
         return trigger;
     }

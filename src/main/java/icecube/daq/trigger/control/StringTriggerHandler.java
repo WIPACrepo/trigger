@@ -120,8 +120,6 @@ public class StringTriggerHandler
         try {
             payload = masterFactory.createPayload(0, tBuffer);
             process(payload);
-        } catch (IOException ioe) {
-            log.error("Error creating hit payload", ioe);
         } catch (DataFormatException dfe) {
             log.error("Error creating hit payload", dfe);
         }

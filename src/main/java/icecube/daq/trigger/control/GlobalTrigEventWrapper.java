@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
  *  and put in the payloadList.
  * This is called in GlobalTrigBag.java.
  *
- * @version $Id: GlobalTrigEventWrapper.java 2961 2008-04-22 03:06:36Z dglo $
+ * @version $Id: GlobalTrigEventWrapper.java 3431 2008-08-30 04:30:36Z dglo $
  * @author shseo
  */
 public class GlobalTrigEventWrapper
@@ -132,8 +132,6 @@ public class GlobalTrigEventWrapper
                     try {
                         vecLocalSubPayload.addAll(((ITriggerRequestPayload) tPayload).getPayloads());
                         //log.debug("size of the local subPayload = " + vecLocalSubPayload.size());
-                    } catch (IOException e) {
-                        log.error("Couldn't get payloads", e);
                     } catch (DataFormatException e) {
                         log.error("Couldn't get payloads", e);
                     }
@@ -363,8 +361,6 @@ public class GlobalTrigEventWrapper
                                                                                                    tGTEvent.getPayloads(),
                                                                                                    tReadoutRequest_final);
 
-        } catch (IOException e) {
-            log.error("Couldn't create payload", e);
         } catch (DataFormatException e) {
             log.error("Couldn't create payload", e);
         }

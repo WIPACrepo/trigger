@@ -52,7 +52,7 @@ class BadTriggerRequest
     }
 
     public List getPayloads()
-        throws IOException, DataFormatException
+        throws DataFormatException
     {
         return null;
     }

@@ -38,7 +38,6 @@ public class MockTriggerRequest
     private ArrayList payloadList = new ArrayList();
 
     private DataFormatException getPayDFException;
-    private IOException getPayIOException;
 
     public MockTriggerRequest(long firstVal, long lastVal)
     {
@@ -129,12 +128,10 @@ public class MockTriggerRequest
     }
 
     public List getPayloads()
-        throws IOException, DataFormatException
+        throws DataFormatException
     {
         if (getPayDFException != null) {
             throw getPayDFException;
-        } else if (getPayIOException != null) {
-            throw getPayIOException;
         }
 
         return payloadList;
@@ -189,8 +186,6 @@ public class MockTriggerRequest
     {
         if (ex instanceof DataFormatException) {
             getPayDFException = (DataFormatException) ex;
-        } else if (ex instanceof IOException) {
-            getPayIOException = (IOException) ex;
         } else {
             throw new Error("Unknown exception type " +
                             ex.getClass().getName() + ": " + ex);

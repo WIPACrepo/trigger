@@ -43,8 +43,6 @@ public class AmandaTriggerAnalyzer {
 
         try {
             trigger.loadPayload();
-        } catch (IOException ioe) {
-            log.error("Error loading payload: ", ioe);
         } catch (DataFormatException dfe) {
             log.error("Error loading payload: ", dfe);
         }

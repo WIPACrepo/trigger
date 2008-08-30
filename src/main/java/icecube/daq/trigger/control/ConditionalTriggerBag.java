@@ -1,7 +1,7 @@
 /*
  * class: ConditionalTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java 3428 2008-08-29 17:08:43Z dglo $
+ * Version $Id: ConditionalTriggerBag.java 3431 2008-08-30 04:30:36Z dglo $
  *
  * Date: September 2 2005
  *
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java 3428 2008-08-29 17:08:43Z dglo $
+ * @version $Id: ConditionalTriggerBag.java 3431 2008-08-30 04:30:36Z dglo $
  * @author shseo
  */
 public class ConditionalTriggerBag
@@ -214,9 +214,6 @@ public class ConditionalTriggerBag
         Iterator iterTriggers;
         try {
             iterTriggers = tTrigger.getPayloads().iterator();
-        } catch (IOException e) {
-            log.error("Couldn't get payloads", e);
-            return false;
         } catch (DataFormatException e) {
             log.error("Couldn't get payloads", e);
             return false;

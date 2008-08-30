@@ -314,32 +314,6 @@ public class ConditionalTriggerBagTest
         appender.clear();
     }
 
-    public void testContainsAllGetPayIOException()
-    {
-        ConditionalTriggerBag bag = new ConditionalTriggerBag();
-        assertEquals("Unexpected input total",
-                     0, bag.getMonitor().getInputCountTotal());
-
-        MockCoincidenceTrigger cTrig = new MockCoincidenceTrigger();
-        cTrig.addConfiguredTriggerID(11);
-        bag.setConditionalTriggerAlgorithm(cTrig);
-
-        MockTriggerRequest tr =
-            new MockTriggerRequest(12345L, 20000L, 1, 11, GT_SRCID);
-        tr.setGetPayloadsException(new IOException("TestException"));
-        bag.add(tr);
-        assertEquals("Unexpected input total",
-                     1, bag.getMonitor().getInputCountTotal());
-
-        assertFalse("Didn't expect 'next' trigger", bag.hasNext());
-
-        assertEquals("Bad number of messages",
-                     1, appender.getNumberOfMessages());
-        assertEquals("Bad log message",
-                     "Couldn't get payloads", appender.getMessage(0));
-        appender.clear();
-    }
-
     public void testContainsAllLoadDFException()
     {
         ConditionalTriggerBag bag = new ConditionalTriggerBag();

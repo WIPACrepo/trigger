@@ -44,7 +44,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 2961 2008-04-22 03:06:36Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 3431 2008-08-30 04:30:36Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -334,10 +334,6 @@ public class GlobalTriggerHandler
                     List subPayloads;
                     try {
                         subPayloads = ((ITriggerRequestPayload) tInputTrigger).getPayloads();
-                    } catch (IOException e) {
-                        log.error("Couldn't load payload", e);
-                        subPayloads = null;
-                        failedLoad = true;
                     } catch (DataFormatException e) {
                         log.error("Couldn't load payload", e);
                         subPayloads = null;

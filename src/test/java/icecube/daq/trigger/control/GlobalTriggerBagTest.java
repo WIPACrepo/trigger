@@ -54,7 +54,7 @@ class MockHitRequest
     }
 
     public List getPayloads()
-        throws IOException, DataFormatException
+        throws DataFormatException
     {
         throw new Error("Unimplemented");
     }

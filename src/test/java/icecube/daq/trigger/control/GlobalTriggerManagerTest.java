@@ -45,6 +45,21 @@ public class GlobalTriggerManagerTest
         super(name);
     }
 
+    private void checkLogMessages()
+    {
+        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
+            String msg = (String) appender.getMessage(i);
+
+            if (!(msg.contains("I3 GlobalTrigger Run Summary")) &&
+                !msg.startsWith("Resetting counter ") &&
+                true)
+            {
+                fail("Bad log message#" + i + ": " + appender.getMessage(i));
+            }
+        }
+        appender.clear();
+    }
+
     private void loadAndRun(GlobalTriggerManager trigMgr, int numTails,
                             int numSteps)
         throws SplicerException
@@ -122,20 +137,6 @@ public class GlobalTriggerManagerTest
 
         assertEquals("Bad number of payloads written",
                      100, outProc.getNumberWritten());
-
-        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
-            String msg = (String) appender.getMessage(i);
-
-            if (!(msg.startsWith("Clearing ") &&
-                  msg.endsWith(" rope entries")) &&
-                !msg.startsWith("Resetting counter ") &&
-                !msg.startsWith("Resetting decrement ") &&
-                !msg.startsWith("No match for timegate "))
-            {
-                fail("Bad log message#" + i + ": " + appender.getMessage(i));
-            }
-        }
-        appender.clear();
     }
 
     protected void setUp()
@@ -168,6 +169,8 @@ public class GlobalTriggerManagerTest
     {
         GlobalTriggerManager trigMgr = new GlobalTriggerManager();
         runWithRealSplicer(trigMgr);
+
+        checkLogMessages();
     }
 
     public void testMockSplicer()
@@ -190,6 +193,8 @@ public class GlobalTriggerManagerTest
                      100, outProc.getNumberWritten());
 
         trigMgr.reset();
+
+        checkLogMessages();
     }
 
     public static void main(String[] args)

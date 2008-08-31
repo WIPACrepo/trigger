@@ -44,7 +44,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 3431 2008-08-30 04:30:36Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 3433 2008-08-31 16:19:12Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -245,20 +245,29 @@ public class GlobalTriggerHandler
         //-- one last call to process to check the bag
         process(null);
 
-        System.out.println("======================================================================");
-        System.out.println("I3 GlobalTrigger Run Summary: ");
-        System.out.println(" ");
-        System.out.println("Total # of GT events = " + miTotalOutputGlobalTriggers);
-        System.out.println("Total # of merged GT events = " + miTotalOutputMergedGlobalTriggers);
-        System.out.println(" ");
+        String nl = System.getProperty("line.separator");
+        String hdrLine = "===================================" +
+            "===================================";
+
+        StringBuilder buf = new StringBuilder();
+        buf.append(hdrLine).append(nl);
+        buf.append("I3 GlobalTrigger Run Summary:").append(nl);
+        buf.append(nl);
+        buf.append("Total # of GT events = " +
+                   miTotalOutputGlobalTriggers).append(nl);
+        buf.append("Total # of merged GT events = " +
+                  miTotalOutputMergedGlobalTriggers).append(nl);
+        buf.append(nl);
         triggerIterator = configuredTriggerList.iterator();
         while (triggerIterator.hasNext()) {
             ITriggerControl trigger = (ITriggerControl) triggerIterator.next();
-            System.out.println("Total # of " + ((ITriggerConfig) trigger).getTriggerName() + "= "
-                    + ((ITriggerMonitor) trigger).getTriggerCounter());
-
+            buf.append("Total # of " +
+                       ((ITriggerConfig) trigger).getTriggerName() + "= " +
+                       ((ITriggerMonitor) trigger).getTriggerCounter());
+            buf.append(nl);
         }
-        System.out.println("======================================================================");
+        buf.append(hdrLine).append(nl);
+        log.warn(buf.toString());
     }
 
     public IPayload getEarliestPayloadOfInterest()
@@ -306,7 +315,7 @@ public class GlobalTriggerHandler
         log.debug("Total # of Input Triggers so far = " + miTotalInputTriggers);
 
         if(miTotalInputTriggers == 1){
-            System.out.println("MaxTimeGateWindow at GlobalTrigHandler = " + miMaxTimeGateWindow);
+            log.debug("MaxTimeGateWindow at GlobalTrigHandler = " + miMaxTimeGateWindow);
         }
 
         //--add payload to input handler which supplements funtionality of the splicer.

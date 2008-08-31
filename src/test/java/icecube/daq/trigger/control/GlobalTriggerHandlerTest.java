@@ -74,6 +74,18 @@ public class GlobalTriggerHandlerTest
         super(name);
     }
 
+    private void checkLogMessages()
+    {
+        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
+            String msg = (String) appender.getMessage(i);
+
+            if (!(msg.contains("I3 GlobalTrigger Run Summary"))) {
+                fail("Bad log message#" + i + ": " + appender.getMessage(i));
+            }
+        }
+        appender.clear();
+    }
+
     protected void setUp()
         throws Exception
     {
@@ -261,6 +273,8 @@ public class GlobalTriggerHandlerTest
         trigMgr.setPayloadOutput(outProc);
 
         trigMgr.flush();
+
+        checkLogMessages();
     }
 
     public void testFlush()
@@ -284,6 +298,8 @@ public class GlobalTriggerHandlerTest
         trigMgr.flush();
         assertEquals("Bad number of payloads written",
                      1, outProc.getNumberWritten());
+
+        checkLogMessages();
     }
 
     public void testProcessNonTrigger()

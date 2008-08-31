@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
  * This class receives TriggerRequestPayloads from each active GlobalTrigAlgorithm
  * , merges if they overlap and produces globalTrigEventPayload.
  *
- * @version $Id: GlobalTriggerBag.java 3424 2008-08-29 16:57:29Z dglo $
+ * @version $Id: GlobalTriggerBag.java 3433 2008-08-31 16:19:12Z dglo $
  * @author shseo
  */
 public class GlobalTriggerBag
@@ -361,11 +361,7 @@ public class GlobalTriggerBag
         if (log.isDebugEnabled()) {
             log.debug("Updating timeGate to " + time);
         }
-        //System.out.println("------------------------------------------------------");
-        //System.out.println("in BAG: MAX-TIME-GATE-WINDOW = " + miTimeGateWindow);
         timeGate = time.getOffsetUTCTime((double) miTimeGateWindow);
-        //System.out.println("print timeGate = " + timeGate);
-        //System.out.println("------------------------------------------------------");
         nextIndex = NEXT_UNKNOWN;
     }
 
@@ -379,7 +375,6 @@ public class GlobalTriggerBag
         //--set timeGateWindow as negative always.
         //miTimeGateWindow = -Math.abs(iConfiguredMaxTimeWindow);
         miTimeGateWindow = iConfiguredMaxTimeWindow;
-        //System.out.println("set MAX-TIME-GATE-WINDOW at GT Bag= " + miTimeGateWindow);
     }
 
     public int size()

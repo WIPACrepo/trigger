@@ -1,7 +1,7 @@
 /*
  * class: Sorter
  *
- * Version $Id: Sorter.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: Sorter.java 3433 2008-08-31 16:19:12Z dglo $
  *
  * Date: July 15 2005
  *
@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * This class is to provide the earliest/latest UTC-timeStamp.
  *
- * @version $Id: Sorter.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: Sorter.java 3433 2008-08-31 16:19:12Z dglo $
  * @author shseo
  */
 public class Sorter
@@ -64,7 +64,6 @@ public class Sorter
             //while(!bStop){
             while(listReadoutElementsUTCTimeSorted.size() < iSizeUnsortedList-1)
             {
-                //System.out.println("Size.... UNSORTED !!!! = " + listReadoutElementsUTCTimeUnsorted.size());
                 for(int i=0; i < listReadoutElementsUTCTimeUnsorted.size(); i++)
                 {
                     element = (IReadoutRequestElement) listReadoutElementsUTCTimeUnsorted.get(i);
@@ -130,9 +129,6 @@ public class Sorter
                 UTCTime_earliest = UTCTime_start;
             }
         }
-        //System.out.println("------------------------------------------------------------");
-        //System.out.println("chosen earliest time = " + UTCTime_earliest);
-        //System.out.println("------------------------------------------------------------");
         return UTCTime_earliest;
     }
     public IUTCTime getUTCTimeLatest(List listObjects, boolean isPayloadObjects)

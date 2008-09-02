@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
  *  and put in the payloadList.
  * This is called in GlobalTrigBag.java.
  *
- * @version $Id: GlobalTrigEventWrapper.java 3431 2008-08-30 04:30:36Z dglo $
+ * @version $Id: GlobalTrigEventWrapper.java 3439 2008-09-02 17:08:41Z dglo $
  * @author shseo
  */
 public class GlobalTrigEventWrapper
@@ -131,7 +131,7 @@ public class GlobalTrigEventWrapper
                 }else{
                     try {
                         vecLocalSubPayload.addAll(((ITriggerRequestPayload) tPayload).getPayloads());
-                        //log.debug("size of the local subPayload = " + vecLocalSubPayload.size());
+                        //if (log.isDebugEnabled()) log.debug("size of the local subPayload = " + vecLocalSubPayload.size());
                     } catch (DataFormatException e) {
                         log.error("Couldn't get payloads", e);
                     }
@@ -207,7 +207,9 @@ public class GlobalTrigEventWrapper
             miTriggerUID = 0;
         }
 
-        log.debug("miTriggerUID (ConditionalTrigger counter #) = " + miTriggerUID);
+        if (log.isDebugEnabled()) {
+            log.debug("miTriggerUID (ConditionalTrigger counter #) = " + miTriggerUID);
+        }
 
         List vecGlobalSubPayload = collectSubPayloads(mergeList, false);
 
@@ -370,8 +372,11 @@ public class GlobalTrigEventWrapper
         {
             miNumMergedGTevent++;
         }
-        log.debug("Total # of Final GT Event so far = " + iEvtNumber);
-        log.debug("Total # of Final Merged-GT event so far = " + miNumMergedGTevent);
+        if (log.isDebugEnabled()) {
+            log.debug("Total # of Final GT Event so far = " + iEvtNumber);
+            log.debug("Total # of Final Merged-GT event so far = " +
+                      miNumMergedGTevent);
+        }
 
         //--recycle
         ((ILoadablePayload) tGTEvent).recycle();

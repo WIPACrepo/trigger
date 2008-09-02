@@ -1,7 +1,7 @@
 /*
  * class: TriggerManager
  *
- * Version $Id: TriggerManager.java 2904 2008-04-11 17:38:14Z dglo $
+ * Version $Id: TriggerManager.java 3439 2008-09-02 17:08:41Z dglo $
  *
  * Date: October 25 2004
  *
@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger
  *
- * @version $Id: TriggerManager.java 2904 2008-04-11 17:38:14Z dglo $
+ * @version $Id: TriggerManager.java 3439 2008-09-02 17:08:41Z dglo $
  * @author pat
  */
 public class TriggerManager
@@ -164,7 +164,8 @@ public class TriggerManager
         lastInputListSize = numberOfObjectsInSplicer - (start - decrement);
 
         if (log.isDebugEnabled()) {
-            log.debug("Splicer contains: [" + lastInputListSize + ":" + numberOfObjectsInSplicer + "]");
+            log.debug("Splicer contains: [" + lastInputListSize + ":" +
+                      numberOfObjectsInSplicer + "]");
         }
 
         if (lastInputListSize > 0) {
@@ -176,8 +177,8 @@ public class TriggerManager
                 latestTime = payload.getPayloadTimeUTC();
 
                 if (log.isDebugEnabled()) {
-                    log.debug("  Processing payload " + inputCount + " with time "
-                              + payload.getPayloadTimeUTC());
+                    log.debug("  Processing payload " + inputCount +
+                              " with time " + payload.getPayloadTimeUTC());
                 }
 
                 process(payload);
@@ -225,7 +226,8 @@ public class TriggerManager
         Spliceable update = (Spliceable) getEarliestPayloadOfInterest();
         if (null != update) {
             if (log.isDebugEnabled()) {
-                log.debug("Truncating splicer at " + ((IPayload) update).getPayloadTimeUTC());
+                log.debug("Truncating splicer at " +
+                          ((IPayload) update).getPayloadTimeUTC());
             }
             splicer.truncate(update);
         }
@@ -319,7 +321,8 @@ public class TriggerManager
         while (iter.hasNext()) {
             ILoadablePayload payload = (ILoadablePayload) iter.next();
             if (log.isDebugEnabled()) {
-                log.debug("Recycle payload " + recycleCount + " at " + payload.getPayloadTimeUTC());
+                log.debug("Recycle payload " + recycleCount + " at " +
+                          payload.getPayloadTimeUTC());
             }
 
             earliestTime = payload.getPayloadTimeUTC();

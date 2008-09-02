@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 2904 2008-04-11 17:38:14Z dglo $
+ * Version $Id: TriggerHandler.java 3439 2008-09-02 17:08:41Z dglo $
  *
  * Date: October 25 2004
  *
@@ -45,7 +45,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 2904 2008-04-11 17:38:14Z dglo $
+ * @version $Id: TriggerHandler.java 3439 2008-09-02 17:08:41Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -447,7 +447,8 @@ public class TriggerHandler
 
 
         if (log.isDebugEnabled()) {
-            log.debug("Trigger Bag contains " + triggerBag.size() + " triggers");
+            log.debug("Trigger Bag contains " + triggerBag.size() +
+                      " triggers");
         }
 
         // update earliest time of interest
@@ -475,12 +476,18 @@ public class TriggerHandler
                         log.error("Couldn't get number of subpayloads", e);
                     }
 
-                    if (0 > trigger.getTriggerType()) {
-                        log.debug("Issue trigger: extended event time = " + firstTime + " to "
-                                  + lastTime + " and contains " + nSubPayloads + " triggers");
-                    } else {
-                        log.debug("Issue trigger: extended event time = " + firstTime + " to "
-                                  + lastTime + " and contains " + nSubPayloads + " hits");
+                    if (log.isDebugEnabled()) {
+                        String trType;
+                        if (0 > trigger.getTriggerType()) {
+                            trType = "triggers";
+                        } else {
+                            trType = "hits";
+                        }
+
+                        log.debug("Issue trigger: extended event time = " +
+                                  firstTime + " to " + lastTime +
+                                  " and contains " + nSubPayloads + " " +
+                                  trType);
                     }
                 }
             }

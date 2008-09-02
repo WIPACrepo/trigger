@@ -1,7 +1,7 @@
 /*
  * class: VetoTrigger
  *
- * Version $Id: VetoTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: VetoTrigger.java 3439 2008-09-02 17:08:41Z dglo $
  *
  * Date: January 25 2006
  *
@@ -22,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is to provide commond methods for any N-VetoTrigger.
  *
- * @version $Id: VetoTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: VetoTrigger.java 3439 2008-09-02 17:08:41Z dglo $
  * @author shseo
  */
 public abstract class VetoTrigger
@@ -56,7 +56,9 @@ public abstract class VetoTrigger
          if(!isConfiguredTrigger((ITriggerRequestPayload) payload))
          {
              miNumIncomingSelectedTriggers++;
-             log.debug("Total number of incoming Unvetoed triggers so far = " + miNumIncomingSelectedTriggers);
+             if (log.isDebugEnabled()) {
+                 log.debug("Total number of incoming Unvetoed triggers so far = " + miNumIncomingSelectedTriggers);
+             }
              try {
                  wrapTrigger((ITriggerRequestPayload) payload);
              } catch (Exception e) {

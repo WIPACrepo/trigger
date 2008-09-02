@@ -103,7 +103,9 @@ public class GlobalConfiguration
             return null;
         }
 	String nodeValue = elements.item(0).getFirstChild().getNodeValue();
-	log.info("triggerConfig element has: " + nodeValue);
+	if (log.isInfoEnabled()) {
+		log.info("triggerConfig element has: " + nodeValue);
+	}
         return elements.item(0).getFirstChild().getNodeValue();
 
     }
@@ -119,7 +121,9 @@ public class GlobalConfiguration
     private static Element getRootElement(String configFileName)
             throws ParserConfigurationException, SAXException, IOException {
 
-	log.info("Getting root element of xml file: " + configFileName);
+	if (log.isInfoEnabled()) {
+		log.info("Getting root element of xml file: " + configFileName);
+	}
         DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         return documentBuilder.parse(configFileName).getDocumentElement();
 

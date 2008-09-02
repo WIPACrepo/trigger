@@ -1,7 +1,7 @@
 /*
  * class: ConditionalTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java 3431 2008-08-30 04:30:36Z dglo $
+ * Version $Id: ConditionalTriggerBag.java 3439 2008-09-02 17:08:41Z dglo $
  *
  * Date: September 2 2005
  *
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java 3431 2008-08-30 04:30:36Z dglo $
+ * @version $Id: ConditionalTriggerBag.java 3439 2008-09-02 17:08:41Z dglo $
  * @author shseo
  */
 public class ConditionalTriggerBag
@@ -412,8 +412,10 @@ public class ConditionalTriggerBag
         mListConfiguredTriggerIDs = mtCoincidenceTriggerAlgorithm.getConfiguredTriggerIDs();
 
         msCoincidenceTriggerAlgorithmName = mtCoincidenceTriggerAlgorithm.getClass().getName();
-        log.info("A specific ConditionalTriggerAlgorithm was set in ConditionalTriggerBag: "
-                    + msCoincidenceTriggerAlgorithmName);
+        if (log.isInfoEnabled()) {
+            log.info("A specific ConditionalTriggerAlgorithm was set in ConditionalTriggerBag: "
+                     + msCoincidenceTriggerAlgorithmName);
+        }
     }
 
     public List getPayloadsInConditonalTriggerBag()

@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTrigger
  *
- * Version $Id: CoincidenceTrigger.java 2961 2008-04-22 03:06:36Z dglo $
+ * Version $Id: CoincidenceTrigger.java 3439 2008-09-02 17:08:41Z dglo $
  *
  * Date: September 2 2005
  *
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is to provide methods common to all coincidence triggers.
  *
- * @version $Id: CoincidenceTrigger.java 2961 2008-04-22 03:06:36Z dglo $
+ * @version $Id: CoincidenceTrigger.java 3439 2008-09-02 17:08:41Z dglo $
  * @author shseo
  */
 public abstract class CoincidenceTrigger
@@ -75,7 +75,9 @@ public abstract class CoincidenceTrigger
         if(isConfiguredTrigger((ITriggerRequestPayload) payload))
         {
             miNumIncomingConfiguredTriggers++;
-            log.debug("Total number of incoming configured triggers so far = " + miNumIncomingConfiguredTriggers);
+            if (log.isDebugEnabled()) {
+                log.debug("Total number of incoming configured triggers so far = " + miNumIncomingConfiguredTriggers);
+            }
 
             mtConditionalTriggerBag.add((ILoadablePayload) payload);
 

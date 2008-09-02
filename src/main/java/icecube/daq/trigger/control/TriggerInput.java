@@ -1,7 +1,7 @@
 /*
  * class: TriggerInput
  *
- * Version $Id: TriggerInput.java 2657 2008-02-15 23:41:14Z dglo $
+ * Version $Id: TriggerInput.java 3439 2008-09-02 17:08:41Z dglo $
  *
  * Date: May 2 2005
  *
@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides a simple implementation of ITriggerInput
  *
- * @version $Id: TriggerInput.java 2657 2008-02-15 23:41:14Z dglo $
+ * @version $Id: TriggerInput.java 3439 2008-09-02 17:08:41Z dglo $
  * @author pat
  */
 public class TriggerInput
@@ -163,7 +163,9 @@ public class TriggerInput
     public void flush() {
         nextIndex = NEXT_UNKNOWN;
         flushing = true;
-        log.info("Flushing: Total count = " + count);
+        if (log.isInfoEnabled()) {
+            log.info("Flushing: Total count = " + count);
+        }
     }
 
     /**

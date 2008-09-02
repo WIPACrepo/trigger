@@ -93,6 +93,10 @@ public class AmandaTriggerAnalyzer {
 
     public void dump() {
 
+        if (!log.isInfoEnabled()) {
+            return;
+        }
+
         log.info("BitMask count:");
         for (int i=0; i<512; i++) {
             int mask = i+1;

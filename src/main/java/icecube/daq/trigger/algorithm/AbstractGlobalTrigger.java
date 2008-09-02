@@ -1,7 +1,7 @@
 /*
  * class: AbstractGlobalTrigger
  *
- * Version $Id: AbstractGlobalTrigger.java 2904 2008-04-11 17:38:14Z dglo $
+ * Version $Id: AbstractGlobalTrigger.java 3439 2008-09-02 17:08:41Z dglo $
  *
  * Date: August 30 2005
  *
@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * This class is to provide a common method for all triggers in GT.
  *
- * @version $Id: AbstractGlobalTrigger.java 2904 2008-04-11 17:38:14Z dglo $
+ * @version $Id: AbstractGlobalTrigger.java 3439 2008-09-02 17:08:41Z dglo $
  * @author shseo
  */
 public abstract class AbstractGlobalTrigger extends AbstractTrigger
@@ -79,8 +79,6 @@ public abstract class AbstractGlobalTrigger extends AbstractTrigger
         }else{
             throw new NullPointerException("mtGlobalTrigEventPayload is NULL in wrapTrigger()");
         }
-
-       // log.info("Number of GlobalTriggers to Release so far = " + getNumberAvailableTriggerToRelease());
     }
     /**
      * This returns a list of selected triggers by each global trigger algorithm.

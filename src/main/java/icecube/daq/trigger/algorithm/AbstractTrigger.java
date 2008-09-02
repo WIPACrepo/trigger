@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 3423 2008-08-29 16:54:19Z dglo $
+ * Version $Id: AbstractTrigger.java 3439 2008-09-02 17:08:41Z dglo $
  *
  * Date: August 19 2005
  *
@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 3423 2008-08-29 16:54:19Z dglo $
+ * @version $Id: AbstractTrigger.java 3439 2008-09-02 17:08:41Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor
@@ -457,9 +457,9 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Creating readout: Type = " + type);
-            log.debug("   FirstTime = " + timeMinus.longValue()/10.0
-                      + "  LastTime = " + timePlus.longValue()/10.0);
+            log.debug("Creating readout: Type = " + type +
+                      " FirstTime = " + timeMinus.longValue()/10.0 +
+                      " LastTime = " + timePlus.longValue()/10.0);
         }
 
         return TriggerRequestPayloadFactory.createReadoutRequestElement(type, timeMinus, timePlus, domId, stringId);
@@ -483,8 +483,7 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
         IUTCTime firstTime = ((IHitPayload) hits.get(0)).getPayloadTimeUTC();
         IUTCTime lastTime = ((IHitPayload) hits.get(numberOfHits-1)).getPayloadTimeUTC();
 
-        if ((log.isDebugEnabled() || log.isInfoEnabled())
-	    && (triggerCounter % printMod == 0)) {
+        if (log.isInfoEnabled() && (triggerCounter % printMod == 0)) {
             log.info("New Trigger " + triggerCounter + " from " + triggerName + " includes " + numberOfHits
                      + " hits:  First time = "
                      + firstTime + " Last time = " + lastTime);
@@ -530,8 +529,7 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
             throw new Error("TriggerFactory is not set!");
         }
 
-        if (log.isDebugEnabled() ||
-            (log.isInfoEnabled() && (triggerCounter % printMod == 0)) ) {
+        if (log.isInfoEnabled() && (triggerCounter % printMod == 0)) {
             log.info("New Trigger " + triggerCounter + " from " + triggerName);
         }
 

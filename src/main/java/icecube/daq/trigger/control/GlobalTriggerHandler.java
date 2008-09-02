@@ -44,7 +44,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 3433 2008-08-31 16:19:12Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 3439 2008-09-02 17:08:41Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -312,10 +312,14 @@ public class GlobalTriggerHandler
      */
     public void process(ILoadablePayload payload) {
         miTotalInputTriggers++;
-        log.debug("Total # of Input Triggers so far = " + miTotalInputTriggers);
+        if (log.isDebugEnabled()) {
+            log.debug("Total # of Input Triggers so far = " +
+                      miTotalInputTriggers);
+        }
 
-        if(miTotalInputTriggers == 1){
-            log.debug("MaxTimeGateWindow at GlobalTrigHandler = " + miMaxTimeGateWindow);
+        if (miTotalInputTriggers == 1 && log.isDebugEnabled()) {
+            log.debug("MaxTimeGateWindow at GlobalTrigHandler = " +
+                      miMaxTimeGateWindow);
         }
 
         //--add payload to input handler which supplements funtionality of the splicer.
@@ -324,8 +328,10 @@ public class GlobalTriggerHandler
         }else
         {
             miTotalNullInputTriggers++;
-            log.debug("Total # of Null Input Triggers so far = " + miTotalNullInputTriggers);
-            //log.fatal("incoming payload is null....");
+            if (log.isDebugEnabled()) {
+                log.debug("Total # of Null Input Triggers so far = " +
+                          miTotalNullInputTriggers);
+            }
         }
 
         //--now loop over payloads available from input handler.
@@ -335,10 +341,12 @@ public class GlobalTriggerHandler
 
             //--MergedPayload should be separated first! and then sent to each GT algorithm.
             if(interfaceType == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
-                 if (((ITriggerRequestPayload) tInputTrigger).getTriggerType() == -1) {
-                     miTotalMergedInputTriggers++;
-                     log.debug("Total # of Merged Input Triggers so far = " + miTotalMergedInputTriggers);
-                     log.debug("Now start processing merged trigger input");
+                if (((ITriggerRequestPayload) tInputTrigger).getTriggerType() == -1) {
+                    miTotalMergedInputTriggers++;
+                    if (log.isDebugEnabled()) {
+                        log.debug("Total # of Merged Input Triggers so far = " + miTotalMergedInputTriggers);
+                        log.debug("Now start processing merged trigger input");
+                    }
                     boolean failedLoad = false;
                     List subPayloads;
                     try {
@@ -381,10 +389,9 @@ public class GlobalTriggerHandler
                             try {
                                 configuredTrigger.runTrigger(subPayload);
                                 int triggerCounter = ((ITriggerMonitor) configuredTrigger).getTriggerCounter();
-                                if(triggerCounter % PRINTOUT_FREQUENCY == 0 && triggerCounter >= PRINTOUT_FREQUENCY){
+                                if(log.isInfoEnabled() && triggerCounter % PRINTOUT_FREQUENCY == 0 && triggerCounter >= PRINTOUT_FREQUENCY){
                                     log.info(((ITriggerConfig) configuredTrigger).
                                             getTriggerName() + ":  #  " + triggerCounter);
-
                                 }
 
                             } catch (TriggerException e) {
@@ -406,8 +413,12 @@ public class GlobalTriggerHandler
                 }
             } else {
                 miTotalNonTRPInputTriggers++;
-                log.debug("Total # of Non-TriggerRequestPayload Input Triggers so far = " + miTotalNonTRPInputTriggers);
-                log.info("Input payload was found to be Non-TriggerRequestPayloads: # " + miTotalNonTRPInputTriggers);
+                if (log.isDebugEnabled()) {
+                    log.debug("Total # of Non-TriggerRequestPayload Input Triggers so far = " + miTotalNonTRPInputTriggers);
+                }
+                if (log.isInfoEnabled()) {
+                    log.info("Input payload was found to be Non-TriggerRequestPayloads: # " + miTotalNonTRPInputTriggers);
+                }
                 return;
             }
         }
@@ -505,7 +516,7 @@ public class GlobalTriggerHandler
             }
 
             if (log.isInfoEnabled()) {
-                if(miTotalOutputGlobalTriggers % PRINTOUT_FREQUENCY == 0){
+                if(log.isInfoEnabled() && miTotalOutputGlobalTriggers % PRINTOUT_FREQUENCY == 0){
                     log.info("Issue # " + miTotalOutputGlobalTriggers + " GTEventPayload (trigType = " + GT_trigType + " ) : "
                              + " extended event time = " + firstTime + " to "
                              + lastTime + " and contains " + nSubPayloads + " subTriggers"
@@ -516,7 +527,9 @@ public class GlobalTriggerHandler
                 }
                 if(nSubPayloads > miMaxNum){
                     miMaxNum = nSubPayloads;
-                    log.info("payload length = " + GTEventPayload.getPayloadLength() + "bytes");
+                    if (log.isInfoEnabled()) {
+                        log.info("payload length = " + GTEventPayload.getPayloadLength() + "bytes");
+                    }
                     //TriggerTestUtil testUtil = new TriggerTestUtil();
                     //testUtil.show_trigger_Info("Final GT ", miTotalOutputGlobalTriggers, GTEventPayload);
                 }
@@ -567,14 +580,19 @@ public class GlobalTriggerHandler
                     = (IPayload) ((ITriggerControl) triggerListIterator.next()).getEarliestPayloadOfInterest();
 
             if (earliestPayload != null) {
-                log.debug("There is earliestPayload: Time = " + earliestPayload.getPayloadTimeUTC());
+                if (log.isDebugEnabled()) {
+                    log.debug("There is earliestPayload: Time = " +
+                              earliestPayload.getPayloadTimeUTC());
+                }
                 // if payload < earliest
                 if (earliestTimeOverall.compareTo(earliestPayload.getPayloadTimeUTC()) > 0) {
                     earliestTimeOverall = earliestPayload.getPayloadTimeUTC();
                     earliestPayloadOverall = earliestPayload;
                 }
-                log.debug("There is earliestPayloadOverall: Time = "
-                         + earliestPayloadOverall.getPayloadTimeUTC());
+                if (log.isDebugEnabled()) {
+                    log.debug("There is earliestPayloadOverall: Time = " +
+                              earliestPayloadOverall.getPayloadTimeUTC());
+                }
             }
         }
 

@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java 3079 2008-05-27 20:55:17Z dglo $
+ * @version $Id: GlobalTriggerManager.java 3439 2008-09-02 17:08:41Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager
@@ -165,7 +165,7 @@ public class GlobalTriggerManager
         lastInputListSize = numberOfObjectsInSplicer - (start - decrement);
 
         if (log.isInfoEnabled()) {
-            if(numberOfObjectsInSplicer >= nThresholdInSplicer){
+            if(log.isInfoEnabled() && numberOfObjectsInSplicer >= nThresholdInSplicer){
                 log.info("Splicer contains: [" + lastInputListSize + ":" + numberOfObjectsInSplicer + "]");
             }
         }
@@ -180,8 +180,8 @@ public class GlobalTriggerManager
 
                 inputCount++;
                 if (log.isDebugEnabled()) {
-                    log.debug("  Processing payload " + inputCount + " with time "
-                         + payload.getPayloadTimeUTC());
+                    log.debug("  Processing payload " + inputCount +
+                              " with time " + payload.getPayloadTimeUTC());
                 }
 
                 process(payload);
@@ -203,7 +203,10 @@ public class GlobalTriggerManager
         if ((inputCount % nThresholdInSplicer) == (nThresholdInSplicer - 1)) {
             double timeDiff = System.currentTimeMillis() - startTime;
             double timePerHit = timeDiff/nInputs;
-            log.debug("Process time per input = " + Math.round(timePerHit)+ " ms");
+            if (log.isDebugEnabled()) {
+                log.debug("Process time per input = " +
+                          Math.round(timePerHit) + " ms");
+            }
         }
 
     }
@@ -248,7 +251,9 @@ public class GlobalTriggerManager
 
     public void truncated(SplicerChangedEvent event) {
 
-        log.debug("Splicer truncated: " + event.getSpliceable());
+        if (log.isDebugEnabled()) {
+            log.debug("Splicer truncated: " + event.getSpliceable());
+        }
         if (event.getSpliceable() == Splicer.LAST_POSSIBLE_SPLICEABLE) {
             flush();
         }
@@ -256,7 +261,10 @@ public class GlobalTriggerManager
         while (iter.hasNext()) {
             ILoadablePayload payload = (ILoadablePayload) iter.next();
             recycleCount++;
-            log.debug("  Recycle payload " + recycleCount + " at time " + payload.getPayloadTimeUTC());
+            if (log.isDebugEnabled()) {
+                log.debug("  Recycle payload " + recycleCount + " at time " +
+                          payload.getPayloadTimeUTC());
+            }
             earliestTime = payload.getPayloadTimeUTC();
             long wallStart = ((Long) wallTimeQueue.removeFirst()).longValue();
             long wallEnd = System.currentTimeMillis();

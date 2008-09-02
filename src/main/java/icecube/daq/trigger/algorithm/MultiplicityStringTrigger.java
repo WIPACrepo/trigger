@@ -217,9 +217,9 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 	// make sure this hit is on the proper string
 	int hitString = getTriggerHandler().getDOMRegistry().getStringMajor(hit.getDOMID().toString());
 	if (hitString != string) {
-	    if(log.isDebugEnabled())
-		log.debug("This hit is not on the proper string.");
-	    return;
+		if(log.isDebugEnabled())
+			log.debug("This hit is not on the proper string.");
+		return;
 	}
 
 

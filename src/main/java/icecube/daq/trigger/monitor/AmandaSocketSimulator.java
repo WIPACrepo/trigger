@@ -107,7 +107,9 @@ public class AmandaSocketSimulator
                         log.error("Error writing to output stream: ", e);
                         break;
                     }
-                    log.info("Sent " + nSent);
+                    if (log.isInfoEnabled()) {
+                        log.info("Sent " + nSent);
+                    }
                     nSent++;
                     try {
                         Thread.sleep(waitTime);
@@ -174,7 +176,9 @@ public class AmandaSocketSimulator
         for (int i=0; i<128; i++) {
             int offset = i*72;
             ITriggerRequestPayload trigger = generateTrigger();
-            log.info("Trigger size = " + trigger.getPayloadLength());
+            if (log.isInfoEnabled()) {
+                log.info("Trigger size = " + trigger.getPayloadLength());
+            }
             try {
                 trigger.writePayload(false, offset, buffer);
             } catch (IOException e) {

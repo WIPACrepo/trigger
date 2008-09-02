@@ -59,7 +59,9 @@ public class AmandaSocketReader {
 
     public void read(int nTrig) throws IOException {
         for (int i=0; i<nTrig; i++) {
-            log.info("Reading trigger " + i);
+            if (log.isInfoEnabled()) {
+                log.info("Reading trigger " + i);
+            }
             input.readFully(buffer.array());
             TriggerRequestPayload trigger;
             try {

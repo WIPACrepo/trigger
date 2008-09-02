@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java 3439 2008-09-02 17:08:41Z dglo $
+ * @version $Id: GlobalTriggerManager.java 3441 2008-09-02 17:49:20Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager
@@ -164,10 +164,8 @@ public class GlobalTriggerManager
         int numberOfObjectsInSplicer = splicedObjects.size();
         lastInputListSize = numberOfObjectsInSplicer - (start - decrement);
 
-        if (log.isInfoEnabled()) {
-            if(log.isInfoEnabled() && numberOfObjectsInSplicer >= nThresholdInSplicer){
-                log.info("Splicer contains: [" + lastInputListSize + ":" + numberOfObjectsInSplicer + "]");
-            }
+        if (log.isInfoEnabled() && numberOfObjectsInSplicer >= nThresholdInSplicer){
+            log.info("Splicer contains: [" + lastInputListSize + ":" + numberOfObjectsInSplicer + "]");
         }
 
         if (lastInputListSize > 0) {

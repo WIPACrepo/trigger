@@ -44,7 +44,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 3439 2008-09-02 17:08:41Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 3440 2008-09-02 17:45:35Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -114,7 +114,8 @@ public class GlobalTriggerHandler
     private int miTotalMergedInputTriggers;
     private int miTotalOutputGlobalTriggers;
     private int miTotalOutputMergedGlobalTriggers;
-    private int miMaxNum = 20;
+    /** only log payloads which exceed this size */
+    private int miMaxNumLogged = 20;
 
     /**
      * Monitor object.
@@ -525,13 +526,11 @@ public class GlobalTriggerHandler
                         log.info("Merged GT # " + miTotalOutputMergedGlobalTriggers);
                     }
                 }
-                if(nSubPayloads > miMaxNum){
-                    miMaxNum = nSubPayloads;
+                if(nSubPayloads > miMaxNumLogged){
+                    miMaxNumLogged = nSubPayloads;
                     if (log.isInfoEnabled()) {
                         log.info("payload length = " + GTEventPayload.getPayloadLength() + "bytes");
                     }
-                    //TriggerTestUtil testUtil = new TriggerTestUtil();
-                    //testUtil.show_trigger_Info("Final GT ", miTotalOutputGlobalTriggers, GTEventPayload);
                 }
             }
 

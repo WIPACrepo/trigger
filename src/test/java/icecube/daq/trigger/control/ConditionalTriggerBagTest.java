@@ -241,7 +241,7 @@ public class ConditionalTriggerBagTest
         MockTriggerRequest tr;
 
         rr = new MockReadoutRequest();
-        rr.add(1, 12345L, 20000L, 1111L, 10);
+        rr.addElement(1, 12345L, 20000L, 1111L, 10);
 
         tr = new MockTriggerRequest(12345L, 20000L, 1, 11, 1000);
         tr.setReadoutRequest(rr);
@@ -252,7 +252,7 @@ public class ConditionalTriggerBagTest
                      1, bag.getMonitor().getInputCountTotal());
 
         rr = new MockReadoutRequest();
-        rr.add(1, 19999L, 23456L, 11111L, 10);
+        rr.addElement(1, 19999L, 23456L, 11111L, 10);
 
         tr = new MockTriggerRequest(19999L, 23456L, 2, 11, 2000);
         tr.setReadoutRequest(rr);
@@ -261,7 +261,7 @@ public class ConditionalTriggerBagTest
                      2, bag.getMonitor().getInputCountTotal());
 
         rr = new MockReadoutRequest();
-        rr.add(1, 17777L, 18888L, 111111L, 10);
+        rr.addElement(1, 17777L, 18888L, 111111L, 10);
 
         tr = new MockTriggerRequest(17777L, 18888L, 3, 33, 3000);
         tr.setReadoutRequest(rr);

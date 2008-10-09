@@ -101,7 +101,8 @@ public class GlobalTrigEventWrapperTest
         GlobalTrigEventWrapper evtWrap = new GlobalTrigEventWrapper();
 
         MockReadoutRequest rr = new MockReadoutRequest();
-        rr.add(new MockReadoutRequestElement(1, 11000L, 12000L, 123L, 123));
+        rr.addElement(new MockReadoutRequestElement(1, 11000L, 12000L, 123L,
+                                                    123));
 
         MockTriggerRequest tr = new MockTriggerRequest(10000L, 20000L);
         tr.setSourceID(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID);
@@ -133,7 +134,8 @@ public class GlobalTrigEventWrapperTest
         MockTriggerRequest tr;
 
         rr = new MockReadoutRequest();
-        rr.add(new MockReadoutRequestElement(1, 10000L, 20000L, 123L, 123));
+        rr.addElement(new MockReadoutRequestElement(1, 10000L, 20000L, 123L,
+                                                    123));
 
         tr = new MockTriggerRequest(10000L, 20000L, 3, 4);
         tr.setSourceID(123);
@@ -141,7 +143,8 @@ public class GlobalTrigEventWrapperTest
         list.add(tr);
 
         rr = new MockReadoutRequest();
-        rr.add(new MockReadoutRequestElement(2, 30000L, 40000L, 456L, 456));
+        rr.addElement(new MockReadoutRequestElement(2, 30000L, 40000L, 456L,
+                                                    456));
 
         tr = new MockTriggerRequest(30000L, 40000L, 5, 6);
         tr.setSourceID(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID);
@@ -194,7 +197,7 @@ public class GlobalTrigEventWrapperTest
         GlobalTrigEventWrapper evtWrap = new GlobalTrigEventWrapper();
 
         MockReadoutRequest rr = new MockReadoutRequest();
-        rr.add(new MockReadoutRequestElement(1, 10000L, 20000L, 123L, 123));
+        rr.addElement(new MockReadoutRequestElement(1, 10000L, 20000L, 123L, 123));
 
         MockTriggerRequest tr = new MockTriggerRequest(11000L, 12000L);
         tr.setSourceID(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID);

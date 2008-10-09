@@ -12,7 +12,7 @@ public class MockReadoutRequest
 {
     private int uid;
     private ISourceID srcId;
-    private List elems;
+    private List elemList;
 
     public MockReadoutRequest()
     {
@@ -25,45 +25,46 @@ public class MockReadoutRequest
              rReq.getReadoutRequestElements());
     }
 
-    public MockReadoutRequest(int uid, ISourceID srcObj, List elems)
+    public MockReadoutRequest(int uid, int srcId)
     {
-        this(uid, srcObj == null ? -1 : srcObj.getSourceID(), elems);
+        this(uid, new MockSourceID(srcId), null);
     }
 
-    public MockReadoutRequest(int uid, int srcId, List elems)
+    public MockReadoutRequest(int uid, int srcId, List elemList)
+    {
+        this(uid, new MockSourceID(srcId), elemList);
+    }
+
+    public MockReadoutRequest(int uid, ISourceID srcId, List elemList)
     {
         this.uid = uid;
-        this.srcId = new MockSourceID(srcId);
-        this.elems = elems;
+        this.srcId = srcId;
+        this.elemList = elemList;
     }
 
-    public void add(IReadoutRequestElement elem)
+    public void addElement(IReadoutRequestElement elem)
     {
-        if (elems == null) {
-            elems = new ArrayList();
+        if (elemList == null) {
+            elemList = new ArrayList();
         }
 
-        elems.add(elem);
+        elemList.add(elem);
     }
 
-    public void add(int type, long firstTime, long lastTime, long domId,
-                    int srcId)
+    public void addElement(int type, long firstTime, long lastTime, long domId,
+                           int srcId)
     {
-        if (elems == null) {
-            elems = new ArrayList();
-        }
-
-        elems.add(new MockReadoutRequestElement(type, firstTime, lastTime,
-                                                domId, srcId));
+        addElement(new MockReadoutRequestElement(type, firstTime, lastTime,
+                                                 domId, srcId));
     }
 
     public List getReadoutRequestElements()
     {
-        if (elems == null) {
-            return new ArrayList();
+        if (elemList == null) {
+            elemList = new ArrayList();
         }
 
-        return elems;
+        return elemList;
     }
 
     public ISourceID getSourceID()

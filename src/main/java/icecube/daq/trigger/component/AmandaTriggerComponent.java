@@ -20,7 +20,15 @@ public class AmandaTriggerComponent
     }
 
     public static void main(String[] args) throws DAQCompException {
-        new DAQCompServer(new AmandaTriggerComponent(), args);
+        DAQCompServer srvr;
+        try {
+            srvr = new DAQCompServer(new AmandaTriggerComponent(), args);
+        } catch (IllegalArgumentException ex) {
+            System.err.println(ex.getMessage());
+            System.exit(1);
+            return; // without this, compiler whines about uninitialized 'srvr'
+        }
+        srvr.startServing();
     }
 
 }

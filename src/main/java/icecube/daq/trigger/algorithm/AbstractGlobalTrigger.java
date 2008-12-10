@@ -1,7 +1,7 @@
 /*
  * class: AbstractGlobalTrigger
  *
- * Version $Id: AbstractGlobalTrigger.java 3439 2008-09-02 17:08:41Z dglo $
+ * Version $Id: AbstractGlobalTrigger.java 3715 2008-12-10 19:21:02Z kael $
  *
  * Date: August 30 2005
  *
@@ -23,19 +23,14 @@ import java.util.List;
 /**
  * This class is to provide a common method for all triggers in GT.
  *
- * @version $Id: AbstractGlobalTrigger.java 3439 2008-09-02 17:08:41Z dglo $
+ * @version $Id: AbstractGlobalTrigger.java 3715 2008-12-10 19:21:02Z kael $
  * @author shseo
  */
 public abstract class AbstractGlobalTrigger extends AbstractTrigger
 {
     private GlobalTrigEventWrapper mtGlobalTrigEventWrapper = new GlobalTrigEventWrapper();
-
     private ITriggerRequestPayload mtGlobalTrigEventPayload;
-
-    private List mListSelectedTriggers = new ArrayList();
     protected List mListOutputTriggers = new ArrayList();
-    private int miMaxTimeGateWindowForCoincidenceTrigger;
-
     protected ConditionalTriggerBag mtConditionalTriggerBag;
     /**
      *  Constructor

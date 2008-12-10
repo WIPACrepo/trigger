@@ -24,6 +24,7 @@ import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.util.DeployedDOM;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -497,7 +498,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	if (maxPos > 60) maxPos = 60;
 
 	// add doms on center string, skipping center om
-	ArrayList<DeployedDOM> allDoms = getTriggerHandler().getDOMRegistry().getDomsOnString(centerString);
+	Collection<DeployedDOM> allDoms = getTriggerHandler().getDOMRegistry().getDomsOnString(centerString);
 	for (DeployedDOM dom : allDoms) {
 	    int position = dom.getStringMinor();
 	    if (position != centerPosition) {

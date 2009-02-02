@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 3439 2008-09-02 17:08:41Z dglo $
+ * Version $Id: AbstractTrigger.java 3899 2009-02-02 18:10:21Z dglo $
  *
  * Date: August 19 2005
  *
@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 3439 2008-09-02 17:08:41Z dglo $
+ * @version $Id: AbstractTrigger.java 3899 2009-02-02 18:10:21Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor
@@ -599,15 +599,17 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
      * @return hit type (integer in range 1 to 4)
      * <table>
      * <tr><th>Hit Type ID</th><th>Description</th></tr>
+     * <tr><td>0</td><td>Test pattern trigger (engineering fmt)</td></tr>
      * <tr><td>1</td><td>Forced trigger</td></tr>
      * <tr><td>2</td><td>SPE / MPE trigger</td></td></tr>
      * <tr><td>3</td><td>Flasher trigger</td></td></tr>
      * <tr><td>4</td><td>IceTop minimum bias trigger</td></tr>
      * </table>
+     * <br>NOTE: Only the low 4 bits of the trigger type are returned.
      */
     public static int getHitType(IHitPayload hit) {
 
-        return hit.getTriggerType();
+        return hit.getTriggerType() & 0xf;
 
     }
 

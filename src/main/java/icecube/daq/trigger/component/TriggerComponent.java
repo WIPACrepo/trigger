@@ -56,7 +56,6 @@ public class TriggerComponent
     private String triggerConfigFileName;
     private List currentTriggers;
 
-    private boolean useCacheMaxVal;
     private boolean useDummy;
 
     public TriggerComponent(String name, int id) {
@@ -70,12 +69,31 @@ public class TriggerComponent
         // Create the source id of this component
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
 
-        if (!useCacheMaxVal) {
-            bufferCache = new VitreousBufferCache();
+        boolean isGlobalTrigger = false;
+        boolean isAmandaTrigger = false;
+
+        // Get input and output types
+        String inputType, outputType;
+        if (name.equals(DAQCmdInterface.DAQ_GLOBAL_TRIGGER)) {
+            isGlobalTrigger = true;
+            inputType = DAQConnector.TYPE_TRIGGER;
+            outputType = DAQConnector.TYPE_GLOBAL_TRIGGER;
+        } else if (name.equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
+            inputType = DAQConnector.TYPE_STRING_HIT;
+            outputType = DAQConnector.TYPE_TRIGGER;
+        } else if (name.equals(DAQCmdInterface.DAQ_ICETOP_TRIGGER)) {
+            inputType = DAQConnector.TYPE_ICETOP_HIT;
+            outputType = DAQConnector.TYPE_TRIGGER;
+        } else if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
+            isAmandaTrigger = true;
+            inputType = DAQConnector.TYPE_SELF_CONTAINED;
+            outputType = DAQConnector.TYPE_TRIGGER;
         } else {
-            bufferCache = new VitreousBufferCache(Long.MAX_VALUE);
+            throw new Error("Unknown trigger " + name);
         }
 
+        //bufferCache = new VitreousBufferCache();
+        bufferCache = new VitreousBufferCache(Long.MAX_VALUE);
         addCache(bufferCache);
         //addMBean("bufferCache", bufferCache);
 
@@ -85,15 +103,11 @@ public class TriggerComponent
         SpliceableFactory factory;
 
         // Now differentiate
-        String inputType, outputType;
-        if (name.equals(DAQCmdInterface.DAQ_GLOBAL_TRIGGER)) {
+        if (isGlobalTrigger) {
             factory = new MasterPayloadFactory(bufferCache);
 
             // Global trigger
             triggerManager = new GlobalTriggerManager(factory, sourceId);
-
-            inputType = DAQConnector.TYPE_TRIGGER;
-            outputType = DAQConnector.TYPE_GLOBAL_TRIGGER;
         } else {
             factory = new MasterPayloadFactory(bufferCache);
 
@@ -105,7 +119,7 @@ public class TriggerComponent
             }
 
             IByteBufferCache trigCache = new VitreousBufferCache();
-            addCache(DAQConnector.TYPE_TRIGGER, trigCache);
+            addCache(outputType, trigCache);
 
             MasterPayloadFactory mpf =
                 new MasterPayloadFactory(trigCache);
@@ -113,28 +127,13 @@ public class TriggerComponent
             TriggerRequestPayloadFactory trFactory =
                 (TriggerRequestPayloadFactory) mpf.getPayloadFactory(trId);
             triggerManager.setOutputFactory(trFactory);
-
-            if (name.equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
-                inputType = DAQConnector.TYPE_STRING_HIT;
-                outputType = DAQConnector.TYPE_TRIGGER;
-            } else if (name.equals(DAQCmdInterface.DAQ_ICETOP_TRIGGER)) {
-                inputType = DAQConnector.TYPE_ICETOP_HIT;
-                outputType = DAQConnector.TYPE_TRIGGER;
-            } else if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
-                inputType = DAQConnector.TYPE_SELF_CONTAINED;
-                outputType = DAQConnector.TYPE_TRIGGER;
-            } else {
-                // Unknown name?
-                inputType = "";
-                outputType = "";
-            }
         }
 
         // Create splicer and introduce it to the trigger manager
         splicer = new HKN1Splicer(triggerManager);
         triggerManager.setSplicer(splicer);
 
-        // Create and register io engines
+        // Create and register input engine
         try {
             inputEngine = new SpliceablePayloadReader(name, splicer, factory);
         } catch (IOException ioe) {
@@ -142,7 +141,7 @@ public class TriggerComponent
             System.exit(1);
             inputEngine = null;
         }
-        if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
+        if (isAmandaTrigger) {
             try {
                 inputEngine.addReverseConnection(amandaHost, amandaPort,
                                                  bufferCache);
@@ -152,8 +151,9 @@ public class TriggerComponent
             }
         }
         addMonitoredEngine(inputType, inputEngine);
+
+        // Create and register output engine
         outputEngine = new SimpleOutputEngine(name, id, name + "OutputEngine");
-        //outputEngine.registerBufferManager(bufferCache);
         triggerManager.setPayloadOutput(outputEngine);
         addMonitoredEngine(outputType, outputEngine);
 
@@ -264,6 +264,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 2953 2008-04-21 17:40:54Z dglo $";
+	return "$Id: TriggerComponent.java 3947 2009-03-04 23:33:30Z dglo $";
     }
 }

@@ -2,6 +2,8 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.config.DomSet;
+import icecube.daq.trigger.config.DomSetFactory;
+import icecube.daq.util.DOMRegistry;
 
 /**
  * Created by IntelliJ IDEA.
@@ -17,13 +19,10 @@ import icecube.daq.trigger.config.DomSet;
 public class HitFilter
 {
 
-    public static final long SYNC_DOMID = 0x1e5b72775d19L;
-    public static final long TRIG_DOMID = 0x1d165fc478caL;
-
     /**
      * DomSet to use
      */
-    private DomSet domSet;
+    private DomSet domSet = null;
 
     private int domSetId = -1;
 
@@ -31,7 +30,6 @@ public class HitFilter
      * Default constructor
      */
     public HitFilter() {
-        //this(null);
         this(-1);
     }
 
@@ -45,6 +43,11 @@ public class HitFilter
 
     public HitFilter(int domSetId) {
         this.domSetId = domSetId;
+	setDomSet(DomSetFactory.getDomSet(domSetId));
+    }
+
+    public void setDomRegistry(DOMRegistry dr) {
+	DomSetFactory.setDomRegistry(dr);
     }
 
     /**
@@ -63,25 +66,15 @@ public class HitFilter
      */
     public boolean useHit(IHitPayload hit) {
         // if domSet is not initialized, use the hit
-        //if (null == domSet) {
-        //    return true;
-        //}
+        if (null == domSet) {
+            return true;
+        }
 
         // if the dom is in the domSet, use the hit
-        //if (domSet.inSet(hit.getDOMID())) {
-        //    return true;
-        //} else {
-        //    return false;
-        //}
-
-        long domId = hit.getDOMID().longValue();
-
-        if (domSetId == 0) {
-            return domId == SYNC_DOMID;
-        } else if (domSetId == 1) {
-            return domId == TRIG_DOMID;
+        if (domSet.inSet(hit.getDOMID())) {
+            return true;
         } else {
-            return domId != SYNC_DOMID && domId != TRIG_DOMID;
+            return false;
         }
 
     }

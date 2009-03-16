@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 3899 2009-02-02 18:10:21Z dglo $
+ * Version $Id: AbstractTrigger.java 3965 2009-03-16 16:47:29Z toale $
  *
  * Date: August 19 2005
  *
@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 3899 2009-02-02 18:10:21Z dglo $
+ * @version $Id: AbstractTrigger.java 3965 2009-03-16 16:47:29Z toale $
  * @author pat
  */
 public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor
@@ -266,6 +266,9 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
      */
     public void setTriggerHandler(ITriggerHandler triggerHandler) {
         this.triggerHandler = triggerHandler;
+
+	// pass DOMRegistry to hitFilter
+	hitFilter.setDomRegistry(triggerHandler.getDOMRegistry());
     }
 
     public ITriggerHandler getTriggerHandler() {
@@ -645,7 +648,6 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
     }
 
     protected void configHitFilter(int domSetId) {
-        //DomSet domSet = DomSetFactory.getDomSet(domSetId);
         hitFilter = new HitFilter(domSetId);
     }
 

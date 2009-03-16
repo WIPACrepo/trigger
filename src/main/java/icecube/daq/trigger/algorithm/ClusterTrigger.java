@@ -83,6 +83,10 @@ public class ClusterTrigger extends AbstractTrigger
             multiplicity = Integer.parseInt(parameter.getValue());
         else if (parameter.getName().equals("coherenceLength"))
             coherenceLength = Integer.parseInt(parameter.getValue());
+	else if (parameter.getName().equals("domSet")) {
+	    domSetId = Integer.parseInt(parameter.getValue());
+	    configHitFilter(domSetId);
+	}
         super.addParameter(parameter);
         configured = true;
     }
@@ -105,6 +109,7 @@ public class ClusterTrigger extends AbstractTrigger
 
         // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
         if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
+	if (!hitFilter.useHit(hitPayload)) return;
         
         if (logger.isDebugEnabled()) 
         {

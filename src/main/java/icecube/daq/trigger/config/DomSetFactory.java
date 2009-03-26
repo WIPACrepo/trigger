@@ -65,7 +65,7 @@ public class DomSetFactory
 		int pos = dom.getStringMinor();
 		if (pos == 91) {
 		    // this is our baby
-		    String domId = dom.getDomId();
+		    String domId = dom.getMainboardId();
 		    domIds.add(domId);
 		    good = true;
 		}
@@ -88,7 +88,7 @@ public class DomSetFactory
 		int pos = dom.getStringMinor();
 		if (pos == 92) {
 		    // this is our baby
-		    String domId = dom.getDomId();
+		    String domId = dom.getMainboardId();
 		    domIds.add(domId);
 		    good = true;
 		}
@@ -111,7 +111,7 @@ public class DomSetFactory
 		for (DeployedDOM dom: doms) {
 		    int pos = dom.getStringMinor();
 		    if ( (pos >= 1) && (pos <= 60) ) {
-			String domId = dom.getDomId();
+			String domId = dom.getMainboardId();
 			domIds.add(domId);
 		    }
 		}
@@ -128,12 +128,12 @@ public class DomSetFactory
 	    // IceTop (1,61)-(1,64):(80,61)-(80,64)
 	    List domIds = new ArrayList();
 
-	    for (int str=1; str<=80; str++) {
+	    for (int str=201; str<=220; str++) {
 		Set<DeployedDOM> doms = domRegistry.getDomsOnString(str);
 		for (DeployedDOM dom: doms) {
 		    int pos = dom.getStringMinor();
 		    if ( (pos >= 61) && (pos <= 64) ) {
-			String domId = dom.getDomId();
+			String domId = dom.getMainboardId();
 			domIds.add(domId);
 		    }
 		}
@@ -159,7 +159,7 @@ public class DomSetFactory
 	    for (DeployedDOM dom: doms) {
 		int pos = dom.getStringMinor();
 		if ( (pos >= minPos) && (pos <= maxPos) ) {
-		    String domId = dom.getDomId();
+		    String domId = dom.getMainboardId();
 		    domIds.add(domId);
 		}
 	    }
@@ -169,7 +169,7 @@ public class DomSetFactory
 	    for (DeployedDOM dom: doms) {
 		int pos = dom.getStringMinor();
 		if ( (pos >= minPos) && (pos <= maxPos) ) {
-		    String domId = dom.getDomId();
+		    String domId = dom.getMainboardId();
 		    domIds.add(domId);
 		}
 	    }
@@ -179,7 +179,7 @@ public class DomSetFactory
 	    for (DeployedDOM dom: doms) {
 		int pos = dom.getStringMinor();
 		if ( (pos >= minPos) && (pos <= maxPos) ) {
-		    String domId = dom.getDomId();
+		    String domId = dom.getMainboardId();
 		    domIds.add(domId);
 		}
 	    }
@@ -189,7 +189,7 @@ public class DomSetFactory
 	    for (DeployedDOM dom: doms) {
 		int pos = dom.getStringMinor();
 		if ( (pos >= minPos) && (pos <= maxPos) ) {
-		    String domId = dom.getDomId();
+		    String domId = dom.getMainboardId();
 		    domIds.add(domId);
 		}
 	    }
@@ -199,7 +199,7 @@ public class DomSetFactory
 	    for (DeployedDOM dom: doms) {
 		int pos = dom.getStringMinor();
 		if ( (pos >= minPos) && (pos <= maxPos) ) {
-		    String domId = dom.getDomId();
+		    String domId = dom.getMainboardId();
 		    domIds.add(domId);
 		}
 	    }
@@ -209,7 +209,7 @@ public class DomSetFactory
 	    for (DeployedDOM dom: doms) {
 		int pos = dom.getStringMinor();
 		if ( (pos >= minPos) && (pos <= maxPos) ) {
-		    String domId = dom.getDomId();
+		    String domId = dom.getMainboardId();
 		    domIds.add(domId);
 		}
 	    }
@@ -219,7 +219,7 @@ public class DomSetFactory
 	    for (DeployedDOM dom: doms) {
 		int pos = dom.getStringMinor();
 		if ( (pos >= minPos) && (pos <= maxPos) ) {
-		    String domId = dom.getDomId();
+		    String domId = dom.getMainboardId();
 		    domIds.add(domId);
 		}
 	    }
@@ -233,7 +233,7 @@ public class DomSetFactory
 		for (DeployedDOM dom: doms) {
 		    int pos = dom.getStringMinor();
 		    if ( (pos >= minPos) && (pos <= maxPos) ) {
-			String domId = dom.getDomId();
+			String domId = dom.getMainboardId();
 			domIds.add(domId);
 		    }
 		}
@@ -247,8 +247,11 @@ public class DomSetFactory
 	    }
 
 	} else {
+            if (domSetId != -1) {
+                log.error("Invalid DomSetId! must be 0,1,2,3,or 4, not " +
+                          domSetId);
+            }
 
-	    log.error("Invalid DomSetId! must be 0,1,2,3,or 4");
 	    return null;
 
 	}

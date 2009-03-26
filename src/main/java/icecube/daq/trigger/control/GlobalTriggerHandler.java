@@ -22,6 +22,7 @@ import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
 import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.config.ITriggerConfig;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -44,7 +45,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 3441 2008-09-02 17:49:20Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 4000 2009-03-26 14:30:55Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -680,6 +681,7 @@ public class GlobalTriggerHandler
 
     public void setDOMRegistry(DOMRegistry registry) {
 	domRegistry = registry;
+        DomSetFactory.setDomRegistry(registry);
     }
 
     public DOMRegistry getDOMRegistry() {

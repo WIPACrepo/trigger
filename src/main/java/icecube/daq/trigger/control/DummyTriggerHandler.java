@@ -24,6 +24,7 @@ import icecube.daq.trigger.IReadoutRequest;
 import icecube.daq.trigger.IReadoutRequestElement;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
 
@@ -295,6 +296,7 @@ public class DummyTriggerHandler
 
     public void setDOMRegistry(DOMRegistry registry) {
         domRegistry = registry;
+        DomSetFactory.setDomRegistry(registry);
     }
 
     public DOMRegistry getDOMRegistry() {

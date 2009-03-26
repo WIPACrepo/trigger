@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 3439 2008-09-02 17:08:41Z dglo $
+ * Version $Id: TriggerHandler.java 4000 2009-03-26 14:30:55Z dglo $
  *
  * Date: October 25 2004
  *
@@ -24,6 +24,7 @@ import icecube.daq.payload.impl.UTCTime8B;
 import icecube.daq.payload.splicer.Payload;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.config.ITriggerConfig;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
@@ -45,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 3439 2008-09-02 17:08:41Z dglo $
+ * @version $Id: TriggerHandler.java 4000 2009-03-26 14:30:55Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -570,6 +571,7 @@ public class TriggerHandler
 
     public void setDOMRegistry(DOMRegistry registry) {
 	domRegistry = registry;
+        DomSetFactory.setDomRegistry(registry);
     }
 
     public DOMRegistry getDOMRegistry() {

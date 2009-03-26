@@ -4,6 +4,7 @@ import icecube.daq.payload.IPayloadDestination;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.algorithm.CoincidenceTrigger;
+import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.test.MockPayload;
@@ -12,6 +13,7 @@ import icecube.daq.trigger.test.MockReadoutRequestElement;
 import icecube.daq.trigger.test.MockSourceID;
 import icecube.daq.trigger.test.MockTriggerRequest;
 import icecube.daq.trigger.test.MockUTCTime;
+import icecube.daq.util.DOMRegistry;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -150,6 +152,22 @@ public class ConditionalTriggerBagTest
 
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
+
+        String configDir =
+            getClass().getResource("/config/").getPath();
+
+        String classCfgStr = "/classes/config/";
+        if (configDir.endsWith(classCfgStr)) {
+            int breakPt = configDir.length() - (classCfgStr.length() - 1);
+            configDir = configDir.substring(0, breakPt) + "test-" +
+                configDir.substring(breakPt);
+        }
+
+        try {
+            DomSetFactory.setDomRegistry(DOMRegistry.loadRegistry(configDir));
+        } catch (Exception ex) {
+            throw new Error("Cannot set DOM registry", ex);
+        }
     }
 
     public static Test suite()

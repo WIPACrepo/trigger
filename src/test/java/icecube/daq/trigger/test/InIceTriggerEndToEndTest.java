@@ -12,6 +12,7 @@ import icecube.daq.splicer.SplicerException;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.util.DOMRegistry;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -99,9 +100,6 @@ public class InIceTriggerEndToEndTest
         final int numTails = 10;
         final int numObjs = numTails * 10;
 
-        // load all triggers
-        TriggerCollection trigCfg = new SPSIcecubeAmanda008Triggers();
-
         // set up in-ice trigger
         VitreousBufferCache cache = new VitreousBufferCache();
 
@@ -110,6 +108,24 @@ public class InIceTriggerEndToEndTest
         TriggerManager trigMgr = new TriggerManager(srcId);
         trigMgr.setOutputFactory(getTriggerRequestFactory(factory));
 
+        String configDir =
+            getClass().getResource("/config/").getPath();
+
+        String classCfgStr = "/classes/config/";
+        if (configDir.endsWith(classCfgStr)) {
+            int breakPt = configDir.length() - (classCfgStr.length() - 1);
+            configDir = configDir.substring(0, breakPt) + "test-" +
+                configDir.substring(breakPt);
+        }
+
+        try {
+            trigMgr.setDOMRegistry(DOMRegistry.loadRegistry(configDir));
+        } catch (Exception ex) {
+            throw new Error("Cannot set DOM registry", ex);
+        }
+    
+        // load all triggers
+        TriggerCollection trigCfg = new SPSIcecubeAmanda008Triggers();
         trigCfg.addToHandler(trigMgr);
 
         MockOutputProcess outProc = new MockOutputProcess();

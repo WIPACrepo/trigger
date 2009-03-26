@@ -4,6 +4,7 @@ import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.test.MockAppender;
@@ -13,6 +14,7 @@ import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockPayload;
 import icecube.daq.trigger.test.MockSourceID;
 import icecube.daq.trigger.test.MockTrigger;
+import icecube.daq.util.DOMRegistry;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ public class StringTriggerHandlerTest
     private static final MockSourceID srcId =
         new MockSourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
 
+    private DOMRegistry domRegistry;
 
     public StringTriggerHandlerTest(String name)
     {
@@ -48,6 +51,18 @@ public class StringTriggerHandlerTest
 
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
+
+        String configDir = getClass().getResource("/config/").getPath();
+
+        String classCfgStr = "/classes/config/";
+        if (configDir.endsWith(classCfgStr)) {
+            int breakPt = configDir.length() - (classCfgStr.length() - 1);
+            configDir = configDir.substring(0, breakPt) + "test-" +
+                configDir.substring(breakPt);
+        }
+
+        domRegistry = DOMRegistry.loadRegistry(configDir);
+        DomSetFactory.setDomRegistry(domRegistry);
     }
 
     public static Test suite()
@@ -134,8 +149,10 @@ public class StringTriggerHandlerTest
     }
 
     public void testAddTriggers()
+        throws Exception
     {
         StringTriggerHandler trigMgr = new StringTriggerHandler(srcId);
+        trigMgr.setDOMRegistry(domRegistry);
 
         ArrayList list = new ArrayList();
         list.add(new MockTrigger());
@@ -149,8 +166,10 @@ public class StringTriggerHandlerTest
     }
 
     public void testClearTriggers()
+        throws Exception
     {
         StringTriggerHandler trigMgr = new StringTriggerHandler(srcId);
+        trigMgr.setDOMRegistry(domRegistry);
 
         assertEquals("Bad triggerList length",
                      1, trigMgr.getTriggerList().size());
@@ -272,8 +291,10 @@ public class StringTriggerHandlerTest
     }
 
     public void testProcessManyHitsAndReset()
+        throws Exception
     {
         StringTriggerHandler trigMgr = new StringTriggerHandler(srcId);
+        trigMgr.setDOMRegistry(domRegistry);
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());

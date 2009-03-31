@@ -2,7 +2,8 @@ package icecube.daq.trigger.config;
 
 import icecube.daq.payload.IDOMID;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,16 +29,17 @@ public class DomSet
     /**
      * List of doms in this DomSet
      */
-    private final List set;
+    private final HashSet<String> set;
 
     /**
      * Constructor, takes the name of the set and the list of domid's
      * @param name name of domset
      * @param set list of domIds, must be lowercase hex
      */
-    public DomSet(String name, List set) {
+    public DomSet(String name, Collection<String> set) {
         this.name = name;
-        this.set = set;
+        this.set = new HashSet<String>(7500);
+        this.set.addAll(set);
     }
 
     /**

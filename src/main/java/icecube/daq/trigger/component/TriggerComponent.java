@@ -135,7 +135,7 @@ public class TriggerComponent
 
         // Create and register input engine
         try {
-            inputEngine = new SpliceablePayloadReader(name, splicer, factory);
+            inputEngine = new SpliceablePayloadReader(name, 25000, splicer, factory);
         } catch (IOException ioe) {
             log.error("Couldn't create input reader");
             System.exit(1);
@@ -264,6 +264,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 3947 2009-03-04 23:33:30Z dglo $";
+	return "$Id: TriggerComponent.java 4096 2009-04-21 12:53:54Z kael $";
     }
 }

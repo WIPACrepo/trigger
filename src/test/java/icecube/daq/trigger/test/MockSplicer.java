@@ -1,7 +1,6 @@
 package icecube.daq.trigger.test;
 
 import icecube.daq.splicer.ClosedStrandException;
-import icecube.daq.splicer.MonitorPoints;
 import icecube.daq.splicer.OrderingException;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.SplicedAnalysis;
@@ -154,11 +153,6 @@ public class MockSplicer
     public SplicedAnalysis getAnalysis()
     {
         return analysis;
-    }
-
-    public MonitorPoints getMonitorPoints()
-    {
-        throw new Error("Unimplemented");
     }
 
     public int getState()

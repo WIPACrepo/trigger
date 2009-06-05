@@ -151,18 +151,6 @@ public class DummyTriggerManager
     }
 
     /**
-     * getter for factory
-     * @return factory for producing primitives
-     */
-    public SpliceableFactory getFactory() {
-        return inputFactory;
-    }
-
-    public void setFactory(SpliceableFactory inputFactory) {
-        this.inputFactory = inputFactory;
-    }
-
-    /**
      * setter for splicer
      * @param splicer splicer associated with this object
      */

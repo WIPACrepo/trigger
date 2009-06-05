@@ -149,11 +149,6 @@ class Analysis
         // ignored
     }
 
-    public SpliceableFactory getFactory()
-    {
-        return factory;
-    }
-
     public HashMap getHitSources()
     {
         HashMap strSrcs = new HashMap();

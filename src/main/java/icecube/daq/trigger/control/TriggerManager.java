@@ -1,7 +1,7 @@
 /*
  * class: TriggerManager
  *
- * Version $Id: TriggerManager.java 3439 2008-09-02 17:08:41Z dglo $
+ * Version $Id: TriggerManager.java 4267 2009-06-05 19:11:27Z dglo $
  *
  * Date: October 25 2004
  *
@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger
  *
- * @version $Id: TriggerManager.java 3439 2008-09-02 17:08:41Z dglo $
+ * @version $Id: TriggerManager.java 4267 2009-06-05 19:11:27Z dglo $
  * @author pat
  */
 public class TriggerManager
@@ -192,18 +192,6 @@ public class TriggerManager
 
         start = numberOfObjectsInSplicer;
 
-    }
-
-    /**
-     * getter for factory
-     * @return factory for producing primitives
-     */
-    public SpliceableFactory getFactory() {
-        return inputFactory;
-    }
-
-    public void setFactory(SpliceableFactory inputFactory) {
-        this.inputFactory = inputFactory;
     }
 
     public int getLastInputListSize() {

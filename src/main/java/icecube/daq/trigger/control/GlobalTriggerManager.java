@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java 3441 2008-09-02 17:49:20Z dglo $
+ * @version $Id: GlobalTriggerManager.java 4267 2009-06-05 19:11:27Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager
@@ -48,12 +48,6 @@ public class GlobalTriggerManager
      * Log object for this class
      */
     private static final Log log = LogFactory.getLog(GlobalTriggerManager.class);
-    /**
-     * The factory used to produce IHitPayloads for this object to use.
-     */
-    //private final MasterPayloadFactory inputFactory = new MasterPayloadFactory();
-    private SpliceableFactory inputFactory;
-
     /**
      * splicer associated with this manager
      */
@@ -115,7 +109,6 @@ public class GlobalTriggerManager
                                 boolean allowTimeGap, int iMax_TimeGate_Window)
     {
         super(sourceID, allowTimeGap, getOutputFactory(inputFactory));
-        this.inputFactory = inputFactory;
 
         setMaxTimeGateWindow(iMax_TimeGate_Window);
         setAllowTimeGap(allowTimeGap);
@@ -140,10 +133,6 @@ public class GlobalTriggerManager
     public void setSplicer(Splicer splicer) {
         this.splicer = splicer;
         this.splicer.addSplicerListener(this);
-    }
-
-    public void setFactory(SpliceableFactory inputFactory) {
-        this.inputFactory = inputFactory;
     }
 
     public void setReportingThreshold(int threshold) {
@@ -209,9 +198,6 @@ public class GlobalTriggerManager
 
     }
 
-    public SpliceableFactory getFactory() {
-        return inputFactory;
-    }
     /**
      * update splicer to earliest time of interest
      */

@@ -77,23 +77,6 @@ class DevNullAnalysis
     }
 
     /**
-     * Returns the {@link SpliceableFactory} that should be used to create the
-     * {@link Spliceable Spliceable} objects used by this
-     * object.
-     *
-     * @return the SpliceableFactory that creates Spliceable objects.
-     */
-    public SpliceableFactory getFactory()
-    {
-        try {
-            throw new Error("Unimplemented");
-        } catch (Error err) {
-            LOG.error("Unimplemented", err);
-            throw err;
-        }
-    }
-
-    /**
      * Set Splicer associated with this analysis.
      * @param splicer parent Splicer
      */

@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 4000 2009-03-26 14:30:55Z dglo $
+ * Version $Id: TriggerHandler.java 4269 2009-06-08 22:01:11Z dglo $
  *
  * Date: October 25 2004
  *
@@ -12,6 +12,7 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.OutputChannel;
+import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ISourceID;
@@ -46,7 +47,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 4000 2009-03-26 14:30:55Z dglo $
+ * @version $Id: TriggerHandler.java 4269 2009-06-08 22:01:11Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -117,6 +118,9 @@ public class TriggerHandler
      * DOMRegistry
      */
     private DOMRegistry domRegistry;
+
+    /** Outgoing byte buffer cache. */
+    private IByteBufferCache outCache;
 
     /**
      * Default constructor
@@ -493,9 +497,19 @@ public class TriggerHandler
                 }
             }
 
+            int bufLen = payload.getPayloadLength();
+
+            // allocate ByteBuffer
+            ByteBuffer trigBuf;
+            if (outCache != null) {
+                trigBuf = outCache.acquireBuffer(bufLen);
+//System.err.println("Alloc "+trigBuf.capacity()+" bytes from "+outCache);
+            } else {
+                trigBuf = ByteBuffer.allocate(bufLen);
+System.err.println("Unattached "+SourceIdRegistry.getDAQNameFromISourceID(sourceId)+" "+trigBuf.capacity()+" bytes");
+            }
+
             // write trigger to a ByteBuffer
-            ByteBuffer trigBuf =
-                ByteBuffer.allocate(payload.getPayloadLength());
             try {
                 ((IWriteablePayload) payload).writePayload(false, 0, trigBuf);
             } catch (IOException ioe) {
@@ -586,4 +600,12 @@ public class TriggerHandler
         }
     }
 
+    /**
+     * Set the outgoing payload buffer cache.
+     * @param byte buffer cache manager
+     */
+    public void setOutgoingBufferCache(IByteBufferCache cache)
+    {
+        outCache = cache;
+    }
 }

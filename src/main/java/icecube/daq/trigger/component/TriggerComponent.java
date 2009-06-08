@@ -46,7 +46,8 @@ public class TriggerComponent
     public static final int DEFAULT_AMANDA_PORT = 12014;
 
     private ISourceID sourceId;
-    private IByteBufferCache bufferCache;
+    private IByteBufferCache inCache;
+    private IByteBufferCache outCache;
     private ITriggerManager triggerManager;
     private Splicer splicer;
     private SpliceablePayloadReader inputEngine;
@@ -96,10 +97,14 @@ public class TriggerComponent
             throw new Error("Unknown trigger " + name);
         }
 
-        //bufferCache = new VitreousBufferCache(shortName + "IN");
-        bufferCache = new VitreousBufferCache(shortName + "IN", Long.MAX_VALUE);
-        addCache(bufferCache);
-        //addMBean("bufferCache", bufferCache);
+        //inCache = new VitreousBufferCache(shortName + "IN");
+        inCache = new VitreousBufferCache(shortName + "IN", Long.MAX_VALUE);
+        addCache(inCache);
+        //addMBean("inCache", inCache);
+
+        outCache = new VitreousBufferCache(shortName + "OUT");
+        addCache(outputType, outCache);
+        //addMBean("outCache", inCache);
 
         addMBean("jvm", new MemoryStatistics());
         addMBean("system", new SystemStatistics());
@@ -108,12 +113,16 @@ public class TriggerComponent
 
         // Now differentiate
         if (isGlobalTrigger) {
-            factory = new MasterPayloadFactory(bufferCache);
+            factory = new MasterPayloadFactory(inCache);
 
             // Global trigger
             triggerManager = new GlobalTriggerManager(factory, sourceId);
         } else {
-            factory = new MasterPayloadFactory(bufferCache);
+            factory = new MasterPayloadFactory(inCache);
+
+            TriggerRequestPayloadFactory trFactory =
+                new TriggerRequestPayloadFactory();
+            trFactory.setByteBufferCache(outCache);
 
             // Sub-detector triggers
             if (!useDummy) {
@@ -122,17 +131,10 @@ public class TriggerComponent
                 triggerManager = new DummyTriggerManager(factory, sourceId);
             }
 
-            IByteBufferCache trigCache =
-                new VitreousBufferCache(shortName + "OUT");
-            addCache(outputType, trigCache);
-
-            MasterPayloadFactory mpf =
-                new MasterPayloadFactory(trigCache);
-            final int trId = PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST;
-            TriggerRequestPayloadFactory trFactory =
-                (TriggerRequestPayloadFactory) mpf.getPayloadFactory(trId);
             triggerManager.setOutputFactory(trFactory);
         }
+
+        triggerManager.setOutgoingBufferCache(outCache);
 
         // Create splicer and introduce it to the trigger manager
         splicer = new HKN1Splicer(triggerManager);
@@ -149,7 +151,7 @@ public class TriggerComponent
         if (isAmandaTrigger) {
             try {
                 inputEngine.addReverseConnection(amandaHost, amandaPort,
-                                                 bufferCache);
+                                                 inCache);
             } catch (IOException ioe) {
                 log.error("Couldn't connect to Amanda TWR", ioe);
                 System.exit(1);
@@ -169,9 +171,14 @@ public class TriggerComponent
         triggerManager.flush();
     }
 
-    public IByteBufferCache getCache()
+    public IByteBufferCache getInputCache()
     {
-        return bufferCache;
+        return inCache;
+    }
+
+    public IByteBufferCache getOutputCache()
+    {
+        return outCache;
     }
 
     public long getPayloadsSent()
@@ -269,6 +276,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 4268 2009-06-08 16:50:49Z dglo $";
+	return "$Id: TriggerComponent.java 4269 2009-06-08 22:01:11Z dglo $";
     }
 }

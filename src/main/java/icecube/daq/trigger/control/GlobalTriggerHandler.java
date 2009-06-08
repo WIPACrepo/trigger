@@ -12,6 +12,7 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.OutputChannel;
+import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ISourceID;
@@ -45,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 4000 2009-03-26 14:30:55Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 4269 2009-06-08 22:01:11Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -126,6 +127,9 @@ public class GlobalTriggerHandler
     private double longestTrigger;
 
     private DOMRegistry domRegistry;
+
+    /** Outgoing byte buffer cache. */
+    private IByteBufferCache outCache;
 
     /**
      * Create an instance of this class.
@@ -533,9 +537,18 @@ public class GlobalTriggerHandler
                 }
             }
 
+            int bufLen = GTEventPayload.getPayloadLength();
+
+            ByteBuffer trigBuf;
+            if (outCache != null) {
+                trigBuf = outCache.acquireBuffer(bufLen);
+//System.err.println("Alloc "+trigBuf.capacity()+" bytes from "+outCache);
+            } else {
+                trigBuf = ByteBuffer.allocate(bufLen);
+System.err.println("GTrig unattached "+trigBuf.capacity()+" bytes");
+            }
+
             // write trigger to a ByteBuffer
-            ByteBuffer trigBuf =
-                ByteBuffer.allocate(GTEventPayload.getPayloadLength());
             try {
                 ((IWriteablePayload) GTEventPayload).writePayload(false, 0,
                                                                   trigBuf);
@@ -731,4 +744,12 @@ public class GlobalTriggerHandler
         }
     }
 
+    /**
+     * Set the outgoing payload buffer cache.
+     * @param byte buffer cache manager
+     */
+    public void setOutgoingBufferCache(IByteBufferCache cache)
+    {
+        outCache = cache;
+    }
 }

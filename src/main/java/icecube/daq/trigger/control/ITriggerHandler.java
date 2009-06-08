@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerManager
  *
- * Version $Id: ITriggerHandler.java 2935 2008-04-17 19:25:42Z dglo $
+ * Version $Id: ITriggerHandler.java 4269 2009-06-08 22:01:11Z dglo $
  *
  * Date: March 31 2005
  *
@@ -10,6 +10,7 @@
 
 package icecube.daq.trigger.control;
 
+import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
@@ -20,7 +21,7 @@ import java.util.List;
 /**
  * This interface defines the behavior of a TriggerHandler
  *
- * @version $Id: ITriggerHandler.java 2935 2008-04-17 19:25:42Z dglo $
+ * @version $Id: ITriggerHandler.java 4269 2009-06-08 22:01:11Z dglo $
  * @author pat
  */
 public interface ITriggerHandler extends IPayloadProducer
@@ -95,4 +96,10 @@ public interface ITriggerHandler extends IPayloadProducer
      * @return number of payloads processed
      */
     int getCount();
+
+    /**
+     * Set the outgoing payload buffer cache.
+     * @param byte buffer cache manager
+     */
+    void setOutgoingBufferCache(IByteBufferCache cache);
 }

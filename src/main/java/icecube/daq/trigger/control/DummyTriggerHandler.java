@@ -12,6 +12,7 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.OutputChannel;
+import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ISourceID;
@@ -309,5 +310,15 @@ public class DummyTriggerHandler
         if (outputFactory != null) {
             triggerBag.setPayloadFactory(outputFactory);
         }
+    }
+
+    /**
+     * Set the outgoing payload buffer cache.
+     * @param byte buffer cache manager
+     */
+    public void setOutgoingBufferCache(IByteBufferCache cache)
+    {
+        throw new Error("Unimplemented");
+        //outCache = cache;
     }
 }

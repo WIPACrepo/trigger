@@ -101,7 +101,7 @@ public class InIceTriggerEndToEndTest
         final int numObjs = numTails * 10;
 
         // set up in-ice trigger
-        VitreousBufferCache cache = new VitreousBufferCache();
+        VitreousBufferCache cache = new VitreousBufferCache("IITrig");
 
         MasterPayloadFactory factory = new MasterPayloadFactory(cache);
 

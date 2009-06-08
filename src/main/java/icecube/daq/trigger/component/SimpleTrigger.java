@@ -334,11 +334,11 @@ public class SimpleTrigger
 
         final int compId = 0;
 
-        IByteBufferCache hitMgr = new VitreousBufferCache();
+        IByteBufferCache hitMgr = new VitreousBufferCache("SimpTrigHit");
         addCache(DAQConnector.TYPE_STRING_HIT, hitMgr);
         MasterPayloadFactory hitFactory = new MasterPayloadFactory(hitMgr);
 
-        IByteBufferCache trigMgr = new VitreousBufferCache();
+        IByteBufferCache trigMgr = new VitreousBufferCache("SimpTrig");
         addCache(DAQConnector.TYPE_TRIGGER, trigMgr);
 
         addMBean("jvm", new MemoryStatistics());

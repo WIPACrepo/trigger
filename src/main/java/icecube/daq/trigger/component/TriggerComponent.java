@@ -73,27 +73,31 @@ public class TriggerComponent
         boolean isAmandaTrigger = false;
 
         // Get input and output types
-        String inputType, outputType;
+        String inputType, outputType, shortName;
         if (name.equals(DAQCmdInterface.DAQ_GLOBAL_TRIGGER)) {
             isGlobalTrigger = true;
             inputType = DAQConnector.TYPE_TRIGGER;
             outputType = DAQConnector.TYPE_GLOBAL_TRIGGER;
+            shortName = "GTrig";
         } else if (name.equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
             inputType = DAQConnector.TYPE_STRING_HIT;
             outputType = DAQConnector.TYPE_TRIGGER;
+            shortName = "IITrig";
         } else if (name.equals(DAQCmdInterface.DAQ_ICETOP_TRIGGER)) {
             inputType = DAQConnector.TYPE_ICETOP_HIT;
             outputType = DAQConnector.TYPE_TRIGGER;
+            shortName = "ITTrig";
         } else if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
             isAmandaTrigger = true;
             inputType = DAQConnector.TYPE_SELF_CONTAINED;
             outputType = DAQConnector.TYPE_TRIGGER;
+            shortName = "ATrig";
         } else {
             throw new Error("Unknown trigger " + name);
         }
 
-        //bufferCache = new VitreousBufferCache();
-        bufferCache = new VitreousBufferCache(Long.MAX_VALUE);
+        //bufferCache = new VitreousBufferCache(shortName + "IN");
+        bufferCache = new VitreousBufferCache(shortName + "IN", Long.MAX_VALUE);
         addCache(bufferCache);
         //addMBean("bufferCache", bufferCache);
 
@@ -118,7 +122,8 @@ public class TriggerComponent
                 triggerManager = new DummyTriggerManager(factory, sourceId);
             }
 
-            IByteBufferCache trigCache = new VitreousBufferCache();
+            IByteBufferCache trigCache =
+                new VitreousBufferCache(shortName + "OUT");
             addCache(outputType, trigCache);
 
             MasterPayloadFactory mpf =
@@ -264,6 +269,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 4096 2009-04-21 12:53:54Z kael $";
+	return "$Id: TriggerComponent.java 4268 2009-06-08 16:50:49Z dglo $";
     }
 }

@@ -108,7 +108,7 @@ public class AmandaTriggerEndToEndTest
         final long multiplier = 10000L;
 
         // set up amanda trigger
-        VitreousBufferCache cache = new VitreousBufferCache();
+        VitreousBufferCache cache = new VitreousBufferCache("AMTrig");
 
         MasterPayloadFactory factory = new MasterPayloadFactory(cache);
 

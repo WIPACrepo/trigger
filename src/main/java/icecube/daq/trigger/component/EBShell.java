@@ -75,7 +75,7 @@ public class EBShell
         super(name, id);
 
         // Create the buffer cache
-        IByteBufferCache bufferCache = new VitreousBufferCache();
+        IByteBufferCache bufferCache = new VitreousBufferCache("EBShell");
         addCache(bufferCache);
 
         addMBean("jvm", new MemoryStatistics());

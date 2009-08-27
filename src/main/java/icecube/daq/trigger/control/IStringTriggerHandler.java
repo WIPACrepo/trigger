@@ -1,6 +1,6 @@
 package icecube.daq.trigger.control;
 
-import icecube.daq.payload.IByteBufferReceiver;
+import icecube.daq.io.DAQOutputChannelManager;
 import icecube.daq.payload.MasterPayloadFactory;
 
 /**
@@ -10,7 +10,7 @@ import icecube.daq.payload.MasterPayloadFactory;
  * Time: 1:29:30 PM
  */
 public interface IStringTriggerHandler
-        extends ITriggerHandler, IByteBufferReceiver
+        extends DAQOutputChannelManager, ITriggerHandler
 {
 
     void setMasterPayloadFactory(MasterPayloadFactory factory);

@@ -1,15 +1,16 @@
 package icecube.daq.trigger.component;
 
+import java.io.IOException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -102,7 +103,9 @@ public class GlobalConfiguration
             return null;
         }
 	String nodeValue = elements.item(0).getFirstChild().getNodeValue();
-	log.info("triggerConfig element has: " + nodeValue);
+	if (log.isInfoEnabled()) {
+		log.info("triggerConfig element has: " + nodeValue);
+	}
         return elements.item(0).getFirstChild().getNodeValue();
 
     }
@@ -118,7 +121,9 @@ public class GlobalConfiguration
     private static Element getRootElement(String configFileName)
             throws ParserConfigurationException, SAXException, IOException {
 
-	log.info("Getting root element of xml file: " + configFileName);
+	if (log.isInfoEnabled()) {
+		log.info("Getting root element of xml file: " + configFileName);
+	}
         DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         return documentBuilder.parse(configFileName).getDocumentElement();
 

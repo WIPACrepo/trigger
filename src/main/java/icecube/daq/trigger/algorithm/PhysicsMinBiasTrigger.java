@@ -11,21 +11,21 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.exceptions.UnknownParameterException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * This class implements a minimum bias trigger with a deadtime. It simply counts 
+ * This class implements a minimum bias trigger with a deadtime. It simply counts
  * hits that are not in a deadtime window and
  * applies a prescale for determining when a trigger should be formed.
  *
@@ -113,10 +113,19 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
         }
         IHitPayload hit = (IHitPayload) payload;
 
+	// make sure spe bit is on for this hit
+	int type = AbstractTrigger.getHitType(hit);
+	if (type != AbstractTrigger.SPE_HIT) {
+	    if (log.isDebugEnabled()) {
+		log.debug("Hit type is " + hit.getTriggerType() + ", returning.");
+	    }
+	    return;
+	}
+
         // check hit filter
         if (!hitFilter.useHit(hit)) {
             if (log.isDebugEnabled()) {
-                log.debug("Hit from DOM " + hit.getDOMID().getDomIDAsString() + " not in DomSet");
+                log.debug("Hit from DOM " + hit.getDOMID() + " not in DomSet");
             }
             return;
         }
@@ -134,10 +143,10 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
 	} else {
 	    // this hit comes after the end of the deadtime window, count it
 	    numberProcessed++;
+	    deadtimeWindow = hitTime.getOffsetUTCTime(deadtime);
 	    if (numberProcessed % prescale == 0) {
 		// report this as a trigger and update the deadtime window
 		formTrigger(hit, null, null);
-		deadtimeWindow = hitTime.getOffsetUTCTime(deadtime);
 	    } else {
 		// just update earliest time of interest
 		IPayload earliest = new DummyPayload(hitTime.getOffsetUTCTime(0.1));

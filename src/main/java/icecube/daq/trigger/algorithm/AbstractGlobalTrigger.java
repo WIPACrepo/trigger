@@ -1,7 +1,7 @@
 /*
  * class: AbstractGlobalTrigger
  *
- * Version $Id: AbstractGlobalTrigger.java,v 1.19 2006/03/16 19:08:25 shseo Exp $
+ * Version $Id: AbstractGlobalTrigger.java 3715 2008-12-10 19:21:02Z kael $
  *
  * Date: August 30 2005
  *
@@ -10,46 +10,28 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.control.ConditionalTriggerBag;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.GlobalTrigEventWrapper;
-import icecube.daq.trigger.control.ConditionalTriggerBag;
-import icecube.daq.payload.ILoadablePayload;
-import icecube.daq.payload.PayloadDestination;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
-import java.util.List;
 import java.util.ArrayList;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.List;
 
 /**
  * This class is to provide a common method for all triggers in GT.
  *
- * @version $Id: AbstractGlobalTrigger.java,v 1.19 2006/03/16 19:08:25 shseo Exp $
+ * @version $Id: AbstractGlobalTrigger.java 3715 2008-12-10 19:21:02Z kael $
  * @author shseo
  */
 public abstract class AbstractGlobalTrigger extends AbstractTrigger
 {
-    /**
-    * Log object for this class
-    */
-    private static final Log log = LogFactory.getLog(AbstractGlobalTrigger.class);
-
-    public GlobalTrigEventWrapper mtGlobalTrigEventWrapper = new GlobalTrigEventWrapper();
-
-    public ITriggerRequestPayload mtGlobalTrigEventPayload;
-
-    public List mListSelectedTriggers = new ArrayList();
-    public List mListOutputTriggers = new ArrayList();
-    /**
-     * output destination
-     */
-    public PayloadDestination payloadDestination;
-    public int miMaxTimeGateWindowForCoincidenceTrigger;
-
-    public ConditionalTriggerBag mtConditionalTriggerBag;
+    private GlobalTrigEventWrapper mtGlobalTrigEventWrapper = new GlobalTrigEventWrapper();
+    private ITriggerRequestPayload mtGlobalTrigEventPayload;
+    protected List mListOutputTriggers = new ArrayList();
+    protected ConditionalTriggerBag mtConditionalTriggerBag;
     /**
      *  Constructor
       */
@@ -85,15 +67,6 @@ public abstract class AbstractGlobalTrigger extends AbstractTrigger
             //--The firstTime here to set DummyPayload is the earliestReadoutTime.
             DummyPayload dummy = new DummyPayload(mtGlobalTrigEventPayload.getFirstTimeUTC());
             setEarliestPayloadOfInterest(dummy);
-/*
-            if(null != payloadDestination){
-                try {
-                    payloadDestination.writePayload((Payload) mtGlobalTrigEventPayload);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-*/
 
             //--every wrapped trigger should be reported to GlobalTrigBag.
             reportTrigger((ILoadablePayload) mtGlobalTrigEventPayload);
@@ -101,8 +74,6 @@ public abstract class AbstractGlobalTrigger extends AbstractTrigger
         }else{
             throw new NullPointerException("mtGlobalTrigEventPayload is NULL in wrapTrigger()");
         }
-
-       // log.info("Number of GlobalTriggers to Release so far = " + getNumberAvailableTriggerToRelease());
     }
     /**
      * This returns a list of selected triggers by each global trigger algorithm.
@@ -123,11 +94,6 @@ public abstract class AbstractGlobalTrigger extends AbstractTrigger
         }
 
         return mListOutputTriggers;
-    }
-
-    public void setPayloadDestination(PayloadDestination payloadDestination)
-    {
-        this.payloadDestination = payloadDestination;
     }
 
     public ConditionalTriggerBag getBag(){

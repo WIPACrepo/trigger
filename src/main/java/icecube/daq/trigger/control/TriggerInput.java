@@ -1,7 +1,7 @@
 /*
  * class: TriggerInput
  *
- * Version $Id: TriggerInput.java,v 1.4 2005/10/18 19:18:06 toale Exp $
+ * Version $Id: TriggerInput.java 3439 2008-09-02 17:08:41Z dglo $
  *
  * Date: May 2 2005
  *
@@ -10,23 +10,21 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.payload.ILoadablePayload;
-import icecube.daq.payload.IPayload;
-import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.splicer.Payload;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.IHitDataPayload;
-import icecube.daq.trigger.ICompositePayload;
-import icecube.daq.trigger.ITriggerPayload;
-import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.eventbuilder.IEventPayload;
 import icecube.daq.eventbuilder.IReadoutDataPayload;
+import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.trigger.ICompositePayload;
+import icecube.daq.trigger.IHitDataPayload;
+import icecube.daq.trigger.IHitPayload;
+import icecube.daq.trigger.ITriggerPayload;
+import icecube.daq.trigger.ITriggerRequestPayload;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.zip.DataFormatException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.DataFormatException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides a simple implementation of ITriggerInput
  *
- * @version $Id: TriggerInput.java,v 1.4 2005/10/18 19:18:06 toale Exp $
+ * @version $Id: TriggerInput.java 3439 2008-09-02 17:08:41Z dglo $
  * @author pat
  */
 public class TriggerInput
@@ -46,23 +44,31 @@ public class TriggerInput
      */
     private static final Log log = LogFactory.getLog(TriggerInput.class);
 
+    /** No 'next' value is known. */
+    private static final int NEXT_UNKNOWN = -1;
+    /** There is no 'next' value. */
+    private static final int NEXT_NONE = Integer.MIN_VALUE;
+
     /**
      * internal list of payloads
      */
-    private List inputList;
+    private List<PayloadWindow> inputList;
 
-    private int count = 0;
+    private int count;
 
     /**
      * flag to indicate if we should flush
      */
-    private boolean flushing = false;
+    private boolean flushing;
+
+    /** The index of the 'next' value (can be NEXT_UNKNOWN or NEXT_NONE). */
+    private int nextIndex = NEXT_UNKNOWN;
 
     /**
      * default constructor
      */
     public TriggerInput() {
-        inputList = new ArrayList();
+        inputList = new ArrayList<PayloadWindow>();
     }
 
     /**
@@ -82,101 +88,121 @@ public class TriggerInput
             return;
         }
 
+        // reset 'next' index
+        nextIndex = NEXT_UNKNOWN;
+
         PayloadWindow newWindow = new PayloadWindow(payload);
-        IUTCTime currentTime = newWindow.firstTime;
-        inputList.add(newWindow);
-        count++;
+        long currentTime = newWindow.firstTime;
 
         // update containment
-        for (int i=0; i<inputList.size(); i++) {
-            PayloadWindow window = (PayloadWindow) inputList.get(i);
-
+        for (PayloadWindow window : inputList) {
             // if window was already contained it is still contained
             if (!window.isContained()) {
 
                 // see if it is now contained
-                if (0 < currentTime.compareTo(window.lastTime)) {
+                if (currentTime > window.lastTime) {
                     window.setContained(true);
                 }
-
             }
         }
+
+        // add new window
+        inputList.add(newWindow);
+        count++;
 
         // now check for overlaps
         for (int i=0; i<inputList.size(); i++) {
-            PayloadWindow window1 = (PayloadWindow) inputList.get(i);
+            PayloadWindow window1 = inputList.get(i);
             // for each contained window...
             if (window1.isContained()) {
 
-                window1.setOverlaping(false);
+                window1.setOverlapping(false);
 
                 for (int j=i+1; j<inputList.size(); j++) {
-                    PayloadWindow window2 = (PayloadWindow) inputList.get(j);
-                    // check ovelaps with all uncontained windows
+                    PayloadWindow window2 = inputList.get(j);
+                    // check overlaps with all uncontained windows
                     if (!window2.isContained()) {
 
-                        if ( (0 >= window1.firstTime.compareTo(window2.lastTime)) &&
-                             (0 <= window1.lastTime.compareTo(window2.firstTime)) ) {
-                            window1.setOverlaping(true);
+                        if (window1.firstTime <= window2.lastTime &&
+                            window1.lastTime >= window2.firstTime)
+                        {
+                            window1.setOverlapping(true);
+                            break;
                         }
-
                     }
-
                 }
             }
         }
+    }
 
+    /**
+     * Find the index of the 'next' value used by hasNext() and next().
+     * NOTE: Sets the internal 'nextIndex' value.
+     */
+    private void findNextIndex()
+    {
+        // assume we won't find anything
+        nextIndex = NEXT_NONE;
+
+        for (int i=0; i<inputList.size(); i++) {
+            PayloadWindow window = inputList.get(i);
+
+            // if flushing, just return true
+            // otherwise check if it is free to go
+            if (flushing || (window.isContained() && !window.isOverlapping()))
+            {
+                nextIndex = i;
+                break;
+            }
+        }
     }
 
     /**
      * allow all payloads to be sucked out
      */
     public void flush() {
+        nextIndex = NEXT_UNKNOWN;
         flushing = true;
-        log.info("Flushing: Total count = " + count);
+        if (log.isInfoEnabled()) {
+            log.info("Flushing: Total count = " + count);
+        }
     }
 
     /**
-     * check if there is a payload which is fully contained and does not overlap with
-     * payloads that are not contained
+     * check if there is a payload which is fully contained and does not
+     * overlap with payloads that are not contained
      *
      * @return true if there is, false otherwise
      */
-    public boolean hasNext() {
-
-        // loop over all payloads in list
-        for (int i=0; i<inputList.size(); i++) {
-            PayloadWindow window = (PayloadWindow) inputList.get(i);
-            // if flushing, just return true
-            // otherwise check if it is free to go
-            if ( (flushing) ||
-                 (window.isContained() && !window.isOverlaping()) ) {
-                return true;
-            }
+    public synchronized boolean hasNext()
+    {
+        if (nextIndex == NEXT_UNKNOWN) {
+            findNextIndex();
         }
 
-        return false;
+        return (nextIndex != NEXT_NONE);
     }
 
     /**
      * get next available payload
-     * @return next IPayload
+     * @return next ILoadablePayload
      */
-    public ILoadablePayload next() {
-
-        // loop over all payloads in list
-        for (int i=0; i<inputList.size(); i++) {
-            PayloadWindow window = (PayloadWindow) inputList.get(i);
-            // if flushing, just return the payload
-            // otherwise check if it is free to go
-            if ( (flushing) ||
-                 (window.isContained() && !window.isOverlaping()) ) {
-                inputList.remove(i);
-                return window.getPayload();
-            }
+    public synchronized ILoadablePayload next()
+    {
+        if (nextIndex == NEXT_UNKNOWN) {
+            findNextIndex();
         }
 
-        return null;
+        // save and reset next index
+        int curIndex = nextIndex;
+        nextIndex = NEXT_UNKNOWN;
+
+        // if there isn't one, return null
+        if (curIndex == NEXT_NONE) {
+            return null;
+        }
+
+        return inputList.remove(curIndex).getPayload();
     }
 
     /**
@@ -190,61 +216,75 @@ public class TriggerInput
     /**
      * private inner class to manage time windows and flags
      */
-    private class PayloadWindow {
+    private final class PayloadWindow {
 
         private ILoadablePayload payload;
-        public IUTCTime firstTime;
-        private IUTCTime lastTime;
-        private boolean overlaping;
+        private long firstTime;
+        private long lastTime;
+        private boolean overlapping;
         private boolean contained;
 
         private PayloadWindow(ILoadablePayload payload) {
             this.payload = payload;
 
             // get firstTime and lastTime from appropriate interface
+            IUTCTime firstUTC;
+            IUTCTime lastUTC;
             switch (payload.getPayloadInterfaceType()) {
                 case PayloadInterfaceRegistry.I_PAYLOAD :
-                    firstTime = payload.getPayloadTimeUTC();
-                    lastTime = firstTime;
+                    firstUTC = payload.getPayloadTimeUTC();
+                    lastUTC = firstUTC;
                     break;
                 case PayloadInterfaceRegistry.I_TRIGGER_PAYLOAD :
-                    firstTime = ((ITriggerPayload) payload).getPayloadTimeUTC();
-                    lastTime = firstTime;
+                    firstUTC = ((ITriggerPayload) payload).getPayloadTimeUTC();
+                    lastUTC = firstUTC;
                     break;
                 case PayloadInterfaceRegistry.I_HIT_PAYLOAD :
-                    firstTime = ((IHitPayload) payload).getHitTimeUTC();
-                    lastTime = firstTime;
+                    firstUTC = ((IHitPayload) payload).getHitTimeUTC();
+                    lastUTC = firstUTC;
                     break;
                 case PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD :
-                    firstTime = ((IHitDataPayload) payload).getHitTimeUTC();
-                    lastTime = firstTime;
+                    firstUTC = ((IHitDataPayload) payload).getHitTimeUTC();
+                    lastUTC = firstUTC;
                     break;
                 case PayloadInterfaceRegistry.I_COMPOSITE_PAYLOAD :
-                    firstTime = ((ICompositePayload) payload).getFirstTimeUTC();
-                    lastTime = ((ICompositePayload) payload).getLastTimeUTC();
+                    firstUTC = ((ICompositePayload) payload).getFirstTimeUTC();
+                    lastUTC = ((ICompositePayload) payload).getLastTimeUTC();
                     break;
                 case PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD :
-                    firstTime = ((ITriggerRequestPayload) payload).getFirstTimeUTC();
-                    lastTime = ((ITriggerRequestPayload) payload).getLastTimeUTC();
+                    firstUTC = ((ITriggerRequestPayload) payload).getFirstTimeUTC();
+                    lastUTC = ((ITriggerRequestPayload) payload).getLastTimeUTC();
                     break;
                 case PayloadInterfaceRegistry.I_READOUT_REQUEST_PAYLOAD :
-                    firstTime = null;
-                    lastTime = null;
+                    firstUTC = null;
+                    lastUTC = null;
                     break;
                 case PayloadInterfaceRegistry.I_READOUT_DATA_PAYLOAD :
-                    firstTime = ((IReadoutDataPayload) payload).getFirstTimeUTC();
-                    lastTime = ((IReadoutDataPayload) payload).getLastTimeUTC();
+                    firstUTC = ((IReadoutDataPayload) payload).getFirstTimeUTC();
+                    lastUTC = ((IReadoutDataPayload) payload).getLastTimeUTC();
                     break;
                 case PayloadInterfaceRegistry.I_EVENT_PAYLOAD :
-                    firstTime = ((IEventPayload) payload).getFirstTimeUTC();
-                    lastTime = ((IEventPayload) payload).getLastTimeUTC();
+                    firstUTC = ((IEventPayload) payload).getFirstTimeUTC();
+                    lastUTC = ((IEventPayload) payload).getLastTimeUTC();
                     break;
                 default :
-                    firstTime = null;
-                    lastTime = null;
+                    log.error("Unexpected interface type #" +
+                              payload.getPayloadInterfaceType());
+                    firstUTC = null;
+                    lastUTC = null;
                     break;
             }
 
+            if (firstUTC == null) {
+                firstTime = -1L;
+            } else {
+                firstTime = firstUTC.longValue();
+            }
+            if (lastUTC == null) {
+                lastTime = -1L;
+            } else {
+                lastTime = lastUTC.longValue();
+            }
         }
 
         private ILoadablePayload getPayload() {
@@ -255,18 +295,24 @@ public class TriggerInput
             return contained;
         }
 
-        private boolean isOverlaping() {
-            return overlaping;
+        private boolean isOverlapping() {
+            return overlapping;
         }
 
         private void setContained(boolean contained) {
             this.contained = contained;
         }
 
-        private void setOverlaping(boolean overlaping) {
-            this.overlaping = overlaping;
+        private void setOverlapping(boolean overlapping) {
+            this.overlapping = overlapping;
         }
 
+        public String toString()
+        {
+            return "PayloadWindow[" + firstTime + "," + lastTime + "]" +
+                (overlapping ? ",overlapping" : "") +
+                (contained ? ",contained" : "");
+        }
     }
 
 }

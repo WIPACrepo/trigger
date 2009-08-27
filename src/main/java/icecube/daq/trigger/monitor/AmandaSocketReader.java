@@ -1,18 +1,19 @@
 package icecube.daq.trigger.monitor;
 
-import icecube.icebucket.logging.LoggingConsumer;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.impl.TriggerRequestPayload;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.icebucket.logging.LoggingConsumer;
 
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.net.InetAddress;
-import java.io.IOException;
-import java.io.DataInputStream;
 import java.nio.ByteBuffer;
 import java.util.zip.DataFormatException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -58,7 +59,9 @@ public class AmandaSocketReader {
 
     public void read(int nTrig) throws IOException {
         for (int i=0; i<nTrig; i++) {
-            log.info("Reading trigger " + i);
+            if (log.isInfoEnabled()) {
+                log.info("Reading trigger " + i);
+            }
             input.readFully(buffer.array());
             TriggerRequestPayload trigger;
             try {

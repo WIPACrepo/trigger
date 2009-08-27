@@ -1,7 +1,7 @@
 /*
  * class: TimeOutOfOrderException
  *
- * Version $Id: TimeOutOfOrderException.java,v 1.1 2005/12/06 22:29:54 toale Exp $
+ * Version $Id: TimeOutOfOrderException.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: March 31 2005
  *
@@ -10,12 +10,11 @@
 
 package icecube.daq.trigger.exceptions;
 
-import icecube.daq.trigger.exceptions.TriggerException;
 
 /**
  * This class provides a specific exception
  *
- * @version $Id: TimeOutOfOrderException.java,v 1.1 2005/12/06 22:29:54 toale Exp $
+ * @version $Id: TimeOutOfOrderException.java 2629 2008-02-11 05:48:36Z dglo $
  * @author pat
  */
 public class TimeOutOfOrderException

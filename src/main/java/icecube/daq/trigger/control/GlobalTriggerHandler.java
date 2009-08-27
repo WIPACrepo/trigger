@@ -10,79 +10,82 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.payload.*;
-import icecube.daq.payload.splicer.Payload;
-import icecube.daq.payload.impl.UTCTime8B;
+import icecube.daq.io.DAQComponentOutputProcess;
+import icecube.daq.io.OutputChannel;
+import icecube.daq.payload.IByteBufferCache;
+import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IPayload;
+import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.IWriteablePayload;
+import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
+import icecube.daq.payload.impl.UTCTime8B;
 import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.monitor.ITriggerMonitor;
-import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
-import icecube.daq.trigger.monitor.PayloadBagMonitor;
+import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.config.ITriggerConfig;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.exceptions.TriggerException;
-//import icecube.daq.globalTrig.util.TriggerTestUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.trigger.monitor.ITriggerMonitor;
+import icecube.daq.trigger.monitor.PayloadBagMonitor;
+import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
+import icecube.daq.util.DOMRegistry;
 
-import java.util.Vector;
-import java.util.Iterator;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.zip.DataFormatException;
-import java.io.IOException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTrigHandler.java,v 1.44 2006/08/08 20:01:24 vav111 Exp $
+ * @version $Id: GlobalTriggerHandler.java 4269 2009-06-08 22:01:11Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
         implements ITriggerHandler
 {
+    public static final int DEFAULT_MAX_TIMEGATE_WINDOW = 0;
+    public static final boolean DEFAULT_TIMEGAP_OPTION = true;
+
+    private static final int PRINTOUT_FREQUENCY = 100000;
+
     /**
      * Log object for this class
      */
     private static final Log log = LogFactory.getLog(GlobalTriggerHandler.class);
 
     /**
-     * interval at which messages are printed
-     */
-    private static final int messageInterval = 1000;
-
-    /**
-     * maximum allowable time difference between hits (in ns)
-     */
-    private static final double MAX_TIME_DIFF = 30*1e9;
-
-    /**
      * List of defined triggers
      */
-    private List configuredTriggerList = null;
+    private List configuredTriggerList;
 
     /**
      * Bag of triggers to issue
      */
-    protected ITriggerBag triggerBag = null;
+    private ITriggerBag triggerBag;
 
     /**
      * The factory used to create triggers to issue
      */
-    protected TriggerRequestPayloadFactory outputFactory;
+    private TriggerRequestPayloadFactory outputFactory;
 
     /**
-     * counts the number of processed primitives
+     * output process
      */
-    private int count;
+    private DAQComponentOutputProcess payloadOutput;
 
-    protected IPayloadDestinationCollection payloadDestination = null;
     /**
-     * output destination
+     * output channel
      */
-    // private PayloadDestination payloadDestination;
+    private OutputChannel outChan;
 
     /**
      * earliest thing of interest to the analysis
@@ -92,50 +95,41 @@ public class GlobalTriggerHandler
     /**
      * sourceID of the iniceTrigger
      */
-    protected ISourceID sourceID;
-
-    /**
-     * time of last hit, used for monitoring
-     */
-    private IUTCTime timeOfLastHit = null;
+    private ISourceID sourceID;
 
     /**
      * input handler
      */
-    protected ITriggerInput inputHandler;
+    private ITriggerInput inputHandler;
     /**
      * This list is used for JUnitTest purpose.
      */
     private List mListAvailableTriggersToRelease;
 
-    private int miNumberAvailableTriggerToRelease;
-    private int miCount;
-
-    protected static final int DEFAULT_MAX_TIMEGATE_WINDOW = 0;
-    protected static final int miTimeGap_No = 1;
-    protected static final int miTimeGap_Yes = 2;
-    protected static final int DEFAULT_TIMEGAP_OPTION = miTimeGap_Yes;
-
     //--assign Default value.
     private int miMaxTimeGateWindow = DEFAULT_MAX_TIMEGATE_WINDOW;
-    private int miTimeGap_option = DEFAULT_TIMEGAP_OPTION;
+    private boolean allowTimeGap = DEFAULT_TIMEGAP_OPTION;
 
-    public int miTotalInputTriggers;
-    public int miTotalNullInputTriggers;
-    public int miTotalNonTRPInputTriggers;
-    public int miTotalMergedInputTriggers;
-    public int miTotalOutputGlobalTriggers;
-    public int miTotalOutputMergedGlobalTriggers;
-    int miMaxNum = 20;
-
-    private int miInfoPrintoutFrequency = 100000;
+    private int miTotalInputTriggers;
+    private int miTotalNullInputTriggers;
+    private int miTotalNonTRPInputTriggers;
+    private int miTotalMergedInputTriggers;
+    private int miTotalOutputGlobalTriggers;
+    private int miTotalOutputMergedGlobalTriggers;
+    /** only log payloads which exceed this size */
+    private int miMaxNumLogged = 20;
 
     /**
      * Monitor object.
      */
-    protected TriggerHandlerMonitor monitor;
+    private TriggerHandlerMonitor monitor;
 
     private double longestTrigger;
+
+    private DOMRegistry domRegistry;
+
+    /** Outgoing byte buffer cache. */
+    private IByteBufferCache outCache;
 
     /**
      * Create an instance of this class.
@@ -144,7 +138,7 @@ public class GlobalTriggerHandler
      */
     public GlobalTriggerHandler()
     {
-        this(new SourceID4B(6000), DEFAULT_TIMEGAP_OPTION);
+        this(new SourceID4B(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID));
     }
 
     public GlobalTriggerHandler(ISourceID sourceID)
@@ -153,20 +147,21 @@ public class GlobalTriggerHandler
     }
 
     public GlobalTriggerHandler(TriggerRequestPayloadFactory outputFactory) {
-        this(new SourceID4B(6000), DEFAULT_TIMEGAP_OPTION, outputFactory);
+        this(new SourceID4B(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID),
+             DEFAULT_TIMEGAP_OPTION, outputFactory);
     }
 
-    public GlobalTriggerHandler(ISourceID sourceID, int iTimeGap_Option)
+    public GlobalTriggerHandler(ISourceID sourceID, boolean allowTimeGap)
     {
-        this(sourceID, iTimeGap_Option, new TriggerRequestPayloadFactory());
+        this(sourceID, allowTimeGap, new TriggerRequestPayloadFactory());
     }
 
-    public GlobalTriggerHandler(ISourceID sourceID, int iTimeGap_Option, TriggerRequestPayloadFactory outputFactory) {
+    public GlobalTriggerHandler(ISourceID sourceID, boolean allowTimeGap, TriggerRequestPayloadFactory outputFactory) {
         this.sourceID = sourceID;
         this.outputFactory = outputFactory;
 
         this.init();
-        ((GlobalTriggerBag) triggerBag).setTimeGap_option(iTimeGap_Option);
+        ((GlobalTriggerBag) triggerBag).setAllowTimeGap(allowTimeGap);
     }
 
     public void addToTriggerBag(ILoadablePayload triggerPayload)
@@ -219,32 +214,6 @@ public class GlobalTriggerHandler
     public List getConfiguredTriggerList() {
         return configuredTriggerList;
     }
-    /**
-     * This method sends input payload to its destinantion algorithm
-     * where filtering of payloads may occur if necessary.
-     * This method will be removed once automatice routing for a payload is implemented.
-     *
-     * //todo: finish this method.
-     *
-     */
- /*   public void sendPayloadToFilterDestinantion(IPayload iPayload)
-    {
-        switch(iPayload.getPayloadInterfaceType()){
-            case PayloadInterfaceRegistry.I_STOP_PAYLOAD:
-                tStropTrigger.;
-                break;
-            case PayloadInterfaceRegistry.I_BEACON_PAYLOAD:
-
-                break;
-            case PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD:
-
-                break;
-            default:
-
-                break;
-
-        }
-    }*/
     public void flush()
     {
         // flush the input handler
@@ -261,7 +230,9 @@ public class GlobalTriggerHandler
             log.info("Flushing GlobalTriggers");
         }
 
-        Iterator triggerIterator = configuredTriggerList.iterator();
+        Iterator triggerIterator;
+
+        triggerIterator = configuredTriggerList.iterator();
         while (triggerIterator.hasNext()) {
             ITriggerControl trigger = (ITriggerControl) triggerIterator.next();
             trigger.flush();
@@ -280,19 +251,29 @@ public class GlobalTriggerHandler
         //-- one last call to process to check the bag
         process(null);
 
-        System.out.println("======================================================================");
-        System.out.println("I3 GlobalTrigger Run Summary: ");
-        System.out.println(" ");
-        System.out.println("Total # of GT events = " + miTotalOutputGlobalTriggers);
-        System.out.println("Total # of merged GT events = " + miTotalOutputMergedGlobalTriggers);
-        System.out.println(" ");
+        String nl = System.getProperty("line.separator");
+        String hdrLine = "===================================" +
+            "===================================";
+
+        StringBuilder buf = new StringBuilder();
+        buf.append(hdrLine).append(nl);
+        buf.append("I3 GlobalTrigger Run Summary:").append(nl);
+        buf.append(nl);
+        buf.append("Total # of GT events = " +
+                   miTotalOutputGlobalTriggers).append(nl);
+        buf.append("Total # of merged GT events = " +
+                  miTotalOutputMergedGlobalTriggers).append(nl);
+        buf.append(nl);
+        triggerIterator = configuredTriggerList.iterator();
         while (triggerIterator.hasNext()) {
             ITriggerControl trigger = (ITriggerControl) triggerIterator.next();
-            System.out.println("Total # of " + ((ITriggerConfig) trigger).getTriggerName() + "= "
-                    + ((ITriggerMonitor) trigger).getTriggerCounter());
-
+            buf.append("Total # of " +
+                       ((ITriggerConfig) trigger).getTriggerName() + "= " +
+                       ((ITriggerMonitor) trigger).getTriggerCounter());
+            buf.append(nl);
         }
-        System.out.println("======================================================================");
+        buf.append(hdrLine).append(nl);
+        log.warn(buf.toString());
     }
 
     public IPayload getEarliestPayloadOfInterest()
@@ -301,47 +282,50 @@ public class GlobalTriggerHandler
     }
 
     protected void init() {
-        count = 0;
-        miNumberAvailableTriggerToRelease = 0;
-        miCount = 0;
         miTotalInputTriggers = 0;
         miTotalOutputGlobalTriggers = 0;
         miTotalOutputMergedGlobalTriggers = 0;
         earliestPayloadOfInterest = null;
         mListAvailableTriggersToRelease = new ArrayList();
         configuredTriggerList = new ArrayList();
+        longestTrigger = 0.0;
 
         inputHandler = new TriggerInput();
-        triggerBag = new GlobalTriggerBag();
-        triggerBag.setPayloadFactory(outputFactory);
 
         //--following two values need to be reset anytime we want to change the values.
         //  Inside JBoss DAQ framework, those values are reset in enterRunning() stage.
         //  perhaps they need to be set in enterReady() stage, just right place to be.
        // ((GlobalTriggerBag) triggerBag).setMaxTimeGateWindow((int) getMaxTimeGateWindow());
-       // ((GlobalTriggerBag) triggerBag).setTimeGap_option(getTimeGap_option());
+       // ((GlobalTriggerBag) triggerBag).setAllowTimeGap(allowetTimeGap());
 
-        this.setMaxTimeGateWindow((int) getMaxTimeGateWindow());
-        this.setTimeGap_option(getTimeGap_option());
-        
+        triggerBag = new GlobalTriggerBag();
+        if (outputFactory != null) {
+            triggerBag.setPayloadFactory(outputFactory);
+        }
+
         monitor = new TriggerHandlerMonitor();
         PayloadBagMonitor triggerBagMonitor = new PayloadBagMonitor();
         triggerBag.setMonitor(triggerBagMonitor);
         monitor.setTriggerBagMonitor(triggerBagMonitor);
 
-        longestTrigger = 0.0;
+        this.setMaxTimeGateWindow((int) getMaxTimeGateWindow());
+        this.setAllowTimeGap(allowTimeGap());
     }
     /**
-     * This is the main mehtod.
+     * This is the main method.
      *
      * @param payload
      */
     public void process(ILoadablePayload payload) {
         miTotalInputTriggers++;
-        log.debug("Total # of Input Triggers so far = " + miTotalInputTriggers);
+        if (log.isDebugEnabled()) {
+            log.debug("Total # of Input Triggers so far = " +
+                      miTotalInputTriggers);
+        }
 
-        if(miTotalInputTriggers == 1){
-            System.out.println("MaxTimeGateWindow at GlobalTrigHandler = " + miMaxTimeGateWindow);
+        if (miTotalInputTriggers == 1 && log.isDebugEnabled()) {
+            log.debug("MaxTimeGateWindow at GlobalTrigHandler = " +
+                      miMaxTimeGateWindow);
         }
 
         //--add payload to input handler which supplements funtionality of the splicer.
@@ -350,8 +334,10 @@ public class GlobalTriggerHandler
         }else
         {
             miTotalNullInputTriggers++;
-            log.debug("Total # of Null Input Triggers so far = " + miTotalNullInputTriggers);
-            //log.fatal("incoming payload is null....");
+            if (log.isDebugEnabled()) {
+                log.debug("Total # of Null Input Triggers so far = " +
+                          miTotalNullInputTriggers);
+            }
         }
 
         //--now loop over payloads available from input handler.
@@ -361,98 +347,84 @@ public class GlobalTriggerHandler
 
             //--MergedPayload should be separated first! and then sent to each GT algorithm.
             if(interfaceType == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
-                 if (((ITriggerRequestPayload) tInputTrigger).getTriggerType() == -1) {
-                     miTotalMergedInputTriggers++;
-                     log.debug("Total # of Merged Input Triggers so far = " + miTotalMergedInputTriggers);
-                     log.debug("Now start processing merged trigger input");
+                if (((ITriggerRequestPayload) tInputTrigger).getTriggerType() == -1) {
+                    miTotalMergedInputTriggers++;
+                    if (log.isDebugEnabled()) {
+                        log.debug("Total # of Merged Input Triggers so far = " + miTotalMergedInputTriggers);
+                        log.debug("Now start processing merged trigger input");
+                    }
                     boolean failedLoad = false;
-                    Vector vecSubPayloads;
+                    List subPayloads;
                     try {
-                        vecSubPayloads = ((TriggerRequestPayload) tInputTrigger).getPayloads();
-                    } catch (IOException e) {
-                        log.error("Couldn't load payload", e);
-                        vecSubPayloads = null;
-                        failedLoad = true;
+                        subPayloads = ((ITriggerRequestPayload) tInputTrigger).getPayloads();
                     } catch (DataFormatException e) {
                         log.error("Couldn't load payload", e);
-                        vecSubPayloads = null;
+                        subPayloads = null;
                         failedLoad = true;
                     }
-                    if (vecSubPayloads == null) {
+                    if (subPayloads == null) {
                         if (!failedLoad) {
                             ITriggerRequestPayload trigReq =
                                 (ITriggerRequestPayload) tInputTrigger;
 
-                            ISourceID srcObj =
-                                trigReq.getSourceID();
-                            int srcId = (srcObj == null ? -1 :
-                                         srcObj.getSourceID());
-
-                            IUTCTime firstObj =
-                                trigReq.getFirstTimeUTC();
-                            long firstTime = (firstObj == null ? -1L :
-                                              firstObj.getUTCTimeAsLong());
-
-                            IUTCTime lastObj =
-                                trigReq.getLastTimeUTC();
-                            long lastTime = (lastObj == null ? -1L :
-                                              lastObj.getUTCTimeAsLong());
-
                             log.error("Bad merged trigger: uid " +
                                       trigReq.getUID() + " configId " +
                                       trigReq.getTriggerConfigID() + " src "+
-                                      srcId + " times [" + firstTime + "-" +
-                                      lastTime + "]");
+                                      trigReq.getSourceID() + " times [" +
+                                      trigReq.getFirstTimeUTC() + "-" +
+                                      trigReq.getLastTimeUTC() + "]");
                         }
                         continue;
                     }
                     //--Each component payload of the MergedPayload needs to be sent to its filter.
-                    for(int i=0; i<vecSubPayloads.size(); i++)
+                    for(int i=0; i<subPayloads.size(); i++)
                     {
-                        ITriggerRequestPayload subPayload = (ITriggerRequestPayload) vecSubPayloads.get(i);
+                        ITriggerRequestPayload subPayload = (ITriggerRequestPayload) subPayloads.get(i);
                         try {
                             ((ILoadablePayload) subPayload).loadPayload();
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            log.error("Couldn't load payload", e);
                         } catch (DataFormatException e) {
-                            e.printStackTrace();
+                            log.error("Couldn't load payload", e);
                         }
 
-                        //sendPayloadToFilterDestinantion((IPayload) vecSubPayloads.get(i));
+                        //sendPayloadToFilterDestinantion((IPayload) subPayloads.get(i));
                         Iterator triggerIterator = configuredTriggerList.iterator();
                         while (triggerIterator.hasNext()) {
                             ITriggerControl configuredTrigger = (ITriggerControl) triggerIterator.next();
                             try {
                                 configuredTrigger.runTrigger(subPayload);
                                 int triggerCounter = ((ITriggerMonitor) configuredTrigger).getTriggerCounter();
-                                if(triggerCounter % miInfoPrintoutFrequency == 0 && triggerCounter >= miInfoPrintoutFrequency){
+                                if(log.isInfoEnabled() && triggerCounter % PRINTOUT_FREQUENCY == 0 && triggerCounter >= PRINTOUT_FREQUENCY){
                                     log.info(((ITriggerConfig) configuredTrigger).
                                             getTriggerName() + ":  #  " + triggerCounter);
-
                                 }
 
                             } catch (TriggerException e) {
-                                log.error("Exception while running configuredTrigger: " + e);
+                                log.error("Exception while running configuredTrigger", e);
                             }
                         }
                     }
                 }else{
                     log.debug("Now start processing single trigger input");
-                    //sendPayloadToFilterDestinantion(tInputTrigger);
                     Iterator triggerIterator = configuredTriggerList.iterator();
                     while (triggerIterator.hasNext()) {
                         ITriggerControl configuredTrigger = (ITriggerControl) triggerIterator.next();
                         try {
                             configuredTrigger.runTrigger(tInputTrigger);
                         } catch (TriggerException e) {
-                            log.error("Exception while running configuredTrigger: " + e);
+                            log.error("Exception while running configuredTrigger", e);
                         }
                     }
                 }
             } else {
                 miTotalNonTRPInputTriggers++;
-                log.debug("Total # of Non-TriggerRequestPayload Input Triggers so far = " + miTotalNonTRPInputTriggers);
-                log.info("Input payload was found to be Non-TriggerRequestPayloads: # " + miTotalNonTRPInputTriggers);
+                if (log.isDebugEnabled()) {
+                    log.debug("Found non-TriggerRequestPayload #" +
+                              miTotalNonTRPInputTriggers + " (ifaceType#" +
+                              interfaceType + "=" +
+                              tInputTrigger.getClass().getName() + ")");
+                }
                 return;
             }
         }
@@ -486,11 +458,25 @@ public class GlobalTriggerHandler
     }
 
     /**
+     * Get the input handler
+     *
+     * @return a trigger input handler
+     */
+    public ITriggerInput getInputHandler()
+    {
+        return inputHandler;
+    }
+
+    /**
      * check triggerBag and issue/ship GTEventPayload if possible
      *   any triggers that are earlier than the earliestPayloadOfInterest are selected
      *   if any of those overlap, they are merged
      */
     public void issueTriggers() {
+
+        if (null == payloadOutput) {
+            throw new RuntimeException("PayloadOutput has not been set!");
+        }
 
         if (log.isDebugEnabled()) {
             log.debug("GlobalTrig Bag contains " + triggerBag.size() + " triggers");
@@ -501,7 +487,7 @@ public class GlobalTriggerHandler
         setEarliestTime();
 
         while (triggerBag.hasNext()) {
-            TriggerRequestPayload GTEventPayload = (TriggerRequestPayload) triggerBag.next();
+            ITriggerRequestPayload GTEventPayload = (ITriggerRequestPayload) triggerBag.next();
             miTotalOutputGlobalTriggers++;
             int GT_trigType = GTEventPayload.getTriggerType();
 
@@ -532,51 +518,60 @@ public class GlobalTriggerHandler
             try {
                 nSubPayloads = GTEventPayload.getPayloads().size();
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("Couldn't get payloads", e);
             }
 
             if (log.isInfoEnabled()) {
-                if(miTotalOutputGlobalTriggers%miInfoPrintoutFrequency == 0){
+                if(miTotalOutputGlobalTriggers % PRINTOUT_FREQUENCY == 0){
                     log.info("Issue # " + miTotalOutputGlobalTriggers + " GTEventPayload (trigType = " + GT_trigType + " ) : "
-                             + " extended event time = " + firstTime.getUTCTimeAsLong() + " to "
-                             + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " subTriggers"
+                             + " extended event time = " + firstTime + " to "
+                             + lastTime + " and contains " + nSubPayloads + " subTriggers"
                              + ", payload length = " + GTEventPayload.getPayloadLength() + "bytes");
                     if(-1 == GT_trigType){
                         log.info("Merged GT # " + miTotalOutputMergedGlobalTriggers);
                     }
                 }
-                if(nSubPayloads > miMaxNum){
-                    miMaxNum = nSubPayloads;
-                    log.info("paylaod length = " + GTEventPayload.getPayloadLength() + "bytes");
-                    //TriggerTestUtil testUtil = new TriggerTestUtil();
-                    //testUtil.show_trigger_Info("Final GT ", miTotalOutputGlobalTriggers, GTEventPayload);
+                if(log.isInfoEnabled() && nSubPayloads > miMaxNumLogged){
+                    miMaxNumLogged = nSubPayloads;
+                    log.info("payload length = " + GTEventPayload.getPayloadLength() + "bytes");
                 }
             }
 
-            //--ship the GTEventPayload to its destinantion (i.e., EB).
-            if (null == payloadDestination) {
-                log.error("PayloadDestination has not been set!");
+            int bufLen = GTEventPayload.getPayloadLength();
+
+            ByteBuffer trigBuf;
+            if (outCache != null) {
+                trigBuf = outCache.acquireBuffer(bufLen);
+//System.err.println("Alloc "+trigBuf.capacity()+" bytes from "+outCache);
             } else {
-                try {
-                    payloadDestination.writePayload(GTEventPayload);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                GTEventPayload.recycle();
-                //sendTrigger(GTEventPayload);
+                trigBuf = ByteBuffer.allocate(bufLen);
+System.err.println("GTrig unattached "+trigBuf.capacity()+" bytes");
             }
-        }
-    }
-    /**
-     * send trigger to output destination.
-     * @param trigger
-     */
-    public void sendTrigger(Payload trigger) {
-        // issue the trigger
-        try {
-            payloadDestination.writePayload(trigger);
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            // write trigger to a ByteBuffer
+            try {
+                ((IWriteablePayload) GTEventPayload).writePayload(false, 0,
+                                                                  trigBuf);
+            } catch (IOException ioe) {
+                log.error("Couldn't create payload", ioe);
+                trigBuf = null;
+            }
+
+            // if we haven't already, get the output channel
+            if (outChan == null) {
+                if (payloadOutput == null) {
+                    log.error("Trigger destination has not been set");
+                } else {
+                    outChan = payloadOutput.getChannel();
+                }
+            }
+
+            //--ship the trigger to its destination
+            if (trigBuf != null) {
+                outChan.receiveByteBuffer(trigBuf);
+            }
+
+            GTEventPayload.recycle();
         }
     }
 
@@ -596,14 +591,18 @@ public class GlobalTriggerHandler
                     = (IPayload) ((ITriggerControl) triggerListIterator.next()).getEarliestPayloadOfInterest();
 
             if (earliestPayload != null) {
-                log.debug("There is earliestPayload: Time = " + earliestPayload.getPayloadTimeUTC().getUTCTimeAsLong());
                 // if payload < earliest
                 if (earliestTimeOverall.compareTo(earliestPayload.getPayloadTimeUTC()) > 0) {
                     earliestTimeOverall = earliestPayload.getPayloadTimeUTC();
                     earliestPayloadOverall = earliestPayload;
+                    if (log.isDebugEnabled()) {
+                        log.debug("There is earliestPayloadOverall: Time = "
+                                  + earliestPayloadOverall.getPayloadTimeUTC());
+                    }
+                } else if (log.isDebugEnabled()) {
+                    log.debug("There is earliestPayload: Time = "
+                              + earliestPayload.getPayloadTimeUTC());
                 }
-                log.debug("There is earliestPayloadOverall: Time = "
-                         + earliestPayloadOverall.getPayloadTimeUTC().getUTCTimeAsLong());
             }
         }
 
@@ -617,7 +616,7 @@ public class GlobalTriggerHandler
 
             //--set earliestPayload
             setEarliestPayloadOfInterest(earliestPayloadOfInterest);
-        }else
+        }else if (log.isDebugEnabled())
         {
             log.debug("There is no earliestPayloadOverall.....");
         }
@@ -665,29 +664,92 @@ public class GlobalTriggerHandler
      * todo: Thus this method should be called when GlobalTriggerHandler object is created
      * when GT is configured.
      *
-     * iTimeGap_option = 1 --> No_TimeGap
-     *                 = 2 --> Yes_TimeGap
-     *
-     * @param iTimeGap_option
+     * @param allowTimeGap <tt>true</tt> to allow time gaps
      */
-    public void setTimeGap_option(int iTimeGap_option)
+    public void setAllowTimeGap(boolean allowTimeGap)
     {
-        miTimeGap_option = iTimeGap_option;
-        ((GlobalTriggerBag) triggerBag).setTimeGap_option(iTimeGap_option);
+        this.allowTimeGap = allowTimeGap;
+        ((GlobalTriggerBag) triggerBag).setAllowTimeGap(allowTimeGap);
     }
 
-    public int getTimeGap_option()
+    public boolean allowTimeGap()
     {
-        return miTimeGap_option;
+        return allowTimeGap;
     }
 
-    public void setPayloadDestinationCollection(IPayloadDestinationCollection payloadDestination)
+    public void setPayloadOutput(DAQComponentOutputProcess payloadOutput)
     {
-        this.payloadDestination = payloadDestination;
+        this.payloadOutput = payloadOutput;
+    }
+
+    public DAQComponentOutputProcess getPayloadOutput()
+    {
+        return payloadOutput;
     }
 
     public List getListAvailableTriggerToRelease()
     {
         return mListAvailableTriggersToRelease;
+    }
+
+    public void setDOMRegistry(DOMRegistry registry) {
+	domRegistry = registry;
+        DomSetFactory.setDomRegistry(registry);
+    }
+
+    public DOMRegistry getDOMRegistry() {
+	return domRegistry;
+    }
+
+    public int getCount()
+    {
+        return miTotalInputTriggers;
+    }
+
+    public int getTotalInputTriggers()
+    {
+        return miTotalInputTriggers;
+    }
+
+    public int getTotalNullInputTriggers()
+    {
+        return miTotalNullInputTriggers;
+    }
+
+    public int getTotalNonTRPInputTriggers()
+    {
+        return miTotalNonTRPInputTriggers;
+    }
+
+    public int getTotalMergedInputTriggers()
+    {
+        return miTotalMergedInputTriggers;
+    }
+
+    public int getTotalOutputGlobalTriggers()
+    {
+        return miTotalOutputGlobalTriggers;
+    }
+
+    public int getTotalOutputMergedGlobalTriggers()
+    {
+        return miTotalOutputMergedGlobalTriggers;
+    }
+
+    public void setOutputFactory(TriggerRequestPayloadFactory factory)
+    {
+        outputFactory = factory;
+        if (outputFactory != null) {
+            triggerBag.setPayloadFactory(outputFactory);
+        }
+    }
+
+    /**
+     * Set the outgoing payload buffer cache.
+     * @param byte buffer cache manager
+     */
+    public void setOutgoingBufferCache(IByteBufferCache cache)
+    {
+        outCache = cache;
     }
 }

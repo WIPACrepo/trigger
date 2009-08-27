@@ -1,7 +1,7 @@
 /*
  * class: DummyPayload
  *
- * Version $Id: DummyPayload.java,v 1.2 2005/10/10 01:23:03 toale Exp $
+ * Version $Id: DummyPayload.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: October 7 2005
  *
@@ -10,15 +10,17 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.splicer.Spliceable;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.splicer.Spliceable;
+
+import java.nio.ByteBuffer;
 
 /**
  * This class is a dummy payload that only has a UTC time associated with it.
  * Its main purpose is for truncating the Splicer.
  *
- * @version $Id: DummyPayload.java,v 1.2 2005/10/10 01:23:03 toale Exp $
+ * @version $Id: DummyPayload.java 2629 2008-02-11 05:48:36Z dglo $
  * @author pat
  */
 public class DummyPayload implements Spliceable, IPayload
@@ -28,6 +30,11 @@ public class DummyPayload implements Spliceable, IPayload
 
     public DummyPayload(IUTCTime payloadTimeUTC) {
         this.payloadTimeUTC = payloadTimeUTC;
+    }
+
+    public ByteBuffer getPayloadBacking()
+    {
+        throw new Error("Unimplemented");
     }
 
     /**
@@ -60,8 +67,8 @@ public class DummyPayload implements Spliceable, IPayload
         return payloadTimeUTC;
     }
 
-    public int compareTo(Object object) {
-        return payloadTimeUTC.compareTo(((IPayload) object).getPayloadTimeUTC());
+    public int compareSpliceable(Spliceable spl) {
+        return payloadTimeUTC.compareTo(((IPayload) spl).getPayloadTimeUTC());
     }
 
     /**
@@ -73,4 +80,8 @@ public class DummyPayload implements Spliceable, IPayload
         return new DummyPayload(this.payloadTimeUTC);
     }
 
+    public String toString()
+    {
+        return "Dummy@" + payloadTimeUTC;
+    }
 }

@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTriggerTwo
  *
- * Version $Id: TwoCoincidenceTrigger.java,v 1.17 2006/06/30 18:28:01 dwharton Exp $
+ * Version $Id: TwoCoincidenceTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: September 2 2005
  *
@@ -10,22 +10,23 @@
 
 package icecube.daq.trigger.algorithm;
 
+import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.control.ConditionalTriggerBag;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.control.ConditionalTriggerBag;
-import icecube.daq.trigger.config.TriggerParameter;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Two coincidence trigger algorithm which uses timeGate (using CoincidenceTriggerBag)
  * for safe release of a selected trigger.
  *
- * @version $Id: TwoCoincidenceTrigger.java,v 1.17 2006/06/30 18:28:01 dwharton Exp $
+ * @version $Id: TwoCoincidenceTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public class TwoCoincidenceTrigger
@@ -48,18 +49,18 @@ public class TwoCoincidenceTrigger
     private static final int miConfiguredTrigId_1 = 1;
     private static final int miConfiguredTrigId_2 = 2;
 
-    boolean mbConfigTriggerType_1 = false;
-    boolean mbConfigTriggerConfigId_1 = false;
-    boolean mbConfigSourceId_1 = false;
-    boolean mbConfigTriggerType_2 = false;
-    boolean mbConfigTriggerConfigId_2 = false;
-    boolean mbConfigSourceId_2 = false;
-    boolean configTriggerType_3 = false;
-    boolean configTriggerConfigId_3 = false;
-    boolean configSourceId_3 = false;
+    private boolean mbConfigTriggerType_1;
+    private boolean mbConfigTriggerConfigId_1;
+    private boolean mbConfigSourceId_1;
+    private boolean mbConfigTriggerType_2;
+    private boolean mbConfigTriggerConfigId_2;
+    private boolean mbConfigSourceId_2;
+    private boolean configTriggerType_3;
+    private boolean configTriggerConfigId_3;
+    private boolean configSourceId_3;
 
     private final int NUMBER_OF_REQUIRED_CONFIG_PARAMETERS = 6;
-    int miCurrentNumberOfConfigurationParameters = 0;
+    private int miCurrentNumberOfConfigurationParameters;
 
     /**
      * Create an instance of this class.

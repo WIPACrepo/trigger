@@ -1,7 +1,7 @@
 /*
  * interface: AdvancedSplicedAnalysis
  *
- * Version $Id: AdvancedSplicedAnalysis.java,v 1.2 2005/10/20 15:21:02 toale Exp $
+ * Version $Id: AdvancedSplicedAnalysis.java 4267 2009-06-05 19:11:27Z dglo $
  *
  * Date: October 17 2005
  *
@@ -10,15 +10,15 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.splicer.SplicerListener;
+import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.SplicedAnalysis;
 import icecube.daq.splicer.Splicer;
-import icecube.daq.splicer.SpliceableFactory;
+import icecube.daq.splicer.SplicerListener;
 
 /**
  * This interface defines a SplicedAnalysis tailored to the modern Payload system.
  *
- * @version $Id: AdvancedSplicedAnalysis.java,v 1.2 2005/10/20 15:21:02 toale Exp $
+ * @version $Id: AdvancedSplicedAnalysis.java 4267 2009-06-05 19:11:27Z dglo $
  * @author pat
  */
 public interface AdvancedSplicedAnalysis extends SplicedAnalysis, SplicerListener, IPayloadProducer
@@ -29,11 +29,4 @@ public interface AdvancedSplicedAnalysis extends SplicedAnalysis, SplicerListene
      * @param splicer parent Splicer
      */
     void setSplicer(Splicer splicer);
-
-    /**
-     * Set factory to be used by Splicer.
-     * @param spliceableFactory a Spliceable factory
-     */
-    void setFactory(SpliceableFactory spliceableFactory);
-
 }

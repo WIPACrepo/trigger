@@ -1,7 +1,7 @@
 /*
  * class: VetoTrigger
  *
- * Version $Id: VetoTrigger.java,v 1.4 2006/02/02 12:49:35 shseo Exp $
+ * Version $Id: VetoTrigger.java 3439 2008-09-02 17:08:41Z dglo $
  *
  * Date: January 25 2006
  *
@@ -11,18 +11,18 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.IPayload;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.ITriggerRequestPayload;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import icecube.daq.trigger.exceptions.TriggerException;
 
 import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * This class is to provide commond methods for any N-VetoTrigger.
  *
- * @version $Id: VetoTrigger.java,v 1.4 2006/02/02 12:49:35 shseo Exp $
+ * @version $Id: VetoTrigger.java 3439 2008-09-02 17:08:41Z dglo $
  * @author shseo
  */
 public abstract class VetoTrigger
@@ -34,7 +34,6 @@ public abstract class VetoTrigger
     private static final Log log = LogFactory.getLog(VetoTrigger.class);
 
     private int miNumIncomingSelectedTriggers;
-    private int miNumIncomingVetoedTriggers;
     /**
      * Create an instance of this class.
      * Default constructor is declared, but private, to stop accidental
@@ -57,17 +56,16 @@ public abstract class VetoTrigger
          if(!isConfiguredTrigger((ITriggerRequestPayload) payload))
          {
              miNumIncomingSelectedTriggers++;
-             System.out.println("Total number of incoming Unvetoed triggers so far = " + miNumIncomingSelectedTriggers);
-             log.debug("Total number of incoming Unvetoed triggers so far = " + miNumIncomingSelectedTriggers);
+             if (log.isDebugEnabled()) {
+                 log.debug("Total number of incoming Unvetoed triggers so far = " + miNumIncomingSelectedTriggers);
+             }
              try {
                  wrapTrigger((ITriggerRequestPayload) payload);
              } catch (Exception e) {
-                 e.printStackTrace();
+                 log.error("Couldn't wrap trigger", e);
              }
          }else
          {
-             miNumIncomingVetoedTriggers++;
-             System.out.println("Total number of incoming vetoed triggers so far = " + miNumIncomingVetoedTriggers);
              log.debug("This Trigger is being vetoed.");
              //DummyPayload dummy = new DummyPayload(((ITriggerRequestPayload) payload).getFirstTimeUTC());
              //setEarliestPayloadOfInterest(dummy);

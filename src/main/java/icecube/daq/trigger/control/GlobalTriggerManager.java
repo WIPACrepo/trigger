@@ -10,26 +10,26 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.splicer.Splicer;
-import icecube.daq.splicer.SpliceableFactory;
-import icecube.daq.splicer.Spliceable;
-import icecube.daq.splicer.SplicerChangedEvent;
-import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.MasterPayloadFactory;
+import icecube.daq.payload.PayloadRegistry;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.payload.splicer.Payload;
+import icecube.daq.splicer.Spliceable;
+import icecube.daq.splicer.SpliceableFactory;
+import icecube.daq.splicer.Splicer;
+import icecube.daq.splicer.SplicerChangedEvent;
 import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.monitor.Statistic;
 
-import java.util.List;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java,v 1.31 2006/05/09 19:57:57 toale Exp $
+ * @version $Id: GlobalTriggerManager.java 4267 2009-06-05 19:11:27Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager
@@ -48,12 +48,6 @@ public class GlobalTriggerManager
      * Log object for this class
      */
     private static final Log log = LogFactory.getLog(GlobalTriggerManager.class);
-    /**
-     * The factory used to produce IHitPayloads for this object to use.
-     */
-    //private final MasterPayloadFactory inputFactory = new MasterPayloadFactory();
-    private SpliceableFactory inputFactory = null;
-
     /**
      * splicer associated with this manager
      */
@@ -68,7 +62,7 @@ public class GlobalTriggerManager
      * spliceable inputCount
      */
     private int inputCount;
-    private int recycleCount = 0;
+    private int recycleCount;
     private double totalProcessTime;
     /**
      * size of last input list
@@ -91,12 +85,13 @@ public class GlobalTriggerManager
      */
     public GlobalTriggerManager()
     {
-        this(new MasterPayloadFactory(), new SourceID4B(6000), DEFAULT_TIMEGAP_OPTION);
+        this(new MasterPayloadFactory());
     }
 
     public GlobalTriggerManager(SpliceableFactory inputFactory)
     {
-        this(inputFactory, new SourceID4B(6000), DEFAULT_TIMEGAP_OPTION);
+        this(inputFactory,
+             new SourceID4B(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID));
     }
 
     public GlobalTriggerManager(SpliceableFactory inputFactory, ISourceID sourceID)
@@ -104,33 +99,33 @@ public class GlobalTriggerManager
         this(inputFactory, sourceID, DEFAULT_TIMEGAP_OPTION);
     }
 
-    public GlobalTriggerManager(SpliceableFactory inputFactory, ISourceID sourceID, int iTimeGap_option)
+    public GlobalTriggerManager(SpliceableFactory inputFactory, ISourceID sourceID, boolean allowTimeGap)
     {
-        super.sourceID = sourceID;
-        this.inputFactory = inputFactory;
-        outputFactory = (TriggerRequestPayloadFactory)
-                ((MasterPayloadFactory) inputFactory).getPayloadFactory(PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST);
-
-        super.init();
-        this.initialize();
-        super.setMaxTimeGateWindow(DEFAULT_MAX_TIMEGATE_WINDOW);
-        super.setTimeGap_option(iTimeGap_option);
+        this(inputFactory, sourceID, allowTimeGap,
+             DEFAULT_MAX_TIMEGATE_WINDOW);
     }
 
     public GlobalTriggerManager(SpliceableFactory inputFactory, ISourceID sourceID,
-                                int iTimeGap_option, int iMax_TimeGate_Window)
+                                boolean allowTimeGap, int iMax_TimeGate_Window)
     {
-        super.sourceID = sourceID;
-        this.inputFactory = inputFactory;
-        outputFactory = (TriggerRequestPayloadFactory)
-                ((MasterPayloadFactory) inputFactory).getPayloadFactory(PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST);
-        super.setMaxTimeGateWindow(iMax_TimeGate_Window);
-        super.setTimeGap_option(iTimeGap_option);
-        super.init();
-        this.initialize();
+        super(sourceID, allowTimeGap, getOutputFactory(inputFactory));
+
+        setMaxTimeGateWindow(iMax_TimeGate_Window);
+        setAllowTimeGap(allowTimeGap);
+
+        initialize();
     }
 
-    // public static void main(String args[]) {}
+    private static TriggerRequestPayloadFactory
+        getOutputFactory(SpliceableFactory inputFactory)
+    {
+        final int id = PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST;
+
+        MasterPayloadFactory factory = (MasterPayloadFactory) inputFactory;
+
+        return (TriggerRequestPayloadFactory) factory.getPayloadFactory(id);
+    }
+
     public Splicer getSplicer() {
         return splicer;
     }
@@ -140,14 +135,9 @@ public class GlobalTriggerManager
         this.splicer.addSplicerListener(this);
     }
 
-    public void setFactory(SpliceableFactory inputFactory) {
-        this.inputFactory = inputFactory;
+    public void setReportingThreshold(int threshold) {
+        nThresholdInSplicer = threshold;
     }
-
-  /*  public void setMaxTimeGateWindow(int iMaxTimeGateWindow)
-    {
-        super.setMaxTimeGateWindow(iMaxTimeGateWindow);
-    }*/
 
     public void execute(List splicedObjects, int decrement) {
         // Loop over the new objects in the splicer
@@ -163,10 +153,8 @@ public class GlobalTriggerManager
         int numberOfObjectsInSplicer = splicedObjects.size();
         lastInputListSize = numberOfObjectsInSplicer - (start - decrement);
 
-        if (log.isInfoEnabled()) {
-            if(numberOfObjectsInSplicer >= nThresholdInSplicer){
-                log.info("Splicer contains: [" + lastInputListSize + ":" + numberOfObjectsInSplicer + "]");
-            }
+        if (log.isInfoEnabled() && numberOfObjectsInSplicer >= nThresholdInSplicer){
+            log.info("Splicer contains: [" + lastInputListSize + ":" + numberOfObjectsInSplicer + "]");
         }
 
         if (lastInputListSize > 0) {
@@ -179,8 +167,8 @@ public class GlobalTriggerManager
 
                 inputCount++;
                 if (log.isDebugEnabled()) {
-                    log.debug("  Processing payload " + inputCount + " with time "
-                         + payload.getPayloadTimeUTC().getUTCTimeAsLong());
+                    log.debug("  Processing payload " + inputCount +
+                              " with time " + payload.getPayloadTimeUTC());
                 }
 
                 process(payload);
@@ -202,43 +190,38 @@ public class GlobalTriggerManager
         if ((inputCount % nThresholdInSplicer) == (nThresholdInSplicer - 1)) {
             double timeDiff = System.currentTimeMillis() - startTime;
             double timePerHit = timeDiff/nInputs;
-            log.debug("Process time per input = " + Math.round(timePerHit)+ " ms");
+            if (log.isDebugEnabled()) {
+                log.debug("Process time per input = " +
+                          Math.round(timePerHit) + " ms");
+            }
         }
 
     }
 
-    public SpliceableFactory getFactory() {
-        return inputFactory;
-    }
     /**
      * update splicer to earliest time of interest
      */
     public void updateSplicer() {
         Spliceable update = (Spliceable) super.getEarliestPayloadOfInterest();
         if (null != update) {
-            log.debug("Truncating splicer at " + ((IPayload) update).getPayloadTimeUTC().getUTCTimeAsLong());
+            if (log.isDebugEnabled()) {
+                log.debug("Truncating splicer at " +
+                          ((IPayload) update).getPayloadTimeUTC());
+            }
             splicer.truncate(update);
         }
     }
 
     public void failed(SplicerChangedEvent event) {
         if (log.isErrorEnabled()) {
-            log.error("Recieved Splicer FAILED");
+            log.error("Received Splicer FAILED");
         }
-        try {
-            payloadDestination.closeAllPayloadDestinations();
-        } catch (IOException e) {
-            log.error("Error closing PayloadDestination", e);
-        }
+        getPayloadOutput().sendLastAndStop();
     }
 
     public void stopped(SplicerChangedEvent event) {
-        log.info("Recieved Splicer STOPPED, flushing...");
-        try {
-            payloadDestination.stopAllPayloadDestinations();
-        } catch (IOException e) {
-            log.error("Error closing PayloadDestinations");
-        }
+        log.info("Received Splicer STOPPED, flushing...");
+        getPayloadOutput().forcedStopProcessing();
     }
 
     public void starting(SplicerChangedEvent event) {
@@ -252,32 +235,33 @@ public class GlobalTriggerManager
 
     public void truncated(SplicerChangedEvent event) {
 
-        log.debug("Splicer truncated: " + event.getSpliceable());
+        if (log.isDebugEnabled()) {
+            log.debug("Splicer truncated: " + event.getSpliceable());
+        }
         if (event.getSpliceable() == Splicer.LAST_POSSIBLE_SPLICEABLE) {
             flush();
         }
         Iterator iter = event.getAllSpliceables().iterator();
         while (iter.hasNext()) {
-            Payload payload = (Payload) iter.next();
+            ILoadablePayload payload = (ILoadablePayload) iter.next();
             recycleCount++;
-            log.debug("  Recycle payload " + recycleCount + " at time " + payload.getPayloadTimeUTC().getUTCTimeAsLong());
+            if (log.isDebugEnabled()) {
+                log.debug("  Recycle payload " + recycleCount + " at time " +
+                          payload.getPayloadTimeUTC());
+            }
             earliestTime = payload.getPayloadTimeUTC();
-            long startTime = ((Long) wallTimeQueue.removeFirst()).longValue();
-            long endTime = System.currentTimeMillis();
-            processingTime.add(endTime - startTime);
+            long wallStart = ((Long) wallTimeQueue.removeFirst()).longValue();
+            long wallEnd = System.currentTimeMillis();
+            processingTime.add(wallEnd - wallStart);
             payload.recycle();
         }
     }
 
     public void disposed(SplicerChangedEvent event) {
         if (log.isInfoEnabled()) {
-            log.info("Recieved Splicer DISPOSED");
+            log.info("Received Splicer DISPOSED");
         }
-        try {
-            payloadDestination.closeAllPayloadDestinations();
-        } catch (IOException e) {
-            log.error("Error closing PayloadDestination", e);
-        }
+        getPayloadOutput().destroyProcessor();
     }
 
     public void flush() {
@@ -332,5 +316,5 @@ public class GlobalTriggerManager
     public int getProcessingCount() {
         return wallTimeQueue.size();
     }
-        
+
 }

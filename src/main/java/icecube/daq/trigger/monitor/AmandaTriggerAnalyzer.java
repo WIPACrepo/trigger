@@ -1,14 +1,13 @@
 package icecube.daq.trigger.monitor;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.trigger.impl.TriggerRequestPayload;
 
 import java.io.IOException;
 import java.util.zip.DataFormatException;
-import java.util.List;
-import java.util.ArrayList;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,7 +19,6 @@ public class AmandaTriggerAnalyzer {
 
     private static final Log log = LogFactory.getLog(AmandaTriggerAnalyzer.class);
 
-    private int count = 0;
     private int veryFirstUID = -1;
     private int lastUID = -1;
     private IUTCTime veryFirstTime = null;
@@ -45,18 +43,12 @@ public class AmandaTriggerAnalyzer {
 
         try {
             trigger.loadPayload();
-        } catch (IOException ioe) {
-            log.error("Error loading payload: ", ioe);
         } catch (DataFormatException dfe) {
             log.error("Error loading payload: ", dfe);
         }
 
-        count++;
-
         int uid = trigger.getUID();
-        int type = trigger.getTriggerType();
         int config = trigger.getTriggerConfigID();
-        int source = trigger.getSourceID().getSourceID();
         IUTCTime time = trigger.getFirstTimeUTC();
 
         processUID(uid);
@@ -100,6 +92,10 @@ public class AmandaTriggerAnalyzer {
     }
 
     public void dump() {
+
+        if (!log.isInfoEnabled()) {
+            return;
+        }
 
         log.info("BitMask count:");
         for (int i=0; i<512; i++) {

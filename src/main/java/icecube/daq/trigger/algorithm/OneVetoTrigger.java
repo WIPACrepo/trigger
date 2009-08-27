@@ -1,7 +1,7 @@
 /*
  * class: OneVetoTrigger
  *
- * Version $Id: OneVetoTrigger.java,v 1.2 2006/06/30 18:27:53 dwharton Exp $
+ * Version $Id: OneVetoTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: January 25 2006
  *
@@ -10,13 +10,13 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.exceptions.UnknownParameterException;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is accept all incoming triggers but to veto one configured triggers.
  *
- * @version $Id: OneVetoTrigger.java,v 1.2 2006/06/30 18:27:53 dwharton Exp $
+ * @version $Id: OneVetoTrigger.java 2629 2008-02-11 05:48:36Z dglo $
  * @author shseo
  */
 public class OneVetoTrigger
@@ -42,12 +42,12 @@ public class OneVetoTrigger
     private static final int miUnconfiguredTrigId = -1;
     private static final int miConfiguredTrigId_1 = 1;
 
-    boolean mbConfigTriggerType_1 = false;
-    boolean mbConfigTriggerConfigId_1 = false;
-    boolean mbConfigSourceId_1 = false;
+    private boolean mbConfigTriggerType_1;
+    private boolean mbConfigTriggerConfigId_1;
+    private boolean mbConfigSourceId_1;
 
     private final int NUMBER_OF_REQUIRED_CONFIG_PARAMETERS = 3;
-    int miCurrentNumberOfConfigurationParameters = 0;
+    private int miCurrentNumberOfConfigurationParameters;
 
     /**
      * Create an instance of this class.

@@ -10,19 +10,18 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.monitor.PayloadBagMonitor;
-import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.payload.splicer.PayloadFactory;
 import icecube.daq.payload.impl.UTCTime8B;
+import icecube.daq.payload.splicer.PayloadFactory;
+import icecube.daq.trigger.IHitPayload;
+import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.monitor.PayloadBagMonitor;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,10 +53,16 @@ public class SimpleTriggerBag
      */
     private static final Log log = LogFactory.getLog(SimpleTriggerBag.class);
 
+    /** No 'next' value is known. */
+    private static final int NEXT_UNKNOWN = -1;
+    /** There is no 'next' value. */
+    private static final int NEXT_NONE = Integer.MIN_VALUE;
+
     /**
      * internal list of triggers
      */
-    private List payloadList = new ArrayList();
+    private List<ILoadablePayload> payloadList =
+        new ArrayList<ILoadablePayload>();
 
     /**
      * triggers that occur earlier than this time are free to be released
@@ -67,12 +72,15 @@ public class SimpleTriggerBag
     /**
      * flag to indicate we are flushing
      */
-    private boolean flushing = false;
+    private boolean flushing;
 
     /**
      * Payload monitor object.
      */
     private PayloadBagMonitor monitor;
+
+    /** The index of the 'next' value (can be NEXT_UNKNOWN or NEXT_NONE). */
+    private int nextIndex = NEXT_UNKNOWN;
 
     /**
      * default constructor
@@ -93,26 +101,54 @@ public class SimpleTriggerBag
             payload.loadPayload();
         } catch (Exception e) {
             log.error("Error loading payload", e);
+            return;
         }
+
+        // reset 'next' index
+        nextIndex = NEXT_UNKNOWN;
 
         // show this input to the monitor
         monitor.recordInput(payload);
 
         // add to internal list
         payloadList.add(payload);
-        Collections.sort(payloadList);
+        Collections.sort((List) payloadList, new SpliceableComparator());
 
         if (log.isDebugEnabled()) {
             log.debug("TriggerList has " + payloadList.size() + " payloads");
-            log.debug("   TimeGate at " + timeGate.getUTCTimeAsLong());
+            log.debug("   TimeGate at " + timeGate);
         }
 
+    }
+
+    /**
+     * Find the index of the 'next' value used by hasNext() and next().
+     * NOTE: Sets the internal 'nextIndex' value.
+     */
+    private void findNextIndex()
+    {
+        // assume we won't find anything
+        nextIndex = NEXT_NONE;
+
+        for (int i = 0; i < payloadList.size(); i++) {
+            ILoadablePayload payload = payloadList.get(i);
+
+            // if flushing, just return true
+            // otherwise check if it can be released
+            if (flushing ||
+                0 < timeGate.compareTo(getPayloadTime(payload)))
+            {
+                nextIndex = i;
+                break;
+            }
+        }
     }
 
     /**
      * method to flush the bag, allow all payloads to go free
      */
     public void flush() {
+        nextIndex = NEXT_UNKNOWN;
         flushing = true;
     }
 
@@ -132,18 +168,13 @@ public class SimpleTriggerBag
      *
      * @return true if there is a releasable trigger
      */
-    public synchronized boolean hasNext() {
-
-        // iterate over triggerList and check against timeGate
-        for (Object aPayloadList : payloadList) {
-            ILoadablePayload payload = (ILoadablePayload) aPayloadList;
-            if ((flushing) ||
-                    (0 < timeGate.compareTo(getPayloadTime(payload)))) {
-                return true;
-            }
+    public synchronized boolean hasNext()
+    {
+        if (nextIndex == NEXT_UNKNOWN) {
+            findNextIndex();
         }
 
-        return false;
+        return (nextIndex != NEXT_NONE);
     }
 
     /**
@@ -151,28 +182,34 @@ public class SimpleTriggerBag
      *
      * @return the next trigger
      */
-    public synchronized ILoadablePayload next() {
-
-        // iterate over triggerList and check against timeGate
-        Iterator iter = payloadList.iterator();
-        while (iter.hasNext()) {
-            ILoadablePayload payload = (ILoadablePayload) iter.next();
-            double timeDiff = timeGate.timeDiff_ns(getPayloadTime(payload));
-            if ( (flushing) ||
-                 (0 < timeGate.compareTo(getPayloadTime(payload))) ) {
-                iter.remove();
-                if (log.isDebugEnabled()) {
-                    log.debug("Releasing payload at " + getPayloadTime(payload).getUTCTimeAsLong()
-                             + " with timeDiff = " + timeDiff);
-                }
-                // show this output to the monitor
-                monitor.recordOutput(payload);
-
-                return payload;
-            }
+    public synchronized ILoadablePayload next()
+    {
+        if (nextIndex == NEXT_UNKNOWN) {
+            findNextIndex();
         }
 
-        return null;
+        // save and reset next index
+        int curIndex = nextIndex;
+        nextIndex = NEXT_UNKNOWN;
+
+        // if there isn't one, return null
+        if (curIndex == NEXT_NONE) {
+            return null;
+        }
+
+        ILoadablePayload payload = payloadList.remove(curIndex);
+
+        if (log.isDebugEnabled()) {
+            IUTCTime payTime = getPayloadTime(payload);
+            double timeDiff = timeGate.timeDiff_ns(payTime);
+            log.debug("Releasing payload from " + payTime +
+                      " with timeDiff = " + timeDiff);
+        }
+
+        // show this output to the monitor
+        monitor.recordOutput(payload);
+
+        return payload;
     }
 
     /**
@@ -182,7 +219,7 @@ public class SimpleTriggerBag
      */
     public void setTimeGate(IUTCTime time) {
         if (log.isDebugEnabled()) {
-            log.debug("Updating timeGate to " + time.getUTCTimeAsLong());
+            log.debug("Updating timeGate to " + time);
         }
         timeGate = time;
     }

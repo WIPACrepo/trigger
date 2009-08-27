@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java,v 1.19 2006/08/08 20:26:29 vav111 Exp $
+ * Version $Id: TriggerHandler.java 4269 2009-06-08 22:01:11Z dglo $
  *
  * Date: October 25 2004
  *
@@ -10,25 +10,36 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.io.DAQComponentOutputProcess;
+import icecube.daq.io.OutputChannel;
+import icecube.daq.payload.IByteBufferCache;
+import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IPayload;
+import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.IWriteablePayload;
+import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.payload.impl.SourceID4B;
+import icecube.daq.payload.impl.UTCTime8B;
+import icecube.daq.payload.splicer.Payload;
 import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.config.ITriggerConfig;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.monitor.ITriggerMonitor;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-import icecube.daq.payload.*;
-import icecube.daq.payload.splicer.Payload;
-import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.payload.impl.SourceID4B;
+import icecube.daq.util.DOMRegistry;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.zip.DataFormatException;
-import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,7 +47,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java,v 1.19 2006/08/08 20:26:29 vav111 Exp $
+ * @version $Id: TriggerHandler.java 4269 2009-06-08 22:01:11Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -51,42 +62,47 @@ public class TriggerHandler
     /**
      * List of defined triggers
      */
-    protected List triggerList = null;
+    private List triggerList;
 
     /**
      * Bag of triggers to issue
      */
-    protected ITriggerBag triggerBag = null;
+    private ITriggerBag triggerBag;
 
     /**
      * counts the number of processed primitives
      */
-    private int count = 0;
+    private int count;
 
     /**
-     * output destination
+     * output process
      */
-    protected IPayloadDestinationCollection payloadDestination = null;
+    private DAQComponentOutputProcess payloadOutput;
+
+    /**
+     * output channel
+     */
+    private OutputChannel outChan;
 
     /**
      * earliest thing of interest to the analysis
      */
-    private IPayload earliestPayloadOfInterest = null;
+    private IPayload earliestPayloadOfInterest;
 
     /**
      * time of last hit, used for monitoring
      */
-    private IUTCTime timeOfLastHit = null;
+    private IUTCTime timeOfLastHit;
 
     /**
      * input handler
      */
-    private ITriggerInput inputHandler = null;
+    private ITriggerInput inputHandler;
 
     /**
      * Default output factory
      */
-    protected TriggerRequestPayloadFactory outputFactory = null;
+    private TriggerRequestPayloadFactory outputFactory;
 
     /**
      * SourceId of this TriggerHandler.
@@ -96,13 +112,21 @@ public class TriggerHandler
     /**
      * Monitor object.
      */
-    protected TriggerHandlerMonitor monitor;
+    private TriggerHandlerMonitor monitor;
+
+    /**
+     * DOMRegistry
+     */
+    private DOMRegistry domRegistry;
+
+    /** Outgoing byte buffer cache. */
+    private IByteBufferCache outCache;
 
     /**
      * Default constructor
      */
     public TriggerHandler() {
-        this(new SourceID4B(4000));
+        this(new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
     public TriggerHandler(ISourceID sourceId) {
@@ -122,14 +146,22 @@ public class TriggerHandler
         timeOfLastHit = null;
         inputHandler = new TriggerInput();
         triggerList = new ArrayList();
-        triggerBag = new TriggerBag(sourceId);
-        triggerBag.setPayloadFactory(outputFactory);
+
+        triggerBag = createTriggerBag();
 
         monitor = new TriggerHandlerMonitor();
         PayloadBagMonitor triggerBagMonitor = new PayloadBagMonitor();
         triggerBag.setMonitor(triggerBagMonitor);
         monitor.setTriggerBagMonitor(triggerBagMonitor);
+    }
 
+    protected ITriggerBag createTriggerBag()
+    {
+        ITriggerBag bag = new TriggerBag(sourceId);
+        if (outputFactory != null) {
+            bag.setPayloadFactory(outputFactory);
+        }
+        return bag;
     }
 
     /**
@@ -227,11 +259,16 @@ public class TriggerHandler
     }
 
     /**
-     * sets payload destination
-     * @param payloadDestination destination of payloads
+     * sets payload output
+     * @param payloadOutput destination of payloads
      */
-    public void setPayloadDestinationCollection(IPayloadDestinationCollection payloadDestination) {
-        this.payloadDestination = payloadDestination;
+    public void setPayloadOutput(DAQComponentOutputProcess payloadOutput) {
+        this.payloadOutput = payloadOutput;
+    }
+
+    public DAQComponentOutputProcess getPayloadOutput()
+    {
+        return payloadOutput;
     }
 
     /**
@@ -290,7 +327,7 @@ public class TriggerHandler
                     try {
                         trigger.runTrigger(hit);
                     } catch (TriggerException e) {
-                        log.error("Exception while running trigger: " + e);
+                        log.error("Exception while running trigger", e);
                     }
                 }
 
@@ -298,32 +335,36 @@ public class TriggerHandler
                 try {
                     ((ILoadablePayload) nextPayload).loadPayload();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("Couldn't load payload", e);
                 } catch (DataFormatException e) {
-                    e.printStackTrace();
+                    log.error("Couldn't load payload", e);
                 }
                 ITriggerRequestPayload tPayload = (ITriggerRequestPayload) nextPayload;
-                int sourceId;
+                int srcId;
                 if (tPayload.getSourceID() != null) {
-                    sourceId = tPayload.getSourceID().getSourceID();
+                    srcId = tPayload.getSourceID().getSourceID();
                 } else {
                     if (tPayload.getPayloadLength() == 0 &&
                         tPayload.getPayloadTimeUTC() == null &&
-                        ((Payload) tPayload).getPayloadBacking() == null)
+                        ((IPayload) tPayload).getPayloadBacking() == null)
                     {
                         log.error("Ignoring recycled payload");
                     } else {
                         log.error("Unexpected null SourceID in payload (len=" +
                                   tPayload.getPayloadLength() + ", time=" +
                                   (tPayload.getPayloadTimeUTC() == null ?
-                                   "null" : "" + tPayload.getPayloadTimeUTC().getUTCTimeAsLong()) +
-                                   ", buf=" + ((Payload) tPayload).getPayloadBacking());
+                                   "null" : "" + tPayload.getPayloadTimeUTC()) +
+                                   ", buf=" +
+                                  ((IPayload) tPayload).getPayloadBacking() +
+                                  ")");
                     }
 
-                    sourceId = -1;
+                    srcId = -1;
                 }
-                if(sourceId == SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID
-                    || sourceId == SourceIdRegistry.STRINGPROCESSOR_SOURCE_ID){
+                if(srcId == SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID
+                    || srcId == SourceIdRegistry.STRINGPROCESSOR_SOURCE_ID){
+                    count++;
+
                     // loop over triggers
                     Iterator triggerIterator = triggerList.iterator();
                     while (triggerIterator.hasNext()) {
@@ -331,12 +372,12 @@ public class TriggerHandler
                         try {
                             trigger.runTrigger(tPayload);
                         } catch (TriggerException e) {
-                            log.error("Exception while running trigger: " + e);
+                            log.error("Exception while running trigger", e);
                         }
                     }
-                }else if (sourceId != -1) {
+                }else if (srcId != -1) {
 
-                    log.error("SourceID " + sourceId + " should not send TriggerRequestPayloads!");
+                    log.error("SourceID " + srcId + " should not send TriggerRequestPayloads!");
                 }
             }else{
                     log.warn("TriggerHandler only knows about either hitPayloads or TriggerRequestPayloads!");
@@ -363,6 +404,16 @@ public class TriggerHandler
      */
     public TriggerHandlerMonitor getMonitor() {
         return monitor;
+    }
+
+    /**
+     * Get the input handler
+     *
+     * @return a trigger input handler
+     */
+    public ITriggerInput getInputHandler()
+    {
+        return inputHandler;
     }
 
     /**
@@ -395,20 +446,31 @@ public class TriggerHandler
      *   if any of those overlap, they are merged
      */
     public void issueTriggers() {
+        if (null == payloadOutput) {
+            throw new RuntimeException("PayloadOutput has not been set!");
+        }
+
 
         if (log.isDebugEnabled()) {
-            log.debug("Trigger Bag contains " + triggerBag.size() + " triggers");
+            log.debug("Trigger Bag contains " + triggerBag.size() +
+                      " triggers");
         }
 
         // update earliest time of interest
         setEarliestTime();
 
         while (triggerBag.hasNext()) {
-            IPayload payload = triggerBag.next();
+            IWriteablePayload payload = (IWriteablePayload) triggerBag.next();
+
+            if (payload == null) {
+                log.error("TriggerBag returned null next payload");
+                break;
+            }
 
             if (payload.getPayloadInterfaceType() == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
-                TriggerRequestPayload trigger = (TriggerRequestPayload) payload;
                 if (log.isDebugEnabled()) {
+                    ITriggerRequestPayload trigger = (ITriggerRequestPayload) payload;
+
                     IUTCTime firstTime = trigger.getFirstTimeUTC();
                     IUTCTime lastTime = trigger.getLastTimeUTC();
 
@@ -416,35 +478,65 @@ public class TriggerHandler
                     try {
                         nSubPayloads = trigger.getPayloads().size();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("Couldn't get number of subpayloads", e);
                     }
 
                     if (log.isDebugEnabled()) {
+                        String trType;
                         if (0 > trigger.getTriggerType()) {
-                            log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
-                                      + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " triggers");
+                            trType = "triggers";
                         } else {
-                            log.debug("Issue trigger: extended event time = " + firstTime.getUTCTimeAsLong() + " to "
-                                      + lastTime.getUTCTimeAsLong() + " and contains " + nSubPayloads + " hits");
+                            trType = "hits";
                         }
+
+                        log.debug("Issue trigger: extended event time = " +
+                                  firstTime + " to " + lastTime +
+                                  " and contains " + nSubPayloads + " " +
+                                  trType);
                     }
                 }
             }
 
-            // issue the trigger
-            if (null == payloadDestination) {
-                log.error("PayloadDestination has not been set!");
-                throw new RuntimeException("PayloadDestination has not been set!");
+            int bufLen = payload.getPayloadLength();
+
+            // allocate ByteBuffer
+            ByteBuffer trigBuf;
+            if (outCache != null) {
+                trigBuf = outCache.acquireBuffer(bufLen);
+//System.err.println("Alloc "+trigBuf.capacity()+" bytes from "+outCache);
             } else {
-                try {
-                    payloadDestination.writePayload((Payload) payload);
-                } catch (IOException e) {
-                    log.error("Failed to write triggers");
-                    throw new RuntimeException(e);
-                }
-                // now recycle it
-                ((Payload) payload).recycle();
+                trigBuf = ByteBuffer.allocate(bufLen);
+System.err.println("Unattached "+SourceIdRegistry.getDAQNameFromISourceID(sourceId)+" "+trigBuf.capacity()+" bytes");
             }
+
+            // write trigger to a ByteBuffer
+            try {
+                ((IWriteablePayload) payload).writePayload(false, 0, trigBuf);
+            } catch (IOException ioe) {
+                log.error("Couldn't create payload", ioe);
+                trigBuf = null;
+            }
+
+            // if we haven't already, get the output channel
+            if (outChan == null) {
+                if (payloadOutput == null) {
+                    log.error("Trigger destination has not been set");
+                } else {
+                    outChan = payloadOutput.getChannel();
+                    if (outChan == null) {
+                        throw new Error("Output channel has not been set in " +
+                                        payloadOutput);
+                    }
+                }
+            }
+
+            //--ship the trigger to its destination
+            if (trigBuf != null) {
+                outChan.receiveByteBuffer(trigBuf);
+            }
+
+            // now recycle it
+            payload.recycle();
 
         }
 
@@ -461,7 +553,7 @@ public class TriggerHandler
     /**
      * sets the earliest overall time of interest by inspecting each trigger
      */
-    protected void setEarliestTime() {
+    private void setEarliestTime() {
 
         IUTCTime earliestTimeOverall = new UTCTime8B(Long.MAX_VALUE);
         IPayload earliestPayloadOverall = null;
@@ -491,4 +583,29 @@ public class TriggerHandler
 
     }
 
+    public void setDOMRegistry(DOMRegistry registry) {
+	domRegistry = registry;
+        DomSetFactory.setDomRegistry(registry);
+    }
+
+    public DOMRegistry getDOMRegistry() {
+	return domRegistry;
+    }
+
+    public void setOutputFactory(TriggerRequestPayloadFactory factory)
+    {
+        outputFactory = factory;
+        if (outputFactory != null) {
+            triggerBag.setPayloadFactory(outputFactory);
+        }
+    }
+
+    /**
+     * Set the outgoing payload buffer cache.
+     * @param byte buffer cache manager
+     */
+    public void setOutgoingBufferCache(IByteBufferCache cache)
+    {
+        outCache = cache;
+    }
 }

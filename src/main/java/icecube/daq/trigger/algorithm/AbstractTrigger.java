@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java,v 1.27 2006/09/14 20:35:13 toale Exp $
+ * Version $Id: AbstractTrigger.java 3965 2009-03-16 16:47:29Z toale $
  *
  * Date: August 19 2005
  *
@@ -10,39 +10,36 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.trigger.config.ITriggerConfig;
-import icecube.daq.trigger.config.TriggerReadout;
-import icecube.daq.trigger.config.TriggerParameter;
-import icecube.daq.trigger.config.DomSet;
-import icecube.daq.trigger.config.DomSetFactory;
-import icecube.daq.trigger.control.ITriggerControl;
-import icecube.daq.trigger.control.ITriggerHandler;
-import icecube.daq.trigger.control.DummyPayload;
-import icecube.daq.trigger.control.HitFilter;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
-import icecube.daq.trigger.IReadoutRequestElement;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.monitor.ITriggerMonitor;
-import icecube.daq.trigger.monitor.TriggerMonitor;
-import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.splicer.Payload;
-import icecube.daq.trigger.exceptions.UnknownParameterException;
+import icecube.daq.trigger.IHitPayload;
+import icecube.daq.trigger.IReadoutRequest;
+import icecube.daq.trigger.IReadoutRequestElement;
+import icecube.daq.trigger.config.ITriggerConfig;
+import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.config.TriggerReadout;
+import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.trigger.control.HitFilter;
+import icecube.daq.trigger.control.ITriggerControl;
+import icecube.daq.trigger.control.ITriggerHandler;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.exceptions.UnknownParameterException;
+import icecube.daq.trigger.impl.TriggerRequestPayload;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.trigger.monitor.ITriggerMonitor;
+import icecube.daq.trigger.monitor.TriggerMonitor;
 import icecube.icebucket.monitor.ScalarFlowMonitor;
 import icecube.icebucket.monitor.simple.ScalarFlowMonitorImpl;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Vector;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java,v 1.27 2006/09/14 20:35:13 toale Exp $
+ * @version $Id: AbstractTrigger.java 3965 2009-03-16 16:47:29Z toale $
  * @author pat
  */
 public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor
@@ -91,16 +88,16 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
     protected int triggerConfigId;
     protected ISourceID sourceId;
     protected String triggerName;
-    protected List readouts = new ArrayList();
-    protected List parameters = new ArrayList();
+    private List readouts = new ArrayList();
+    private List parameters = new ArrayList();
 
-    protected IPayload earliestPayloadOfIterest = null;
+    private IPayload earliestPayloadOfIterest = null;
     private ITriggerHandler triggerHandler = null;
     protected TriggerRequestPayloadFactory triggerFactory = new TriggerRequestPayloadFactory();
     protected boolean onTrigger;
     protected int triggerCounter = 0;
-    protected int sentTriggerCounter = 0;
-    protected int printMod = 1000;
+    private int sentTriggerCounter = 0;
+    private int printMod = 1000;
 
     protected int triggerPrescale = 0;
     protected int domSetId = -1;
@@ -269,6 +266,13 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
      */
     public void setTriggerHandler(ITriggerHandler triggerHandler) {
         this.triggerHandler = triggerHandler;
+
+	// pass DOMRegistry to hitFilter
+	hitFilter.setDomRegistry(triggerHandler.getDOMRegistry());
+    }
+
+    public ITriggerHandler getTriggerHandler() {
+	return triggerHandler;
     }
 
     public void setTriggerFactory(TriggerRequestPayloadFactory triggerFactory) {
@@ -318,7 +322,7 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
      */
     protected void reportTrigger(ILoadablePayload payload) {
         if (null == triggerHandler) {
-            log.error("TriggerHandler was not set!");
+            throw new Error("TriggerHandler was not set!");
         }
         triggerCounter++;
         if ((triggerPrescale == 0) || ((triggerCounter % triggerPrescale) == 0)) {
@@ -356,11 +360,9 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
         switch (type) {
             case IReadoutRequestElement.READOUT_TYPE_GLOBAL:
                 if (null != stringId) {
-                    log.warn("ReadoutType = " + type + " but StringId is not NULL.");
                     stringId = null;
                 }
                 if (null != domId) {
-                    log.warn("ReadoutType = " + type + " but DomId is not NULL.");
                     domId = null;
                 }
                 timeMinus = firstTime.getOffsetUTCTime(-readoutConfig.getMinus());
@@ -368,11 +370,9 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
                 break;
             case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL:
                 if (null != stringId) {
-                    log.warn("ReadoutType = " + type + " but StringId is not NULL.");
                     stringId = null;
                 }
                 if (null != domId) {
-                    log.warn("ReadoutType = " + type + " but DomId is not NULL.");
                     domId = null;
                 }
                 if (sourceId.getSourceID() == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
@@ -390,7 +390,6 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
                     log.error("ReadoutType = " + type + " but StringId is NULL!");
                 }
                 if (null != domId) {
-                    log.warn("ReadoutType = " + type + " but DomId is not NULL.");
                     domId = null;
                 }
                 if (sourceId.getSourceID() == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
@@ -421,11 +420,9 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
                 break;
             case IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL:
                 if (null != stringId) {
-                    log.warn("ReadoutType = " + type + " but StringId is not NULL.");
                     stringId = null;
                 }
                 if (null != domId) {
-                    log.warn("ReadoutType = " + type + " but DomId is not NULL.");
                     domId = null;
                 }
                 if (sourceId.getSourceID() == SourceIdRegistry.INICE_TRIGGER_SOURCE_ID) {
@@ -463,9 +460,9 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Creating readout: Type = " + type);
-            log.debug("   FirstTime = " + timeMinus.getUTCTimeAsLong()/10.0
-                      + "  LastTime = " + timePlus.getUTCTimeAsLong()/10.0);
+            log.debug("Creating readout: Type = " + type +
+                      " FirstTime = " + timeMinus.longValue()/10.0 +
+                      " LastTime = " + timePlus.longValue()/10.0);
         }
 
         return TriggerRequestPayloadFactory.createReadoutRequestElement(type, timeMinus, timePlus, domId, stringId);
@@ -480,16 +477,19 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
      */
     protected void formTrigger(List hits, IDOMID dom, ISourceID string) {
 
+        if (null == triggerFactory) {
+            throw new Error("TriggerFactory is not set!");
+        }
+
         // get times (this assumes that the hits are time-ordered)
         int numberOfHits = hits.size();
         IUTCTime firstTime = ((IHitPayload) hits.get(0)).getPayloadTimeUTC();
         IUTCTime lastTime = ((IHitPayload) hits.get(numberOfHits-1)).getPayloadTimeUTC();
 
-        if ((log.isDebugEnabled() || log.isInfoEnabled()) 
-	    && (triggerCounter % printMod == 0)) {
+        if (log.isInfoEnabled() && (triggerCounter % printMod == 0)) {
             log.info("New Trigger " + triggerCounter + " from " + triggerName + " includes " + numberOfHits
                      + " hits:  First time = "
-                     + firstTime.getUTCTimeAsLong() + " Last time = " + lastTime.getUTCTimeAsLong());
+                     + firstTime + " Last time = " + lastTime);
         }
 
         // set earliest payload of interest to 1/10 ns after the last hit
@@ -509,9 +509,6 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
                                                                                            readoutElements);
 
         // make payload
-        if (null == triggerFactory) {
-            log.error("TriggerFactory is not set!");
-        }
         TriggerRequestPayload triggerPayload
                 = (TriggerRequestPayload) triggerFactory.createPayload(triggerCounter,
                                                                        triggerType,
@@ -531,8 +528,11 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
      */
     protected void formTrigger(IUTCTime time) {
 
-        if (log.isDebugEnabled() ||
-            (log.isInfoEnabled() && (triggerCounter % printMod == 0)) ) {
+        if (null == triggerFactory) {
+            throw new Error("TriggerFactory is not set!");
+        }
+
+        if (log.isInfoEnabled() && (triggerCounter % printMod == 0)) {
             log.info("New Trigger " + triggerCounter + " from " + triggerName);
         }
 
@@ -548,9 +548,6 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
                                                                                            readoutElements);
 
         // make payload
-        if (null == triggerFactory) {
-            log.error("TriggerFactory is not set!");
-        }
         TriggerRequestPayload triggerPayload
                 = (TriggerRequestPayload) triggerFactory.createPayload(triggerCounter,
                                                                        triggerType,
@@ -581,7 +578,7 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
         buffer.append(triggerName + ":\n");
         buffer.append("\tTriggerType     = " + triggerType + "\n");
         buffer.append("\tTriggerConfigId = " + triggerConfigId + "\n");
-        buffer.append("\tSourceId        = " + sourceId.getSourceID() + "\n");
+        buffer.append("\tSourceId        = " + sourceId + "\n");
         if (!parameters.isEmpty()) {
             buffer.append("\tParameters:\n");
             Iterator iter = parameters.iterator();
@@ -602,12 +599,20 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
     /**
      * method for retrieving the hit type from the trigger mode byte
      * @param hit hit
-     * @return hit type (integer in range 0 to 3)
+     * @return hit type (integer in range 1 to 4)
+     * <table>
+     * <tr><th>Hit Type ID</th><th>Description</th></tr>
+     * <tr><td>0</td><td>Test pattern trigger (engineering fmt)</td></tr>
+     * <tr><td>1</td><td>Forced trigger</td></tr>
+     * <tr><td>2</td><td>SPE / MPE trigger</td></td></tr>
+     * <tr><td>3</td><td>Flasher trigger</td></td></tr>
+     * <tr><td>4</td><td>IceTop minimum bias trigger</td></tr>
+     * </table>
+     * <br>NOTE: Only the low 4 bits of the trigger type are returned.
      */
     public static int getHitType(IHitPayload hit) {
 
-        // clear all bits except 1..0
-        return (hit.getTriggerType() & 0x03);
+        return hit.getTriggerType() & 0xf;
 
     }
 
@@ -643,7 +648,6 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
     }
 
     protected void configHitFilter(int domSetId) {
-        //DomSet domSet = DomSetFactory.getDomSet(domSetId);
         hitFilter = new HitFilter(domSetId);
     }
 

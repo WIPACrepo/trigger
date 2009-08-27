@@ -1,31 +1,25 @@
 package icecube.daq.trigger.component;
 
 import icecube.daq.io.SpliceablePayloadReader;
-
+import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQCompServer;
 import icecube.daq.juggler.component.DAQComponent;
 import icecube.daq.juggler.component.DAQConnector;
-import icecube.daq.juggler.component.DAQCompException;
-
 import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
-
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.VitreousBufferCache;
-
 import icecube.daq.payload.splicer.Payload;
-
+import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.SplicedAnalysis;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
-import icecube.daq.splicer.SplicerImpl;
 import icecube.daq.splicer.SplicerListener;
 
 import java.io.IOException;
-
 import java.util.Iterator;
 import java.util.List;
 
@@ -79,23 +73,6 @@ class DevNullAnalysis
 
                 splicer.truncate((Spliceable) lastObj);
             }
-        }
-    }
-
-    /**
-     * Returns the {@link SpliceableFactory} that should be used to create the
-     * {@link Spliceable Spliceable} objects used by this
-     * object.
-     *
-     * @return the SpliceableFactory that creates Spliceable objects.
-     */
-    public SpliceableFactory getFactory()
-    {
-        try {
-            throw new Error("Unimplemented");
-        } catch (Error err) {
-            LOG.error("Unimplemented", err);
-            throw err;
         }
     }
 
@@ -173,9 +150,7 @@ class DevNullAnalysis
             try {
                 pay.recycle();
             } catch (Exception ex) {
-                LOG.error("Couldn't recycle payload " +
-                          icecube.daq.payload.DebugDumper.toString(pay),
-                          ex);
+                LOG.error("Couldn't recycle payload " + pay, ex);
             }
         }
     }
@@ -197,7 +172,8 @@ public class TriggerShell
         super(name, id);
 
         // Create the buffer cache and the payload factory
-        IByteBufferCache bufferCache = new VitreousBufferCache();
+        IByteBufferCache bufferCache =
+            new VitreousBufferCache(name + "#" + id);
         addCache(bufferCache);
 
         MasterPayloadFactory masterFactory =
@@ -206,15 +182,10 @@ public class TriggerShell
         addMBean("jvm", new MemoryStatistics());
         addMBean("system", new SystemStatistics());
 
-        // Now differentiate
-        String inputType, outputType;
-
         DevNullAnalysis analysis = new DevNullAnalysis();
 
-        inputType = DAQConnector.TYPE_STRING_HIT;
-
         // Create splicer and introduce it to the trigger manager
-        Splicer splicer = new SplicerImpl(analysis);
+        Splicer splicer = new HKN1Splicer(analysis);
         analysis.setSplicer(splicer);
 
         // Create and register io engines
@@ -227,12 +198,26 @@ public class TriggerShell
             System.exit(1);
             inputEngine = null;
         }
-        addMonitoredEngine(inputType, inputEngine);
+        addMonitoredEngine(DAQConnector.TYPE_STRING_HIT, inputEngine);
+    }
+
+    public String getVersionInfo()
+    {
+        return "$Id$";
     }
 
     public static void main(String[] args)
         throws DAQCompException
     {
-        new DAQCompServer(new TriggerShell(COMPONENT_NAME, COMPONENT_ID), args);
+        DAQCompServer srvr;
+        try {
+            srvr = new DAQCompServer(new TriggerShell(COMPONENT_NAME,
+                                                      COMPONENT_ID), args);
+        } catch (IllegalArgumentException ex) {
+            System.err.println(ex.getMessage());
+            System.exit(1);
+            return; // without this, compiler whines about uninitialized 'srvr'
+        }
+        srvr.startServing();
     }
 }

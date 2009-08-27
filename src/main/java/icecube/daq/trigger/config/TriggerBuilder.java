@@ -1,7 +1,7 @@
 /*
  * class: TriggerBuilder
  *
- * Version $Id: TriggerBuilder.java,v 1.18 2006/08/08 20:26:29 vav111 Exp $
+ * Version $Id: TriggerBuilder.java 2629 2008-02-11 05:48:36Z dglo $
  *
  * Date: August 18 2005
  *
@@ -10,28 +10,27 @@
 
 package icecube.daq.trigger.config;
 
+import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.trigger.config.triggers.ActiveTriggers;
-import icecube.daq.trigger.config.triggers.TriggerConfigType;
 import icecube.daq.trigger.config.triggers.ParameterConfigType;
 import icecube.daq.trigger.config.triggers.ReadoutConfigType;
+import icecube.daq.trigger.config.triggers.TriggerConfigType;
+import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.exceptions.UnknownParameterException;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.io.InputStream;
-
-import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.exceptions.IllegalParameterValueException;
-import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.payload.ISourceID;
-
 /**
  * This class builds triggers from a trigger configuration object.
  *
- * @version $Id: TriggerBuilder.java,v 1.18 2006/08/08 20:26:29 vav111 Exp $
+ * @version $Id: TriggerBuilder.java 2629 2008-02-11 05:48:36Z dglo $
  * @author pat
  */
 public class TriggerBuilder

@@ -1,24 +1,26 @@
 package icecube.daq.trigger.monitor;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import icecube.icebucket.logging.LoggingConsumer;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-import icecube.daq.trigger.IReadoutRequest;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.splicer.Payload;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.payload.impl.UTCTime8B;
+import icecube.daq.payload.splicer.Payload;
+import icecube.daq.trigger.IReadoutRequest;
+import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.icebucket.logging.LoggingConsumer;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.io.IOException;
-import java.io.DataOutputStream;
+import java.nio.ByteBuffer;
 import java.util.Random;
 import java.util.Vector;
-import java.nio.ByteBuffer;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -105,7 +107,9 @@ public class AmandaSocketSimulator
                         log.error("Error writing to output stream: ", e);
                         break;
                     }
-                    log.info("Sent " + nSent);
+                    if (log.isInfoEnabled()) {
+                        log.info("Sent " + nSent);
+                    }
                     nSent++;
                     try {
                         Thread.sleep(waitTime);
@@ -149,11 +153,12 @@ public class AmandaSocketSimulator
      * Generate the next TriggerRequestPayload
      * @return a trigger payload
      */
-    private TriggerRequestPayload generateTrigger() {
+    private ITriggerRequestPayload generateTrigger() {
 
         int triggerType = 0;
         int configId = generateTriggerMask();
-        ISourceID sourceId = new SourceID4B(10000);
+        ISourceID sourceId =
+            new SourceID4B(SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID);
         long nextTime = lastTime + generateDelta();
         IUTCTime time = new UTCTime8B(nextTime);
         Vector payloads = new Vector();
@@ -163,17 +168,19 @@ public class AmandaSocketSimulator
         count++;
         lastTime = nextTime;
 
-        return (TriggerRequestPayload) trigger;
+        return (ITriggerRequestPayload) trigger;
     }
 
     private void fillBuffer() {
         buffer.clear();
         for (int i=0; i<128; i++) {
             int offset = i*72;
-            TriggerRequestPayload trigger = generateTrigger();
-            log.info("Trigger size = " + trigger.getPayloadLength());
+            ITriggerRequestPayload trigger = generateTrigger();
+            if (log.isInfoEnabled()) {
+                log.info("Trigger size = " + trigger.getPayloadLength());
+            }
             try {
-                trigger.writePayload(offset, buffer);
+                trigger.writePayload(false, offset, buffer);
             } catch (IOException e) {
                 log.error("Error writing to buffer: ", e);
             }

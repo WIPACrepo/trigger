@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java,v 1.27 2006/09/14 20:35:13 toale Exp $
+ * Version $Id: SimpleMajorityTrigger.java 2656 2008-02-15 23:20:07Z dglo $
  *
  * Date: August 19 2005
  *
@@ -10,32 +10,31 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.exceptions.TimeOutOfOrderException;
-import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.exceptions.IllegalParameterValueException;
-import icecube.daq.trigger.config.TriggerParameter;
-import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.trigger.IHitPayload;
+import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.trigger.exceptions.IllegalParameterValueException;
+import icecube.daq.trigger.exceptions.TimeOutOfOrderException;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.exceptions.UnknownParameterException;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Iterator;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
-
+import org.apache.commons.logging.LogFactory;
 
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java,v 1.27 2006/09/14 20:35:13 toale Exp $
+ * @version $Id: SimpleMajorityTrigger.java 2656 2008-02-15 23:20:07Z dglo $
  * @author pat
  */
-public class SimpleMajorityTrigger extends AbstractTrigger
+public final class SimpleMajorityTrigger extends AbstractTrigger
 {
 
     /**
@@ -122,7 +121,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
             log.info("TriggerName set to " + super.triggerName);
         }
     }
-    
+
     /*
     *
     * Methods of ITriggerControl
@@ -160,11 +159,11 @@ public class SimpleMajorityTrigger extends AbstractTrigger
         // check hit filter
         if (!hitFilter.useHit(hit)) {
             if (log.isDebugEnabled()) {
-                log.debug("Hit from DOM " + hit.getDOMID().getDomIDAsString() + " not in DomSet");
+                log.debug("Hit from DOM " + hit.getDOMID() + " not in DomSet");
             }
             return;
         }
-        
+
         IUTCTime hitTimeUTC = hit.getHitTimeUTC();
 
         /*
@@ -181,7 +180,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
 
             if (log.isDebugEnabled()) {
                 log.debug("This is the first hit, initializing...");
-                log.debug("slidingTimeWindowStart set to " + slidingTimeWindow.startTime().getUTCTimeAsLong());
+                log.debug("slidingTimeWindowStart set to " + slidingTimeWindow.startTime());
             }
 
         }
@@ -191,7 +190,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
         else {
 
             if (log.isDebugEnabled()) {
-                log.debug("Processing hit at time " + hitTimeUTC.getUTCTimeAsLong());
+                log.debug("Processing hit at time " + hitTimeUTC);
             }
 
             /*
@@ -202,25 +201,38 @@ public class SimpleMajorityTrigger extends AbstractTrigger
                 log.error("hitTimeUTC is null!!!");
             } else if (slidingTimeWindow.startTime() == null) {
                 log.error("SlidingTimeWindow startTime is null!!!");
-                for (int i=0; i<slidingTimeWindow.size(); i++) {
-                    IHitPayload h = (IHitPayload) slidingTimeWindow.hits.get(i);
-                    if (h == null) {
+                int i = 0;
+                Iterator it = slidingTimeWindow.hits.iterator();
+
+                while ( it.hasNext() )
+                {
+                    i++;
+                    IHitPayload h = (IHitPayload) it.next();
+                    if (h == null)
+                    {
                         log.error("  Hit " + i + " is null");
-                    } else {
-                        if (h.getPayloadTimeUTC() == null) {
+                    }
+                    else
+                    {
+                        if (h.getPayloadTimeUTC() == null)
+                        {
                             log.error("  Hit " + i + " has a null time");
-                        } else {
-                            log.error("  Hit " + i + " has time = " + h.getPayloadTimeUTC().getUTCTimeAsLong());
+                        }
+                        else
+                        {
+                            log.error("  Hit " + i + " has time = " + h.getPayloadTimeUTC());
                         }
                     }
                 }
             }
-            if (hitTimeUTC.compareTo(slidingTimeWindow.startTime()) < 0) {
-                throw new TimeOutOfOrderException("Hit comes before start of sliding time window: Window is at "
-                                                                                 + slidingTimeWindow.startTime().getUTCTimeAsLong() + " Hit is at "
-                                                                                 + hitTimeUTC.getUTCTimeAsLong() + " DOMId = "
-                                                                                 + hit.getDOMID().getDomIDAsString());
-            }
+
+            if (hitTimeUTC.compareTo(slidingTimeWindow.startTime()) < 0)
+                throw new TimeOutOfOrderException(
+                        "Hit comes before start of sliding time window: Window is at "
+                        + slidingTimeWindow.startTime() + " Hit is at "
+                        + hitTimeUTC + " DOMId = "
+                        + hit.getDOMID());
+
 
             /*
              * Hit falls within the slidingTimeWindow
@@ -258,7 +270,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
 
                         if (log.isDebugEnabled()) {
                             log.debug("Trigger is already on. Changing triggerWindowStop to "
-                                      + getTriggerWindowStop().getUTCTimeAsLong());
+                                      + getTriggerWindowStop());
                         }
 
                     } else {
@@ -270,8 +282,8 @@ public class SimpleMajorityTrigger extends AbstractTrigger
                         if (log.isDebugEnabled()) {
                             log.debug("Trigger is now on, numberOfHitsInTriggerWindow = "
                                       + numberOfHitsInTriggerWindow + " triggerWindowStart = "
-                                      + getTriggerWindowStart().getUTCTimeAsLong() + " triggerWindowStop = "
-                                      + getTriggerWindowStop().getUTCTimeAsLong());
+                                      + getTriggerWindowStart() + " triggerWindowStop = "
+                                      + getTriggerWindowStop());
                         }
 
                     }
@@ -300,7 +312,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
 
                     if (log.isDebugEnabled()) {
                         log.debug("numberOfHitsInSlidingTimeWindow is now " + slidingTimeWindow.size()
-                                  + " slidingTimeWindowStart is now " + slidingTimeWindow.startTime().getUTCTimeAsLong());
+                                  + " slidingTimeWindowStart is now " + slidingTimeWindow.startTime());
                     }
 
                 }
@@ -328,7 +340,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
                     if (log.isDebugEnabled()) {
                         log.debug("Hit still outside slidingTimeWindow, start a new one "
                                   + "numberOfHitsInSlidingTimeWindow = " + slidingTimeWindow.size()
-                                  + " slidingTimeWindowStart = " + slidingTimeWindow.startTime().getUTCTimeAsLong());
+                                  + " slidingTimeWindowStart = " + slidingTimeWindow.startTime());
                     }
 
                 }
@@ -366,7 +378,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
                         for (int i=0; i<hitsWithinTriggerWindow.size(); i++) {
                             IHitPayload h = (IHitPayload) hitsWithinTriggerWindow.get(i);
                             if (slidingTimeWindow.contains(h)) {
-                                log.error("Hit at time " + h.getPayloadTimeUTC().getUTCTimeAsLong()
+                                log.error("Hit at time " + h.getPayloadTimeUTC()
                                           + " is part of new trigger but is still in SlidingTimeWindow");
                             }
                         }
@@ -402,15 +414,14 @@ public class SimpleMajorityTrigger extends AbstractTrigger
      * and no further calls to runTrigger.
      */
     public void flush() {
+        boolean formLast = true;
+
         // see if we're above threshold, if so form a trigger
         if (onTrigger) {
             if (log.isDebugEnabled()) {
                 log.debug("Last Trigger is on, numberOfHitsInTriggerWindow = "
                           + numberOfHitsInTriggerWindow);
             }
-
-            // form last trigger
-            formTrigger(hitsWithinTriggerWindow, null, null);
         }
         //see if TimeWindow has enough hits to form a trigger before an out of bounds hit
         else if(slidingTimeWindow.aboveThreshold()) {
@@ -420,14 +431,21 @@ public class SimpleMajorityTrigger extends AbstractTrigger
 
             if (log.isDebugEnabled()) {
                 log.debug(" Last Trigger is now on, numberOfHitsInTriggerWindow = "
-                + numberOfHitsInTriggerWindow + " triggerWindowStart = "
-                + getTriggerWindowStart().getUTCTimeAsLong() + " triggerWindowStop = "
-                + getTriggerWindowStop().getUTCTimeAsLong());
+                + numberOfHitsInTriggerWindow
+                + (numberOfHitsInTriggerWindow == 0 ? "" :
+                   " triggerWindowStart = "
+                   + getTriggerWindowStart() + " triggerWindowStop = "
+                   + getTriggerWindowStop()));
             }
+        }
+        else {
+            formLast = false;
+        }
 
-            // form last trigger
+        // form last trigger
+        if (hitsWithinTriggerWindow.size() > 0 && formLast) {
             formTrigger(hitsWithinTriggerWindow, null, null);
-        }    
+        }
 
         // todo: Pat is this right?
         reset();
@@ -494,7 +512,7 @@ public class SimpleMajorityTrigger extends AbstractTrigger
         configTimeWindow = false;
     }
 
-    private class SlidingTimeWindow {
+    private final class SlidingTimeWindow {
 
         private LinkedList hits;
 

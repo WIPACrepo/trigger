@@ -3,14 +3,10 @@ package icecube.daq.trigger.component;
 import icecube.daq.common.DAQCmdInterface;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQCompServer;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class IniceTriggerComponent
     extends TriggerComponent
 {
-
-    private static final Log log = LogFactory.getLog(IniceTriggerComponent.class);
 
     private static final String COMPONENT_NAME = DAQCmdInterface.DAQ_INICE_TRIGGER;
     private static final int COMPONENT_ID = 0;
@@ -20,7 +16,15 @@ public class IniceTriggerComponent
     }
 
     public static void main(String[] args) throws DAQCompException {
-        new DAQCompServer(new IniceTriggerComponent(), args);
+        DAQCompServer srvr;
+        try {
+            srvr = new DAQCompServer(new IniceTriggerComponent(), args);
+        } catch (IllegalArgumentException ex) {
+            System.err.println(ex.getMessage());
+            System.exit(1);
+            return; // without this, compiler whines about uninitialized 'srvr'
+        }
+        srvr.startServing();
     }
 
 }

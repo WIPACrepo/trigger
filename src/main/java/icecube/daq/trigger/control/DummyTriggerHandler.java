@@ -10,18 +10,29 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.IReadoutRequestElement;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-import icecube.daq.payload.*;
+import icecube.daq.io.DAQComponentOutputProcess;
+import icecube.daq.io.OutputChannel;
+import icecube.daq.payload.IByteBufferCache;
+import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IPayload;
+import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.IWriteablePayload;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID4B;
+import icecube.daq.trigger.IHitPayload;
+import icecube.daq.trigger.IReadoutRequest;
+import icecube.daq.trigger.IReadoutRequestElement;
+import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.trigger.config.DomSetFactory;
+import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
+import icecube.daq.util.DOMRegistry;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Vector;
-import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,17 +55,22 @@ public class DummyTriggerHandler
     /**
      * Bag of triggers to issue
      */
-    protected ITriggerBag triggerBag = null;
+    private ITriggerBag triggerBag;
 
     /**
-     * output destination
+     * output process
      */
-    protected IPayloadDestinationCollection payloadDestination = null;
+    private DAQComponentOutputProcess payloadOutput;
+
+    /**
+     * output channel
+     */
+    private OutputChannel outChan;
 
     /**
      * Default output factory
      */
-    protected TriggerRequestPayloadFactory outputFactory = null;
+    private TriggerRequestPayloadFactory outputFactory;
 
     /**
      * SourceId of this TriggerHandler.
@@ -64,22 +80,25 @@ public class DummyTriggerHandler
     /**
      * earliest thing of interest to the analysis
      */
-    private IPayload earliestPayloadOfInterest = null;
+    private IPayload earliestPayloadOfInterest;
 
+    private int numHitsPerTrigger = 1000;
     private int count;
+
+    private DOMRegistry domRegistry;
 
     /**
      * Default constructor
      */
     public DummyTriggerHandler() {
-        this(new SourceID4B(4000));
+        this(new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
-    public DummyTriggerHandler(ISourceID sourceId) {
+    private DummyTriggerHandler(ISourceID sourceId) {
         this(sourceId, new TriggerRequestPayloadFactory());
     }
 
-    public DummyTriggerHandler(ISourceID sourceId, TriggerRequestPayloadFactory outputFactory) {
+    protected DummyTriggerHandler(ISourceID sourceId, TriggerRequestPayloadFactory outputFactory) {
         this.sourceId = sourceId;
         this.outputFactory = outputFactory;
         init();
@@ -87,7 +106,9 @@ public class DummyTriggerHandler
 
     private void init() {
         triggerBag = new DummyTriggerBag(sourceId);
-        triggerBag.setPayloadFactory(outputFactory);
+        if (outputFactory != null) {
+            triggerBag.setPayloadFactory(outputFactory);
+        }
         count = 0;
     }
 
@@ -104,6 +125,7 @@ public class DummyTriggerHandler
      * @param trigger trigger to be added
      */
     public void addTrigger(ITriggerControl trigger) {
+        log.info("Triggers added to DummyTriggerBag are ignored");
     }
 
     /**
@@ -112,6 +134,7 @@ public class DummyTriggerHandler
      * @param triggers
      */
     public void addTriggers(List triggers) {
+        log.info("Triggers added to DummyTriggerBag are ignored");
     }
 
     /**
@@ -128,11 +151,21 @@ public class DummyTriggerHandler
     }
 
     /**
-     * sets payload destination
-     * @param payloadDestination destination of payloads
+     * sets payload output
+     * @param payloadOutput destination of payloads
      */
-    public void setPayloadDestinationCollection(IPayloadDestinationCollection payloadDestination) {
-        this.payloadDestination = payloadDestination;
+    public void setPayloadOutput(DAQComponentOutputProcess payloadOutput) {
+        this.payloadOutput = payloadOutput;
+    }
+
+    DAQComponentOutputProcess getPayloadOutput()
+    {
+        return payloadOutput;
+    }
+
+    public void setNumHitsPerTrigger(int numHitsPerTrigger)
+    {
+        this.numHitsPerTrigger = numHitsPerTrigger;
     }
 
     /**
@@ -143,7 +176,7 @@ public class DummyTriggerHandler
         IHitPayload hit = (IHitPayload) payload;
 
         // need to make TRP and add to trigger bag
-        if (count % 1000 == 0) {
+        if (count % numHitsPerTrigger == 0) {
 
             log.info("Creating Trigger...");
 
@@ -158,8 +191,8 @@ public class DummyTriggerHandler
             IReadoutRequest readout = TriggerRequestPayloadFactory.createReadoutRequest(sourceId, count, readouts);
 
             // create trigger
-            TriggerRequestPayload triggerPayload
-                    = (TriggerRequestPayload) outputFactory.createPayload(count,
+            ITriggerRequestPayload triggerPayload
+                    = (ITriggerRequestPayload) outputFactory.createPayload(count,
                                                                           0,
                                                                           0,
                                                                           sourceId,
@@ -171,7 +204,7 @@ public class DummyTriggerHandler
 
         }
         count++;
-        
+
         setEarliestPayloadOfInterest(payload);
 
         issueTriggers();
@@ -195,6 +228,14 @@ public class DummyTriggerHandler
     }
 
     /**
+     * getter for count
+     * @return count
+     */
+    public int getCount() {
+        return count;
+    }
+
+    /**
      * getter for SourceID
      * @return sourceID
      */
@@ -208,24 +249,39 @@ public class DummyTriggerHandler
      *   if any of those overlap, they are merged
      */
     public void issueTriggers() {
-        while (triggerBag.hasNext()) {
-            TriggerRequestPayload trigger = (TriggerRequestPayload) triggerBag.next();
+        if (null == payloadOutput) {
+            throw new RuntimeException("PayloadOutput has not been set!");
+        }
 
-            // issue the trigger
-            if (null == payloadDestination) {
-                log.error("PayloadDestination has not been set!");
-                throw new RuntimeException("PayloadDestination has not been set!");
-            } else {
-                try {
-		    log.info("Writing Trigger...");
-                    payloadDestination.writePayload(trigger);
-                } catch (IOException e) {
-                    log.error("Failed to write triggers");
-                    throw new RuntimeException(e);
-                }
-                // now recycle it
-                trigger.recycle();
+        while (triggerBag.hasNext()) {
+            ITriggerRequestPayload trigger = (ITriggerRequestPayload) triggerBag.next();
+
+            // write trigger to a ByteBuffer
+            ByteBuffer trigBuf =
+                ByteBuffer.allocate(trigger.getPayloadLength());
+            try {
+                ((IWriteablePayload) trigger).writePayload(false, 0, trigBuf);
+            } catch (IOException ioe) {
+                log.error("Couldn't create payload", ioe);
+                trigBuf = null;
             }
+
+            // if we haven't already, get the output channel
+            if (outChan == null) {
+                if (payloadOutput == null) {
+                    log.error("Trigger destination has not been set");
+                } else {
+                    outChan = payloadOutput.getChannel();
+                }
+            }
+
+            //--ship the trigger to its destination
+            if (trigBuf != null) {
+                outChan.receiveByteBuffer(trigBuf);
+            }
+
+            // now recycle it
+            trigger.recycle();
 
         }
 
@@ -235,8 +291,34 @@ public class DummyTriggerHandler
         return earliestPayloadOfInterest;
     }
 
-    protected void setEarliestPayloadOfInterest(IPayload earliest) {
+    private void setEarliestPayloadOfInterest(IPayload earliest) {
         earliestPayloadOfInterest = earliest;
     }
 
+    public void setDOMRegistry(DOMRegistry registry) {
+        domRegistry = registry;
+        DomSetFactory.setDomRegistry(registry);
+    }
+
+    public DOMRegistry getDOMRegistry() {
+        return domRegistry;
+    }
+
+    public void setOutputFactory(TriggerRequestPayloadFactory factory)
+    {
+        outputFactory = factory;
+        if (outputFactory != null) {
+            triggerBag.setPayloadFactory(outputFactory);
+        }
+    }
+
+    /**
+     * Set the outgoing payload buffer cache.
+     * @param byte buffer cache manager
+     */
+    public void setOutgoingBufferCache(IByteBufferCache cache)
+    {
+        throw new Error("Unimplemented");
+        //outCache = cache;
+    }
 }

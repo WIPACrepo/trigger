@@ -1,59 +1,63 @@
 package icecube.daq.trigger.component;
 
 import icecube.daq.common.DAQCmdInterface;
-import icecube.daq.io.PayloadDestinationOutputEngine;
+import icecube.daq.io.DAQComponentOutputProcess;
+import icecube.daq.io.SimpleOutputEngine;
 import icecube.daq.io.SpliceablePayloadReader;
+import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQComponent;
 import icecube.daq.juggler.component.DAQConnector;
-import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
-import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.MasterPayloadFactory;
+import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
+import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
-import icecube.daq.splicer.SplicerImpl;
-import icecube.daq.trigger.control.ITriggerManager;
-import icecube.daq.trigger.control.TriggerManager;
+import icecube.daq.trigger.config.TriggerBuilder;
+import icecube.daq.trigger.control.DummyTriggerManager;
 import icecube.daq.trigger.control.GlobalTriggerManager;
 import icecube.daq.trigger.control.ITriggerControl;
-import icecube.daq.trigger.control.DummyTriggerManager;
-import icecube.daq.trigger.config.TriggerBuilder;
+import icecube.daq.trigger.control.ITriggerManager;
+import icecube.daq.trigger.control.TriggerManager;
+import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.util.DOMRegistry;
 
-import java.nio.ByteBuffer;
 import java.io.IOException;
-
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.xml.sax.SAXException;
 
 public class TriggerComponent
     extends DAQComponent
 {
     private static final Log log = LogFactory.getLog(TriggerComponent.class);
 
-    public static final String DEFAULT_AMANDA_HOST = "triggerdaq2";
+    public static final String DEFAULT_AMANDA_HOST = "ic-twrdaq00";
     public static final int DEFAULT_AMANDA_PORT = 12014;
 
-    protected ISourceID sourceId;
-    protected IByteBufferCache bufferCache;
-    protected ITriggerManager triggerManager;
-    protected Splicer splicer;
-    protected SpliceablePayloadReader inputEngine;
-    protected PayloadDestinationOutputEngine outputEngine;
+    private ISourceID sourceId;
+    private IByteBufferCache inCache;
+    private IByteBufferCache outCache;
+    private ITriggerManager triggerManager;
+    private Splicer splicer;
+    private SpliceablePayloadReader inputEngine;
+    private DAQComponentOutputProcess outputEngine;
 
-    protected String globalConfigurationDir = null;
-    protected String triggerConfigFileName = null;
-    protected List currentTriggers = null;
+    private String globalConfigurationDir;
+    private String triggerConfigFileName;
+    private List currentTriggers;
 
-    private String amandaHost = DEFAULT_AMANDA_HOST;
-    private int amandaPort = DEFAULT_AMANDA_PORT;
+    private boolean useDummy;
 
     public TriggerComponent(String name, int id) {
         this(name, id, DEFAULT_AMANDA_HOST, DEFAULT_AMANDA_PORT);
@@ -62,82 +66,139 @@ public class TriggerComponent
     public TriggerComponent(String name, int id,
                             String amandaHost, int amandaPort) {
         super(name, id);
-        
-        this.amandaHost = amandaHost;
-        this.amandaPort = amandaPort;
 
         // Create the source id of this component
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
 
-        bufferCache = new VitreousBufferCache();
-        
-        addCache(bufferCache);
-        addMBean("bufferCache", bufferCache);
-        MasterPayloadFactory masterFactory = new MasterPayloadFactory(bufferCache);
+        boolean isGlobalTrigger = false;
+        boolean isAmandaTrigger = false;
+
+        // Get input and output types
+        String inputType, outputType, shortName;
+        if (name.equals(DAQCmdInterface.DAQ_GLOBAL_TRIGGER)) {
+            isGlobalTrigger = true;
+            inputType = DAQConnector.TYPE_TRIGGER;
+            outputType = DAQConnector.TYPE_GLOBAL_TRIGGER;
+            shortName = "GTrig";
+        } else if (name.equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
+            inputType = DAQConnector.TYPE_STRING_HIT;
+            outputType = DAQConnector.TYPE_TRIGGER;
+            shortName = "IITrig";
+        } else if (name.equals(DAQCmdInterface.DAQ_ICETOP_TRIGGER)) {
+            inputType = DAQConnector.TYPE_ICETOP_HIT;
+            outputType = DAQConnector.TYPE_TRIGGER;
+            shortName = "ITTrig";
+        } else if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
+            isAmandaTrigger = true;
+            inputType = DAQConnector.TYPE_SELF_CONTAINED;
+            outputType = DAQConnector.TYPE_TRIGGER;
+            shortName = "ATrig";
+        } else {
+            throw new Error("Unknown trigger " + name);
+        }
+
+        //inCache = new VitreousBufferCache(shortName + "IN");
+        inCache = new VitreousBufferCache(shortName + "IN", Long.MAX_VALUE);
+        addCache(inCache);
+        //addMBean("inCache", inCache);
+
+        outCache = new VitreousBufferCache(shortName + "OUT");
+        addCache(outputType, outCache);
+        //addMBean("outCache", inCache);
 
         addMBean("jvm", new MemoryStatistics());
         addMBean("system", new SystemStatistics());
 
+        SpliceableFactory factory;
+
         // Now differentiate
-        String inputType, outputType;
-        if (name.equals(DAQCmdInterface.DAQ_GLOBAL_TRIGGER)) {
+        if (isGlobalTrigger) {
+            factory = new MasterPayloadFactory(inCache);
 
             // Global trigger
-            triggerManager = new GlobalTriggerManager(masterFactory, sourceId);
-
-            inputType = DAQConnector.TYPE_TRIGGER;
-            outputType = DAQConnector.TYPE_GLOBAL_TRIGGER;
+            triggerManager = new GlobalTriggerManager(factory, sourceId);
         } else {
+            factory = new MasterPayloadFactory(inCache);
+
+            TriggerRequestPayloadFactory trFactory =
+                new TriggerRequestPayloadFactory();
+            trFactory.setByteBufferCache(outCache);
 
             // Sub-detector triggers
-            triggerManager = new TriggerManager(masterFactory, sourceId);
-            //triggerManager = new DummyTriggerManager(masterFactory, sourceId);
-
-            if (name.equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
-                inputType = DAQConnector.TYPE_STRING_HIT;
-                outputType = DAQConnector.TYPE_TRIGGER;
-            } else if (name.equals(DAQCmdInterface.DAQ_ICETOP_TRIGGER)) {
-                inputType = DAQConnector.TYPE_ICETOP_HIT;
-                outputType = DAQConnector.TYPE_TRIGGER;
-            } else if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
-                inputType = DAQConnector.TYPE_SELF_CONTAINED;
-                outputType = DAQConnector.TYPE_TRIGGER;
+            if (!useDummy) {
+                triggerManager = new TriggerManager(factory, sourceId);
             } else {
-                // Unknown name?
-                inputType = "";
-                outputType = "";
+                triggerManager = new DummyTriggerManager(factory, sourceId);
             }
+
+            triggerManager.setOutputFactory(trFactory);
         }
+
+        triggerManager.setOutgoingBufferCache(outCache);
 
         // Create splicer and introduce it to the trigger manager
         splicer = new HKN1Splicer(triggerManager);
         triggerManager.setSplicer(splicer);
 
-        // Create and register io engines
+        // Create and register input engine
         try {
-            inputEngine =
-                new SpliceablePayloadReader(name, splicer, masterFactory);
+            inputEngine = new SpliceablePayloadReader(name, 25000, splicer, factory);
         } catch (IOException ioe) {
             log.error("Couldn't create input reader");
             System.exit(1);
             inputEngine = null;
         }
-        if (name.equals(DAQCmdInterface.DAQ_AMANDA_TRIGGER)) {
+        if (isAmandaTrigger) {
             try {
                 inputEngine.addReverseConnection(amandaHost, amandaPort,
-                                                 bufferCache);
+                                                 inCache);
             } catch (IOException ioe) {
                 log.error("Couldn't connect to Amanda TWR", ioe);
                 System.exit(1);
             }
         }
         addMonitoredEngine(inputType, inputEngine);
-        outputEngine = new PayloadDestinationOutputEngine(name, id,
-                                                          name + "OutputEngine");
-        outputEngine.registerBufferManager(bufferCache);
-        triggerManager.setPayloadDestinationCollection(outputEngine.getPayloadDestinationCollection());
+
+        // Create and register output engine
+        outputEngine = new SimpleOutputEngine(name, id, name + "OutputEngine");
+        triggerManager.setPayloadOutput(outputEngine);
         addMonitoredEngine(outputType, outputEngine);
 
+    }
+
+    public void flush()
+    {
+        triggerManager.flush();
+    }
+
+    public IByteBufferCache getInputCache()
+    {
+        return inCache;
+    }
+
+    public IByteBufferCache getOutputCache()
+    {
+        return outCache;
+    }
+
+    public long getPayloadsSent()
+    {
+        return ((SimpleOutputEngine) outputEngine).getTotalRecordsSent();
+    }
+
+    public SpliceablePayloadReader getReader()
+    {
+        return inputEngine;
+    }
+
+    public Splicer getSplicer()
+    {
+        return splicer;
+    }
+
+    public DAQComponentOutputProcess getWriter()
+    {
+        return outputEngine;
     }
 
     /**
@@ -157,9 +218,26 @@ public class TriggerComponent
      */
     public void configuring(String configName) throws DAQCompException {
 
+    	// Setup DOMRegistry as 1st thing to do ...
+    	try {
+    		triggerManager.setDOMRegistry(DOMRegistry.loadRegistry(globalConfigurationDir));
+    		log.info("loaded DOM registry");
+    	}
+    	catch (Exception ex) {
+    		throw new DAQCompException("Error loading DOM registry", ex);
+    	}
+    	
         // Lookup the trigger configuration
-        String triggerConfiguration = null;
-        String globalConfigurationFileName = globalConfigurationDir + "/" + configName + ".xml";
+        String globalConfigurationFileName;
+        if (configName.endsWith(".xml")) {
+            globalConfigurationFileName =
+                globalConfigurationDir + "/" + configName;
+        } else {
+            globalConfigurationFileName =
+                globalConfigurationDir + "/" + configName + ".xml";
+        }
+
+        String triggerConfiguration;
         try {
             triggerConfiguration = GlobalConfiguration.getTriggerConfig(globalConfigurationFileName);
         } catch (Exception e) {
@@ -176,14 +254,28 @@ public class TriggerComponent
             trigger.setTriggerHandler(triggerManager);
         }
         triggerManager.addTriggers(currentTriggers);
-
+	
     }
 
     public ITriggerManager getTriggerManager(){
         return triggerManager;
     }
 
+    public String getTriggerConfigFileName(){
+        return triggerConfigFileName;
+    }
+
     public ISourceID getSourceID(){
         return sourceId;
+    }
+
+    /**
+     * Return this component's svn version info as a String.
+     *
+     * @return svn version id as a String
+     */
+    public String getVersionInfo()
+    {
+	return "$Id: TriggerComponent.java 4269 2009-06-08 22:01:11Z dglo $";
     }
 }

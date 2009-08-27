@@ -172,6 +172,22 @@
               </archive>
             </configuration>
           </execution>
+          <execution>
+            <id>simptrig</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classifier>simptrig</classifier>
+              <archive>
+                <manifest>
+                  <mainClass>icecube.daq.trigger.component.SimpleTrigger</mainClass>
+                  <addClasspath>true</addClasspath>
+                  <classpathPrefix>../lib</classpathPrefix>
+                </manifest>
+              </archive>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>

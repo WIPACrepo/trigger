@@ -12,7 +12,7 @@ import icecube.daq.juggler.component.DAQConnector;
 import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
 import icecube.daq.payload.IByteBufferCache;
-import icecube.daq.payload.VitreousBufferCache;
+import icecube.daq.payload.impl.VitreousBufferCache;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

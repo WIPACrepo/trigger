@@ -1,7 +1,7 @@
 /*
  * class: ConditionalTriggerBag
  *
- * Version $Id: ConditionalTriggerBag.java 3439 2008-09-02 17:08:41Z dglo $
+ * Version $Id: ConditionalTriggerBag.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: September 2 2005
  *
@@ -12,8 +12,8 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.algorithm.CoincidenceTrigger;
 
 import java.io.IOException;
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
  * This bag is handled by CoincidenceTrigger.
  * (cf. GlobalTrigBag is handled by GlobalTrigHandler.)
  *
- * @version $Id: ConditionalTriggerBag.java 3439 2008-09-02 17:08:41Z dglo $
+ * @version $Id: ConditionalTriggerBag.java 4574 2009-08-28 21:32:32Z dglo $
  * @author shseo
  */
 public class ConditionalTriggerBag

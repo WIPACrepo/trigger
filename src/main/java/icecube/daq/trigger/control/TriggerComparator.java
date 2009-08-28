@@ -1,6 +1,6 @@
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.payload.ITriggerRequestPayload;
 
 import java.util.Comparator;
 

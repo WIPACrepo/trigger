@@ -11,7 +11,7 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.IPayload;
-import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
  *  makes a new TriggerRequestPayload for each input TriggerRequestPayload
  *  and then pass them to GlobalTrigBag.java.
  *
- * @version $Id: ThroughputTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: ThroughputTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  * @author shseo
  */
 public class ThroughputTrigger

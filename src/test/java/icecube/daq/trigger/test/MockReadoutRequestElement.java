@@ -1,12 +1,18 @@
 package icecube.daq.trigger.test;
 
 import icecube.daq.payload.IDOMID;
+import icecube.daq.payload.IPayloadDestination;
+import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.trigger.IReadoutRequestElement;
+import icecube.daq.payload.IWriteablePayloadRecord;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.zip.DataFormatException;
 
 public class MockReadoutRequestElement
-    implements IReadoutRequestElement
+    implements IReadoutRequestElement, IWriteablePayloadRecord
 {
     private int type;
     private IUTCTime firstTime;
@@ -32,6 +38,11 @@ public class MockReadoutRequestElement
         this.srcId = srcId;
     }
 
+    public void dispose()
+    {
+        // do nothing
+    }
+
     public IDOMID getDomID()
     {
         return domId;
@@ -55,6 +66,56 @@ public class MockReadoutRequestElement
     public ISourceID getSourceID()
     {
         return srcId;
+    }
+
+    /**
+     * Determines if this record is loaded with valid data.
+     * @return <tt>true</tt> if data is loaded, <tt>false</tt> otherwise.
+     */
+    public boolean isDataLoaded()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    /**
+     * Loads the data from the buffer into the container record.
+     *
+     * @param offset the offset into the byte buffer
+     * @param buffer ByteBuffer from which to construct the record.
+     *
+     * @exception IOException if errors are detected reading the record
+     * @exception DataFormatException if the record is not of the correct format
+     */
+    public void loadData(int offset, ByteBuffer buffer)
+    {
+        throw new Error("Unimplemented");
+    }
+
+    /**
+     * Write this record to the payload destination.
+     *
+     * @param dest PayloadDestination to which to write this record.
+     *
+     * @return the number of bytes written to this destination.
+     */
+    public int writeData(IPayloadDestination dest)
+        throws IOException
+    {
+        throw new Error("Unimplemented");
+    }
+
+    /**
+     * Write this record to the bute buffer.
+     *
+     * @param offset the offset at which to start writing the object.
+     * @param buffer the ByteBuffer into which to write this payload-record
+.
+     * @return the number of bytes written to this byte buffer.
+     */
+    public int writeData(int iOffset, ByteBuffer tBuffer)
+        throws IOException
+    {
+        throw new Error("Unimplemented");
     }
 
     public String toString()

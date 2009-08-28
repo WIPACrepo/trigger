@@ -12,22 +12,22 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.OutputChannel;
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IWriteablePayload;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.payload.impl.SourceID;
+import icecube.daq.payload.impl.UTCTime;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.config.ITriggerConfig;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.monitor.ITriggerMonitor;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
@@ -46,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 4269 2009-06-08 22:01:11Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 4574 2009-08-28 21:32:32Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -138,7 +138,7 @@ public class GlobalTriggerHandler
      */
     public GlobalTriggerHandler()
     {
-        this(new SourceID4B(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID));
+        this(new SourceID(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID));
     }
 
     public GlobalTriggerHandler(ISourceID sourceID)
@@ -147,7 +147,7 @@ public class GlobalTriggerHandler
     }
 
     public GlobalTriggerHandler(TriggerRequestPayloadFactory outputFactory) {
-        this(new SourceID4B(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID),
+        this(new SourceID(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID),
              DEFAULT_TIMEGAP_OPTION, outputFactory);
     }
 
@@ -580,7 +580,7 @@ System.err.println("GTrig unattached "+trigBuf.capacity()+" bytes");
      * and sets it in the triggerBag to set timeGate.
      */
     private void setEarliestTime() {
-        IUTCTime earliestTimeOverall = new UTCTime8B(Long.MAX_VALUE);
+        IUTCTime earliestTimeOverall = new UTCTime(Long.MAX_VALUE);
         IPayload earliestPayloadOverall = null;
 
         log.debug("SET EARLIEST TIME:");

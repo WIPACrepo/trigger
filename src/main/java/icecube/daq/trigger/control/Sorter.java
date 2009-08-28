@@ -1,7 +1,7 @@
 /*
  * class: Sorter
  *
- * Version $Id: Sorter.java 3433 2008-08-31 16:19:12Z dglo $
+ * Version $Id: Sorter.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: July 15 2005
  *
@@ -10,10 +10,10 @@
 
 package icecube.daq.trigger.control;
 
+import icecube.daq.payload.IReadoutRequestElement;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.trigger.IReadoutRequestElement;
-import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.payload.impl.UTCTime;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * This class is to provide the earliest/latest UTC-timeStamp.
  *
- * @version $Id: Sorter.java 3433 2008-08-31 16:19:12Z dglo $
+ * @version $Id: Sorter.java 4574 2009-08-28 21:32:32Z dglo $
  * @author shseo
  */
 public class Sorter
@@ -50,7 +50,7 @@ public class Sorter
 
         IReadoutRequestElement element = null;
         IReadoutRequestElement earliestElement = null;
-        IUTCTime earliestUTCTime = new UTCTime8B(Long.MAX_VALUE);
+        IUTCTime earliestUTCTime = new UTCTime(Long.MAX_VALUE);
         IUTCTime tStartUTCTime = null;
 
         int iSizeUnsortedList = listReadoutElementsUTCTimeUnsorted.size();
@@ -82,7 +82,7 @@ public class Sorter
 
                 listReadoutElementsUTCTimeSorted.add(earliestElement);
                 listReadoutElementsUTCTimeUnsorted.remove(index);
-                earliestUTCTime = new UTCTime8B(Long.MAX_VALUE);
+                earliestUTCTime = new UTCTime(Long.MAX_VALUE);
 
             }
 
@@ -107,7 +107,7 @@ public class Sorter
     }
     public IUTCTime getUTCTimeEarliest(List listObjects, boolean isPayloadObjects)
     {
-        IUTCTime UTCTime_earliest = new UTCTime8B(Long.MAX_VALUE);
+        IUTCTime UTCTime_earliest = new UTCTime(Long.MAX_VALUE);
         IUTCTime UTCTime_start = null;
 
         Iterator iterElements = listObjects.iterator();
@@ -133,7 +133,7 @@ public class Sorter
     }
     public IUTCTime getUTCTimeLatest(List listObjects, boolean isPayloadObjects)
     {
-        IUTCTime UTCTime_latest = new UTCTime8B(Long.MIN_VALUE);
+        IUTCTime UTCTime_latest = new UTCTime(Long.MIN_VALUE);
         IUTCTime UTCTime_end = null;
 
         Iterator iterElements = listObjects.iterator();

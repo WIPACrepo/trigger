@@ -1,20 +1,20 @@
 package icecube.daq.trigger.test;
 
+import icecube.daq.oldpayload.impl.MasterPayloadFactory;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.io.SpliceablePayloadReader;
+import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.ISourceID;
-import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.VitreousBufferCache;
+import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
-import icecube.daq.trigger.IReadoutRequestElement;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.util.DOMRegistry;
 
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class AmandaTriggerEndToEndTest
 //        new MockAppender(org.apache.log4j.Level.ALL).setVerbose(true);
 //        new MockAppender(/*org.apache.log4j.Level.ALL*/).setVerbose(true);
 
-    private static final MockSourceID srcId =
+    private static final MockSourceID SOURCE_ID =
         new MockSourceID(SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID);
 
     public AmandaTriggerEndToEndTest(String name)
@@ -112,8 +112,9 @@ public class AmandaTriggerEndToEndTest
 
         MasterPayloadFactory factory = new MasterPayloadFactory(cache);
 
-        TriggerManager trigMgr = new TriggerManager(srcId);
-        trigMgr.setOutputFactory(getTriggerRequestFactory(factory));
+        TriggerManager trigMgr =
+            new TriggerManager(factory, SOURCE_ID,
+                               getTriggerRequestFactory(factory));
 
         String configDir =
             getClass().getResource("/config/").getPath();

@@ -1,7 +1,9 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IPayloadDestination;
-import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.payload.ITriggerRequestPayload;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.test.MockPayload;
@@ -56,6 +58,11 @@ public class TriggerBagTest
         }
 
         public int getPayloadType()
+        {
+            throw new Error("Unimplemented");
+        }
+
+        public void setCache(IByteBufferCache cache)
         {
             throw new Error("Unimplemented");
         }
@@ -249,19 +256,21 @@ public class TriggerBagTest
         assertEquals("Unexpected input total",
                      0, bag.getMonitor().getInputCountTotal());
 
+        final int baseSrcId = SourceIdRegistry.STRINGPROCESSOR_SOURCE_ID;
+
         MockTriggerRequest tr =
-            new MockTriggerRequest(12345L, 20000L, 1, 11, 1000);
+            new MockTriggerRequest(12345L, 20000L, 1, 11, baseSrcId + 1);
         tr.addPayload(new MockHit(13579L));
 
         bag.add(tr);
         assertEquals("Unexpected input total",
                      1, bag.getMonitor().getInputCountTotal());
 
-        bag.add(new MockTriggerRequest(19999L, 23456L, 2, 22, 2000));
+        bag.add(new MockTriggerRequest(19999L, 23456L, 2, 22, baseSrcId + 2));
         assertEquals("Unexpected input total",
                      2, bag.getMonitor().getInputCountTotal());
 
-        bag.add(new MockTriggerRequest(17777L, 18888L, 3, 33, 3000));
+        bag.add(new MockTriggerRequest(17777L, 18888L, 3, 33, baseSrcId + 3));
         assertEquals("Unexpected input total",
                      3, bag.getMonitor().getInputCountTotal());
 

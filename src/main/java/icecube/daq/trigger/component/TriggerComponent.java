@@ -9,12 +9,13 @@ import icecube.daq.juggler.component.DAQComponent;
 import icecube.daq.juggler.component.DAQConnector;
 import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
+import icecube.daq.oldpayload.impl.MasterPayloadFactory;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ISourceID;
-import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.VitreousBufferCache;
+import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
@@ -24,7 +25,6 @@ import icecube.daq.trigger.control.GlobalTriggerManager;
 import icecube.daq.trigger.control.ITriggerControl;
 import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.TriggerManager;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.util.DOMRegistry;
 
 import java.io.IOException;
@@ -109,29 +109,22 @@ public class TriggerComponent
         addMBean("jvm", new MemoryStatistics());
         addMBean("system", new SystemStatistics());
 
-        SpliceableFactory factory;
+        SpliceableFactory factory = new MasterPayloadFactory(inCache);
+
+        TriggerRequestPayloadFactory trFactory =
+            new TriggerRequestPayloadFactory();
+        trFactory.setByteBufferCache(outCache);
 
         // Now differentiate
         if (isGlobalTrigger) {
-            factory = new MasterPayloadFactory(inCache);
-
             // Global trigger
-            triggerManager = new GlobalTriggerManager(factory, sourceId);
+            triggerManager =
+                new GlobalTriggerManager(factory, sourceId, trFactory);
+        } else if (!useDummy) {
+            triggerManager = new TriggerManager(factory, sourceId, trFactory);
         } else {
-            factory = new MasterPayloadFactory(inCache);
-
-            TriggerRequestPayloadFactory trFactory =
-                new TriggerRequestPayloadFactory();
-            trFactory.setByteBufferCache(outCache);
-
-            // Sub-detector triggers
-            if (!useDummy) {
-                triggerManager = new TriggerManager(factory, sourceId);
-            } else {
-                triggerManager = new DummyTriggerManager(factory, sourceId);
-            }
-
-            triggerManager.setOutputFactory(trFactory);
+            triggerManager =
+                new DummyTriggerManager(factory, sourceId, trFactory);
         }
 
         triggerManager.setOutgoingBufferCache(outCache);
@@ -276,6 +269,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 4269 2009-06-08 22:01:11Z dglo $";
+	return "$Id: TriggerComponent.java 4574 2009-08-28 21:32:32Z dglo $";
     }
 }

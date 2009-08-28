@@ -1,6 +1,6 @@
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.IHitPayload;
+import icecube.daq.payload.IHitPayload;
 import icecube.daq.trigger.config.DomSet;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.util.DOMRegistry;

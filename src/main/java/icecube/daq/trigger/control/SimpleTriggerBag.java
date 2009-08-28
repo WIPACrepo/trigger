@@ -10,13 +10,13 @@
 
 package icecube.daq.trigger.control;
 
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.oldpayload.impl.PayloadFactory;
+import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.payload.splicer.PayloadFactory;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.payload.impl.UTCTime;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ public class SimpleTriggerBag
     /**
      * triggers that occur earlier than this time are free to be released
      */
-    private IUTCTime timeGate = new UTCTime8B(-1);
+    private IUTCTime timeGate = new UTCTime(-1);
 
     /**
      * flag to indicate we are flushing

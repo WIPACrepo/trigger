@@ -1,10 +1,10 @@
 package icecube.daq.trigger.test;
 
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.PayloadChecker;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
-import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.algorithm.AbstractTrigger;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.config.TriggerReadout;

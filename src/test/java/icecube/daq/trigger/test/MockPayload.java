@@ -1,10 +1,10 @@
 package icecube.daq.trigger.test;
 
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayloadDestination;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

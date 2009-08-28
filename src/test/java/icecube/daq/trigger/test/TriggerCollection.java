@@ -1,8 +1,8 @@
 package icecube.daq.trigger.test;
 
+import icecube.daq.oldpayload.RecordTypeRegistry;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.PayloadRegistry;
-import icecube.daq.payload.RecordTypeRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;

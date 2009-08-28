@@ -1,7 +1,7 @@
 /*
  * class: DummyPayload
  *
- * Version $Id: DummyPayload.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: DummyPayload.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: October 7 2005
  *
@@ -10,6 +10,7 @@
 
 package icecube.daq.trigger.control;
 
+import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.splicer.Spliceable;
@@ -20,7 +21,7 @@ import java.nio.ByteBuffer;
  * This class is a dummy payload that only has a UTC time associated with it.
  * Its main purpose is for truncating the Splicer.
  *
- * @version $Id: DummyPayload.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: DummyPayload.java 4574 2009-08-28 21:32:32Z dglo $
  * @author pat
  */
 public class DummyPayload implements Spliceable, IPayload
@@ -78,6 +79,11 @@ public class DummyPayload implements Spliceable, IPayload
      */
     public Object deepCopy() {
         return new DummyPayload(this.payloadTimeUTC);
+    }
+
+    public void setCache(IByteBufferCache cache)
+    {
+        throw new Error("Unimplemented");
     }
 
     public String toString()

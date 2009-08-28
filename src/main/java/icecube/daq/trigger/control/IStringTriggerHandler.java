@@ -1,7 +1,7 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.io.DAQOutputChannelManager;
-import icecube.daq.payload.MasterPayloadFactory;
+import icecube.daq.oldpayload.impl.MasterPayloadFactory;
 
 /**
  * Created by IntelliJ IDEA.

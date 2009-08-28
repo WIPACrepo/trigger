@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerControl
  *
- * Version $Id: ITriggerControl.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ITriggerControl.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: August 22 2005
  *
@@ -10,14 +10,14 @@
 
 package icecube.daq.trigger.control;
 
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.IPayload;
 import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
 /**
  * This interface defines the control aspect of a trigger.
  *
- * @version $Id: ITriggerControl.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ITriggerControl.java 4574 2009-08-28 21:32:32Z dglo $
  * @author pat
  */
 public interface ITriggerControl

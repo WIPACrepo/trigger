@@ -1,6 +1,6 @@
 package icecube.daq.trigger.control;
 
-import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.test.MockSourceID;

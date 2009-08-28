@@ -10,18 +10,18 @@
 
 package icecube.daq.trigger.control;
 
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.oldpayload.impl.PayloadFactory;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
+import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.payload.splicer.PayloadFactory;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.payload.impl.SourceID;
+import icecube.daq.payload.impl.UTCTime;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
  * This class receives TriggerRequestPayloads from each active GlobalTrigAlgorithm
  * , merges if they overlap and produces globalTrigEventPayload.
  *
- * @version $Id: GlobalTriggerBag.java 3433 2008-08-31 16:19:12Z dglo $
+ * @version $Id: GlobalTriggerBag.java 4574 2009-08-28 21:32:32Z dglo $
  * @author shseo
  */
 public class GlobalTriggerBag
@@ -65,7 +65,7 @@ public class GlobalTriggerBag
     /**
      * triggers that occur earlier than this time are free to be released
      */
-    private IUTCTime timeGate = new UTCTime8B(-1);
+    private IUTCTime timeGate = new UTCTime(-1);
 
     private GlobalTrigEventWrapper mtGlobalTrigEventWrapper;
 
@@ -96,7 +96,7 @@ public class GlobalTriggerBag
      */
     public GlobalTriggerBag()
     {
-        this(-1, -1, new SourceID4B(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID));
+        this(-1, -1, new SourceID(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID));
     }
     /**
       * constructor

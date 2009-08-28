@@ -1,7 +1,7 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.trigger.IReadoutRequestElement;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockReadoutRequestElement;
 

@@ -1,7 +1,7 @@
 /*
  * class: ThreeCoincidenceTrigger
  *
- * Version $Id: ThreeCoincidenceTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: ThreeCoincidenceTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: September 6 2005
  *
@@ -10,7 +10,7 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.ConditionalTriggerBag;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  * Three coincidence trigger algorithm which uses timeGate (using CoincidenceTriggerBag)
  * for safe release of a selected trigger.
  *
- * @version $Id: ThreeCoincidenceTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: ThreeCoincidenceTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  * @author shseo
  */
 public class ThreeCoincidenceTrigger

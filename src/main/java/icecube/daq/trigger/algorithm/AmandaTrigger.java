@@ -1,9 +1,9 @@
 package icecube.daq.trigger.algorithm;
 
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.TriggerException;
 

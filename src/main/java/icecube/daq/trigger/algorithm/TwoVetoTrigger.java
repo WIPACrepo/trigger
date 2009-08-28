@@ -1,7 +1,7 @@
 /*
  * class: TwoVetoTrigger
  *
- * Version $Id: TwoVetoTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: TwoVetoTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: January 25 2006
  *
@@ -10,7 +10,7 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is accept all incoming triggers but to veto two configured triggers.
  *
- * @version $Id: TwoVetoTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: TwoVetoTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  * @author shseo
  */
 public class TwoVetoTrigger

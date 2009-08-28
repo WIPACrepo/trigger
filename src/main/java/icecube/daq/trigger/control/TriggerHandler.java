@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 4269 2009-06-08 22:01:11Z dglo $
+ * Version $Id: TriggerHandler.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: October 25 2004
  *
@@ -12,23 +12,23 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.OutputChannel;
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.oldpayload.impl.Payload;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.IByteBufferCache;
+import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.payload.splicer.Payload;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.payload.impl.SourceID;
+import icecube.daq.payload.impl.UTCTime;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.config.ITriggerConfig;
 import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.monitor.ITriggerMonitor;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
@@ -47,7 +47,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 4269 2009-06-08 22:01:11Z dglo $
+ * @version $Id: TriggerHandler.java 4574 2009-08-28 21:32:32Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -126,7 +126,7 @@ public class TriggerHandler
      * Default constructor
      */
     public TriggerHandler() {
-        this(new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
+        this(new SourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
     public TriggerHandler(ISourceID sourceId) {
@@ -555,7 +555,7 @@ System.err.println("Unattached "+SourceIdRegistry.getDAQNameFromISourceID(source
      */
     private void setEarliestTime() {
 
-        IUTCTime earliestTimeOverall = new UTCTime8B(Long.MAX_VALUE);
+        IUTCTime earliestTimeOverall = new UTCTime(Long.MAX_VALUE);
         IPayload earliestPayloadOverall = null;
 
         // loop over triggers and find earliest time of interest

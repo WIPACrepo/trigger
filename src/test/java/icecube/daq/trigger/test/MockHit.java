@@ -1,13 +1,14 @@
 package icecube.daq.trigger.test;
 
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IDOMID;
+import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayloadDestination;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.splicer.Spliceable;
-import icecube.daq.trigger.IHitPayload;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -104,6 +105,11 @@ public class MockHit
     }
 
     public int getTriggerType()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public void setCache(IByteBufferCache cache)
     {
         throw new Error("Unimplemented");
     }

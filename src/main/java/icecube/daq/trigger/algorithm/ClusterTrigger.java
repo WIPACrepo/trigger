@@ -52,11 +52,15 @@ import org.apache.log4j.Logger;
 public class ClusterTrigger extends AbstractTrigger
 {
     private long timeWindow;
+    private boolean configTimeWindow;
+
     private int  multiplicity;
+    private boolean configMultiplicity;
+
     private int  coherenceLength;
     private int  coherenceUp;
     private int  coherenceDown;
-    private boolean configured;
+    private boolean configCoherence;
     
     private LinkedList<IHitPayload> triggerQueue;
     
@@ -65,12 +69,15 @@ public class ClusterTrigger extends AbstractTrigger
     public ClusterTrigger()
     {
         triggerQueue    = new LinkedList<IHitPayload>();
-        multiplicity    = 5;
-        timeWindow      = 15000L;
-        coherenceLength = 7;
-        coherenceUp     = (coherenceLength - 1) / 2;
-        coherenceDown   = coherenceLength / 2;
-        configured      = false;
+
+        setMultiplicity(5);
+        configMultiplicity = false;
+
+        setTimeWindow(1500L);
+        configTimeWindow = false;
+
+        setCoherenceLength(7);
+        configCoherence = false;
     }
     
     @Override
@@ -78,17 +85,51 @@ public class ClusterTrigger extends AbstractTrigger
             IllegalParameterValueException
     {
         if (parameter.getName().equals("timeWindow"))
-            timeWindow = Long.parseLong(parameter.getValue()) * 10L;
+            setTimeWindow(Long.parseLong(parameter.getValue()));
         else if (parameter.getName().equals("multiplicity"))
-            multiplicity = Integer.parseInt(parameter.getValue());
+            setMultiplicity(Integer.parseInt(parameter.getValue()));
         else if (parameter.getName().equals("coherenceLength"))
-            coherenceLength = Integer.parseInt(parameter.getValue());
-	else if (parameter.getName().equals("domSet")) {
+            setCoherenceLength(Integer.parseInt(parameter.getValue()));
+        else if (parameter.getName().equals("domSet")) {
 	    domSetId = Integer.parseInt(parameter.getValue());
 	    configHitFilter(domSetId);
 	}
         super.addParameter(parameter);
-        configured = true;
+    }
+
+    public long getTimeWindow()
+    {
+        return timeWindow / 10L;
+    }
+
+    public void setTimeWindow(long lval)
+    {
+        timeWindow = lval * 10L;
+        configTimeWindow = true;
+    }
+
+    public int getMultiplicity()
+    {
+        return multiplicity;
+    }
+
+    public void setMultiplicity(int val)
+    {
+        multiplicity = val;
+        configMultiplicity = true;
+    }
+
+    public int getCoherenceLength()
+    {
+        return coherenceLength;
+    }
+
+    public void setCoherenceLength(int val)
+    {
+        coherenceLength = val;
+        coherenceUp     = (coherenceLength - 1) / 2;
+        coherenceDown   = coherenceLength / 2;
+        configCoherence = true;
     }
 
     @Override
@@ -197,7 +238,7 @@ public class ClusterTrigger extends AbstractTrigger
 
     public boolean isConfigured()
     {
-        return configured;
+        return configTimeWindow && configMultiplicity && configCoherence;
     }
 
 }

@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: AbstractTrigger.java 4590 2009-09-14 17:42:26Z dglo $
  *
  * Date: August 19 2005
  *
@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: AbstractTrigger.java 4590 2009-09-14 17:42:26Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor
@@ -481,8 +481,12 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
             throw new Error("TriggerFactory is not set!");
         }
 
+        final int numberOfHits = hits.size();
+        if (numberOfHits == 0) {
+            throw new Error("Cannot form trigger from empty list of hits");
+        }
+
         // get times (this assumes that the hits are time-ordered)
-        int numberOfHits = hits.size();
         IUTCTime firstTime = ((IHitPayload) hits.get(0)).getPayloadTimeUTC();
         IUTCTime lastTime = ((IHitPayload) hits.get(numberOfHits-1)).getPayloadTimeUTC();
 

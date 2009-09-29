@@ -141,7 +141,7 @@ public class MockTrigger
         return earliest;
     }
 
-    public List getParamterList()
+    public List getParameterList()
     {
         throw new Error("Unimplemented");
     }

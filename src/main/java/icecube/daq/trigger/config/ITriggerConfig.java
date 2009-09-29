@@ -1,7 +1,7 @@
 /*
  * interface: ITrigger
  *
- * Version $Id: ITriggerConfig.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: ITriggerConfig.java 4628 2009-09-29 17:34:36Z dglo $
  *
  * Date: January 3 2005
  *
@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * This interface defines the configuration aspect of a trigger.
  *
- * @version $Id: ITriggerConfig.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: ITriggerConfig.java 4628 2009-09-29 17:34:36Z dglo $
  * @author pat
  */
 public interface ITriggerConfig
@@ -88,9 +88,9 @@ public interface ITriggerConfig
 
     /**
      * Get list of trigger parameters.
-     * @return paramter list
+     * @return parameter list
      */
-    List getParamterList();
+    List getParameterList();
 
     /**
      * Add a readout.

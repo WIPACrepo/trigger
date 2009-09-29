@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 4590 2009-09-14 17:42:26Z dglo $
+ * Version $Id: AbstractTrigger.java 4628 2009-09-29 17:34:36Z dglo $
  *
  * Date: August 19 2005
  *
@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 4590 2009-09-14 17:42:26Z dglo $
+ * @version $Id: AbstractTrigger.java 4628 2009-09-29 17:34:36Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor
@@ -240,9 +240,9 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
     /**
      * Get list of trigger parameters.
      *
-     * @return paramter list
+     * @return parameter list
      */
-    public List getParamterList() {
+    public List getParameterList() {
         return parameters;
     }
 

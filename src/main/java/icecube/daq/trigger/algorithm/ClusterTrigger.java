@@ -109,7 +109,7 @@ public class ClusterTrigger extends AbstractTrigger
 
         // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
         if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
-	if (!hitFilter.useHit(hitPayload)) return;
+        if (!hitFilter.useHit(hitPayload)) return;
         
         if (logger.isDebugEnabled()) 
         {
@@ -127,7 +127,7 @@ public class ClusterTrigger extends AbstractTrigger
         {
             if (triggerQueue.size() >= multiplicity && processHitQueue())
             {   
-                formTrigger(triggerQueue, null, null);
+                if (triggerQueue.size() > 0) formTrigger(triggerQueue, null, null);
                 triggerQueue.clear();
                 setEarliestPayloadOfInterest(hitPayload);
                 break;

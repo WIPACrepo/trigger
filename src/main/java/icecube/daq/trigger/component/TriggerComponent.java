@@ -27,6 +27,7 @@ import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.util.DOMRegistry;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -221,23 +222,46 @@ public class TriggerComponent
     	}
     	
         // Lookup the trigger configuration
-        String globalConfigurationFileName;
-        if (configName.endsWith(".xml")) {
-            globalConfigurationFileName =
-                globalConfigurationDir + "/" + configName;
-        } else {
-            globalConfigurationFileName =
-                globalConfigurationDir + "/" + configName + ".xml";
+        String globalConfigurationFileName = globalConfigurationDir + "/" +
+            configName;;
+        File cfgFile = new File(globalConfigurationFileName);
+        if (!cfgFile.isFile()) {
+            if (!globalConfigurationFileName.endsWith(".xml")) {
+                globalConfigurationFileName += ".xml";
+                cfgFile = new File(globalConfigurationFileName);
+            }
+
+            if (!cfgFile.isFile()) {
+                throw new DAQCompException("Configuration file \"" + cfgFile +
+                                           "\" does not exist");
+            }
         }
 
         String triggerConfiguration;
         try {
             triggerConfiguration = GlobalConfiguration.getTriggerConfig(globalConfigurationFileName);
         } catch (Exception e) {
-            log.error("Error extracting trigger configuration name from global configuraion file.", e);
-            throw new DAQCompException("Cannot get trigger configuration name.", e);
+            log.error("Error extracting trigger configuration name from" +
+                      " global configuraion file.", e);
+            throw new DAQCompException("Cannot get trigger configuration name.",
+                                       e);
         }
-        triggerConfigFileName = globalConfigurationDir + "/trigger/" + triggerConfiguration + ".xml";
+        triggerConfigFileName = globalConfigurationDir + "/trigger/" +
+            triggerConfiguration;
+        File f = new File(triggerConfigFileName);
+        if (!f.isFile()) {
+            if (!triggerConfigFileName.endsWith(".xml")) {
+                triggerConfigFileName += ".xml";
+                f = new File(triggerConfigFileName);
+            }
+
+            if (!f.isFile()) {
+                throw new DAQCompException("Trigger configuration file \"" +
+                                           triggerConfigFileName +
+                                           "\" (from \"" + configName +
+                                           "\") does not exist");
+            }
+        }
 
         // Add triggers to the trigger manager
         currentTriggers = TriggerBuilder.buildTriggers(triggerConfigFileName, sourceId);
@@ -269,6 +293,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 4574 2009-08-28 21:32:32Z dglo $";
+	return "$Id: TriggerComponent.java 4856 2010-01-23 18:50:21Z dglo $";
     }
 }

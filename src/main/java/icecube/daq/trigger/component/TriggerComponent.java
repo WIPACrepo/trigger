@@ -160,6 +160,12 @@ public class TriggerComponent
 
     }
 
+    public void closeAll()
+    {
+        inputEngine.destroyProcessor();
+        outputEngine.destroyProcessor();
+    }
+
     public void flush()
     {
         triggerManager.flush();
@@ -293,6 +299,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 4856 2010-01-23 18:50:21Z dglo $";
+	return "$Id: TriggerComponent.java 4860 2010-01-24 17:47:28Z dglo $";
     }
 }

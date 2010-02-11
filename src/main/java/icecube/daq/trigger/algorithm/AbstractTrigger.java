@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 4628 2009-09-29 17:34:36Z dglo $
+ * Version $Id: AbstractTrigger.java 4885 2010-02-11 18:50:24Z dglo $
  *
  * Date: August 19 2005
  *
@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 4628 2009-09-29 17:34:36Z dglo $
+ * @version $Id: AbstractTrigger.java 4885 2010-02-11 18:50:24Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor
@@ -490,10 +490,10 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
         IUTCTime firstTime = ((IHitPayload) hits.get(0)).getPayloadTimeUTC();
         IUTCTime lastTime = ((IHitPayload) hits.get(numberOfHits-1)).getPayloadTimeUTC();
 
-        if (log.isInfoEnabled() && (triggerCounter % printMod == 0)) {
-            log.info("New Trigger " + triggerCounter + " from " + triggerName + " includes " + numberOfHits
-                     + " hits:  First time = "
-                     + firstTime + " Last time = " + lastTime);
+        if (log.isDebugEnabled() && (triggerCounter % printMod == 0)) {
+            log.debug("New Trigger " + triggerCounter + " from " + triggerName +
+                      " includes " + numberOfHits + " hits:  First time = " +
+                      firstTime + " Last time = " + lastTime);
         }
 
         // set earliest payload of interest to 1/10 ns after the last hit

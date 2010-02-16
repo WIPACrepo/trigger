@@ -46,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 4893 2010-02-16 21:39:13Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 4894 2010-02-16 21:47:25Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -396,9 +396,12 @@ public class GlobalTriggerHandler
                             try {
                                 configuredTrigger.runTrigger(subPayload);
                                 int triggerCounter = configuredTrigger.getTriggerCounter();
-                                if(log.isInfoEnabled() && triggerCounter % PRINTOUT_FREQUENCY == 0 && triggerCounter >= PRINTOUT_FREQUENCY){
-                                    log.info(configuredTrigger.getTriggerName() +
-                                             ":  #  " + triggerCounter);
+                                if(log.isDebugEnabled() &&
+                                   triggerCounter % PRINTOUT_FREQUENCY == 0 &&
+                                   triggerCounter >= PRINTOUT_FREQUENCY)
+                                {
+                                    log.debug(configuredTrigger.getTriggerName() +
+                                              ":  #  " + triggerCounter);
                                 }
 
                             } catch (TriggerException e) {

@@ -35,7 +35,6 @@ import icecube.daq.util.DOMRegistry;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
@@ -45,7 +44,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 4891 2010-02-16 21:09:34Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 4892 2010-02-16 21:26:15Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -64,7 +63,7 @@ public class GlobalTriggerHandler
     /**
      * List of defined triggers
      */
-    private List configuredTriggerList;
+    private List<ITrigger> configuredTriggerList;
 
     /**
      * Bag of triggers to issue
@@ -172,9 +171,7 @@ public class GlobalTriggerHandler
 
         // check for duplicates
         boolean good = true;
-        Iterator iter = configuredTriggerList.iterator();
-        while (iter.hasNext()) {
-            ITrigger existing = (ITrigger) iter.next();
+        for (ITrigger existing : configuredTriggerList) {
             if ( (iTrigger.getTriggerType() == existing.getTriggerType()) &&
                  (iTrigger.getTriggerConfigId() == existing.getTriggerConfigId()) &&
                  (iTrigger.getSourceId().getSourceID() == existing.getSourceId().getSourceID()) ) {
@@ -197,7 +194,7 @@ public class GlobalTriggerHandler
      *
      * @param triggers
      */
-    public void addTriggers(List triggers) {
+    public void addTriggers(List<ITrigger> triggers) {
         clearTriggers();
         configuredTriggerList.addAll(triggers);
     }
@@ -209,9 +206,10 @@ public class GlobalTriggerHandler
         configuredTriggerList.clear();
     }
 
-    public List getConfiguredTriggerList() {
+    public List<ITrigger> getConfiguredTriggerList() {
         return configuredTriggerList;
     }
+
     public void flush()
     {
         // flush the input handler
@@ -228,15 +226,11 @@ public class GlobalTriggerHandler
             log.info("Flushing GlobalTriggers");
         }
 
-        Iterator triggerIterator;
-
-        triggerIterator = configuredTriggerList.iterator();
-        while (triggerIterator.hasNext()) {
-            ITrigger trigger = (ITrigger) triggerIterator.next();
+        for (ITrigger trigger : configuredTriggerList) {
             trigger.flush();
             if (log.isInfoEnabled()) {
-                log.info("GlobalTrigger count for " + trigger.getTriggerName() + " is "
-                         + trigger.getTriggerCounter());
+                log.info("GlobalTrigger count for " + trigger.getTriggerName() +
+                         " is " + trigger.getTriggerCounter());
             }
         }
 
@@ -262,9 +256,7 @@ public class GlobalTriggerHandler
         buf.append("Total # of merged GT events = " +
                   miTotalOutputMergedGlobalTriggers).append(nl);
         buf.append(nl);
-        triggerIterator = configuredTriggerList.iterator();
-        while (triggerIterator.hasNext()) {
-            ITrigger trigger = (ITrigger) triggerIterator.next();
+        for (ITrigger trigger : configuredTriggerList) {
             buf.append("Total # of " + trigger.getTriggerName() + "= " +
                        trigger.getTriggerCounter());
             buf.append(nl);
@@ -284,7 +276,7 @@ public class GlobalTriggerHandler
         miTotalOutputMergedGlobalTriggers = 0;
         earliestPayloadOfInterest = null;
         mListAvailableTriggersToRelease = new ArrayList();
-        configuredTriggerList = new ArrayList();
+        configuredTriggerList = new ArrayList<ITrigger>();
         longestTrigger = 0.0;
 
         inputHandler = new TriggerInput();
@@ -386,9 +378,7 @@ public class GlobalTriggerHandler
                         }
 
                         //sendPayloadToFilterDestinantion((IPayload) subPayloads.get(i));
-                        Iterator triggerIterator = configuredTriggerList.iterator();
-                        while (triggerIterator.hasNext()) {
-                            ITrigger configuredTrigger = (ITrigger) triggerIterator.next();
+                        for (ITrigger configuredTrigger : configuredTriggerList) {
                             try {
                                 configuredTrigger.runTrigger(subPayload);
                                 int triggerCounter = configuredTrigger.getTriggerCounter();
@@ -404,9 +394,7 @@ public class GlobalTriggerHandler
                     }
                 }else{
                     log.debug("Now start processing single trigger input");
-                    Iterator triggerIterator = configuredTriggerList.iterator();
-                    while (triggerIterator.hasNext()) {
-                        ITrigger configuredTrigger = (ITrigger) triggerIterator.next();
+                    for (ITrigger configuredTrigger : configuredTriggerList) {
                         try {
                             configuredTrigger.runTrigger(tInputTrigger);
                         } catch (TriggerException e) {
@@ -582,10 +570,8 @@ System.err.println("GTrig unattached "+trigBuf.capacity()+" bytes");
 
         log.debug("SET EARLIEST TIME:");
         //--loop over triggers and find earliest time of interest
-        Iterator triggerListIterator = configuredTriggerList.iterator();
-        while (triggerListIterator.hasNext()) {
-            IPayload earliestPayload
-                    = (IPayload) ((ITrigger) triggerListIterator.next()).getEarliestPayloadOfInterest();
+        for (ITrigger trigger : configuredTriggerList) {
+            IPayload earliestPayload = trigger.getEarliestPayloadOfInterest();
 
             if (earliestPayload != null) {
                 // if payload < earliest
@@ -636,9 +622,8 @@ System.err.println("GTrig unattached "+trigBuf.capacity()+" bytes");
         int maxPastOverall = Integer.MAX_VALUE;
 
         // loop over triggers
-        Iterator readoutIter = readoutList.iterator();
-        while (readoutIter.hasNext()) {
-            TriggerReadout readout = (TriggerReadout) readoutIter.next();
+        for (Object obj : readoutList) {
+            TriggerReadout readout = (TriggerReadout) obj;
 
             // check this readout against the overall earliest
             int maxPast = TriggerReadout.getMaxReadoutPast(readout);

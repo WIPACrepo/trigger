@@ -68,8 +68,7 @@ public class StringTriggerHandler
              (interfaceType == PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)) {
 
             // loop over triggers
-            for (Object obj : getTriggerList()) {
-                ITrigger trigger = (ITrigger) obj;
+            for (ITrigger trigger : getTriggerList()) {
                 try {
                     trigger.runTrigger(payload);
                 } catch (TriggerException e) {

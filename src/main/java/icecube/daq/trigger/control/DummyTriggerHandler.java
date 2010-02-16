@@ -134,7 +134,7 @@ public class DummyTriggerHandler
      *
      * @param triggers
      */
-    public void addTriggers(List triggers) {
+    public void addTriggers(List<ITrigger> triggers) {
         log.info("Triggers added to DummyTriggerBag are ignored");
     }
 

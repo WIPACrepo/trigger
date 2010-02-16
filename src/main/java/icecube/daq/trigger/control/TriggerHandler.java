@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 4891 2010-02-16 21:09:34Z dglo $
+ * Version $Id: TriggerHandler.java 4892 2010-02-16 21:26:15Z dglo $
  *
  * Date: October 25 2004
  *
@@ -36,7 +36,6 @@ import icecube.daq.util.DOMRegistry;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
@@ -46,7 +45,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 4891 2010-02-16 21:09:34Z dglo $
+ * @version $Id: TriggerHandler.java 4892 2010-02-16 21:26:15Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -61,7 +60,7 @@ public class TriggerHandler
     /**
      * List of defined triggers
      */
-    private List triggerList;
+    private List<ITrigger> triggerList;
 
     /**
      * Bag of triggers to issue
@@ -144,7 +143,7 @@ public class TriggerHandler
         earliestPayloadOfInterest = null;
         timeOfLastHit = null;
         inputHandler = new TriggerInput();
-        triggerList = new ArrayList();
+        triggerList = new ArrayList<ITrigger>();
 
         triggerBag = createTriggerBag();
 
@@ -179,9 +178,7 @@ public class TriggerHandler
 
         // check for duplicates
         boolean good = true;
-        Iterator iter = triggerList.iterator();
-        while (iter.hasNext()) {
-            ITrigger existing = (ITrigger) iter.next();
+        for (ITrigger existing : triggerList) {
             if ( (trigger.getTriggerType() == existing.getTriggerType()) &&
                  (trigger.getTriggerConfigId() == existing.getTriggerConfigId()) &&
                  (trigger.getSourceId().getSourceID() == existing.getSourceId().getSourceID()) ) {
@@ -204,7 +201,7 @@ public class TriggerHandler
      *
      * @param triggers
      */
-    public void addTriggers(List triggers) {
+    public void addTriggers(List<ITrigger> triggers) {
         clearTriggers();
         triggerList.addAll(triggers);
     }
@@ -235,9 +232,7 @@ public class TriggerHandler
         if (log.isInfoEnabled()) {
             log.info("Flushing Triggers");
         }
-        Iterator triggerIterator = triggerList.iterator();
-        while (triggerIterator.hasNext()) {
-            ITrigger trigger = (ITrigger) triggerIterator.next();
+        for (ITrigger trigger : triggerList) {
             trigger.flush();
             if (log.isInfoEnabled()) {
                 log.info("Trigger count for " + trigger.getTriggerName() +
@@ -319,9 +314,7 @@ public class TriggerHandler
                 }
 
                 // loop over triggers
-                Iterator triggerIterator = triggerList.iterator();
-                while (triggerIterator.hasNext()) {
-                    ITrigger trigger = (ITrigger) triggerIterator.next();
+                for (ITrigger trigger : triggerList) {
                     try {
                         trigger.runTrigger(hit);
                     } catch (TriggerException e) {
@@ -364,9 +357,7 @@ public class TriggerHandler
                     count++;
 
                     // loop over triggers
-                    Iterator triggerIterator = triggerList.iterator();
-                    while (triggerIterator.hasNext()) {
-                        ITrigger trigger = (ITrigger) triggerIterator.next();
+                    for (ITrigger trigger : triggerList) {
                         try {
                             trigger.runTrigger(tPayload);
                         } catch (TriggerException e) {
@@ -426,7 +417,7 @@ public class TriggerHandler
      * getter for triggerList
      * @return trigger list
      */
-    public List getTriggerList() {
+    public List<ITrigger> getTriggerList() {
         return triggerList;
     }
 
@@ -557,10 +548,8 @@ System.err.println("Unattached "+SourceIdRegistry.getDAQNameFromISourceID(source
         IPayload earliestPayloadOverall = null;
 
         // loop over triggers and find earliest time of interest
-        Iterator triggerListIterator = triggerList.iterator();
-        while (triggerListIterator.hasNext()) {
-            IPayload earliestPayload
-                    = ((ITrigger) triggerListIterator.next()).getEarliestPayloadOfInterest();
+        for (ITrigger trigger : triggerList) {
+            IPayload earliestPayload = trigger.getEarliestPayloadOfInterest();
             if (earliestPayload != null) {
                 // if payload < earliest
                 if (earliestTimeOverall.compareTo(earliestPayload.getPayloadTimeUTC()) > 0) {

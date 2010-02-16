@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerManager
  *
- * Version $Id: ITriggerHandler.java 4891 2010-02-16 21:09:34Z dglo $
+ * Version $Id: ITriggerHandler.java 4892 2010-02-16 21:26:15Z dglo $
  *
  * Date: March 31 2005
  *
@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * This interface defines the behavior of a TriggerHandler
  *
- * @version $Id: ITriggerHandler.java 4891 2010-02-16 21:09:34Z dglo $
+ * @version $Id: ITriggerHandler.java 4892 2010-02-16 21:26:15Z dglo $
  * @author pat
  */
 public interface ITriggerHandler extends IPayloadProducer
@@ -44,7 +44,7 @@ public interface ITriggerHandler extends IPayloadProducer
      * add a list of triggers
      * @param triggers
      */
-    void addTriggers(List triggers);
+    void addTriggers(List<ITrigger> triggers);
 
     /**
      * clear list of triggers

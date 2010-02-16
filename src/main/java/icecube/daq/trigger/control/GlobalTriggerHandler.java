@@ -46,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 4890 2010-02-16 20:24:07Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -201,7 +201,7 @@ public class GlobalTriggerHandler
      */
     public void addTriggers(List triggers) {
         clearTriggers();
-        configuredTriggerList = triggers;
+        configuredTriggerList.addAll(triggers);
     }
 
     /**

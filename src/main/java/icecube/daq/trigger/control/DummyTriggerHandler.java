@@ -32,7 +32,9 @@ import icecube.daq.util.DOMRegistry;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
@@ -142,6 +144,15 @@ public class DummyTriggerHandler
      * clear list of triggers
      */
     public void clearTriggers() {
+    }
+
+    public Map<String, Long> getTriggerCounts()
+    {
+        HashMap<String, Long> map = new HashMap<String, Long>();
+
+        map.put("DummyTrigger", new Long(count));
+
+        return map;
     }
 
     /**

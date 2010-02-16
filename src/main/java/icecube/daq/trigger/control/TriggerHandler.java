@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 4892 2010-02-16 21:26:15Z dglo $
+ * Version $Id: TriggerHandler.java 4893 2010-02-16 21:39:13Z dglo $
  *
  * Date: October 25 2004
  *
@@ -36,7 +36,9 @@ import icecube.daq.util.DOMRegistry;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.DataFormatException;
 
 import org.apache.commons.logging.Log;
@@ -45,7 +47,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 4892 2010-02-16 21:26:15Z dglo $
+ * @version $Id: TriggerHandler.java 4893 2010-02-16 21:39:13Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -211,6 +213,18 @@ public class TriggerHandler
      */
     public void clearTriggers() {
         triggerList.clear();
+    }
+
+    public Map<String, Long> getTriggerCounts()
+    {
+        HashMap<String, Long> map = new HashMap<String, Long>();
+
+        for (ITrigger trigger : triggerList) {
+            map.put(trigger.getTriggerName(),
+                    new Long(trigger.getTriggerCounter()));
+        }
+
+        return map;
     }
 
     /**

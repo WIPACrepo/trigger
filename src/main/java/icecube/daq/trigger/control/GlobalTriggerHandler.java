@@ -35,7 +35,9 @@ import icecube.daq.util.DOMRegistry;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.DataFormatException;
 
 import org.apache.commons.logging.Log;
@@ -44,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 4892 2010-02-16 21:26:15Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 4893 2010-02-16 21:39:13Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -204,6 +206,18 @@ public class GlobalTriggerHandler
      */
     public void clearTriggers() {
         configuredTriggerList.clear();
+    }
+
+    public Map<String, Long> getTriggerCounts()
+    {
+        HashMap<String, Long> map = new HashMap<String, Long>();
+
+        for (ITrigger trigger : configuredTriggerList) {
+            map.put(trigger.getTriggerName(),
+                    new Long(trigger.getTriggerCounter()));
+        }
+
+        return map;
     }
 
     public List<ITrigger> getConfiguredTriggerList() {

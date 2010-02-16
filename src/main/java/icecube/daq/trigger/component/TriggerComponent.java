@@ -127,6 +127,7 @@ public class TriggerComponent
             triggerManager =
                 new DummyTriggerManager(factory, sourceId, trFactory);
         }
+        addMBean("manager", triggerManager);
 
         triggerManager.setOutgoingBufferCache(outCache);
 
@@ -299,6 +300,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 4860 2010-01-24 17:47:28Z dglo $";
+	return "$Id: TriggerComponent.java 4893 2010-02-16 21:39:13Z dglo $";
     }
 }

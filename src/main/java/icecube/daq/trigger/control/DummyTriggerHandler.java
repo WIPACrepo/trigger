@@ -25,6 +25,7 @@ import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID;
+import icecube.daq.trigger.algorithm.ITrigger;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
@@ -124,7 +125,7 @@ public class DummyTriggerHandler
      * method for adding triggers to the trigger list
      * @param trigger trigger to be added
      */
-    public void addTrigger(ITriggerControl trigger) {
+    public void addTrigger(ITrigger trigger) {
         log.info("Triggers added to DummyTriggerBag are ignored");
     }
 

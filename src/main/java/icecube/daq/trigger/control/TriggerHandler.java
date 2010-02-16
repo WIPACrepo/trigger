@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: TriggerHandler.java 4891 2010-02-16 21:09:34Z dglo $
  *
  * Date: October 25 2004
  *
@@ -26,10 +26,9 @@ import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID;
 import icecube.daq.payload.impl.UTCTime;
+import icecube.daq.trigger.algorithm.ITrigger;
 import icecube.daq.trigger.config.DomSetFactory;
-import icecube.daq.trigger.config.ITriggerConfig;
 import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.monitor.ITriggerMonitor;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
@@ -47,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: TriggerHandler.java 4891 2010-02-16 21:09:34Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -176,17 +175,16 @@ public class TriggerHandler
      * method for adding triggers to the trigger list
      * @param trigger trigger to be added
      */
-    public void addTrigger(ITriggerControl trigger) {
+    public void addTrigger(ITrigger trigger) {
 
         // check for duplicates
         boolean good = true;
-        ITriggerConfig config = (ITriggerConfig) trigger;
         Iterator iter = triggerList.iterator();
         while (iter.hasNext()) {
-            ITriggerConfig existing = (ITriggerConfig) iter.next();
-            if ( (config.getTriggerType() == existing.getTriggerType()) &&
-                 (config.getTriggerConfigId() == existing.getTriggerConfigId()) &&
-                 (config.getSourceId().getSourceID() == existing.getSourceId().getSourceID()) ) {
+            ITrigger existing = (ITrigger) iter.next();
+            if ( (trigger.getTriggerType() == existing.getTriggerType()) &&
+                 (trigger.getTriggerConfigId() == existing.getTriggerConfigId()) &&
+                 (trigger.getSourceId().getSourceID() == existing.getSourceId().getSourceID()) ) {
                 log.error("Attempt to add duplicate trigger to trigger list!");
                 good = false;
             }
@@ -239,11 +237,11 @@ public class TriggerHandler
         }
         Iterator triggerIterator = triggerList.iterator();
         while (triggerIterator.hasNext()) {
-            ITriggerControl trigger = (ITriggerControl) triggerIterator.next();
+            ITrigger trigger = (ITrigger) triggerIterator.next();
             trigger.flush();
             if (log.isInfoEnabled()) {
-                log.info("Trigger count for " + ((ITriggerConfig) trigger).getTriggerName() + " is "
-                         + ((ITriggerMonitor) trigger).getTriggerCounter());
+                log.info("Trigger count for " + trigger.getTriggerName() +
+                         " is " + trigger.getTriggerCounter());
             }
         }
 
@@ -323,7 +321,7 @@ public class TriggerHandler
                 // loop over triggers
                 Iterator triggerIterator = triggerList.iterator();
                 while (triggerIterator.hasNext()) {
-                    ITriggerControl trigger = (ITriggerControl) triggerIterator.next();
+                    ITrigger trigger = (ITrigger) triggerIterator.next();
                     try {
                         trigger.runTrigger(hit);
                     } catch (TriggerException e) {
@@ -368,7 +366,7 @@ public class TriggerHandler
                     // loop over triggers
                     Iterator triggerIterator = triggerList.iterator();
                     while (triggerIterator.hasNext()) {
-                        ITriggerControl trigger = (ITriggerControl) triggerIterator.next();
+                        ITrigger trigger = (ITrigger) triggerIterator.next();
                         try {
                             trigger.runTrigger(tPayload);
                         } catch (TriggerException e) {
@@ -562,7 +560,7 @@ System.err.println("Unattached "+SourceIdRegistry.getDAQNameFromISourceID(source
         Iterator triggerListIterator = triggerList.iterator();
         while (triggerListIterator.hasNext()) {
             IPayload earliestPayload
-                    = ((ITriggerControl) triggerListIterator.next()).getEarliestPayloadOfInterest();
+                    = ((ITrigger) triggerListIterator.next()).getEarliestPayloadOfInterest();
             if (earliestPayload != null) {
                 // if payload < earliest
                 if (earliestTimeOverall.compareTo(earliestPayload.getPayloadTimeUTC()) > 0) {

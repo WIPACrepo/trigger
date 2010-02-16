@@ -24,11 +24,10 @@ import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID;
 import icecube.daq.payload.impl.UTCTime;
+import icecube.daq.trigger.algorithm.ITrigger;
 import icecube.daq.trigger.config.DomSetFactory;
-import icecube.daq.trigger.config.ITriggerConfig;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.monitor.ITriggerMonitor;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
@@ -46,7 +45,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 4890 2010-02-16 20:24:07Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 4891 2010-02-16 21:09:34Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -169,17 +168,16 @@ public class GlobalTriggerHandler
         triggerBag.add(triggerPayload);
     }
 
-    public void addTrigger(ITriggerControl iTrigger) {
+    public void addTrigger(ITrigger iTrigger) {
 
         // check for duplicates
         boolean good = true;
-        ITriggerConfig config = (ITriggerConfig) iTrigger;
         Iterator iter = configuredTriggerList.iterator();
         while (iter.hasNext()) {
-            ITriggerConfig existing = (ITriggerConfig) iter.next();
-            if ( (config.getTriggerType() == existing.getTriggerType()) &&
-                 (config.getTriggerConfigId() == existing.getTriggerConfigId()) &&
-                 (config.getSourceId().getSourceID() == existing.getSourceId().getSourceID()) ) {
+            ITrigger existing = (ITrigger) iter.next();
+            if ( (iTrigger.getTriggerType() == existing.getTriggerType()) &&
+                 (iTrigger.getTriggerConfigId() == existing.getTriggerConfigId()) &&
+                 (iTrigger.getSourceId().getSourceID() == existing.getSourceId().getSourceID()) ) {
                 log.error("Attempt to add duplicate trigger to trigger list!");
                 good = false;
             }
@@ -234,11 +232,11 @@ public class GlobalTriggerHandler
 
         triggerIterator = configuredTriggerList.iterator();
         while (triggerIterator.hasNext()) {
-            ITriggerControl trigger = (ITriggerControl) triggerIterator.next();
+            ITrigger trigger = (ITrigger) triggerIterator.next();
             trigger.flush();
             if (log.isInfoEnabled()) {
-                log.info("GlobalTrigger count for " + ((ITriggerConfig) trigger).getTriggerName() + " is "
-                         + ((ITriggerMonitor) trigger).getTriggerCounter());
+                log.info("GlobalTrigger count for " + trigger.getTriggerName() + " is "
+                         + trigger.getTriggerCounter());
             }
         }
 
@@ -266,10 +264,9 @@ public class GlobalTriggerHandler
         buf.append(nl);
         triggerIterator = configuredTriggerList.iterator();
         while (triggerIterator.hasNext()) {
-            ITriggerControl trigger = (ITriggerControl) triggerIterator.next();
-            buf.append("Total # of " +
-                       ((ITriggerConfig) trigger).getTriggerName() + "= " +
-                       ((ITriggerMonitor) trigger).getTriggerCounter());
+            ITrigger trigger = (ITrigger) triggerIterator.next();
+            buf.append("Total # of " + trigger.getTriggerName() + "= " +
+                       trigger.getTriggerCounter());
             buf.append(nl);
         }
         buf.append(hdrLine).append(nl);
@@ -391,13 +388,13 @@ public class GlobalTriggerHandler
                         //sendPayloadToFilterDestinantion((IPayload) subPayloads.get(i));
                         Iterator triggerIterator = configuredTriggerList.iterator();
                         while (triggerIterator.hasNext()) {
-                            ITriggerControl configuredTrigger = (ITriggerControl) triggerIterator.next();
+                            ITrigger configuredTrigger = (ITrigger) triggerIterator.next();
                             try {
                                 configuredTrigger.runTrigger(subPayload);
-                                int triggerCounter = ((ITriggerMonitor) configuredTrigger).getTriggerCounter();
+                                int triggerCounter = configuredTrigger.getTriggerCounter();
                                 if(log.isInfoEnabled() && triggerCounter % PRINTOUT_FREQUENCY == 0 && triggerCounter >= PRINTOUT_FREQUENCY){
-                                    log.info(((ITriggerConfig) configuredTrigger).
-                                            getTriggerName() + ":  #  " + triggerCounter);
+                                    log.info(configuredTrigger.getTriggerName() +
+                                             ":  #  " + triggerCounter);
                                 }
 
                             } catch (TriggerException e) {
@@ -409,7 +406,7 @@ public class GlobalTriggerHandler
                     log.debug("Now start processing single trigger input");
                     Iterator triggerIterator = configuredTriggerList.iterator();
                     while (triggerIterator.hasNext()) {
-                        ITriggerControl configuredTrigger = (ITriggerControl) triggerIterator.next();
+                        ITrigger configuredTrigger = (ITrigger) triggerIterator.next();
                         try {
                             configuredTrigger.runTrigger(tInputTrigger);
                         } catch (TriggerException e) {
@@ -588,7 +585,7 @@ System.err.println("GTrig unattached "+trigBuf.capacity()+" bytes");
         Iterator triggerListIterator = configuredTriggerList.iterator();
         while (triggerListIterator.hasNext()) {
             IPayload earliestPayload
-                    = (IPayload) ((ITriggerControl) triggerListIterator.next()).getEarliestPayloadOfInterest();
+                    = (IPayload) ((ITrigger) triggerListIterator.next()).getEarliestPayloadOfInterest();
 
             if (earliestPayload != null) {
                 // if payload < earliest

@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerManager
  *
- * Version $Id: ITriggerHandler.java 4269 2009-06-08 22:01:11Z dglo $
+ * Version $Id: ITriggerHandler.java 4891 2010-02-16 21:09:34Z dglo $
  *
  * Date: March 31 2005
  *
@@ -13,6 +13,7 @@ package icecube.daq.trigger.control;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.trigger.algorithm.ITrigger;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
 
@@ -21,7 +22,7 @@ import java.util.List;
 /**
  * This interface defines the behavior of a TriggerHandler
  *
- * @version $Id: ITriggerHandler.java 4269 2009-06-08 22:01:11Z dglo $
+ * @version $Id: ITriggerHandler.java 4891 2010-02-16 21:09:34Z dglo $
  * @author pat
  */
 public interface ITriggerHandler extends IPayloadProducer
@@ -37,7 +38,7 @@ public interface ITriggerHandler extends IPayloadProducer
      * add a trigger to the list of managed triggers
      * @param iTrigger trigger to add
      */
-    void addTrigger(ITriggerControl iTrigger);
+    void addTrigger(ITrigger iTrigger);
 
     /**
      * add a list of triggers

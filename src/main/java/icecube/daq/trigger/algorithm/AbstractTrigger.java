@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 4885 2010-02-11 18:50:24Z dglo $
+ * Version $Id: AbstractTrigger.java 4891 2010-02-16 21:09:34Z dglo $
  *
  * Date: August 19 2005
  *
@@ -21,17 +21,14 @@ import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.trigger.config.ITriggerConfig;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.HitFilter;
-import icecube.daq.trigger.control.ITriggerControl;
 import icecube.daq.trigger.control.ITriggerHandler;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.monitor.ITriggerMonitor;
 import icecube.daq.trigger.monitor.TriggerMonitor;
 import icecube.icebucket.monitor.ScalarFlowMonitor;
 import icecube.icebucket.monitor.simple.ScalarFlowMonitorImpl;
@@ -49,10 +46,11 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 4885 2010-02-11 18:50:24Z dglo $
+ * @version $Id: AbstractTrigger.java 4891 2010-02-16 21:09:34Z dglo $
  * @author pat
  */
-public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor
+public abstract class AbstractTrigger
+    implements ITrigger
 {
 
     /**
@@ -294,7 +292,7 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
 
     /*
      *
-     * Methods of ITriggerControl
+     * Methods of ITriggerMonitor
      *
      */
 

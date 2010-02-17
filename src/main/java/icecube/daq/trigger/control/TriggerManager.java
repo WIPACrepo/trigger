@@ -1,7 +1,7 @@
 /*
  * class: TriggerManager
  *
- * Version $Id: TriggerManager.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: TriggerManager.java 4902 2010-02-17 22:55:22Z dglo $
  *
  * Date: October 25 2004
  *
@@ -36,12 +36,12 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger
  *
- * @version $Id: TriggerManager.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: TriggerManager.java 4902 2010-02-17 22:55:22Z dglo $
  * @author pat
  */
 public class TriggerManager
         extends TriggerHandler
-        implements ITriggerManager
+        implements ITriggerManager, TriggerManagerMBean
 {
 
     /**

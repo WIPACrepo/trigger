@@ -36,12 +36,12 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: GlobalTriggerManager.java 4902 2010-02-17 22:55:22Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager
         extends GlobalTriggerHandler
-        implements ITriggerManager
+        implements ITriggerManager, GlobalTriggerManagerMBean
 {
     /**
      * Log object for this class

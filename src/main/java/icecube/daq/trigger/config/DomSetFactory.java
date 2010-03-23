@@ -145,12 +145,15 @@ public class DomSetFactory
                 return null;
             }
 
-        } else if (domSetId == 4) {
+        } else if ( (domSetId == 4) || (domSetId == 5) ) {
             // DeepCore
             ArrayList<String> domIds = new ArrayList<String>();
 
             // InIce strings are 26,27,35,36,37,45,46
+	    // DomSet 4 used 41-60
+	    // DomSet 5 will use 39-60
             int minPos = 41;
+	    if (domSetId == 5) minPos = 39;
             int maxPos = 60;
 
             // 26
@@ -241,7 +244,10 @@ public class DomSetFactory
             if (!domIds.isEmpty()) {
                 return new DomSet("DEEPCORE", domIds);
             } else {
-                log.error("Failed to create DomSet for domSetId=4 (DEEPCORE)");
+		if (domSetId == 4)
+		    log.error("Failed to create DomSet for domSetId=4 (DEEPCORE)");
+		else if (domSetId == 5)
+		    log.error("Failed to create DomSet for domSetId=5 (DEEPCORE)");
                 return null;
             }
 

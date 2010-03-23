@@ -71,6 +71,7 @@ public class VolumeTrigger extends AbstractTrigger
     
     private LinkedList<IHitPayload> triggerQueue;
 
+    private boolean needStringMap;
     private TreeMap<Integer, TreeSet<Integer>> stringMap;
 
     private static final Logger logger = Logger.getLogger(VolumeTrigger.class);
@@ -88,8 +89,7 @@ public class VolumeTrigger extends AbstractTrigger
         setCoherenceLength(7);
         configCoherence = false;
 
-	String stringMapFileName = "";
-	makeStringMap(stringMapFileName);
+	needStringMap = true;
     }
     
     @Override
@@ -153,6 +153,13 @@ public class VolumeTrigger extends AbstractTrigger
     @Override
     public void runTrigger(IPayload payload) throws TriggerException
     {
+
+	// Get the string map if we haven't already
+	if (needStringMap) {
+	    stringMap = getTriggerHandler().getStringMap();
+	    needStringMap = false;
+	}
+
         if (!(payload instanceof IHitPayload)) 
             throw new TriggerException(
                     "Payload object " + payload + " cannot be upcast to IHitPayload."
@@ -199,6 +206,7 @@ public class VolumeTrigger extends AbstractTrigger
     private boolean processHitQueue()
     {
     	final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
+
         final TreeMap<LogicalChannelVT, Integer> coherenceMap = new TreeMap<LogicalChannelVT, Integer>();
         boolean trigger = false;
         
@@ -260,38 +268,6 @@ public class VolumeTrigger extends AbstractTrigger
         }
         
         return true;
-    }
-
-    private void makeStringMap(String stringMapFileName)
-    {
-
-	try {
-	    BufferedReader reader = new BufferedReader(new FileReader(stringMapFileName));
-
-	    String line;
-	    while ((line = reader.readLine()) != null) {
-
-		String[] nums = line.split("\\s");
-		Integer currentString = Integer.parseInt(nums[0]);
-
-		TreeSet<Integer> neighbors = new TreeSet<Integer>();
-		neighbors.add(currentString);
-		for (int i = 1; i < nums.length; i++) {
-		    Integer neighborString = Integer.parseInt(nums[i]);
-		    neighbors.add(neighborString);
-		}
-
-		stringMap.put(currentString, neighbors);
-
-	    }
-
-	} catch(FileNotFoundException fnfe) {
-
-	} catch (IOException ioe) {
-
-	}
-
-
     }
 
     public boolean isConfigured()

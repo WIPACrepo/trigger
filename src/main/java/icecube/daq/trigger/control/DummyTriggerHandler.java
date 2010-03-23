@@ -36,6 +36,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -89,6 +91,11 @@ public class DummyTriggerHandler
     private int count;
 
     private DOMRegistry domRegistry;
+
+    /**
+     * String map
+     */
+    private TreeMap<Integer, TreeSet<Integer> > stringMap;
 
     /**
      * Default constructor
@@ -314,6 +321,15 @@ public class DummyTriggerHandler
 
     public DOMRegistry getDOMRegistry() {
         return domRegistry;
+    }
+
+    public void createStringMap(String stringMapFileName) {
+
+
+    }
+
+    public TreeMap<Integer, TreeSet<Integer> > getStringMap() {
+	return stringMap;
     }
 
     public void setOutputFactory(TriggerRequestPayloadFactory factory)

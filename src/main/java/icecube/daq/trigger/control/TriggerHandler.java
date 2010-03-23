@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 4893 2010-02-16 21:39:13Z dglo $
+ * Version $Id: TriggerHandler.java 4938 2010-03-23 18:26:46Z toale $
  *
  * Date: October 25 2004
  *
@@ -39,7 +39,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.zip.DataFormatException;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +53,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 4893 2010-02-16 21:39:13Z dglo $
+ * @version $Id: TriggerHandler.java 4938 2010-03-23 18:26:46Z toale $
  * @author pat
  */
 public class TriggerHandler
@@ -118,6 +124,11 @@ public class TriggerHandler
      * DOMRegistry
      */
     private DOMRegistry domRegistry;
+
+    /**
+     * String map
+     */
+    private TreeMap<Integer, TreeSet<Integer> > stringMap;
 
     /** Outgoing byte buffer cache. */
     private IByteBufferCache outCache;
@@ -591,6 +602,40 @@ System.err.println("Unattached "+SourceIdRegistry.getDAQNameFromISourceID(source
 
     public DOMRegistry getDOMRegistry() {
 	return domRegistry;
+    }
+
+    public void createStringMap(String stringMapFileName) {
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(stringMapFileName));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+
+                String[] nums = line.split("\\s");
+                Integer currentString = Integer.parseInt(nums[0]);
+
+                TreeSet<Integer> neighbors = new TreeSet<Integer>();
+                neighbors.add(currentString);
+                for (int i = 1; i < nums.length; i++) {
+                    Integer neighborString = Integer.parseInt(nums[i]);
+                    neighbors.add(neighborString);
+                }
+
+                stringMap.put(currentString, neighbors);
+
+            }
+
+        } catch(FileNotFoundException fnfe) {
+	    log.error("Exception opening string map file: " + fnfe);
+        } catch (IOException ioe) {
+	    log.error("Exception reading string map file: " + ioe);
+        }
+
+    }
+
+    public TreeMap<Integer, TreeSet<Integer> > getStringMap() {
+	return stringMap;
     }
 
     public void setOutputFactory(TriggerRequestPayloadFactory factory)

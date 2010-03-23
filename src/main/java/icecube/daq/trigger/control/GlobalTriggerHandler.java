@@ -39,6 +39,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.DataFormatException;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,7 +48,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 4894 2010-02-16 21:47:25Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 4938 2010-03-23 18:26:46Z toale $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -127,6 +129,11 @@ public class GlobalTriggerHandler
     private double longestTrigger;
 
     private DOMRegistry domRegistry;
+
+    /**
+     * String map
+     */
+    private TreeMap<Integer, TreeSet<Integer> > stringMap;
 
     /** Outgoing byte buffer cache. */
     private IByteBufferCache outCache;
@@ -698,6 +705,15 @@ System.err.println("GTrig unattached "+trigBuf.capacity()+" bytes");
 
     public DOMRegistry getDOMRegistry() {
 	return domRegistry;
+    }
+
+    public void createStringMap(String stringMapFileName) {
+
+
+    }
+
+    public TreeMap<Integer, TreeSet<Integer> > getStringMap() {
+	return stringMap;
     }
 
     public int getCount()

@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerManager
  *
- * Version $Id: ITriggerHandler.java 4892 2010-02-16 21:26:15Z dglo $
+ * Version $Id: ITriggerHandler.java 4938 2010-03-23 18:26:46Z toale $
  *
  * Date: March 31 2005
  *
@@ -18,11 +18,13 @@ import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
 
 import java.util.List;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * This interface defines the behavior of a TriggerHandler
  *
- * @version $Id: ITriggerHandler.java 4892 2010-02-16 21:26:15Z dglo $
+ * @version $Id: ITriggerHandler.java 4938 2010-03-23 18:26:46Z toale $
  * @author pat
  */
 public interface ITriggerHandler extends IPayloadProducer
@@ -91,6 +93,18 @@ public interface ITriggerHandler extends IPayloadProducer
      * @return the DOMRegistry to use
      */
     DOMRegistry getDOMRegistry();
+
+    /**
+     * Create the map of neighboring strings
+     * @param stringMapFileName Name of the text file to create the map from
+     */
+    void createStringMap(String stringMapFileName);
+
+    /**
+     * Get the string map
+     * @return the map of neighboring strings
+     */
+    TreeMap<Integer, TreeSet<Integer> > getStringMap();
 
     /**
      * Get the number of payloads processed.

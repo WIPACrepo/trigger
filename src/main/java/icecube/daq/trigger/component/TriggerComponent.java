@@ -46,6 +46,8 @@ public class TriggerComponent
     public static final String DEFAULT_AMANDA_HOST = "ic-twrdaq00";
     public static final int DEFAULT_AMANDA_PORT = 12014;
 
+    public static final String DEFAULT_STRING_MAP_FILE_NAME = "hexagon_near.geo";
+
     private ISourceID sourceId;
     private IByteBufferCache inCache;
     private IByteBufferCache outCache;
@@ -227,7 +229,11 @@ public class TriggerComponent
     	catch (Exception ex) {
     		throw new DAQCompException("Error loading DOM registry", ex);
     	}
-    	
+
+	// Also create the string map
+	String stringMapFile = globalConfigurationDir + "/" + DEFAULT_STRING_MAP_FILE_NAME;
+	triggerManager.createStringMap(stringMapFile);
+
         // Lookup the trigger configuration
         String globalConfigurationFileName = globalConfigurationDir + "/" +
             configName;;
@@ -300,6 +306,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 4893 2010-02-16 21:39:13Z dglo $";
+	return "$Id: TriggerComponent.java 4938 2010-03-23 18:26:46Z toale $";
     }
 }

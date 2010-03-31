@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 4938 2010-03-23 18:26:46Z toale $
+ * Version $Id: TriggerHandler.java 4951 2010-03-31 21:32:55Z toale $
  *
  * Date: October 25 2004
  *
@@ -53,7 +53,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 4938 2010-03-23 18:26:46Z toale $
+ * @version $Id: TriggerHandler.java 4951 2010-03-31 21:32:55Z toale $
  * @author pat
  */
 public class TriggerHandler
@@ -606,6 +606,10 @@ System.err.println("Unattached "+SourceIdRegistry.getDAQNameFromISourceID(source
 
     public void createStringMap(String stringMapFileName) {
 
+	if (log.isDebugEnabled()) {
+	    log.debug("Creating string map...");
+	}
+
         try {
             BufferedReader reader = new BufferedReader(new FileReader(stringMapFileName));
 
@@ -615,16 +619,32 @@ System.err.println("Unattached "+SourceIdRegistry.getDAQNameFromISourceID(source
                 String[] nums = line.split("\\s");
                 Integer currentString = Integer.parseInt(nums[0]);
 
+		if (log.isDebugEnabled()) {
+		    log.debug(" Getting neighbors of string " + currentString);
+		}
+
                 TreeSet<Integer> neighbors = new TreeSet<Integer>();
                 neighbors.add(currentString);
                 for (int i = 1; i < nums.length; i++) {
                     Integer neighborString = Integer.parseInt(nums[i]);
+
+		    if (log.isDebugEnabled()) {
+			log.debug("   Adding string " + neighborString);
+		    }
                     neighbors.add(neighborString);
                 }
+
+		if (log.isDebugEnabled()) {
+		    log.debug("  String " + currentString + " has " + neighbors.size() + " neighbors");
+		}
 
                 stringMap.put(currentString, neighbors);
 
             }
+
+	    if (log.isDebugEnabled()) {
+		log.debug(" String map contains " + stringMap.size() + " strings");
+	    }
 
         } catch(FileNotFoundException fnfe) {
 	    log.error("Exception opening string map file: " + fnfe);

@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 4951 2010-03-31 21:32:55Z toale $
+ * Version $Id: TriggerHandler.java 4952 2010-03-31 21:51:09Z toale $
  *
  * Date: October 25 2004
  *
@@ -53,7 +53,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 4951 2010-03-31 21:32:55Z toale $
+ * @version $Id: TriggerHandler.java 4952 2010-03-31 21:51:09Z toale $
  * @author pat
  */
 public class TriggerHandler
@@ -164,6 +164,9 @@ public class TriggerHandler
         PayloadBagMonitor triggerBagMonitor = new PayloadBagMonitor();
         triggerBag.setMonitor(triggerBagMonitor);
         monitor.setTriggerBagMonitor(triggerBagMonitor);
+
+	stringMap = new TreeMap<Integer, TreeSet<Integer> >();
+
     }
 
     protected ITriggerBag createTriggerBag()

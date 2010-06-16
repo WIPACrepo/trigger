@@ -197,7 +197,7 @@ public class CylinderTrigger extends AbstractTrigger
     
     private boolean processHitQueue()
     {
-        if (triggerQueue.size() > simpleMultiplicity) return true;
+        if (triggerQueue.size() >= simpleMultiplicity) return true;
         IHitPayload[] q = triggerQueue.toArray(new IHitPayload[0]);
      
         final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
@@ -220,7 +220,7 @@ public class CylinderTrigger extends AbstractTrigger
                 double r  = dx * dx + dy * dy;
                 if (r < radius2 && dz < height) hitsInCylinder.add(q[jhit]);
             }
-            if (hitsInCylinder.size() > multiplicity) 
+            if (hitsInCylinder.size() >= multiplicity) 
             {
                 triggerQueue = new LinkedList<IHitPayload>(hitsInCylinder);
                 return true;

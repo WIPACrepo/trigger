@@ -65,7 +65,6 @@ public class CylinderTrigger extends AbstractTrigger
     private int simpleMultiplicity;
     private double radius, radius2; 
     private double height;
-    private final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
 
     private LinkedList<IHitPayload> triggerQueue;
 
@@ -200,7 +199,9 @@ public class CylinderTrigger extends AbstractTrigger
     {
         if (triggerQueue.size() > simpleMultiplicity) return true;
         IHitPayload[] q = triggerQueue.toArray(new IHitPayload[0]);
-        
+     
+        final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
+
         // Loop over hit pairs
         for (int ihit = 0; ihit < q.length; ihit++)
         {

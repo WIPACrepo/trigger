@@ -205,14 +205,14 @@ public class CylinderTrigger extends AbstractTrigger
         // Loop over hit pairs
         for (int ihit = 0; ihit < q.length; ihit++)
         {
-            String mbid0 = String.format("%012.12x", q[ihit].getDOMID().longValue());
+            String mbid0 = String.format("%012x", q[ihit].getDOMID().longValue());
             DeployedDOM d0 = domRegistry.getDom(mbid0);
             ArrayList<IHitPayload> hitsInCylinder = new ArrayList<IHitPayload>(q.length*(q.length-1));
             hitsInCylinder.add(q[ihit]);
             for (int jhit = 0; jhit < q.length; jhit++)
             {
                 if (ihit == jhit) continue;
-                String mbid1 = String.format("%012.12x", q[jhit].getDOMID().longValue());
+                String mbid1 = String.format("%012x", q[jhit].getDOMID().longValue());
                 DeployedDOM d1 = domRegistry.getDom(mbid1);
                 double dx = d1.getX() - d0.getX();
                 double dy = d1.getY() - d0.getY();

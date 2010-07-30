@@ -151,6 +151,7 @@ public class SlowMPTrigger extends AbstractTrigger
 	max_event_length = 100000000;  // we dont want longer events thatn 10 milliseconds, should not occur in 30 min run 
 	    
 	muon_time_window = -1;
+	configHitFilter(5);
 	    
         System.out.println("INITIALIZED SLOWMPTRIGGER");
     }
@@ -171,10 +172,10 @@ public class SlowMPTrigger extends AbstractTrigger
             set_rel_v(Double.parseDouble(parameter.getValue()));    
 	else if (parameter.getName().equals("min_n_tuples"))
             set_delta_d(Integer.parseInt(parameter.getValue()));   
-        
-    	configHitFilter(5);  // Domset 5
-    	
-	
+        else if (parameter.getName().equals("domSet")){
+	    domSetId = Integer.parseInt(parameter.getValue());
+	    configHitFilter(domSetId);
+	}   
         super.addParameter(parameter);
     }
     

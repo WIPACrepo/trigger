@@ -262,11 +262,18 @@ public class SlowMPTrigger extends AbstractTrigger
     }
 
     @Override
-    public void runTrigger(IPayload payload)
+    public void runTrigger(IPayload payload) throws TriggerException
     {
+	    if (!(payload instanceof IHitPayload)) 
+                throw new TriggerException(
+                        "Payload object " + payload + " cannot be upcast to IHitPayload."
+                        );
+            // This upcast should be safe now
+            IHitPayload hitPayload = (IHitPayload) payload;
 
-        IHitPayload hitPayload = (IHitPayload) payload;
-	
+            // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
+            if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
+            if (!hitFilter.useHit(hitPayload)) return;
 	
 	    if(one_hit_list.size() == 0) // size is 0, so just add it to the list
 	    {    

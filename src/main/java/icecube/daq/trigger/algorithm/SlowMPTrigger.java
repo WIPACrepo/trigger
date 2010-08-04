@@ -299,12 +299,18 @@ public class SlowMPTrigger extends AbstractTrigger
 	            }
 	        }
 	    
-	        ListIterator iter = one_hit_list.listIterator();
-	     
-	        while(iter.hasNext())
+	        //ListIterator iter = one_hit_list.listIterator(); added the following
+		// lines, make use of toArray instead of iterator for some speed
+		
+	     	min_hit_info[] one_hit_array = one_hit_list.toArray(new min_hit_info[0]);
+	        int initial_size = one_hit_list.size();
+	        int no_of_removed_elems = 0;
+		
+	        //while(iter.hasNext())
+		for(int i = 0; i < initial_size; i++)
 	        {
 	            //System.out.format("muon_time_window: %d", muon_time_window);
-	            min_hit_info check_payload = HLCPairCheck((min_hit_info)iter.next(), new_hit);
+	            min_hit_info check_payload = HLCPairCheck(one_hit_array[i], new_hit);
 		    
 	            if(check_payload != null)
 	            {   
@@ -332,7 +338,7 @@ public class SlowMPTrigger extends AbstractTrigger
 	        	     	}
 	        	    }
 	        	    else // the pair list is not empty
-	             	{
+	             	    {
 	        	     	if(muon_time_window == -1)
 	        	    	{ 
 	        	    		if(check_payload.get_time() - two_hit_list.getLast().get_time() <= t_proximity)
@@ -374,7 +380,11 @@ public class SlowMPTrigger extends AbstractTrigger
 	        	    		}
 	        	    	}
 	            	}
-	             	iter.remove(); 	
+			
+			one_hit_list.remove(i-no_of_removed_elems);
+	             	++no_of_removed_elems;
+			
+	             	//iter.remove(); 	
 	            }
 	            else
 	            {

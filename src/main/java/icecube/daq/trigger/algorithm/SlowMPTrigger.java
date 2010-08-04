@@ -423,12 +423,15 @@ public class SlowMPTrigger extends AbstractTrigger
     		
     	}
     	
-    	ListIterator list_iterator = trigger_list.listIterator();
-    	
-    	while(list_iterator.hasNext())
+    	//ListIterator list_iterator = trigger_list.listIterator();
+    	min_trigger_info[] trigger_array = trigger_list.toArray(new min_trigger_info[0]);
+	
+    	//while(list_iterator.hasNext())
+	for(int i = 0; i < trigger_list.size(); i++)
     	{
-    		min_trigger_info info = (min_trigger_info)list_iterator.next();
-    		
+    		//min_trigger_info info = (min_trigger_info)list_iterator.next();
+    		min_trigger_info info = trigger_array[i];
+		
     		// Form trigger with each trigger_info object, if num_tuples is fullfilled
     		
     		if(info.get_num_tuples() >= min_n_tuples)

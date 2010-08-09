@@ -143,7 +143,7 @@ public class SlowMPTrigger extends AbstractTrigger
         set_t_proximity(2500);
         set_t_min(0);
         set_t_max(500000);
-        set_delta_d(500);
+        set_delta_d(50000);
         set_rel_v(3);
 	set_min_n_tuples(1);
 	    
@@ -151,7 +151,7 @@ public class SlowMPTrigger extends AbstractTrigger
 	max_event_length = 100000000;  // we dont want longer events thatn 10 milliseconds, should not occur in 30 min run 
 	    
 	muon_time_window = -1;
-	configHitFilter(5);
+	configHitFilter(-1);
 	    
         System.out.println("INITIALIZED SLOWMPTRIGGER");
     }
@@ -273,7 +273,7 @@ public class SlowMPTrigger extends AbstractTrigger
 
             // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
             if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
-            if (!hitFilter.useHit(hitPayload)) return;
+           // if (!hitFilter.useHit(hitPayload)) return;
 	
 	    if(one_hit_list.size() == 0) // size is 0, so just add it to the list
 	    {    

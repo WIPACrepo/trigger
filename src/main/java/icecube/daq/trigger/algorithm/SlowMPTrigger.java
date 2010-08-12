@@ -153,7 +153,6 @@ public class SlowMPTrigger extends AbstractTrigger
         max_event_length = 100000000;  // we dont want longer events thatn 10 milliseconds, should not occur in 30 min run 
 	    
     	muon_time_window = -1;
-    	configHitFilter(5);
     	    
     	logger.debug("INITIALIZED SLOWMPTRIGGER");
     }
@@ -279,6 +278,7 @@ public class SlowMPTrigger extends AbstractTrigger
         {    
             min_hit_info new_hit = new min_hit_info(hitPayload);
             one_hit_list.add(new_hit);
+            logger.debug("Adding hit to one_hit_list: " + new_hit);
         }
 	    else // not zero, so compare payload with current one_hit_list if any hlc pair can be formed
 	    {
@@ -380,8 +380,9 @@ public class SlowMPTrigger extends AbstractTrigger
 	    
 	        one_hit_list.add(new_hit); // at the end add the current hitPayload for further comparisons
 	    }
-        //    System.out.format("muon_time_window: %d", muon_time_window);
-        //  System.out.format("list contains %d entries..%n TWOHIT_list contains %d entries..%n", one_hit_list.size(), two_hit_list.size() );
+        logger.debug("muon_time_window: " + muon_time_window);
+        logger.debug("one_hit_list contains " + one_hit_list.size() +
+                "entries, two_hit_list contains " + two_hit_list.size() + " entries");
     }   
     
     private void CheckTriggerStatus()

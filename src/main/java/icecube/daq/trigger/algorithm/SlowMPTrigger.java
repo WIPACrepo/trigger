@@ -83,6 +83,11 @@ public class SlowMPTrigger extends AbstractTrigger
     	{
     	    return hit;
     	}
+    	
+    	public String toString()
+    	{
+    	    return "[MinHitInfo " + mb_id + " : " + utc_time + "]";
+    	}
     }
     
     private class min_trigger_info
@@ -285,7 +290,7 @@ public class SlowMPTrigger extends AbstractTrigger
 	        min_hit_info new_hit = new min_hit_info(hitPayload);
 		
 	    	logger.debug("one_hit_list contains " + one_hit_list.size() +
-	    	        "entries, two_hit_list contains " + two_hit_list.size() + " entries");
+	    	        " entries, two_hit_list contains " + two_hit_list.size() + " entries");
 	        while( new_hit.get_time() - one_hit_list.element().get_time() > 10000L)
 	        // makes no sense to compare HLC hits that are longer apart than 1000 nanoseconds, so remove first from list
 	        {
@@ -300,9 +305,10 @@ public class SlowMPTrigger extends AbstractTrigger
 	        {
 	            logger.debug("muon_time_window: " + muon_time_window);
 	            min_hit_info check_payload = HLCPairCheck((min_hit_info)iter.next(), new_hit);
-		    
+	            
 	            if(check_payload != null)
 	            {   
+	                logger.debug("check payload: " + check_payload);
 	            	if(two_hit_list.size() == 0)        // the pair list is empty
 	            	{
 	        	    	if(muon_time_window == -1)
@@ -380,9 +386,9 @@ public class SlowMPTrigger extends AbstractTrigger
 	    
 	        one_hit_list.add(new_hit); // at the end add the current hitPayload for further comparisons
 	    }
-        logger.debug("muon_time_window: " + muon_time_window);
-        logger.debug("one_hit_list contains " + one_hit_list.size() +
-                "entries, two_hit_list contains " + two_hit_list.size() + " entries");
+        logger.debug("@end .. muon_time_window: " + muon_time_window);
+        logger.debug("@end .. one_hit_list contains " + one_hit_list.size() +
+                " entries, two_hit_list contains " + two_hit_list.size() + " entries");
     }   
     
     private void CheckTriggerStatus()

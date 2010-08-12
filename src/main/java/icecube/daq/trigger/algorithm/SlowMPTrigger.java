@@ -278,31 +278,27 @@ public class SlowMPTrigger extends AbstractTrigger
         if(one_hit_list.size() == 0) // size is 0, so just add it to the list
         {    
             min_hit_info new_hit = new min_hit_info(hitPayload);
-
             one_hit_list.add(new_hit);
         }
 	    else // not zero, so compare payload with current one_hit_list if any hlc pair can be formed
 	    {
 	        min_hit_info new_hit = new min_hit_info(hitPayload);
 		
-	    	//System.out.format("list contains %d entries..%n TWOHIT_list contains %d entries..%n", one_hit_list.size(), two_hit_list.size() );
+	    	logger.debug("one_hit_list contains " + one_hit_list.size() +
+	    	        "entries, two_hit_list contains " + two_hit_list.size() + " entries");
 	        while( new_hit.get_time() - one_hit_list.element().get_time() > 10000L)
 	        // makes no sense to compare HLC hits that are longer apart than 1000 nanoseconds, so remove first from list
 	        {
-	            //System.out.format("REMOVED FIRST ELEMENT !");
+	            logger.debug("REMOVED FIRST ELEMENT !");
 	            one_hit_list.removeFirst();
-	        
-	            if(one_hit_list.size() == 0)
-	            {
-	            	break;
-	            }
+	            if(one_hit_list.size() == 0) break;
 	        }
 	    
 	        ListIterator<min_hit_info> iter = one_hit_list.listIterator();
 	     
 	        while(iter.hasNext())
 	        {
-	            //System.out.format("muon_time_window: %d", muon_time_window);
+	            logger.debug("muon_time_window: " + muon_time_window);
 	            min_hit_info check_payload = HLCPairCheck((min_hit_info)iter.next(), new_hit);
 		    
 	            if(check_payload != null)

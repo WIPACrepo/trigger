@@ -10,16 +10,21 @@ import icecube.daq.juggler.component.DAQComponent;
 import icecube.daq.juggler.component.DAQConnector;
 import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
+import icecube.daq.oldpayload.impl.HitPayload;
+import icecube.daq.oldpayload.impl.MasterPayloadFactory;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.IByteBufferCache;
+import icecube.daq.payload.IReadoutRequest;
+import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
-import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.VitreousBufferCache;
-import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.payload.impl.UTCTime8B;
+import icecube.daq.payload.impl.SourceID;
+import icecube.daq.payload.impl.UTCTime;
+import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.SpliceableFactory;
@@ -27,11 +32,6 @@ import icecube.daq.splicer.SplicedAnalysis;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
 import icecube.daq.splicer.SplicerListener;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.IReadoutRequestElement;
-import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.impl.HitPayload;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -76,7 +76,7 @@ class Analysis
     private static final Log LOG = LogFactory.getLog(Analysis.class);
 
     private static final ISourceID SOURCE_ID =
-        new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
+        new SourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
 
     private static final long TIME_WINDOW = 10000000L;
 
@@ -217,8 +217,8 @@ class Analysis
 
             prevTime = maxTime;
 
-            IUTCTime minObj = new UTCTime8B(minTime);
-            IUTCTime maxObj = new UTCTime8B(maxTime);
+            IUTCTime minObj = new UTCTime(minTime);
+            IUTCTime maxObj = new UTCTime(maxTime);
 
             IReadoutRequestElement rrElem =
                 TriggerRequestPayloadFactory.createReadoutRequestElement

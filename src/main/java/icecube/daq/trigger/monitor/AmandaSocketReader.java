@@ -1,7 +1,7 @@
 package icecube.daq.trigger.monitor;
 
-import icecube.daq.trigger.impl.TriggerRequestPayload;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.oldpayload.impl.TriggerRequestPayload;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.icebucket.logging.LoggingConsumer;
 
 import java.io.DataInputStream;

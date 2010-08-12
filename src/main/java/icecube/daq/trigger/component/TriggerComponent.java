@@ -9,12 +9,13 @@ import icecube.daq.juggler.component.DAQComponent;
 import icecube.daq.juggler.component.DAQConnector;
 import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
+import icecube.daq.oldpayload.impl.MasterPayloadFactory;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ISourceID;
-import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.VitreousBufferCache;
+import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
@@ -24,9 +25,9 @@ import icecube.daq.trigger.control.GlobalTriggerManager;
 import icecube.daq.trigger.control.ITriggerControl;
 import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.TriggerManager;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.util.DOMRegistry;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -44,6 +45,8 @@ public class TriggerComponent
 
     public static final String DEFAULT_AMANDA_HOST = "ic-twrdaq00";
     public static final int DEFAULT_AMANDA_PORT = 12014;
+
+    public static final String DEFAULT_STRING_MAP_FILE_NAME = "hexagon_near.geo";
 
     private ISourceID sourceId;
     private IByteBufferCache inCache;
@@ -109,30 +112,24 @@ public class TriggerComponent
         addMBean("jvm", new MemoryStatistics());
         addMBean("system", new SystemStatistics());
 
-        SpliceableFactory factory;
+        SpliceableFactory factory = new MasterPayloadFactory(inCache);
+
+        TriggerRequestPayloadFactory trFactory =
+            new TriggerRequestPayloadFactory();
+        trFactory.setByteBufferCache(outCache);
 
         // Now differentiate
         if (isGlobalTrigger) {
-            factory = new MasterPayloadFactory(inCache);
-
             // Global trigger
-            triggerManager = new GlobalTriggerManager(factory, sourceId);
+            triggerManager =
+                new GlobalTriggerManager(factory, sourceId, trFactory);
+        } else if (!useDummy) {
+            triggerManager = new TriggerManager(factory, sourceId, trFactory);
         } else {
-            factory = new MasterPayloadFactory(inCache);
-
-            TriggerRequestPayloadFactory trFactory =
-                new TriggerRequestPayloadFactory();
-            trFactory.setByteBufferCache(outCache);
-
-            // Sub-detector triggers
-            if (!useDummy) {
-                triggerManager = new TriggerManager(factory, sourceId);
-            } else {
-                triggerManager = new DummyTriggerManager(factory, sourceId);
-            }
-
-            triggerManager.setOutputFactory(trFactory);
+            triggerManager =
+                new DummyTriggerManager(factory, sourceId, trFactory);
         }
+        addMBean("manager", triggerManager);
 
         triggerManager.setOutgoingBufferCache(outCache);
 
@@ -164,6 +161,12 @@ public class TriggerComponent
         triggerManager.setPayloadOutput(outputEngine);
         addMonitoredEngine(outputType, outputEngine);
 
+    }
+
+    public void closeAll()
+    {
+        inputEngine.destroyProcessor();
+        outputEngine.destroyProcessor();
     }
 
     public void flush()
@@ -226,25 +229,52 @@ public class TriggerComponent
     	catch (Exception ex) {
     		throw new DAQCompException("Error loading DOM registry", ex);
     	}
-    	
+
+	// Also create the string map
+	String stringMapFile = globalConfigurationDir + "/" + DEFAULT_STRING_MAP_FILE_NAME;
+	triggerManager.createStringMap(stringMapFile);
+
         // Lookup the trigger configuration
-        String globalConfigurationFileName;
-        if (configName.endsWith(".xml")) {
-            globalConfigurationFileName =
-                globalConfigurationDir + "/" + configName;
-        } else {
-            globalConfigurationFileName =
-                globalConfigurationDir + "/" + configName + ".xml";
+        String globalConfigurationFileName = globalConfigurationDir + "/" +
+            configName;;
+        File cfgFile = new File(globalConfigurationFileName);
+        if (!cfgFile.isFile()) {
+            if (!globalConfigurationFileName.endsWith(".xml")) {
+                globalConfigurationFileName += ".xml";
+                cfgFile = new File(globalConfigurationFileName);
+            }
+
+            if (!cfgFile.isFile()) {
+                throw new DAQCompException("Configuration file \"" + cfgFile +
+                                           "\" does not exist");
+            }
         }
 
         String triggerConfiguration;
         try {
             triggerConfiguration = GlobalConfiguration.getTriggerConfig(globalConfigurationFileName);
         } catch (Exception e) {
-            log.error("Error extracting trigger configuration name from global configuraion file.", e);
-            throw new DAQCompException("Cannot get trigger configuration name.", e);
+            log.error("Error extracting trigger configuration name from" +
+                      " global configuraion file.", e);
+            throw new DAQCompException("Cannot get trigger configuration name.",
+                                       e);
         }
-        triggerConfigFileName = globalConfigurationDir + "/trigger/" + triggerConfiguration + ".xml";
+        triggerConfigFileName = globalConfigurationDir + "/trigger/" +
+            triggerConfiguration;
+        File f = new File(triggerConfigFileName);
+        if (!f.isFile()) {
+            if (!triggerConfigFileName.endsWith(".xml")) {
+                triggerConfigFileName += ".xml";
+                f = new File(triggerConfigFileName);
+            }
+
+            if (!f.isFile()) {
+                throw new DAQCompException("Trigger configuration file \"" +
+                                           triggerConfigFileName +
+                                           "\" (from \"" + configName +
+                                           "\") does not exist");
+            }
+        }
 
         // Add triggers to the trigger manager
         currentTriggers = TriggerBuilder.buildTriggers(triggerConfigFileName, sourceId);
@@ -276,6 +306,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 4269 2009-06-08 22:01:11Z dglo $";
+	return "$Id: TriggerComponent.java 4938 2010-03-23 18:26:46Z toale $";
     }
 }

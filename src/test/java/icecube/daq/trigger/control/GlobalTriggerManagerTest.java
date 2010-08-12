@@ -1,7 +1,10 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.oldpayload.impl.MasterPayloadFactory;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
@@ -12,6 +15,7 @@ import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.test.MockOutputChannel;
 import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockReadoutRequest;
+import icecube.daq.trigger.test.MockSourceID;
 import icecube.daq.trigger.test.MockSplicer;
 import icecube.daq.trigger.test.MockTrigger;
 import icecube.daq.trigger.test.MockTrigger;
@@ -39,6 +43,9 @@ public class GlobalTriggerManagerTest
 {
     private static final MockAppender appender =
         new MockAppender(/*org.apache.log4j.Level.ALL*/)/*.setVerbose(true)*/;
+
+    private static final MockSourceID SOURCE_ID =
+        new MockSourceID(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID);
 
     public GlobalTriggerManagerTest(String name)
     {
@@ -167,7 +174,12 @@ public class GlobalTriggerManagerTest
     public void testRealSplicer()
         throws SplicerException
     {
-        GlobalTriggerManager trigMgr = new GlobalTriggerManager();
+        MasterPayloadFactory factory = new MasterPayloadFactory();
+
+        GlobalTriggerManager trigMgr =
+            new GlobalTriggerManager(factory, SOURCE_ID,
+                                     new TriggerRequestPayloadFactory());
+
         runWithRealSplicer(trigMgr);
 
         checkLogMessages();
@@ -176,7 +188,12 @@ public class GlobalTriggerManagerTest
     public void testMockSplicer()
         throws SplicerException
     {
-        GlobalTriggerManager trigMgr = new GlobalTriggerManager();
+        MasterPayloadFactory factory = new MasterPayloadFactory();
+
+        GlobalTriggerManager trigMgr =
+            new GlobalTriggerManager(factory, SOURCE_ID,
+                                     new TriggerRequestPayloadFactory());
+
         trigMgr.setReportingThreshold(10);
 
         MockOutputProcess outProc = new MockOutputProcess();

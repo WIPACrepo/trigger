@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 2656 2008-02-15 23:20:07Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: August 19 2005
  *
@@ -10,10 +10,10 @@
 
 package icecube.daq.trigger.algorithm;
 
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 2656 2008-02-15 23:20:07Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger

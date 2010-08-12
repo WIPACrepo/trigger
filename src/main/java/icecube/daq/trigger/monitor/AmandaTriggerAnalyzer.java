@@ -1,7 +1,7 @@
 package icecube.daq.trigger.monitor;
 
+import icecube.daq.oldpayload.impl.TriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
 
 import java.io.IOException;
 import java.util.zip.DataFormatException;

@@ -1,12 +1,13 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.oldpayload.impl.MasterPayloadFactory;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.test.MockOutputChannel;
@@ -25,6 +26,9 @@ import org.apache.log4j.BasicConfigurator;
 public class TriggerManagerTest
     extends TestCase
 {
+    private static final MockSourceID SOURCE_ID =
+        new MockSourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
+
     private static final MockAppender appender =
         new MockAppender(/*org.apache.log4j.Level.ALL*/)/*.setVerbose(true)*/;
 
@@ -129,9 +133,11 @@ public class TriggerManagerTest
     public void testRealSplicer()
         throws SplicerException
     {
-        TriggerManager trigMgr = new TriggerManager();
+        MasterPayloadFactory factory = new MasterPayloadFactory();
 
-        trigMgr.setOutputFactory(new TriggerRequestPayloadFactory());
+        TriggerManager trigMgr =
+            new TriggerManager(factory, SOURCE_ID,
+                               new TriggerRequestPayloadFactory());
 
         runWithRealSplicer(trigMgr);
     }
@@ -139,7 +145,11 @@ public class TriggerManagerTest
     public void testMockSplicer()
         throws SplicerException
     {
-        TriggerManager trigMgr = new TriggerManager();
+        MasterPayloadFactory factory = new MasterPayloadFactory();
+
+        TriggerManager trigMgr =
+            new TriggerManager(factory, SOURCE_ID,
+                               new TriggerRequestPayloadFactory());
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -148,8 +158,6 @@ public class TriggerManagerTest
 
         MockSplicer splicer = new MockSplicer(trigMgr);
         trigMgr.setSplicer(splicer);
-
-        trigMgr.setOutputFactory(new TriggerRequestPayloadFactory());
 
         loadAndRun(trigMgr);
 

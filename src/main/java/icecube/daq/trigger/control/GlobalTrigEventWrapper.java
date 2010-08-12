@@ -11,14 +11,14 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.common.DAQCmdInterface;
+import icecube.daq.oldpayload.impl.PayloadFactory;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.splicer.PayloadFactory;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
  *  and put in the payloadList.
  * This is called in GlobalTrigBag.java.
  *
- * @version $Id: GlobalTrigEventWrapper.java 3439 2008-09-02 17:08:41Z dglo $
+ * @version $Id: GlobalTrigEventWrapper.java 4574 2009-08-28 21:32:32Z dglo $
  * @author shseo
  */
 public class GlobalTrigEventWrapper

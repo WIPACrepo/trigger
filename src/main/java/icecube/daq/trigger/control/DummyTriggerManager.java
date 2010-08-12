@@ -10,17 +10,16 @@
 
 package icecube.daq.trigger.control;
 
+import icecube.daq.oldpayload.impl.MasterPayloadFactory;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.impl.SourceID4B;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -61,47 +60,14 @@ public class DummyTriggerManager
     private int start;
 
     /**
-     * Default constructor.
-     */
-    public DummyTriggerManager() {
-        this(new MasterPayloadFactory());
-    }
-
-    /**
-     * Constructor
-     * @param sourceId SourceId of this TriggerManager
-     */
-    public DummyTriggerManager(ISourceID sourceId) {
-        this(new MasterPayloadFactory(), sourceId);
-    }
-
-    /**
-     * Constructor
-     * @param inputFactory SpliceableFactory used by Splicer
-     */
-    public DummyTriggerManager(SpliceableFactory inputFactory) {
-        this(inputFactory,
-             new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
-    }
-
-    /**
-     * Constructor
-     * @param inputFactory SpliceableFactory used by Splicer
-     * @param sourceId SourceId of this TriggerManager
-     */
-    public DummyTriggerManager(SpliceableFactory inputFactory, ISourceID sourceId) {
-        this(inputFactory, sourceId, null);
-    }
-
-    /**
      * Constructor
      * @param inputFactory SpliceableFactory used by Splicer
      * @param sourceId SourceId of this TriggerManager
      * @param outputFactory factory used to build triggers
      */
-    private DummyTriggerManager(SpliceableFactory inputFactory,
-                                ISourceID sourceId,
-                                TriggerRequestPayloadFactory outputFactory)
+    public DummyTriggerManager(SpliceableFactory inputFactory,
+                               ISourceID sourceId,
+                               TriggerRequestPayloadFactory outputFactory)
     {
         super(sourceId, outputFactory);
         this.inputFactory = inputFactory;

@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTrigger
  *
- * Version $Id: CoincidenceTrigger.java 3439 2008-09-02 17:08:41Z dglo $
+ * Version $Id: CoincidenceTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: September 2 2005
  *
@@ -10,12 +10,12 @@
 
 package icecube.daq.trigger.algorithm;
 
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.IReadoutRequest;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.Sorter;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is to provide methods common to all coincidence triggers.
  *
- * @version $Id: CoincidenceTrigger.java 3439 2008-09-02 17:08:41Z dglo $
+ * @version $Id: CoincidenceTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  * @author shseo
  */
 public abstract class CoincidenceTrigger

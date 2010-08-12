@@ -10,11 +10,11 @@
 
 package icecube.daq.trigger.algorithm;
 
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.trigger.IHitPayload;
+import icecube.daq.payload.impl.UTCTime;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -49,7 +49,7 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
     private boolean configPrescale = false;
     private boolean configDeadtime = false;
 
-    private IUTCTime deadtimeWindow = new UTCTime8B(0);
+    private IUTCTime deadtimeWindow = new UTCTime(0);
 
     public PhysicsMinBiasTrigger() {
         triggerNumber++;

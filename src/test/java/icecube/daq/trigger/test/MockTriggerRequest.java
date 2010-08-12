@@ -1,18 +1,19 @@
 package icecube.daq.trigger.test;
 
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.payload.IByteBufferCache;
+import icecube.daq.payload.ICompositePayload;
+import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IPayloadDestination;
+import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.splicer.Spliceable;
-import icecube.daq.trigger.ICompositePayload;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.ITriggerRequestPayload;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -190,6 +191,11 @@ public class MockTriggerRequest
             throw new Error("Unknown exception type " +
                             ex.getClass().getName() + ": " + ex);
         }
+    }
+
+    public void setCache(IByteBufferCache cache)
+    {
+        throw new Error("Unimplemented");
     }
 
     public void setReadoutRequest(IReadoutRequest rdoutReq)

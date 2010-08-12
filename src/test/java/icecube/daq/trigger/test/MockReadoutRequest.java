@@ -1,9 +1,10 @@
 package icecube.daq.trigger.test;
 
+import icecube.daq.payload.IReadoutRequest;
+import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.ISourceID;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.IReadoutRequestElement;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,11 +52,23 @@ public class MockReadoutRequest
         elemList.add(elem);
     }
 
+    public void addElement(int type, int srcId, long firstTime, long lastTime,
+                           long domId)
+    {
+        addElement(new MockReadoutRequestElement(type, firstTime, lastTime,
+                                                 domId, srcId));
+    }
+
     public void addElement(int type, long firstTime, long lastTime, long domId,
                            int srcId)
     {
         addElement(new MockReadoutRequestElement(type, firstTime, lastTime,
                                                  domId, srcId));
+    }
+
+    public int getEmbeddedLength()
+    {
+        throw new Error("Unimplemented");
     }
 
     public List getReadoutRequestElements()
@@ -75,5 +88,20 @@ public class MockReadoutRequest
     public int getUID()
     {
         return uid;
+    }
+
+    public int length()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public int putBody(ByteBuffer buf, int offset)
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public void recycle()
+    {
+        // do nothing
     }
 }

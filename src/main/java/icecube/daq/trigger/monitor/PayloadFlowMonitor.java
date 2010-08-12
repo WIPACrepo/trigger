@@ -1,7 +1,7 @@
 /*
  * class: PayloadFlowMonitor
  *
- * Version $Id: PayloadFlowMonitor.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: PayloadFlowMonitor.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: December 29 2005
  *
@@ -12,7 +12,7 @@ package icecube.daq.trigger.monitor;
 
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.impl.UTCTime8B;
+import icecube.daq.payload.impl.UTCTime;
 import icecube.icebucket.monitor.ScalarFlowMonitor;
 import icecube.icebucket.monitor.simple.ScalarFlowMonitorImpl;
 
@@ -20,7 +20,7 @@ import icecube.icebucket.monitor.simple.ScalarFlowMonitorImpl;
  * This class monitors the flow of payloads. It keeps track of object counts and rates as
  * well as byte counts and rates.
  *
- * @version $Id: PayloadFlowMonitor.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: PayloadFlowMonitor.java 4574 2009-08-28 21:32:32Z dglo $
  * @author pat
  */
 public class PayloadFlowMonitor
@@ -87,7 +87,7 @@ public class PayloadFlowMonitor
      */
     public IUTCTime getFirstTime() {
         if (null == firstTime) {
-            return new UTCTime8B(0);
+            return new UTCTime(0);
         }
         return firstTime;
     }
@@ -98,7 +98,7 @@ public class PayloadFlowMonitor
      */
     public IUTCTime getLastTime() {
         if (null == lastTime) {
-            return new UTCTime8B(0);
+            return new UTCTime(0);
         }
         return lastTime;
     }

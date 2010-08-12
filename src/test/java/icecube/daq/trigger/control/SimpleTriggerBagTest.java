@@ -1,5 +1,6 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayloadDestination;
 import icecube.daq.trigger.test.MockAppender;
@@ -56,6 +57,11 @@ public class SimpleTriggerBagTest
         }
 
         public int getPayloadType()
+        {
+            throw new Error("Unimplemented");
+        }
+
+        public void setCache(IByteBufferCache cache)
         {
             throw new Error("Unimplemented");
         }

@@ -1,7 +1,7 @@
 /*
  * class: TriggerBuilder
  *
- * Version $Id: TriggerBuilder.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: TriggerBuilder.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: August 18 2005
  *
@@ -11,7 +11,7 @@
 package icecube.daq.trigger.config;
 
 import icecube.daq.payload.ISourceID;
-import icecube.daq.payload.impl.SourceID4B;
+import icecube.daq.payload.impl.SourceID;
 import icecube.daq.trigger.config.triggers.ActiveTriggers;
 import icecube.daq.trigger.config.triggers.ParameterConfigType;
 import icecube.daq.trigger.config.triggers.ReadoutConfigType;
@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class builds triggers from a trigger configuration object.
  *
- * @version $Id: TriggerBuilder.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: TriggerBuilder.java 4574 2009-08-28 21:32:32Z dglo $
  * @author pat
  */
 public class TriggerBuilder
@@ -68,7 +68,7 @@ public class TriggerBuilder
         // now configure trigger
         trigger.setTriggerType(triggerConfiguration.getTriggerType());
         trigger.setTriggerConfigId(triggerConfiguration.getTriggerConfigId());
-        trigger.setSourceId(new SourceID4B(triggerConfiguration.getSourceId()));
+        trigger.setSourceId(new SourceID(triggerConfiguration.getSourceId()));
         trigger.setTriggerName(triggerConfiguration.getTriggerName());
 
         Iterator paramIter = triggerConfiguration.getParameterConfig().iterator();

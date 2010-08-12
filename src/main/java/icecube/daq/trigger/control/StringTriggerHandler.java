@@ -1,15 +1,16 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.io.OutputChannel;
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.oldpayload.impl.MasterPayloadFactory;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.ISourceID;
-import icecube.daq.payload.MasterPayloadFactory;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.trigger.algorithm.DefaultStringTrigger;
+import icecube.daq.trigger.algorithm.ITrigger;
 import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -67,8 +68,7 @@ public class StringTriggerHandler
              (interfaceType == PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)) {
 
             // loop over triggers
-            for (Object aTriggerList : getTriggerList()) {
-                ITriggerControl trigger = (ITriggerControl) aTriggerList;
+            for (ITrigger trigger : getTriggerList()) {
                 try {
                     trigger.runTrigger(payload);
                 } catch (TriggerException e) {
@@ -125,7 +125,7 @@ public class StringTriggerHandler
         }
     }
 
-    private ITriggerControl createDefaultTrigger() {
+    private ITrigger createDefaultTrigger() {
         return new DefaultStringTrigger();
     }
 

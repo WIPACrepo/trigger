@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * Version $Id: FixedRateTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: May 1 2006
  *
@@ -10,10 +10,10 @@
 
 package icecube.daq.trigger.algorithm;
 
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 2629 2008-02-11 05:48:36Z dglo $
+ * @version $Id: FixedRateTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  * @author pat
  */
 public class FixedRateTrigger extends AbstractTrigger

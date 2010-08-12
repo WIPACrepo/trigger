@@ -1,11 +1,12 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.oldpayload.impl.MasterPayloadFactory;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.test.MockOutputChannel;
@@ -26,6 +27,9 @@ public class DummyTriggerManagerTest
 {
     private static final MockAppender appender =
         new MockAppender(/*org.apache.log4j.Level.ALL*/)/*.setVerbose(true)*/;
+
+    private static final MockSourceID SOURCE_ID =
+        new MockSourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
 
     public DummyTriggerManagerTest(String name)
     {
@@ -120,9 +124,11 @@ public class DummyTriggerManagerTest
     public void testRealSplicer()
         throws SplicerException
     {
-        DummyTriggerManager trigMgr = new DummyTriggerManager();
+        MasterPayloadFactory factory = new MasterPayloadFactory();
 
-        trigMgr.setOutputFactory(new TriggerRequestPayloadFactory());
+        DummyTriggerManager trigMgr =
+            new DummyTriggerManager(factory, SOURCE_ID,
+                                    new TriggerRequestPayloadFactory());
 
         runWithRealSplicer(trigMgr);
     }
@@ -144,7 +150,12 @@ public class DummyTriggerManagerTest
         final int numObjs = numTails * 10;
         final int numHitsPerTrigger = 8;
 
-        DummyTriggerManager trigMgr = new DummyTriggerManager();
+        MasterPayloadFactory factory = new MasterPayloadFactory();
+
+        DummyTriggerManager trigMgr =
+            new DummyTriggerManager(factory, SOURCE_ID,
+                                    new TriggerRequestPayloadFactory());
+
         trigMgr.setNumHitsPerTrigger(numHitsPerTrigger);
 
         MockSplicer splicer = new MockSplicer(trigMgr);
@@ -154,8 +165,6 @@ public class DummyTriggerManagerTest
         outProc.setOutputChannel(new MockOutputChannel());
 
         trigMgr.setPayloadOutput(outProc);
-
-        trigMgr.setOutputFactory(new TriggerRequestPayloadFactory());
 
         StrandTail[] tails = new StrandTail[numTails];
         for (int i = 0; i < tails.length; i++) {

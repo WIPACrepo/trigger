@@ -1,8 +1,8 @@
 package icecube.daq.trigger.test;
 
+import icecube.daq.oldpayload.impl.MasterPayloadFactory;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
-import icecube.daq.payload.MasterPayloadFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

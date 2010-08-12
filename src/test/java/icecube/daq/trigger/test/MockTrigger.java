@@ -1,26 +1,24 @@
 package icecube.daq.trigger.test;
 
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.oldpayload.impl.TriggerRequestPayload;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.IDOMID;
+import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.IReadoutRequest;
+import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.IReadoutRequestElement;
-import icecube.daq.trigger.config.ITriggerConfig;
+import icecube.daq.trigger.algorithm.ITrigger;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.config.TriggerReadout;
-import icecube.daq.trigger.control.ITriggerControl;
 import icecube.daq.trigger.control.ITriggerHandler;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-import icecube.daq.trigger.monitor.ITriggerMonitor;
 import icecube.daq.trigger.monitor.TriggerMonitor;
 
 import java.util.ArrayList;
@@ -28,7 +26,7 @@ import java.util.List;
 import java.util.Vector;
 
 public class MockTrigger
-    implements ITriggerConfig, ITriggerControl, ITriggerMonitor
+    implements ITrigger
 {
     private static final int DEFAULT_HITS_PER_TRIGGER = 1000;
 
@@ -141,7 +139,7 @@ public class MockTrigger
         return earliest;
     }
 
-    public List getParamterList()
+    public List getParameterList()
     {
         throw new Error("Unimplemented");
     }

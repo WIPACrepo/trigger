@@ -1,7 +1,7 @@
 /*
  * class: TriggerManager
  *
- * Version $Id: TriggerManager.java 4267 2009-06-05 19:11:27Z dglo $
+ * Version $Id: TriggerManager.java 4902 2010-02-17 22:55:22Z dglo $
  *
  * Date: October 25 2004
  *
@@ -10,19 +10,19 @@
 
 package icecube.daq.trigger.control;
 
+import icecube.daq.oldpayload.impl.MasterPayloadFactory;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.MasterPayloadFactory;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.payload.impl.UTCTime8B;
+import icecube.daq.payload.impl.SourceID;
+import icecube.daq.payload.impl.UTCTime;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 import icecube.daq.trigger.monitor.Statistic;
 
 import java.io.IOException;
@@ -36,12 +36,12 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger
  *
- * @version $Id: TriggerManager.java 4267 2009-06-05 19:11:27Z dglo $
+ * @version $Id: TriggerManager.java 4902 2010-02-17 22:55:22Z dglo $
  * @author pat
  */
 public class TriggerManager
         extends TriggerHandler
-        implements ITriggerManager
+        implements ITriggerManager, TriggerManagerMBean
 {
 
     /**
@@ -84,39 +84,6 @@ public class TriggerManager
     private Statistic processingTime;
 
     /**
-     * Default constructor.
-     */
-    public TriggerManager() {
-        this(new MasterPayloadFactory());
-    }
-
-    /**
-     * Constructor
-     * @param sourceId SourceId of this TriggerManager
-     */
-    public TriggerManager(ISourceID sourceId) {
-        this(new MasterPayloadFactory(), sourceId);
-    }
-
-    /**
-     * Constructor
-     * @param inputFactory SpliceableFactory used by Splicer
-     */
-    public TriggerManager(SpliceableFactory inputFactory) {
-        this(inputFactory,
-             new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
-    }
-
-    /**
-     * Constructor
-     * @param inputFactory SpliceableFactory used by Splicer
-     * @param sourceId SourceId of this TriggerManager
-     */
-    public TriggerManager(SpliceableFactory inputFactory, ISourceID sourceId) {
-        this(inputFactory, sourceId, null);
-    }
-
-    /**
      * Constructor
      * @param inputFactory SpliceableFactory used by Splicer
      * @param sourceId SourceId of this TriggerManager
@@ -136,8 +103,8 @@ public class TriggerManager
         recycleCount = 0;
         totalProcessTime = 0.0;
         lastInputListSize = 0;
-        earliestTime = new UTCTime8B(0);
-        latestTime = new UTCTime8B(0);
+        earliestTime = new UTCTime(0);
+        latestTime = new UTCTime(0);
         wallTimeQueue = new LinkedList();
         processingTime = new Statistic();
         super.init();

@@ -1,7 +1,7 @@
 /*
  * class: TriggerBag
  *
- * Version $Id: TriggerBag.java 3425 2008-08-29 17:00:05Z dglo $
+ * Version $Id: TriggerBag.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: March 16 2005
  *
@@ -10,19 +10,19 @@
 
 package icecube.daq.trigger.control;
 
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.oldpayload.impl.PayloadFactory;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
+import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.payload.splicer.PayloadFactory;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.payload.impl.SourceID;
+import icecube.daq.payload.impl.UTCTime;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 
 import java.io.IOException;
@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  *                                   +       {===============}
  *                                   +            Merge
  *
- * @version $Id: TriggerBag.java 3425 2008-08-29 17:00:05Z dglo $
+ * @version $Id: TriggerBag.java 4574 2009-08-28 21:32:32Z dglo $
  * @author pat
  */
 public class TriggerBag
@@ -83,7 +83,7 @@ public class TriggerBag
     /**
      * triggers that occur earlier than this time are free to be released
      */
-    private IUTCTime timeGate = new UTCTime8B(-1);
+    private IUTCTime timeGate = new UTCTime(-1);
 
     /**
      * UID for newly merged triggers
@@ -122,7 +122,7 @@ public class TriggerBag
      * default constructor
      */
     public TriggerBag() {
-        this(new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
+        this(new SourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
     /**
@@ -465,8 +465,8 @@ public class TriggerBag
         List subTriggers = new Vector();
 
         // loop over payloads in set and find earliest and latest times
-        IUTCTime earliestTime = new UTCTime8B(Long.MAX_VALUE);
-        IUTCTime latestTime = new UTCTime8B(Long.MIN_VALUE);
+        IUTCTime earliestTime = new UTCTime(Long.MAX_VALUE);
+        IUTCTime latestTime = new UTCTime(Long.MIN_VALUE);
 
         Iterator listIter = mergeList.iterator();
         int listCount = 0;

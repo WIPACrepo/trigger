@@ -1,7 +1,7 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.trigger.IReadoutRequestElement;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockDOMID;
 import icecube.daq.trigger.test.MockReadoutRequestElement;
@@ -68,7 +68,7 @@ public class GlobalTrigEventReadoutElementsTest
             new GlobalTrigEventReadoutElements();
 
         final int baseSrcId =
-            SourceIdRegistry.DOMHUB_SOURCE_ID;
+            SourceIdRegistry.STRING_HUB_SOURCE_ID;
 
         final long timeRange = 9999L;
 
@@ -209,7 +209,7 @@ public class GlobalTrigEventReadoutElementsTest
             new GlobalTrigEventReadoutElements();
 
         final int baseSrcId =
-            SourceIdRegistry.DOMHUB_SOURCE_ID;
+            SourceIdRegistry.STRING_HUB_SOURCE_ID;
 
         final long timeRange = 9999L;
 
@@ -256,7 +256,7 @@ public class GlobalTrigEventReadoutElementsTest
         elems.setAllowTimeGap(true);
 
         final int baseSrcId =
-            SourceIdRegistry.DOMHUB_SOURCE_ID;
+            SourceIdRegistry.STRING_HUB_SOURCE_ID;
 
         final long timeRange = 9999L;
 

@@ -10,10 +10,10 @@
 
 package icecube.daq.trigger.algorithm;
 
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.trigger.IHitPayload;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;

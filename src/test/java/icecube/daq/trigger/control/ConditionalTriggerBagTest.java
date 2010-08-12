@@ -1,8 +1,9 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IPayloadDestination;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.trigger.ITriggerRequestPayload;
 import icecube.daq.trigger.algorithm.CoincidenceTrigger;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.test.MockAppender;
@@ -115,6 +116,11 @@ public class ConditionalTriggerBagTest
             throw new Error("Unimplemented");
         }
 
+        public void setCache(IByteBufferCache cache)
+        {
+            throw new Error("Unimplemented");
+        }
+
         public int writePayload(boolean writeLoaded,
                                 IPayloadDestination dest)
             throws IOException
@@ -132,8 +138,6 @@ public class ConditionalTriggerBagTest
 
     private static final int GT_SRCID =
         SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID;
-    private static final int DH_SRCID =
-        SourceIdRegistry.DOMHUB_SOURCE_ID;
 
     private static final MockAppender appender =
         new MockAppender(/*org.apache.log4j.Level.ALL*/)/*.setVerbose(true)*/;

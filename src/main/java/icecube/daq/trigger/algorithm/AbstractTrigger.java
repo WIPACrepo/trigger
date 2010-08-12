@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 4721 2009-11-10 21:49:45Z ksb $
+ * Version $Id: AbstractTrigger.java 4891 2010-02-16 21:09:34Z dglo $
  *
  * Date: August 19 2005
  *
@@ -10,28 +10,25 @@
 
 package icecube.daq.trigger.algorithm;
 
+import icecube.daq.oldpayload.impl.TriggerRequestPayload;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.IDOMID;
+import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.IReadoutRequest;
+import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.IReadoutRequestElement;
-import icecube.daq.trigger.config.ITriggerConfig;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.HitFilter;
-import icecube.daq.trigger.control.ITriggerControl;
 import icecube.daq.trigger.control.ITriggerHandler;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.impl.TriggerRequestPayload;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
-import icecube.daq.trigger.monitor.ITriggerMonitor;
 import icecube.daq.trigger.monitor.TriggerMonitor;
 import icecube.icebucket.monitor.ScalarFlowMonitor;
 import icecube.icebucket.monitor.simple.ScalarFlowMonitorImpl;
@@ -49,10 +46,11 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 4721 2009-11-10 21:49:45Z ksb $
+ * @version $Id: AbstractTrigger.java 4891 2010-02-16 21:09:34Z dglo $
  * @author pat
  */
-public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl, ITriggerMonitor
+public abstract class AbstractTrigger
+    implements ITrigger
 {
 
     /**
@@ -240,9 +238,9 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
     /**
      * Get list of trigger parameters.
      *
-     * @return paramter list
+     * @return parameter list
      */
-    public List getParamterList() {
+    public List getParameterList() {
         return parameters;
     }
 
@@ -294,7 +292,7 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
 
     /*
      *
-     * Methods of ITriggerControl
+     * Methods of ITriggerMonitor
      *
      */
 
@@ -490,10 +488,10 @@ public abstract class AbstractTrigger implements ITriggerConfig, ITriggerControl
         IUTCTime firstTime = ((IHitPayload) hits.get(0)).getPayloadTimeUTC();
         IUTCTime lastTime = ((IHitPayload) hits.get(numberOfHits-1)).getPayloadTimeUTC();
 
-        if (log.isInfoEnabled() && (triggerCounter % printMod == 0)) {
-            log.info("New Trigger " + triggerCounter + " from " + triggerName + " includes " + numberOfHits
-                     + " hits:  First time = "
-                     + firstTime + " Last time = " + lastTime);
+        if (log.isDebugEnabled() && (triggerCounter % printMod == 0)) {
+            log.debug("New Trigger " + triggerCounter + " from " + triggerName +
+                      " includes " + numberOfHits + " hits:  First time = " +
+                      firstTime + " Last time = " + lastTime);
         }
 
         // set earliest payload of interest to 1/10 ns after the last hit

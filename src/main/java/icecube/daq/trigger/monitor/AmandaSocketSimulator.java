@@ -1,14 +1,14 @@
 package icecube.daq.trigger.monitor;
 
+import icecube.daq.oldpayload.impl.Payload;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
+import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.payload.splicer.Payload;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.payload.impl.SourceID;
+import icecube.daq.payload.impl.UTCTime;
 import icecube.icebucket.logging.LoggingConsumer;
 
 import java.io.DataOutputStream;
@@ -158,9 +158,9 @@ public class AmandaSocketSimulator
         int triggerType = 0;
         int configId = generateTriggerMask();
         ISourceID sourceId =
-            new SourceID4B(SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID);
+            new SourceID(SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID);
         long nextTime = lastTime + generateDelta();
-        IUTCTime time = new UTCTime8B(nextTime);
+        IUTCTime time = new UTCTime(nextTime);
         Vector payloads = new Vector();
         Vector readouts = new Vector();
         IReadoutRequest readout = TriggerRequestPayloadFactory.createReadoutRequest(sourceId, count, readouts);

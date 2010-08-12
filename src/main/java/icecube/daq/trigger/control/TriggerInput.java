@@ -1,7 +1,7 @@
 /*
  * class: TriggerInput
  *
- * Version $Id: TriggerInput.java 3439 2008-09-02 17:08:41Z dglo $
+ * Version $Id: TriggerInput.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: May 2 2005
  *
@@ -10,16 +10,16 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.eventbuilder.IEventPayload;
-import icecube.daq.eventbuilder.IReadoutDataPayload;
+import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.payload.ICompositePayload;
+import icecube.daq.payload.IEventPayload;
+import icecube.daq.payload.IHitDataPayload;
+import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IReadoutDataPayload;
+import icecube.daq.payload.ITriggerPayload;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.trigger.ICompositePayload;
-import icecube.daq.trigger.IHitDataPayload;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.ITriggerPayload;
-import icecube.daq.trigger.ITriggerRequestPayload;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides a simple implementation of ITriggerInput
  *
- * @version $Id: TriggerInput.java 3439 2008-09-02 17:08:41Z dglo $
+ * @version $Id: TriggerInput.java 4574 2009-08-28 21:32:32Z dglo $
  * @author pat
  */
 public class TriggerInput

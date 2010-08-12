@@ -10,14 +10,14 @@
 
 package icecube.daq.trigger.control;
 
+import icecube.daq.oldpayload.impl.PayloadFactory;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.payload.impl.UTCTime8B;
-import icecube.daq.payload.splicer.PayloadFactory;
-import icecube.daq.trigger.ITriggerRequestPayload;
+import icecube.daq.payload.impl.SourceID;
+import icecube.daq.payload.impl.UTCTime;
 import icecube.daq.trigger.monitor.PayloadBagMonitor;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public class DummyTriggerBag
      * default constructor
      */
     public DummyTriggerBag() {
-        this(new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
+        this(new SourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
     /**
@@ -97,7 +97,7 @@ public class DummyTriggerBag
      * @return timeGate
      */
     public IUTCTime getTimeGate() {
-        return new UTCTime8B(-1);
+        return new UTCTime(-1);
     }
 
     /**

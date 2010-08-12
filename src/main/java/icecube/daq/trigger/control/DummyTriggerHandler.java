@@ -12,27 +12,32 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.OutputChannel;
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.IByteBufferCache;
+import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.IReadoutRequest;
+import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.impl.SourceID4B;
-import icecube.daq.trigger.IHitPayload;
-import icecube.daq.trigger.IReadoutRequest;
-import icecube.daq.trigger.IReadoutRequestElement;
-import icecube.daq.trigger.ITriggerRequestPayload;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
+import icecube.daq.payload.impl.SourceID;
+import icecube.daq.trigger.algorithm.ITrigger;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -88,10 +93,15 @@ public class DummyTriggerHandler
     private DOMRegistry domRegistry;
 
     /**
+     * String map
+     */
+    private TreeMap<Integer, TreeSet<Integer> > stringMap;
+
+    /**
      * Default constructor
      */
     public DummyTriggerHandler() {
-        this(new SourceID4B(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
+        this(new SourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID));
     }
 
     private DummyTriggerHandler(ISourceID sourceId) {
@@ -124,7 +134,7 @@ public class DummyTriggerHandler
      * method for adding triggers to the trigger list
      * @param trigger trigger to be added
      */
-    public void addTrigger(ITriggerControl trigger) {
+    public void addTrigger(ITrigger trigger) {
         log.info("Triggers added to DummyTriggerBag are ignored");
     }
 
@@ -133,7 +143,7 @@ public class DummyTriggerHandler
      *
      * @param triggers
      */
-    public void addTriggers(List triggers) {
+    public void addTriggers(List<ITrigger> triggers) {
         log.info("Triggers added to DummyTriggerBag are ignored");
     }
 
@@ -141,6 +151,15 @@ public class DummyTriggerHandler
      * clear list of triggers
      */
     public void clearTriggers() {
+    }
+
+    public Map<String, Long> getTriggerCounts()
+    {
+        HashMap<String, Long> map = new HashMap<String, Long>();
+
+        map.put("DummyTrigger", new Long(count));
+
+        return map;
     }
 
     /**
@@ -302,6 +321,15 @@ public class DummyTriggerHandler
 
     public DOMRegistry getDOMRegistry() {
         return domRegistry;
+    }
+
+    public void createStringMap(String stringMapFileName) {
+
+
+    }
+
+    public TreeMap<Integer, TreeSet<Integer> > getStringMap() {
+	return stringMap;
     }
 
     public void setOutputFactory(TriggerRequestPayloadFactory factory)

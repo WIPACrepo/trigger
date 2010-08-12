@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerManager
  *
- * Version $Id: ITriggerManager.java 2247 2007-11-06 16:57:04Z dglo $
+ * Version $Id: ITriggerManager.java 4902 2010-02-17 22:55:22Z dglo $
  *
  * Date: March 31 2005
  *
@@ -10,18 +10,18 @@
 
 package icecube.daq.trigger.control;
 
+import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.splicer.Splicer;
-import icecube.daq.trigger.impl.TriggerRequestPayloadFactory;
 
 /**
  * This interface defines the behavior of a TriggerManager
  *
- * @version $Id: ITriggerManager.java 2247 2007-11-06 16:57:04Z dglo $
+ * @version $Id: ITriggerManager.java 4902 2010-02-17 22:55:22Z dglo $
  * @author pat
  */
 public interface ITriggerManager
-        extends ITriggerHandler, AdvancedSplicedAnalysis
+    extends ITriggerHandler, AdvancedSplicedAnalysis
 {
 
     Splicer getSplicer();

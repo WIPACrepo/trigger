@@ -395,6 +395,8 @@ public class SlowMPTrigger extends AbstractTrigger
     {
     	int list_size = two_hit_list.size();
     	
+    	logger.debug("in CheckTriggerStatus - list size is " + list_size);
+    	
     	if(list_size >= 3)
     	{
     		min_hit_info[] q = two_hit_list.toArray(new min_hit_info[0]);
@@ -419,11 +421,11 @@ public class SlowMPTrigger extends AbstractTrigger
     		
     		if(info.get_num_tuples() >= min_n_tuples)
     		{
-    			//System.out.format("FOUND TRIGGER: start: %d, end :%d with %d tuples%n",info.get_first_hit().get_time(), info.get_last_hit().get_time(), info.get_num_tuples() );
-    			
+    			logger.debug("FOUND TRIGGER: start: " + info.get_first_hit().getHitTimeUTC().longValue() + 
+    			        " end: " + info.get_last_hit().getHitTimeUTC().longValue() +
+    			        " #: " + info.get_num_tuples());
     			// form trigger here for each trigger_info
     			formTrigger(info.get_hit_list(), null, null);
-    			
     		}
     	}
     	

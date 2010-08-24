@@ -16,18 +16,21 @@ import java.util.ListIterator;
 import java.util.Arrays;
 import java.lang.Math;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * This trigger looks for HLC pairs and groups them in 3-tuples. If a tuple fullfills certain conditions ( in
  *CheckTriple() ) the internal trigger_info structure will raise n_tuples by 1. At the end one can control if a certain
  *amount of overlapping tuples is sufficient for triggering by the min_n_tuples parameter.
- * For the testrun the parameters which will yield 30 Hz trigger rate are pre-set already.
+ * For the testrun the parameters which will yield 10-30 Hz trigger rate are pre-set already.
  * @author gluesenkamp
  *
  */
 public class SlowMPTrigger extends AbstractTrigger
 {
+
+    private static final Log log = LogFactory.getLog(SlowMPTrigger.class);
     private long t_proximity; // t_proximity in nanoseconds, eliminates most muon_hlcs
     private long t_min;
     private long t_max;
@@ -59,7 +62,6 @@ public class SlowMPTrigger extends AbstractTrigger
 	    
 	    utc_time = hit.getHitTimeUTC().longValue();
 	    mb_id = String.format("%012x", hit.getDOMID().longValue());
-	    
 	}
 	
         private IHitPayload hit;
@@ -143,17 +145,17 @@ public class SlowMPTrigger extends AbstractTrigger
         set_t_proximity(2500);
         set_t_min(0);
         set_t_max(500000);
-        set_delta_d(50000);
+        set_delta_d(500);
         set_rel_v(3);
 	set_min_n_tuples(1);
 	    
 	// max_event_length is in tens of nanoseconds    
-	max_event_length = 100000000;  // we dont want longer events thatn 10 milliseconds, should not occur in 30 min run 
+	max_event_length = 50000000;  // we dont want longer events thatn 5 milliseconds, should not occur in 30 min run 
 	    
 	muon_time_window = -1;
-	configHitFilter(-1);
+	configHitFilter(5);
 	    
-        System.out.println("INITIALIZED SLOWMPTRIGGER");
+        //System.out.println("INITIALIZED SLOWMPTRIGGER");
     }
     
     @Override
@@ -257,6 +259,7 @@ public class SlowMPTrigger extends AbstractTrigger
         one_hit_list.clear();
         two_hit_list.clear();
         
+	log.warn("FLUSHHH!!!");
         
         muon_time_window = -1;
     }
@@ -270,15 +273,18 @@ public class SlowMPTrigger extends AbstractTrigger
                         );
             // This upcast should be safe now
             IHitPayload hitPayload = (IHitPayload) payload;
-
+	    //log.warn("HITTIME: " + hitPayload.getHitTimeUTC() + "PAYLOADTIME: " + hitPayload.getPayloadTimeUTC());
             // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
             if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
-           // if (!hitFilter.useHit(hitPayload)) return;
-	
+            if (!hitFilter.useHit(hitPayload)) return;
+	    final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
+
 	    if(one_hit_list.size() == 0) // size is 0, so just add it to the list
 	    {    
 	         min_hit_info new_hit = new min_hit_info(hitPayload);
-		 
+                 //int string_nr = domRegistry.getDom(new_hit.get_mb_id()).getStringMajor();
+                 //int om_nr = domRegistry.getDom(new_hit.get_mb_id()).getStringMinor();
+		 // log.warn("FIRST HIT IN LIST: time " +new_hit.get_time() + " string: " + string_nr + " om: " + om_nr);
 	         one_hit_list.add(new_hit);
 	    }
 	    else // not zero, so compare payload with current one_hit_list if any hlc pair can be formed
@@ -286,10 +292,17 @@ public class SlowMPTrigger extends AbstractTrigger
 	        
 		min_hit_info new_hit = new min_hit_info(hitPayload);
 		
+		// remove this next line again
+		
+		
+		//int string_nr = domRegistry.getDom(new_hit.get_mb_id()).getStringMajor();
+		//int om_nr = domRegistry.getDom(new_hit.get_mb_id()).getStringMinor();
+		//log.warn("LATER HIT IN LIST: time " +new_hit.get_time() + " string: " + string_nr + " om: " + om_nr + "diff: " + (new_hit.get_time()-one_hit_list.getFirst().get_time()));
 	    	//System.out.format("list contains %d entries..%n TWOHIT_list contains %d entries..%n", one_hit_list.size(), two_hit_list.size() );
 	        while( new_hit.get_time() - one_hit_list.element().get_time() > 10000L)
 	        // makes no sense to compare HLC hits that are longer apart than 1000 nanoseconds, so remove first from list
 	        {
+		    //  log.warn("remove first hit from onehitlist because time diff > 10000, actually:" +( new_hit.get_time()-one_hit_list.element().get_time()));
 	            //System.out.format("REMOVED FIRST ELEMENT !");
 	            one_hit_list.removeFirst();
 	        
@@ -298,10 +311,12 @@ public class SlowMPTrigger extends AbstractTrigger
 	            	break;
 	            }
 	        }
+
+		//		log.warn("ONEHITLIST: " + one_hit_list.size() + " newwest " +  new_hit.get_time());
 	    
 	        //ListIterator iter = one_hit_list.listIterator(); added the following
 		// lines, make use of toArray instead of iterator for some speed
-		
+		///one_hit_list.add(new_hit);
 	     	min_hit_info[] one_hit_array = one_hit_list.toArray(new min_hit_info[0]);
 	        int initial_size = one_hit_list.size();
 	        int no_of_removed_elems = 0;
@@ -311,7 +326,8 @@ public class SlowMPTrigger extends AbstractTrigger
 	        {
 	            //System.out.format("muon_time_window: %d", muon_time_window);
 	            min_hit_info check_payload = HLCPairCheck(one_hit_array[i], new_hit);
-		    
+		    //check_payload = one_hit_array[i];
+
 	            if(check_payload != null)
 	            {   
 	            	if(two_hit_list.size() == 0)        // the pair list is empty
@@ -320,6 +336,7 @@ public class SlowMPTrigger extends AbstractTrigger
 	        	    	{
 	        		    	two_hit_list.add(check_payload);
 	        	    		// set earliest payload of interest ?=!
+					//					log.info("Adding two_hit entry -> muon == -1");
 					setEarliestPayloadOfInterest(check_payload.get_hit());
 	        	    	}
 	        	     	else
@@ -331,6 +348,7 @@ public class SlowMPTrigger extends AbstractTrigger
 	        	    		else
 	        	    		{
 	        		     		two_hit_list.add(check_payload);
+						//log.info("Adding two_hit entry -> muon time window was set.. is now unset..");
 	        		     		muon_time_window = -1;
 						setEarliestPayloadOfInterest(check_payload.get_hit());
 		        	    		// set earliest payload of interest ?=!
@@ -344,6 +362,7 @@ public class SlowMPTrigger extends AbstractTrigger
 	        	    		if(check_payload.get_time() - two_hit_list.getLast().get_time() <= t_proximity)
 	        		    	{
 	        		    		muon_time_window = check_payload.get_time();
+						//log.info("removing last hit of two_hit_list..., while muon == -1");
 	        		     		two_hit_list.removeLast();
 	        			    }
 	        		    	else
@@ -351,10 +370,12 @@ public class SlowMPTrigger extends AbstractTrigger
 	        		    		if(check_payload.get_time()-two_hit_list.getLast().get_time() < t_max && check_payload.get_time() - two_hit_list.getFirst().get_time() < max_event_length)
 	        		    		{
 	        		     			two_hit_list.add(check_payload);
+							//log.info("adding twohitlist... below time differences..");
 	        		    		}
 	        		    		else
 	        			    	{
 	        			    		CheckTriggerStatus(); // checks current two_hit_list for 3-tuples
+							//	log.info("Adding twohitlist... after chewcking trigger status");
 	        			    		two_hit_list.add(check_payload);
 	        			    	}
 	        		    	}
@@ -371,10 +392,12 @@ public class SlowMPTrigger extends AbstractTrigger
 	        	    			if(check_payload.get_time()- two_hit_list.getLast().get_time() < t_max && check_payload.get_time() - two_hit_list.getFirst().get_time() < max_event_length)
 	        	    			{
 	        	    				two_hit_list.add(check_payload); // checks current two_hit_list for 3-tupleseckTriggerStatus(); // checks current two_hit_list for 3-tuples
+							//log.info("Adding twohitlist... below time differences............");
 	        		    		}
 	        		     		else
 	        		    		{
 	        		    			CheckTriggerStatus();
+							//log.info("ADding twohitlist... after checking trigger status");
 		        	    			two_hit_list.add(check_payload);
 	        		    		}
 	        	    		}
@@ -388,15 +411,32 @@ public class SlowMPTrigger extends AbstractTrigger
 	            }
 	            else
 	            {
+			//log.info("NULL:::::");
 	             	//System.out.format("NULLLLLLL");
 	            }
 	                                              // with the remaining Payloads in the linked list
 	        }
 	    
 	        one_hit_list.add(new_hit); // at the end add the current hitPayload for further comparisons
+		if(two_hit_list.size() > 0)
+		{
+		    if(one_hit_list.getFirst().get_time() - two_hit_list.getLast().get_time() > t_max) // definetely cannot prdouce a trigger, set earliest palyoad
+		    {
+			//log.warn("TMAX WAS ALREADY REACHED::------------" + "t1 " + one_hit_list.getFirst().get_time() + " t2 " + two_hit_list.getLast().get_time());
+			CheckTriggerStatus();
+			
+				
+		    }
+		}
+		else
+		{
+		    setEarliestPayloadOfInterest(one_hit_list.getFirst().get_hit());
+	        }
+		
 	    }
 	//    System.out.format("muon_time_window: %d", muon_time_window);
-      //  System.out.format("list contains %d entries..%n TWOHIT_list contains %d entries..%n", one_hit_list.size(), two_hit_list.size() );
+	    //   log.warn("list contains " + one_hit_list.size() +  " entries..");
+	    //   log.warn(" TWOHIT_list contains " + two_hit_list.size() + "entries..");
     
    
     }
@@ -404,7 +444,7 @@ public class SlowMPTrigger extends AbstractTrigger
     private void CheckTriggerStatus()
     {
     	int list_size = two_hit_list.size();
-    	
+	//	log.info("CHECKING TRIGGER STATUS because of timing: 2hitsize " + list_size);
     	if(list_size >= 3)
     	{
     		min_hit_info[] q = two_hit_list.toArray(new min_hit_info[0]);
@@ -422,6 +462,11 @@ public class SlowMPTrigger extends AbstractTrigger
     		}
     		
     	}
+	else
+	{
+	    //two_hit_list.clear();
+	    setEarliestPayloadOfInterest(one_hit_list.getFirst().get_hit());
+        }
     	
     	//ListIterator list_iterator = trigger_list.listIterator();
     	min_trigger_info[] trigger_array = trigger_list.toArray(new min_trigger_info[0]);
@@ -437,7 +482,7 @@ public class SlowMPTrigger extends AbstractTrigger
     		if(info.get_num_tuples() >= min_n_tuples)
     		{
     			//System.out.format("FOUND TRIGGER: start: %d, end :%d with %d tuples%n",info.get_first_hit().get_time(), info.get_last_hit().get_time(), info.get_num_tuples() );
-    			
+		    //log.warn("FOUND TRIGGER: length: " + (info.get_last_hit().getHitTimeUTC().longValue()-info.get_first_hit().getHitTimeUTC().longValue()) + " with " + info.get_num_tuples());
     			// form trigger here for each trigger_info
     			formTrigger(info.get_hit_list(), null, null);
     			
@@ -445,6 +490,7 @@ public class SlowMPTrigger extends AbstractTrigger
     	}
     	
     	trigger_list.clear();
+	//one_hit_list.clear();
     	two_hit_list.clear();
     }
     public boolean isConfigured()
@@ -462,7 +508,7 @@ public class SlowMPTrigger extends AbstractTrigger
     {
     	long t_diff1 = hit2.get_time() - hit1.get_time();
     	long t_diff2 = hit3.get_time() - hit2.get_time();
-    	
+	//    	log.warn("CHECKING TRIPLE t_diff1 " + t_diff1 + " / t_diff2 " + t_diff2);
     	if(t_diff1 > t_min && t_diff2 > t_min && t_diff1 < t_max && t_diff2 < t_max)
     	{
     		long t_diff3 = hit3.get_time() - hit1.get_time();
@@ -472,7 +518,7 @@ public class SlowMPTrigger extends AbstractTrigger
 		double p_diff1 = domRegistry.distanceBetweenDOMs(hit1.get_mb_id(), hit2.get_mb_id());
 		double p_diff2 = domRegistry.distanceBetweenDOMs(hit2.get_mb_id(), hit3.get_mb_id());
     		double p_diff3 = domRegistry.distanceBetweenDOMs(hit1.get_mb_id(), hit3.get_mb_id());
-		
+		//log.warn("    ->step2 - p_diff1: " + p_diff1 + " p_diff2 " + p_diff2 + " pdiff3 " + p_diff3);
     		if(p_diff1+p_diff2-p_diff3 <= delta_d && p_diff1 > 0 && p_diff2 > 0 && p_diff3 > 0)
     		{
     		    double inv_v1 = t_diff1/p_diff1;
@@ -482,11 +528,11 @@ public class SlowMPTrigger extends AbstractTrigger
     		    double inv_v_mean = (inv_v1+inv_v2+inv_v3)/3.0;
     		    
     		    //System.out.print(Math.abs(inv_v2-inv_v1)/inv_v_mean);
-    		    
+		    //  log.warn("        ->step3 - inv_v_mean " + Math.abs(inv_v2-inv_v1)/inv_v_mean);
     		    if(Math.abs(inv_v2-inv_v1)/inv_v_mean <= rel_v)
     		    {
     		    	// Found Triple
-    		    	System.out.format("Found a Triple!%n");
+    		    	//System.out.format("Found a Triple!%n");
     		    	
     		    	long triple_start = hit1.get_time();
     		    	long triple_end = hit3.get_time();
@@ -551,12 +597,14 @@ public class SlowMPTrigger extends AbstractTrigger
 	    if( Math.abs(om_nr1 - om_nr2) <= 2)
 	    {
 	        //System.out.format("FOUND PAIR!!! | OM %d - %d / STRING %d%n", om_nr1, om_nr2, string_nr1);
+		//log.info("FOUND PAIR   -> oms: " + om_nr1 + " " + om_nr2 + " strings: " + string_nr1 + " " + string_nr2 + " timediff: " + (hit2.get_time()-hit1.get_time()) + " time1: " + hit1.get_time() + " time2: " + hit2.get_time());
 	        return hit1;
 	
 	    }
+	    //log.info("NULL-> oms: " + om_nr1 + " " + om_nr2 + " strings: " + string_nr1 + " " + string_nr2);
 	}
+	
         return null;
     }
 
 }
-

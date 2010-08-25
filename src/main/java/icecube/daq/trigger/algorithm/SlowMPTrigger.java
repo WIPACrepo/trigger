@@ -367,7 +367,9 @@ public class SlowMPTrigger extends AbstractTrigger
 	        			    }
 	        		    	else
 	        	    		{
-	        		    		if(check_payload.get_time()-two_hit_list.getLast().get_time() < t_max && check_payload.get_time() - two_hit_list.getFirst().get_time() < max_event_length)
+	        		    		if((check_payload.get_time()-two_hit_list.getLast().get_time() < t_max)
+						&& (check_payload.get_time() - two_hit_list.getFirst().get_time() <
+						max_event_length))
 	        		    		{
 	        		     			two_hit_list.add(check_payload);
 							//log.info("adding twohitlist... below time differences..");
@@ -389,7 +391,9 @@ public class SlowMPTrigger extends AbstractTrigger
 	        		    	else
 	        		    	{
 	        		    		muon_time_window = -1;
-	        	    			if(check_payload.get_time()- two_hit_list.getLast().get_time() < t_max && check_payload.get_time() - two_hit_list.getFirst().get_time() < max_event_length)
+	        	    			if((check_payload.get_time()- two_hit_list.getLast().get_time() < t_max)
+						&& (check_payload.get_time() - two_hit_list.getFirst().get_time() <
+						max_event_length))
 	        	    			{
 	        	    				two_hit_list.add(check_payload); // checks current two_hit_list for 3-tupleseckTriggerStatus(); // checks current two_hit_list for 3-tuples
 							//log.info("Adding twohitlist... below time differences............");
@@ -509,7 +513,7 @@ public class SlowMPTrigger extends AbstractTrigger
     	long t_diff1 = hit2.get_time() - hit1.get_time();
     	long t_diff2 = hit3.get_time() - hit2.get_time();
 	//    	log.warn("CHECKING TRIPLE t_diff1 " + t_diff1 + " / t_diff2 " + t_diff2);
-    	if(t_diff1 > t_min && t_diff2 > t_min && t_diff1 < t_max && t_diff2 < t_max)
+    	if((t_diff1 > t_min) && (t_diff2 > t_min) && (t_diff1 < t_max) && (t_diff2 < t_max))
     	{
     		long t_diff3 = hit3.get_time() - hit1.get_time();
 		
@@ -519,7 +523,7 @@ public class SlowMPTrigger extends AbstractTrigger
 		double p_diff2 = domRegistry.distanceBetweenDOMs(hit2.get_mb_id(), hit3.get_mb_id());
     		double p_diff3 = domRegistry.distanceBetweenDOMs(hit1.get_mb_id(), hit3.get_mb_id());
 		//log.warn("    ->step2 - p_diff1: " + p_diff1 + " p_diff2 " + p_diff2 + " pdiff3 " + p_diff3);
-    		if(p_diff1+p_diff2-p_diff3 <= delta_d && p_diff1 > 0 && p_diff2 > 0 && p_diff3 > 0)
+    		if((p_diff1+p_diff2-p_diff3 <= delta_d) && (p_diff1 > 0) && (p_diff2 > 0) && (p_diff3 > 0))
     		{
     		    double inv_v1 = t_diff1/p_diff1;
     		    double inv_v2 = t_diff2/p_diff2;
@@ -553,12 +557,13 @@ public class SlowMPTrigger extends AbstractTrigger
     		    	  
     		        //	System.out.format("TEMP: %d %d%n", trigger_start_temp, trigger_end_temp);
     		    	  
-    		    	    if(triple_start >= trigger_start_temp && triple_start <= trigger_end_temp && triple_end > trigger_end_temp)
+    		    	    if((triple_start >= trigger_start_temp) && (triple_start <= trigger_end_temp) && (triple_end
+			    > trigger_end_temp))
     		    	    {
     		    		    trigger_list.getLast().set_last_hit(hit3.get_hit());
     		    		    trigger_list.getLast().increase_tuples();
     		    	    }
-    		    	    else if(triple_start >= trigger_start_temp && triple_end <= trigger_end_temp) // contained tuple
+    		    	    else if((triple_start >= trigger_start_temp) && (triple_end <= trigger_end_temp)) // contained tuple
     		    	    {
     		    	    	trigger_list.getLast().increase_tuples();
     		    	    }

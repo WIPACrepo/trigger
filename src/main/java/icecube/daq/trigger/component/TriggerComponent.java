@@ -287,6 +287,10 @@ public class TriggerComponent
 	
     }
 
+    public void resetting() throws DAQCompException {
+        triggerManager.reset();
+    }
+
     public ITriggerManager getTriggerManager(){
         return triggerManager;
     }
@@ -306,6 +310,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 4938 2010-03-23 18:26:46Z toale $";
+	return "$Id: TriggerComponent.java 5147 2010-08-27 02:18:00Z dglo $";
     }
 }

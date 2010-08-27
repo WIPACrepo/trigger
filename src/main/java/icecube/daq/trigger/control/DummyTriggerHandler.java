@@ -120,6 +120,8 @@ public class DummyTriggerHandler
             triggerBag.setPayloadFactory(outputFactory);
         }
         count = 0;
+
+        outChan = null;
     }
 
     /**

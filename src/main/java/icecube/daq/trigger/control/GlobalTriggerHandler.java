@@ -48,7 +48,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 4938 2010-03-23 18:26:46Z toale $
+ * @version $Id: GlobalTriggerHandler.java 5148 2010-08-27 02:18:57Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -320,6 +320,8 @@ public class GlobalTriggerHandler
 
         this.setMaxTimeGateWindow((int) getMaxTimeGateWindow());
         this.setAllowTimeGap(allowTimeGap());
+
+        outChan = null;
     }
     /**
      * This is the main method.

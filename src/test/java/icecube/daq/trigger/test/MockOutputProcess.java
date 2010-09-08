@@ -53,6 +53,11 @@ public class MockOutputProcess
         return outChan;
     }
 
+    public int getNumberOfChannels()
+    {
+        throw new Error("Unimplemented");
+    }
+
     public int getNumberWritten()
     {
         if (outChan == null) {

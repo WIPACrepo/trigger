@@ -59,6 +59,8 @@ public class TriggerManagerTest
             tails[ i % numTails].push(new MockHit((long) (i + 1) * 10000L));
         }
 
+        waitForRecordsSent(trigMgr);
+
         for (int i = 0; i < tails.length; i++) {
             tails[i].push(StrandTail.LAST_POSSIBLE_SPLICEABLE);
         }
@@ -86,6 +88,18 @@ public class TriggerManagerTest
         trigMgr.setSplicer(splicer);
 
         loadAndRun(trigMgr);
+
+        for (int i = 0; i < 100 && !outProc.isStopped(); i++) {
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // do nothing
+            }
+        }
+
+        waitForRecordsSent(trigMgr);
+
+        assertTrue("Output process has not stopped", outProc.isStopped());
 
         assertEquals("Bad number of payloads written",
                      12, outProc.getNumberWritten());
@@ -161,10 +175,53 @@ public class TriggerManagerTest
 
         loadAndRun(trigMgr);
 
+        for (int i = 0; i < 100 && !outProc.isStopped(); i++) {
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // do nothing
+            }
+        }
+
         assertEquals("Bad number of payloads written",
                      12, outProc.getNumberWritten());
 
         trigMgr.reset();
+    }
+
+    private void waitForRecordsSent(TriggerManager trigMgr)
+    {
+        long prevSent = 0L;
+        int prevSame = 0;
+        for (int i = 0; i < 10; i++) {
+            long[] recsSent = trigMgr.getPayloadOutput().getRecordsSent();
+
+            long curSent;
+            if (recsSent == null) {
+                curSent = 0L;
+            } else {
+                curSent = recsSent[0];
+            }
+
+            if (curSent > 0L) {
+                if (curSent != prevSent) {
+                    prevSame = 0;
+                } else {
+                    prevSame++;
+                    if (prevSame == 3) {
+                        break;
+                    }
+                }
+            }
+
+            prevSent = curSent;
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // do nothing
+            }
+        }
     }
 
     public static void main(String[] args)

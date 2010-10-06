@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerManager
  *
- * Version $Id: ITriggerHandler.java 4938 2010-03-23 18:26:46Z toale $
+ * Version $Id: ITriggerHandler.java 12315 2010-10-06 21:27:41Z dglo $
  *
  * Date: March 31 2005
  *
@@ -24,7 +24,7 @@ import java.util.TreeSet;
 /**
  * This interface defines the behavior of a TriggerHandler
  *
- * @version $Id: ITriggerHandler.java 4938 2010-03-23 18:26:46Z toale $
+ * @version $Id: ITriggerHandler.java 12315 2010-10-06 21:27:41Z dglo $
  * @author pat
  */
 public interface ITriggerHandler extends IPayloadProducer
@@ -71,6 +71,11 @@ public interface ITriggerHandler extends IPayloadProducer
     void reset();
 
     /**
+     * Stop the threads
+     */
+    void stopThread();
+
+    /**
      * Get the SourceID
      * @return a ISourceID
      */
@@ -81,6 +86,20 @@ public interface ITriggerHandler extends IPayloadProducer
      * @return a TriggerHandlerMonitor
      */
     TriggerHandlerMonitor getMonitor();
+
+    /**
+     * Is the main thread waiting for input?
+     *
+     * @return <tt>true</tt> if the main thread is waiting for input
+     */
+    boolean isMainThreadWaiting();
+
+    /**
+     * Is the output thread waiting for data?
+     *
+     * @return <tt>true</tt> if the main thread is waiting for data
+     */
+    boolean isOutputThreadWaiting();
 
     /**
      * Set the DOMRegistry that should be used.

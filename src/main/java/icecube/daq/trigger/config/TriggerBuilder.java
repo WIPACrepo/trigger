@@ -1,7 +1,7 @@
 /*
  * class: TriggerBuilder
  *
- * Version $Id: TriggerBuilder.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: TriggerBuilder.java 12315 2010-10-06 21:27:41Z dglo $
  *
  * Date: August 18 2005
  *
@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class builds triggers from a trigger configuration object.
  *
- * @version $Id: TriggerBuilder.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: TriggerBuilder.java 12315 2010-10-06 21:27:41Z dglo $
  * @author pat
  */
 public class TriggerBuilder
@@ -74,8 +74,8 @@ public class TriggerBuilder
         Iterator paramIter = triggerConfiguration.getParameterConfig().iterator();
         while (paramIter.hasNext()) {
             ParameterConfigType paramConfig = (ParameterConfigType) paramIter.next();
-            if (log.isInfoEnabled()) {
-                log.info("Adding parameter " + paramConfig.getParameterName()
+            if (log.isDebugEnabled()) {
+                log.debug("Adding parameter " + paramConfig.getParameterName()
                          + " = " + paramConfig.getParameterValue());
             }
             TriggerParameter parameter = new TriggerParameter(paramConfig.getParameterName(),
@@ -102,8 +102,8 @@ public class TriggerBuilder
                                                         readoutConfig.getTimeOffset(),
                                                         readoutConfig.getTimeMinus(),
                                                         readoutConfig.getTimePlus());
-            if (log.isInfoEnabled()) {
-                log.info("Adding readout " + readoutConfig.getReadoutType()
+            if (log.isDebugEnabled()) {
+                log.debug("Adding readout " + readoutConfig.getReadoutType()
                          + " = " + readoutConfig.getTimeOffset()
                          + ", " + readoutConfig.getTimeMinus() + ", " + readoutConfig.getTimePlus());
             }

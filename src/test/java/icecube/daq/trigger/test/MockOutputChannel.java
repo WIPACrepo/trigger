@@ -35,6 +35,11 @@ public class MockOutputChannel
         throw new Error("Unimplemented");
     }
 
+    public boolean isStopped()
+    {
+        return stopped;
+    }
+
     public void receiveByteBuffer(ByteBuffer buf)
     {
         numWritten++;

@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerManager
  *
- * Version $Id: ITriggerManager.java 4902 2010-02-17 22:55:22Z dglo $
+ * Version $Id: ITriggerManager.java 12315 2010-10-06 21:27:41Z dglo $
  *
  * Date: March 31 2005
  *
@@ -17,7 +17,7 @@ import icecube.daq.splicer.Splicer;
 /**
  * This interface defines the behavior of a TriggerManager
  *
- * @version $Id: ITriggerManager.java 4902 2010-02-17 22:55:22Z dglo $
+ * @version $Id: ITriggerManager.java 12315 2010-10-06 21:27:41Z dglo $
  * @author pat
  */
 public interface ITriggerManager
@@ -35,6 +35,8 @@ public interface ITriggerManager
     long getMinProcessingTime();
 
     long getMaxProcessingTime();
+
+    int getNumOutputsQueued();
 
     int getProcessingCount();
 

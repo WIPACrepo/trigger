@@ -69,6 +69,8 @@ public class GlobalTriggerHandlerTest
     private static final MockAppender appender =
         new MockAppender(/*org.apache.log4j.Level.ALL*/)/*.setVerbose(true)*/;
 
+    private GlobalTriggerHandler trigMgr;
+
     public GlobalTriggerHandlerTest(String name)
     {
         super(name);
@@ -108,6 +110,10 @@ public class GlobalTriggerHandlerTest
         assertEquals("Bad number of log messages",
                      0, appender.getNumberOfMessages());
 
+        if (trigMgr != null) {
+            trigMgr.stopThread();
+        }
+
         super.tearDown();
     }
 
@@ -119,8 +125,7 @@ public class GlobalTriggerHandlerTest
         MockSourceID srcId =
             new MockSourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
 
-        GlobalTriggerHandler trigMgr =
-            new GlobalTriggerHandler(srcId, false, factory);
+        trigMgr = new GlobalTriggerHandler(srcId, false, factory);
         assertNotNull("Monitor should not be null", trigMgr.getMonitor());
         assertEquals("Unexpected count difference",
                      0, trigMgr.getMonitor().getTriggerBagCountDifference());
@@ -133,7 +138,7 @@ public class GlobalTriggerHandlerTest
 
     public void testAddTrigger()
     {
-        GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
+        trigMgr = new GlobalTriggerHandler();
         assertEquals("Bad triggerList length",
                      0, trigMgr.getConfiguredTriggerList().size());
 
@@ -144,7 +149,7 @@ public class GlobalTriggerHandlerTest
 
     public void testAddDuplicateTrigger()
     {
-        GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
+        trigMgr = new GlobalTriggerHandler();
         assertEquals("Bad triggerList length",
                      0, trigMgr.getConfiguredTriggerList().size());
 
@@ -166,7 +171,7 @@ public class GlobalTriggerHandlerTest
 
     public void testAddMultipleTriggers()
     {
-        GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
+        trigMgr = new GlobalTriggerHandler();
         assertEquals("Bad triggerList length",
                      0, trigMgr.getConfiguredTriggerList().size());
 
@@ -184,7 +189,7 @@ public class GlobalTriggerHandlerTest
 
     public void testAddTriggers()
     {
-        GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
+        trigMgr = new GlobalTriggerHandler();
 
         ArrayList list = new ArrayList();
         list.add(new MockTrigger());
@@ -199,7 +204,7 @@ public class GlobalTriggerHandlerTest
 
     public void testClearTriggers()
     {
-        GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
+        trigMgr = new GlobalTriggerHandler();
 
         assertEquals("Bad triggerList length",
                      0, trigMgr.getConfiguredTriggerList().size());
@@ -214,7 +219,7 @@ public class GlobalTriggerHandlerTest
 
     public void testIssueNoDest()
     {
-        GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
+        trigMgr = new GlobalTriggerHandler();
 
         try {
             trigMgr.issueTriggers();
@@ -226,7 +231,7 @@ public class GlobalTriggerHandlerTest
 
     public void testIssueEmpty()
     {
-        GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
+        trigMgr = new GlobalTriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -240,7 +245,7 @@ public class GlobalTriggerHandlerTest
 
     public void testIssueOne()
     {
-        GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
+        trigMgr = new GlobalTriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -259,13 +264,17 @@ public class GlobalTriggerHandlerTest
         trigMgr.addToTriggerBag(tr);
 
         trigMgr.issueTriggers();
+
+        waitForOutput(trigMgr);
+        waitForOutputThread(trigMgr);
+
         assertEquals("Bad number of payloads written",
                      1, outProc.getNumberWritten());
     }
 
     public void testFlushEmpty()
     {
-        GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
+        trigMgr = new GlobalTriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -279,7 +288,7 @@ public class GlobalTriggerHandlerTest
 
     public void testFlush()
     {
-        GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
+        trigMgr = new GlobalTriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -296,6 +305,10 @@ public class GlobalTriggerHandlerTest
         trigMgr.addToTriggerBag(tr);
 
         trigMgr.flush();
+
+        waitForOutput(trigMgr);
+        waitForOutputThread(trigMgr);
+
         assertEquals("Bad number of payloads written",
                      1, outProc.getNumberWritten());
 
@@ -304,7 +317,7 @@ public class GlobalTriggerHandlerTest
 
     public void testProcessNonTrigger()
     {
-        GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
+        trigMgr = new GlobalTriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -324,6 +337,10 @@ public class GlobalTriggerHandlerTest
                      1, trigMgr.getMonitor().getTriggerBagCountDifference());
 
         trigMgr.process(new MockHit(12345L));
+
+        waitForProcessedPayloads(trigMgr);
+        waitForMainThread(trigMgr);
+
         assertEquals("Unexpected non-trigger payloads",
                      0, trigMgr.getTotalNonTRPInputTriggers());
 
@@ -332,14 +349,19 @@ public class GlobalTriggerHandlerTest
         trigReq = new MockTriggerRequest(20000L, 29999L, 1, 11);
         trigReq.setSourceID(SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID);
         trigReq.setReadoutRequest(new MockReadoutRequest());
+
         trigMgr.process(trigReq);
+
+        waitForProcessedPayloads(trigMgr);
+        waitForMainThread(trigMgr);
+
         assertEquals("Expected non-trigger payload",
                      1, trigMgr.getTotalNonTRPInputTriggers());
     }
 
     public void testProcessSimpleTrigger()
     {
-        GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
+        trigMgr = new GlobalTriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -364,7 +386,11 @@ public class GlobalTriggerHandlerTest
         trigReq.setSourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
         trigReq.setReadoutRequest(new MockReadoutRequest());
         trigReq.addPayload(new MockTriggerRequest(20001L, 21000L));
+
         trigMgr.process(trigReq);
+
+        waitForProcessedPayloads(trigMgr);
+        waitForMainThread(trigMgr);
 
         assertEquals("Unexpected count difference",
                      1, trigMgr.getMonitor().getTriggerBagCountDifference());
@@ -376,7 +402,11 @@ public class GlobalTriggerHandlerTest
         trigReq = new MockTriggerRequest(30000L, 39999L, 2, 22);
         trigReq.setSourceID(SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID);
         trigReq.setReadoutRequest(new MockReadoutRequest());
+
         trigMgr.process(trigReq);
+
+        waitForProcessedPayloads(trigMgr);
+        waitForMainThread(trigMgr);
 
         assertEquals("Unexpected count difference",
                      2, trigMgr.getMonitor().getTriggerBagCountDifference());
@@ -388,7 +418,7 @@ public class GlobalTriggerHandlerTest
 
     public void testProcessBadMergedTrigger()
     {
-        GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
+        trigMgr = new GlobalTriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -422,7 +452,11 @@ public class GlobalTriggerHandlerTest
                                         badCfgId, badUID);
         trigReq.setSourceID(badSrcId);
         trigReq.setReadoutRequest(new MockReadoutRequest());
+
         trigMgr.process(trigReq);
+
+        waitForProcessedPayloads(trigMgr);
+        waitForMainThread(trigMgr);
 
         assertEquals("Unexpected count difference",
                      1, trigMgr.getMonitor().getTriggerBagCountDifference());
@@ -434,7 +468,11 @@ public class GlobalTriggerHandlerTest
         trigReq = new MockTriggerRequest(30000L, 39999L, -1, 11);
         trigReq.setSourceID(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID);
         trigReq.setReadoutRequest(new MockReadoutRequest());
+
         trigMgr.process(trigReq);
+
+        waitForProcessedPayloads(trigMgr);
+        waitForMainThread(trigMgr);
 
         assertEquals("Unexpected count difference",
                      1, trigMgr.getMonitor().getTriggerBagCountDifference());
@@ -455,7 +493,7 @@ public class GlobalTriggerHandlerTest
 
     public void testProcessMergedTrigger()
     {
-        GlobalTriggerHandler trigMgr = new GlobalTriggerHandler();
+        trigMgr = new GlobalTriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -480,7 +518,11 @@ public class GlobalTriggerHandlerTest
         trigReq.setSourceID(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID);
         trigReq.setReadoutRequest(new MockReadoutRequest());
         trigReq.addPayload(new MockTriggerRequest(20001L, 21000L));
+
         trigMgr.process(trigReq);
+
+        waitForProcessedPayloads(trigMgr);
+        waitForMainThread(trigMgr);
 
         assertEquals("Unexpected count difference",
                      1, trigMgr.getMonitor().getTriggerBagCountDifference());
@@ -492,7 +534,11 @@ public class GlobalTriggerHandlerTest
         trigReq = new MockTriggerRequest(30000L, 39999L, -1, 11);
         trigReq.setSourceID(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID);
         trigReq.setReadoutRequest(new MockReadoutRequest());
+
         trigMgr.process(trigReq);
+
+        waitForProcessedPayloads(trigMgr);
+        waitForMainThread(trigMgr);
 
         assertEquals("Unexpected count difference",
                      2, trigMgr.getMonitor().getTriggerBagCountDifference());
@@ -500,6 +546,81 @@ public class GlobalTriggerHandlerTest
                      0, trigMgr.getMonitor().getTriggerBagCountTotal());
         assertEquals("Bad number of triggers written",
                      0, outProc.getNumberWritten());
+    }
+
+    private static void waitForCount(GlobalTriggerHandler trigMgr, int count)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (trigMgr.getCount() >= count) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // ignore interrupts
+            }
+        }
+    }
+
+    private static void waitForMainThread(GlobalTriggerHandler trigMgr)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (trigMgr.isMainThreadWaiting()) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // ignore interrupts
+            }
+        }
+    }
+
+    private static void waitForOutput(GlobalTriggerHandler trigMgr)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (trigMgr.getNumOutputsQueued() == 0) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // ignore interrupts
+            }
+        }
+    }
+
+    private static void waitForOutputThread(GlobalTriggerHandler trigMgr)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (trigMgr.isOutputThreadWaiting()) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // ignore interrupts
+            }
+        }
+    }
+
+    private static void waitForProcessedPayloads(GlobalTriggerHandler trigMgr)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (!trigMgr.hasUnprocessedPayloads()) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // ignore interrupts
+            }
+        }
     }
 
     public static void main(String[] args)

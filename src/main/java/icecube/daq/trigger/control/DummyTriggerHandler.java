@@ -172,11 +172,41 @@ public class DummyTriggerHandler
     }
 
     /**
+     * Is the main thread waiting for input?
+     *
+     * @return <tt>true</tt> if the main thread is waiting for input
+     */
+    public boolean isMainThreadWaiting()
+    {
+        return false;
+    }
+
+    /**
+     * Is the output thread waiting for data?
+     *
+     * @return <tt>true</tt> if the main thread is waiting for data
+     */
+    public boolean isOutputThreadWaiting()
+    {
+        return false;
+    }
+
+    /**
      * sets payload output
      * @param payloadOutput destination of payloads
      */
     public void setPayloadOutput(DAQComponentOutputProcess payloadOutput) {
         this.payloadOutput = payloadOutput;
+    }
+
+    /**
+     * Get number of triggers queued for output.
+     *
+     * @return number of triggers queued
+     */
+    public int getNumOutputsQueued()
+    {
+        return 0;
     }
 
     DAQComponentOutputProcess getPayloadOutput()
@@ -237,6 +267,14 @@ public class DummyTriggerHandler
      */
     public void reset() {
         init();
+    }
+
+    /**
+     * Stop the threads
+     */
+    public void stopThread()
+    {
+        // do nothing
     }
 
     /**

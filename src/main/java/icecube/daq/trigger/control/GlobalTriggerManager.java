@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java 4902 2010-02-17 22:55:22Z dglo $
+ * @version $Id: GlobalTriggerManager.java 12315 2010-10-06 21:27:41Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager
@@ -62,7 +62,6 @@ public class GlobalTriggerManager
      */
     private int inputCount;
     private int recycleCount;
-    private double totalProcessTime;
     /**
      * size of last input list
      */
@@ -155,13 +154,6 @@ public class GlobalTriggerManager
 
         start = numberOfObjectsInSplicer;
 
-        totalProcessTime += (System.currentTimeMillis() - startTime);
-        if(lastInputListSize > nThresholdInSplicer){
-            if (log.isInfoEnabled()) {
-                log.info("Total time = " + totalProcessTime);
-            }
-        }
-
         if ((inputCount % nThresholdInSplicer) == (nThresholdInSplicer - 1)) {
             double timeDiff = System.currentTimeMillis() - startTime;
             double timePerHit = timeDiff/nInputs;
@@ -213,9 +205,11 @@ public class GlobalTriggerManager
         if (log.isDebugEnabled()) {
             log.debug("Splicer truncated: " + event.getSpliceable());
         }
+
         if (event.getSpliceable() == Splicer.LAST_POSSIBLE_SPLICEABLE) {
-            flush();
+            finalFlush();
         }
+
         Iterator iter = event.getAllSpliceables().iterator();
         while (iter.hasNext()) {
             ILoadablePayload payload = (ILoadablePayload) iter.next();
@@ -241,9 +235,8 @@ public class GlobalTriggerManager
 
     public void flush() {
         super.flush();
-        double timePerInput = totalProcessTime/inputCount;
         if (log.isInfoEnabled()) {
-            log.info("Processed " + inputCount + " hits at " + timePerInput + " ms per hit.");
+            log.info("Processed " + inputCount + " hits");
         }
     }
 
@@ -251,7 +244,6 @@ public class GlobalTriggerManager
         start = 0;
         inputCount = 0;
         recycleCount = 0;
-        totalProcessTime = 0.0;
         lastInputListSize = 0;
         earliestTime = new UTCTime(0);
         latestTime = new UTCTime(0);

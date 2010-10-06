@@ -55,9 +55,9 @@ public class StringTriggerHandler
      * Method to process payloads, assumes that they are time ordered.
      * @param payload payload to process
      */
-    public void process(ILoadablePayload payload) {
+    void reprocess(ILoadablePayload payload) {
 
-        if (payload == null) {
+        if (payload == FLUSH_PAYLOAD) {
             return;
         }
 

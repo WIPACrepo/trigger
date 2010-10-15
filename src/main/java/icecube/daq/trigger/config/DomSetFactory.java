@@ -102,10 +102,10 @@ public class DomSetFactory
 
 
         } else if (domSetId == 2) {
-            // InIce (1,1)-(1,60):(80,1)-(80,60)
+            // InIce (1,1)-(1,60):(78,1)-(78,60)
             ArrayList<String> domIds = new ArrayList<String>();
 
-            for (int str=1; str<=80; str++) {
+            for (int str=1; str<=78; str++) {
                 Set<DeployedDOM> doms = domRegistry.getDomsOnString(str);
                 for (DeployedDOM dom: doms) {
                     int pos = dom.getStringMinor();
@@ -226,11 +226,11 @@ public class DomSetFactory
                 }
             }
 
-            // DeepCore strings are 81-86
+            // DeepCore strings are 79-86
             minPos = 11;
             maxPos = 60;
 
-            for (int str=81; str<=86; str++) {
+            for (int str=79; str<=86; str++) {
                 doms = domRegistry.getDomsOnString(str);
                 for (DeployedDOM dom: doms) {
                     int pos = dom.getStringMinor();

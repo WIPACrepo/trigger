@@ -27,7 +27,7 @@
       <plugin>
         <groupId>org.jvnet.jaxb1.maven2</groupId>
         <artifactId>maven-jaxb1-plugin</artifactId>
-        <version>1.0-rc7</version>
+        <version>1.0-rc11</version>
         <executions>
           <execution>
             <goals>

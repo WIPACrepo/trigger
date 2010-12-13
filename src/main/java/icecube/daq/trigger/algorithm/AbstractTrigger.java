@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 5138 2010-08-12 16:23:39Z kael $
+ * Version $Id: AbstractTrigger.java 4891 2010-02-16 21:09:34Z dglo $
  *
  * Date: August 19 2005
  *
@@ -46,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 5138 2010-08-12 16:23:39Z kael $
+ * @version $Id: AbstractTrigger.java 4891 2010-02-16 21:09:34Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger
@@ -334,7 +334,6 @@ public abstract class AbstractTrigger
     }
 
     protected void setEarliestPayloadOfInterest(IPayload payload) {
-        if (log.isDebugEnabled()) log.debug("Setting EPoI to " + payload.getPayloadTimeUTC().longValue());
         this.earliestPayloadOfIterest = payload;
     }
 

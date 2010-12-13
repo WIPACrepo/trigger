@@ -218,7 +218,7 @@ public class CylinderTrigger extends AbstractTrigger
                 double dy = d1.getY() - d0.getY();
                 double dz = d1.getZ() - d0.getZ();
                 double r  = dx * dx + dy * dy;
-                if (r < radius2 && dz <  0.5*height) hitsInCylinder.add(q[jhit]);
+                if (r < radius2 && dz < height) hitsInCylinder.add(q[jhit]);
             }
             if (hitsInCylinder.size() >= multiplicity) 
             {

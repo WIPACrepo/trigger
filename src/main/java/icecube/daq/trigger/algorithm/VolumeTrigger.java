@@ -71,6 +71,7 @@ public class VolumeTrigger extends AbstractTrigger
     
     private LinkedList<IHitPayload> triggerQueue;
 
+    private boolean needStringMap;
     private TreeMap<Integer, TreeSet<Integer>> stringMap;
 
     private static final Logger logger = Logger.getLogger(VolumeTrigger.class);
@@ -87,8 +88,8 @@ public class VolumeTrigger extends AbstractTrigger
 
         setCoherenceLength(7);
         configCoherence = false;
-        
-        stringMap = null;
+
+	needStringMap = true;
     }
     
     @Override
@@ -153,8 +154,11 @@ public class VolumeTrigger extends AbstractTrigger
     public void runTrigger(IPayload payload) throws TriggerException
     {
 
-        // Get the string map if we haven't already
-        if (stringMap == null) stringMap = getTriggerHandler().getStringMap();
+	// Get the string map if we haven't already
+	if (needStringMap) {
+	    stringMap = getTriggerHandler().getStringMap();
+	    needStringMap = false;
+	}
 
         if (!(payload instanceof IHitPayload)) 
             throw new TriggerException(

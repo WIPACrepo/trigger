@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 4891 2010-02-16 21:09:34Z dglo $
+ * Version $Id: AbstractTrigger.java 12498 2010-12-29 21:48:22Z dglo $
  *
  * Date: August 19 2005
  *
@@ -46,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 4891 2010-02-16 21:09:34Z dglo $
+ * @version $Id: AbstractTrigger.java 12498 2010-12-29 21:48:22Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger
@@ -138,8 +138,8 @@ public abstract class AbstractTrigger
      */
     public void setTriggerType(int triggerType) {
         this.triggerType = triggerType;
-        if (log.isInfoEnabled()) {
-            log.info("TriggerType = " + triggerType);
+        if (log.isDebugEnabled()) {
+            log.debug("TriggerType = " + triggerType);
         }
     }
 
@@ -157,8 +157,8 @@ public abstract class AbstractTrigger
      */
     public void setTriggerConfigId(int triggerConfigId) {
         this.triggerConfigId = triggerConfigId;
-        if (log.isInfoEnabled()) {
-            log.info("TriggerConfigId = " + triggerConfigId);
+        if (log.isDebugEnabled()) {
+            log.debug("TriggerConfigId = " + triggerConfigId);
         }
     }
 
@@ -176,8 +176,8 @@ public abstract class AbstractTrigger
      */
     public void setSourceId(ISourceID sourceId) {
         this.sourceId = sourceId;
-        if (log.isInfoEnabled()) {
-            log.info("SourceId = " + sourceId.getSourceID());
+        if (log.isDebugEnabled()) {
+            log.debug("SourceId = " + sourceId.getSourceID());
         }
     }
 
@@ -195,8 +195,8 @@ public abstract class AbstractTrigger
      */
     public void setTriggerName(String triggerName) {
         this.triggerName = triggerName;
-        if (log.isInfoEnabled()) {
-            log.info("TriggerName = " + triggerName);
+        if (log.isDebugEnabled()) {
+            log.debug("TriggerName = " + triggerName);
         }
     }
 
@@ -206,8 +206,8 @@ public abstract class AbstractTrigger
      */
     public void addReadout(TriggerReadout readout) {
         readouts.add(readout);
-        if (log.isInfoEnabled()) {
-            log.info("Added Readout: " + readout.toString());
+        if (log.isDebugEnabled()) {
+            log.debug("Added Readout: " + readout.toString());
         }
     }
 
@@ -230,8 +230,8 @@ public abstract class AbstractTrigger
      */
     public void addParameter(TriggerParameter parameter) throws UnknownParameterException, IllegalParameterValueException {
         parameters.add(parameter);
-        if (log.isInfoEnabled()) {
-            log.info("Added Parameter: " + parameter.toString());
+        if (log.isDebugEnabled()) {
+            log.debug("Added Parameter: " + parameter.toString());
         }
     }
 

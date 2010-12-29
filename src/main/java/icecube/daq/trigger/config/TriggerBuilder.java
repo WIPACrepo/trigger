@@ -1,7 +1,7 @@
 /*
  * class: TriggerBuilder
  *
- * Version $Id: TriggerBuilder.java 12315 2010-10-06 21:27:41Z dglo $
+ * Version $Id: TriggerBuilder.java 12498 2010-12-29 21:48:22Z dglo $
  *
  * Date: August 18 2005
  *
@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class builds triggers from a trigger configuration object.
  *
- * @version $Id: TriggerBuilder.java 12315 2010-10-06 21:27:41Z dglo $
+ * @version $Id: TriggerBuilder.java 12498 2010-12-29 21:48:22Z dglo $
  * @author pat
  */
 public class TriggerBuilder
@@ -51,8 +51,8 @@ public class TriggerBuilder
         // first get name of trigger and create instance of it
         String triggerName = triggerConfiguration.getTriggerName();
         String className = "icecube.daq.trigger.algorithm." + triggerName;
-        if (log.isInfoEnabled()) {
-            log.info("Building trigger: " + className);
+        if (log.isDebugEnabled()) {
+            log.debug("Building trigger: " + className);
         }
         ITriggerConfig trigger = null;
         try {

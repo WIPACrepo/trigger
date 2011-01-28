@@ -146,8 +146,8 @@ public class SlowMPTrigger extends AbstractTrigger
         set_t_min(0);
         set_t_max(500000);
         set_delta_d(500);
-        set_rel_v(3);
-        set_min_n_tuples(1);
+        set_rel_v(0.5);
+        set_min_n_tuples(2);
 
         // max_event_length is in tens of nanoseconds
         max_event_length = 50000000;  // we dont want longer events thatn 5 milliseconds, should not occur in 30 min run

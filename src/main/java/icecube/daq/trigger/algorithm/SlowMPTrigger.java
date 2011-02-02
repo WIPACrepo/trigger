@@ -259,7 +259,7 @@ public class SlowMPTrigger extends AbstractTrigger
         one_hit_list.clear();
         two_hit_list.clear();
 
-        log.warn("FLUSHHH!!!");
+        log.info("FLUSHHH!!!");
 
         muon_time_window = -1;
     }

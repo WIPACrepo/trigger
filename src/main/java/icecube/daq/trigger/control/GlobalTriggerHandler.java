@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 12315 2010-10-06 21:27:41Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 12628 2011-02-02 00:58:23Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -982,7 +982,13 @@ public class GlobalTriggerHandler
                 }
 
                 if (payload != null) {
-                    reprocess(payload);
+                    try {
+                        reprocess(payload);
+                    } catch (Exception ex) {
+                        log.error("Could not reprocess payload " + payload,
+                                  ex);
+                    }
+
                     if (payload == FLUSH_PAYLOAD) {
                         sawFlush = true;
                     }

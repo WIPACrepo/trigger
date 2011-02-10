@@ -89,6 +89,8 @@ public class CylinderTrigger extends AbstractTrigger
             setTimeWindow(Long.parseLong(parameter.getValue()));
         else if (parameter.getName().equals("multiplicity"))
             setMultiplicity(Integer.parseInt(parameter.getValue()));
+        else if (parameter.getName().equals("simpleMultiplicity"))
+            setSimpleMultiplicity(Integer.parseInt(parameter.getValue()));
         else if (parameter.getName().equals("radius"))
             setRadius(Double.parseDouble(parameter.getValue()));
         else if (parameter.getName().equals("height"))

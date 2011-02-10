@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
  * is intended for use on a central trigger module which may have inputs from multiple
  * strings.  The trigger searches for N hits clustered in a "coherence" length of M
  * adjacent modules all within a time window of &Delta;t.
- * 
+ *
  * The trigger is configured via the standard trigger config XML.  It will respond to
  * the following configuration parameters ...
  * <dl>
@@ -41,12 +41,12 @@ import org.apache.log4j.Logger;
  * <dt>multiplicity</dt>
  * <dd>The parameter M above - the multiplicity threshold.</dd>
  * </dl>
- * 
+ *
  * The implementation is straightforward.  First the overall multiplicty requirement must
  * be satisfied: hits are collected into a queue until the head and tail fall outside
  * the time window.  If the queue size is &ge; N then that forms the 'first-level trigger.'
  * Upon reaching this state, it must be checked whether the hits are clustered in space.
- * This is done by incrementing counters a length M/2 in either direction from the 
+ * This is done by incrementing counters a length M/2 in either direction from the
  * <i>logical channel</i>, allowing for counts on neighboring strings.  A space cluster will
  * also maintain counter[i] &ge; N for one or more <i>logical channel</i> locations.
  * <p>
@@ -54,7 +54,7 @@ import org.apache.log4j.Logger;
  * space cluster.  That is, hits are not part of the trigger hit list unless they are
  * clustered both in time and in space.  Simultaneous, multiple clusters will count toward
  * a single single trigger and will not produce multiple triggers.
- * 
+ *
  * @author kael
  *
  */
@@ -63,13 +63,13 @@ public class CylinderTrigger extends AbstractTrigger
     private long timeWindow;
     private int multiplicity;
     private int simpleMultiplicity;
-    private double radius, radius2; 
+    private double radius, radius2;
     private double height;
 
     private LinkedList<IHitPayload> triggerQueue;
 
     private static final Logger logger = Logger.getLogger(CylinderTrigger.class);
-    
+
     public CylinderTrigger()
     {
         triggerQueue    = new LinkedList<IHitPayload>();
@@ -80,7 +80,7 @@ public class CylinderTrigger extends AbstractTrigger
         setRadius(150.0);
         setHeight(100.0);
     }
-    
+
     @Override
     public void addParameter(TriggerParameter parameter) throws UnknownParameterException,
             IllegalParameterValueException
@@ -93,7 +93,7 @@ public class CylinderTrigger extends AbstractTrigger
             setRadius(Double.parseDouble(parameter.getValue()));
         else if (parameter.getName().equals("height"))
             setHeight(Double.parseDouble(parameter.getValue()));
-        else if (parameter.getName().equals("domSet")) 
+        else if (parameter.getName().equals("domSet"))
         {
     	    domSetId = Integer.parseInt(parameter.getValue());
     	    configHitFilter(domSetId);
@@ -162,7 +162,7 @@ public class CylinderTrigger extends AbstractTrigger
     public void runTrigger(IPayload payload) throws TriggerException
     {
 
-        if (!(payload instanceof IHitPayload)) 
+        if (!(payload instanceof IHitPayload))
             throw new TriggerException(
                     "Payload object " + payload + " cannot be upcast to IHitPayload."
                     );
@@ -172,13 +172,13 @@ public class CylinderTrigger extends AbstractTrigger
         // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
         if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
         if (!hitFilter.useHit(hitPayload)) return;
-        
+
         while (triggerQueue.size() > 0 &&
                 hitPayload.getHitTimeUTC().longValue() -
                 triggerQueue.element().getHitTimeUTC().longValue() > timeWindow)
         {
             if (triggerQueue.size() >= multiplicity && processHitQueue())
-            {   
+            {
                 if (triggerQueue.size() > 0) formTrigger(triggerQueue, null, null);
                 triggerQueue.clear();
                 setEarliestPayloadOfInterest(hitPayload);
@@ -194,12 +194,12 @@ public class CylinderTrigger extends AbstractTrigger
         }
         triggerQueue.add(hitPayload);
     }
-    
+
     private boolean processHitQueue()
     {
         if (triggerQueue.size() >= simpleMultiplicity) return true;
         IHitPayload[] q = triggerQueue.toArray(new IHitPayload[0]);
-     
+
         final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
 
         // Loop over hit pairs
@@ -220,13 +220,13 @@ public class CylinderTrigger extends AbstractTrigger
                 double r  = dx * dx + dy * dy;
                 if (r < radius2 && Math.abs(dz) < 0.5*height) hitsInCylinder.add(q[jhit]);
             }
-            if (hitsInCylinder.size() >= multiplicity) 
+            if (hitsInCylinder.size() >= multiplicity)
             {
                 triggerQueue = new LinkedList<IHitPayload>(hitsInCylinder);
                 return true;
             }
         }
-        
+
         return false;
     }
 

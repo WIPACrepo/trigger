@@ -1,7 +1,7 @@
 /*
  * class: TriggerBuilder
  *
- * Version $Id: TriggerBuilder.java 12498 2010-12-29 21:48:22Z dglo $
+ * Version $Id: TriggerBuilder.java 12665 2011-02-15 21:00:42Z dglo $
  *
  * Date: August 18 2005
  *
@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class builds triggers from a trigger configuration object.
  *
- * @version $Id: TriggerBuilder.java 12498 2010-12-29 21:48:22Z dglo $
+ * @version $Id: TriggerBuilder.java 12665 2011-02-15 21:00:42Z dglo $
  * @author pat
  */
 public class TriggerBuilder
@@ -212,4 +212,7 @@ public class TriggerBuilder
 
     }
 
+    public static List getTriggerConfig(String fileName) {
+        return TriggerXMLParser.parse(fileName).getTriggerConfig();
+    }
 }

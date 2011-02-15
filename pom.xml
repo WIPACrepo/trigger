@@ -92,54 +92,7 @@
               </archive>
             </configuration>
           </execution>
-          <execution>
-            <id>amanda-trig</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier>amtrig</classifier>
-              <archive>
-                <manifest>
-                  <mainClass>icecube.daq.trigger.component.AmandaTriggerComponent</mainClass>
-                  <addClasspath>true</addClasspath>
-                  <classpathPrefix>../lib</classpathPrefix>
-                </manifest>
-              </archive>
-            </configuration>
-          </execution>
-          <execution>
-            <id>amanda-sim</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier>amanda-sim</classifier>
-              <archive>
-                <manifest>
-                  <mainClass>icecube.daq.trigger.monitor.AmandaSocketSimulator</mainClass>
-                  <addClasspath>true</addClasspath>
-                  <classpathPrefix>../lib</classpathPrefix>
-                </manifest>
-              </archive>
-            </configuration>
-          </execution>
-          <execution>
-            <id>amanda-reader</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier>amanda-reader</classifier>
-              <archive>
-                <manifest>
-                  <mainClass>icecube.daq.trigger.monitor.AmandaSocketReader</mainClass>
-                  <addClasspath>true</addClasspath>
-                  <classpathPrefix>../lib</classpathPrefix>
-                </manifest>
-              </archive>
-            </configuration>
-          </execution>
+<!-- Remove this comment to enable EBShell
           <execution>
             <id>ebshell</id>
             <goals>
@@ -156,6 +109,8 @@
               </archive>
             </configuration>
           </execution>
+Remove this comment to enable EBShell -->
+<!-- Remove this comment to enable TriggerShell
           <execution>
             <id>shell</id>
             <goals>
@@ -172,6 +127,8 @@
               </archive>
             </configuration>
           </execution>
+Remove this comment to enable TriggerShell -->
+<!-- Remove this comment to enable SimpleTrigger
           <execution>
             <id>simptrig</id>
             <goals>
@@ -188,6 +145,7 @@
               </archive>
             </configuration>
           </execution>
+Remove this comment to enable SimpleTrigger -->
         </executions>
       </plugin>
      <plugin>

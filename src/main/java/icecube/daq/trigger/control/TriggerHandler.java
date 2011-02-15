@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 12315 2010-10-06 21:27:41Z dglo $
+ * Version $Id: TriggerHandler.java 12667 2011-02-15 21:17:04Z dglo $
  *
  * Date: October 25 2004
  *
@@ -54,7 +54,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 12315 2010-10-06 21:27:41Z dglo $
+ * @version $Id: TriggerHandler.java 12667 2011-02-15 21:17:04Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -569,34 +569,34 @@ public class TriggerHandler
                 break;
             }
 
-            if (payload.getPayloadInterfaceType() == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
-                if (log.isDebugEnabled()) {
-                    ITriggerRequestPayload trigger = (ITriggerRequestPayload) payload;
+            if (payload.getPayloadInterfaceType() !=
+                PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD)
+            {
+                log.error("Issuing non-request " + payload);
+            } else if (log.isDebugEnabled()) {
+                ITriggerRequestPayload trigger = (ITriggerRequestPayload) payload;
 
-                    IUTCTime firstTime = trigger.getFirstTimeUTC();
-                    IUTCTime lastTime = trigger.getLastTimeUTC();
+                IUTCTime firstTime = trigger.getFirstTimeUTC();
+                IUTCTime lastTime = trigger.getLastTimeUTC();
 
-                    int nSubPayloads = 0;
-                    try {
-                        nSubPayloads = trigger.getPayloads().size();
-                    } catch (Exception e) {
-                        log.error("Couldn't get number of subpayloads", e);
-                    }
-
-                    if (log.isDebugEnabled()) {
-                        String trType;
-                        if (0 > trigger.getTriggerType()) {
-                            trType = "triggers";
-                        } else {
-                            trType = "hits";
-                        }
-
-                        log.debug("Issue trigger: extended event time = " +
-                                  firstTime + " to " + lastTime +
-                                  " and contains " + nSubPayloads + " " +
-                                  trType);
-                    }
+                int nSubPayloads = 0;
+                try {
+                    nSubPayloads = trigger.getPayloads().size();
+                } catch (Exception e) {
+                    log.error("Couldn't get number of subpayloads", e);
                 }
+
+                String trType;
+                if (0 > trigger.getTriggerType()) {
+                    trType = "triggers";
+                } else {
+                    trType = "hits";
+                }
+
+                log.debug("Issue trigger: extended event time = " +
+                          firstTime + " to " + lastTime +
+                          " and contains " + nSubPayloads + " " +
+                          trType);
             }
 
             int bufLen = payload.getPayloadLength();

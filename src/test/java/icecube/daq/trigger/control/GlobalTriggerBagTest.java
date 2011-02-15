@@ -65,6 +65,11 @@ class MockHitRequest
         return rdoutReq;
     }
 
+    public String getTriggerName()
+    {
+        throw new Error("Unimplemented");
+    }
+
     public int getUID()
     {
         return uid;

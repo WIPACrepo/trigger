@@ -11,6 +11,7 @@ import icecube.daq.juggler.mbean.MemoryStatistics;
 import icecube.daq.juggler.mbean.SystemStatistics;
 import icecube.daq.oldpayload.impl.MasterPayloadFactory;
 import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
+import icecube.daq.oldpayload.impl.TriggerRequestRecord;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.PayloadRegistry;
@@ -20,6 +21,7 @@ import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.trigger.config.TriggerBuilder;
+import icecube.daq.trigger.config.triggers.TriggerConfigType;
 import icecube.daq.trigger.control.DummyTriggerManager;
 import icecube.daq.trigger.control.GlobalTriggerManager;
 import icecube.daq.trigger.control.ITriggerControl;
@@ -58,7 +60,6 @@ public class TriggerComponent
 
     private String globalConfigurationDir;
     private String triggerConfigFileName;
-    private List currentTriggers;
 
     private boolean useDummy;
 
@@ -276,15 +277,51 @@ public class TriggerComponent
             }
         }
 
+        List triggerConfigs =
+            TriggerBuilder.getTriggerConfig(triggerConfigFileName);
+
         // Add triggers to the trigger manager
-        currentTriggers = TriggerBuilder.buildTriggers(triggerConfigFileName, sourceId);
+        List currentTriggers =
+            TriggerBuilder.buildTriggers(triggerConfigs, sourceId);
         Iterator triggerIter = currentTriggers.iterator();
         while (triggerIter.hasNext()) {
             ITriggerControl trigger = (ITriggerControl) triggerIter.next();
             trigger.setTriggerHandler(triggerManager);
         }
         triggerManager.addTriggers(currentTriggers);
-	
+
+        addTriggerNames(triggerConfigs);
+    }
+
+    private static final void addTriggerNames(List triggerConfigs)
+    {
+        int max = 0;
+
+        Iterator triggerIter = triggerConfigs.iterator();
+        while (triggerIter.hasNext()) {
+            TriggerConfigType cfgType = (TriggerConfigType) triggerIter.next();
+            if (max < cfgType.getTriggerType()) {
+                max = cfgType.getTriggerType();
+            }
+        }
+
+        String[] typeNames = new String[max + 1];
+
+        triggerIter = triggerConfigs.iterator();
+        while (triggerIter.hasNext()) {
+            TriggerConfigType cfgType = (TriggerConfigType) triggerIter.next();
+
+            String trigName = cfgType.getTriggerName();
+
+            int idx = trigName.indexOf("Trigger");
+            if (idx > 0) {
+                trigName = trigName.substring(0, idx);
+            }
+
+            typeNames[cfgType.getTriggerType()] = trigName;
+        }
+
+        TriggerRequestRecord.setTypeNames(typeNames);
     }
 
     public void resetting() throws DAQCompException {
@@ -310,6 +347,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 5147 2010-08-27 02:18:00Z dglo $";
+	return "$Id: TriggerComponent.java 12666 2011-02-15 21:02:34Z dglo $";
     }
 }

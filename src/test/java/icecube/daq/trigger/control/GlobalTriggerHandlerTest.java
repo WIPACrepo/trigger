@@ -320,8 +320,8 @@ public class GlobalTriggerHandlerTest
         trigMgr.addTrigger(trig);
 
         MockTriggerRequest bagReq =
-            new MockTriggerRequest(10000L, 11111L, 0, 0);
-        bagReq.setSourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
+            new MockTriggerRequest(10000L, 11111L, 0, 0,
+                                   SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
         bagReq.setReadoutRequest(new MockReadoutRequest());
         trigMgr.addToTriggerBag(bagReq);
         assertEquals("Unexpected count difference",
@@ -337,8 +337,9 @@ public class GlobalTriggerHandlerTest
 
         MockTriggerRequest trigReq;
 
-        trigReq = new MockTriggerRequest(20000L, 29999L, 1, 11);
-        trigReq.setSourceID(SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID);
+        trigReq =
+            new MockTriggerRequest(20000L, 29999L, 1, 11,
+                                   SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID);
         trigReq.setReadoutRequest(new MockReadoutRequest());
 
         trigMgr.process(trigReq);
@@ -421,14 +422,12 @@ public class GlobalTriggerHandlerTest
         trigMgr.addTrigger(trig);
 
         MockTriggerRequest bagReq =
-            new MockTriggerRequest(10000L, 11111L, 0, 0);
-        bagReq.setSourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
+            new MockTriggerRequest(10000L, 11111L, 0, 0,
+                                   SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
         bagReq.setReadoutRequest(new MockReadoutRequest());
         trigMgr.addToTriggerBag(bagReq);
         assertEquals("Unexpected count difference",
                      1, trigMgr.getMonitor().getTriggerBagCountDifference());
-
-        MockTriggerRequest trigReq;
 
         final long badFirstTime = 20000L;
         final long badLastTime = 29999L;
@@ -439,11 +438,12 @@ public class GlobalTriggerHandlerTest
             SourceIdRegistry.getDAQNameFromSourceID(badSrcId) + "#" +
             SourceIdRegistry.getDAQIdFromSourceID(badSrcId);
 
-        trigReq = new BadTriggerRequest(badFirstTime, badLastTime, -1,
-                                        badCfgId, badSrcId, badUID);
-        trigReq.setReadoutRequest(new MockReadoutRequest());
+        MockTriggerRequest badReq =
+            new BadTriggerRequest(badFirstTime, badLastTime, -1,
+                                  badCfgId, badSrcId, badUID);
+        badReq.setReadoutRequest(new MockReadoutRequest());
 
-        trigMgr.process(trigReq);
+        trigMgr.process(badReq);
 
         waitForProcessedPayloads(trigMgr);
         waitForMainThread(trigMgr);
@@ -455,8 +455,9 @@ public class GlobalTriggerHandlerTest
         assertEquals("Bad number of triggers written",
                      0, outProc.getNumberWritten());
 
-        trigReq = new MockTriggerRequest(30000L, 39999L, -1, 11);
-        trigReq.setSourceID(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID);
+        MockTriggerRequest trigReq =
+            new MockTriggerRequest(30000L, 39999L, -1, 11,
+                                   SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID);
         trigReq.setReadoutRequest(new MockReadoutRequest());
 
         trigMgr.process(trigReq);

@@ -41,25 +41,16 @@ class GlobalTriggerTrigger
 class BadTriggerRequest
     extends MockTriggerRequest
 {
-    private int uid;
-
     public BadTriggerRequest(long firstVal, long lastVal, int type, int cfgId,
-                             int uid)
+                             int srcId, int uid)
     {
-        super(firstVal, lastVal, type, cfgId);
-
-        this.uid = uid;
+        super(firstVal, lastVal, type, cfgId, srcId, uid);
     }
 
     public List getPayloads()
         throws DataFormatException
     {
         return null;
-    }
-
-    public int getUID()
-    {
-        return uid;
     }
 }
 
@@ -449,8 +440,7 @@ public class GlobalTriggerHandlerTest
             SourceIdRegistry.getDAQIdFromSourceID(badSrcId);
 
         trigReq = new BadTriggerRequest(badFirstTime, badLastTime, -1,
-                                        badCfgId, badUID);
-        trigReq.setSourceID(badSrcId);
+                                        badCfgId, badSrcId, badUID);
         trigReq.setReadoutRequest(new MockReadoutRequest());
 
         trigMgr.process(trigReq);

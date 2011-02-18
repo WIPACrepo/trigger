@@ -1,7 +1,7 @@
 /*
  * class: DummyPayload
  *
- * Version $Id: DummyPayload.java 12315 2010-10-06 21:27:41Z dglo $
+ * Version $Id: DummyPayload.java 12680 2011-02-18 21:51:17Z dglo $
  *
  * Date: October 7 2005
  *
@@ -24,7 +24,7 @@ import java.util.zip.DataFormatException;
  * This class is a dummy payload that only has a UTC time associated with it.
  * Its main purpose is for truncating the Splicer.
  *
- * @version $Id: DummyPayload.java 12315 2010-10-06 21:27:41Z dglo $
+ * @version $Id: DummyPayload.java 12680 2011-02-18 21:51:17Z dglo $
  * @author pat
  */
 public class DummyPayload
@@ -88,17 +88,17 @@ public class DummyPayload
     public void loadPayload()
         throws IOException, DataFormatException
     {
-        throw new IOException("Unimplemented");
+        // do nothing
     }
 
     public void recycle()
     {
-        throw new Error("Unimplemented");
+        // do nothing
     }
 
     public void setCache(IByteBufferCache cache)
     {
-        throw new Error("Unimplemented");
+        // do nothing
     }
 
     public String toString()

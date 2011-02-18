@@ -175,7 +175,7 @@ public class MockTriggerRequest
 
     public String getTriggerName()
     {
-        throw new Error("Unimplemented");
+        return "Mock";
     }
 
     public int getTriggerType()

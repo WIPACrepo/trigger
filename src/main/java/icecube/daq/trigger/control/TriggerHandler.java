@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 12667 2011-02-15 21:17:04Z dglo $
+ * Version $Id: TriggerHandler.java 12679 2011-02-18 21:50:24Z dglo $
  *
  * Date: October 25 2004
  *
@@ -54,7 +54,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 12667 2011-02-15 21:17:04Z dglo $
+ * @version $Id: TriggerHandler.java 12679 2011-02-18 21:50:24Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -542,6 +542,11 @@ public class TriggerHandler
         return sourceId;
     }
 
+    void complainAboutNonTrigger(IWriteablePayload payload)
+    {
+        log.error("Issuing non-request " + payload);
+    }
+
     /**
      * check triggerBag and issue triggers if possible
      *   any triggers that are earlier than the earliestPayloadOfInterest are selected
@@ -572,7 +577,7 @@ public class TriggerHandler
             if (payload.getPayloadInterfaceType() !=
                 PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD)
             {
-                log.error("Issuing non-request " + payload);
+                complainAboutNonTrigger(payload);
             } else if (log.isDebugEnabled()) {
                 ITriggerRequestPayload trigger = (ITriggerRequestPayload) payload;
 

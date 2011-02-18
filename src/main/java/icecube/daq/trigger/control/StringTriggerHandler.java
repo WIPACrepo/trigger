@@ -6,6 +6,7 @@ import icecube.daq.oldpayload.impl.MasterPayloadFactory;
 import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.trigger.algorithm.DefaultStringTrigger;
@@ -85,6 +86,10 @@ public class StringTriggerHandler
 
     }
 
+    void complainAboutNonTrigger(IWriteablePayload payload)
+    {
+        // StringTrigger issues hits, not triggers
+    }
 
     protected void init() {
         super.init();

@@ -1,7 +1,7 @@
 /*
  * class: TriggerManager
  *
- * Version $Id: TriggerManager.java 12315 2010-10-06 21:27:41Z dglo $
+ * Version $Id: TriggerManager.java 12691 2011-02-21 20:22:03Z dglo $
  *
  * Date: October 25 2004
  *
@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger
  *
- * @version $Id: TriggerManager.java 12315 2010-10-06 21:27:41Z dglo $
+ * @version $Id: TriggerManager.java 12691 2011-02-21 20:22:03Z dglo $
  * @author pat
  */
 public class TriggerManager
@@ -48,11 +48,6 @@ public class TriggerManager
      * Log object for this class
      */
     private static final Log log = LogFactory.getLog(TriggerManager.class);
-
-    /**
-     * The factory used to produce IHitPayloads for this object to use.
-     */
-    private SpliceableFactory inputFactory;
 
     /**
      * splicer associated with this manager
@@ -83,15 +78,13 @@ public class TriggerManager
 
     /**
      * Constructor
-     * @param inputFactory SpliceableFactory used by Splicer
      * @param sourceId SourceId of this TriggerManager
      * @param outputFactory factory used to build triggers
      */
-    public TriggerManager(SpliceableFactory inputFactory, ISourceID sourceId,
+    public TriggerManager(ISourceID sourceId,
                           TriggerRequestPayloadFactory outputFactory)
     {
         super(sourceId, outputFactory);
-        this.inputFactory = inputFactory;
         init();
     }
 

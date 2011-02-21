@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java 12315 2010-10-06 21:27:41Z dglo $
+ * @version $Id: GlobalTriggerManager.java 12691 2011-02-21 20:22:03Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager
@@ -79,16 +79,14 @@ public class GlobalTriggerManager
     /**
      * Create an instance of this class.
      */
-    public GlobalTriggerManager(SpliceableFactory inputFactory,
-                                ISourceID sourceID,
+    public GlobalTriggerManager(ISourceID sourceID,
                                 TriggerRequestPayloadFactory outputFactory)
     {
-        this(inputFactory, sourceID, outputFactory, DEFAULT_TIMEGAP_OPTION,
+        this(sourceID, outputFactory, DEFAULT_TIMEGAP_OPTION,
              DEFAULT_MAX_TIMEGATE_WINDOW);
     }
 
-    private GlobalTriggerManager(SpliceableFactory inputFactory,
-                                 ISourceID sourceID,
+    private GlobalTriggerManager(ISourceID sourceID,
                                  TriggerRequestPayloadFactory outputFactory,
                                  boolean allowTimeGap, int iMax_TimeGate_Window)
     {

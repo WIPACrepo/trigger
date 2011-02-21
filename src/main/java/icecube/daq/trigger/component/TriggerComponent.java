@@ -122,13 +122,12 @@ public class TriggerComponent
         // Now differentiate
         if (isGlobalTrigger) {
             // Global trigger
-            triggerManager =
-                new GlobalTriggerManager(factory, sourceId, trFactory);
+            triggerManager = new GlobalTriggerManager(sourceId, trFactory);
         } else if (!useDummy) {
-            triggerManager = new TriggerManager(factory, sourceId, trFactory);
+            triggerManager = new TriggerManager(sourceId, trFactory);
         } else {
             triggerManager =
-                new DummyTriggerManager(factory, sourceId, trFactory);
+                new DummyTriggerManager(sourceId, trFactory);
         }
         addMBean("manager", triggerManager);
 
@@ -347,6 +346,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 12666 2011-02-15 21:02:34Z dglo $";
+	return "$Id: TriggerComponent.java 12691 2011-02-21 20:22:03Z dglo $";
     }
 }

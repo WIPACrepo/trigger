@@ -113,8 +113,7 @@ public class AmandaTriggerEndToEndTest
         MasterPayloadFactory factory = new MasterPayloadFactory(cache);
 
         TriggerManager trigMgr =
-            new TriggerManager(factory, SOURCE_ID,
-                               getTriggerRequestFactory(factory));
+            new TriggerManager(SOURCE_ID, getTriggerRequestFactory(factory));
 
         String configDir =
             getClass().getResource("/config/").getPath();

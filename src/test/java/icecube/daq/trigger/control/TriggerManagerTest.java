@@ -147,11 +147,10 @@ public class TriggerManagerTest
     public void testRealSplicer()
         throws SplicerException
     {
-        MasterPayloadFactory factory = new MasterPayloadFactory();
+        //MasterPayloadFactory factory = new MasterPayloadFactory();
 
         TriggerManager trigMgr =
-            new TriggerManager(factory, SOURCE_ID,
-                               new TriggerRequestPayloadFactory());
+            new TriggerManager(SOURCE_ID, new TriggerRequestPayloadFactory());
 
         runWithRealSplicer(trigMgr);
     }
@@ -162,8 +161,7 @@ public class TriggerManagerTest
         MasterPayloadFactory factory = new MasterPayloadFactory();
 
         TriggerManager trigMgr =
-            new TriggerManager(factory, SOURCE_ID,
-                               new TriggerRequestPayloadFactory());
+            new TriggerManager(SOURCE_ID, new TriggerRequestPayloadFactory());
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());

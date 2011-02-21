@@ -106,7 +106,7 @@ public class InIceTriggerEndToEndTest
         MasterPayloadFactory factory = new MasterPayloadFactory(cache);
 
         TriggerManager trigMgr =
-            new TriggerManager(factory, srcId, getTriggerRequestFactory(factory));
+            new TriggerManager(srcId, getTriggerRequestFactory(factory));
 
         String configDir =
             getClass().getResource("/config/").getPath();

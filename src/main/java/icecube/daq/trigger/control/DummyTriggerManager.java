@@ -45,11 +45,6 @@ public class DummyTriggerManager
     private static final Log log = LogFactory.getLog(DummyTriggerManager.class);
 
     /**
-     * The factory used to produce IHitPayloads for this object to use.
-     */
-    private SpliceableFactory inputFactory;
-
-    /**
      * splicer associated with this manager
      */
     private Splicer splicer;
@@ -61,16 +56,13 @@ public class DummyTriggerManager
 
     /**
      * Constructor
-     * @param inputFactory SpliceableFactory used by Splicer
      * @param sourceId SourceId of this TriggerManager
      * @param outputFactory factory used to build triggers
      */
-    public DummyTriggerManager(SpliceableFactory inputFactory,
-                               ISourceID sourceId,
+    public DummyTriggerManager(ISourceID sourceId,
                                TriggerRequestPayloadFactory outputFactory)
     {
         super(sourceId, outputFactory);
-        this.inputFactory = inputFactory;
         init();
     }
 

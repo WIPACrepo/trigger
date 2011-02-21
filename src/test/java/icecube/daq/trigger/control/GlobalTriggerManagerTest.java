@@ -47,6 +47,8 @@ public class GlobalTriggerManagerTest
     private static final MockSourceID SOURCE_ID =
         new MockSourceID(SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID);
 
+    private GlobalTriggerManager trigMgr;
+
     public GlobalTriggerManagerTest(String name)
     {
         super(name);
@@ -108,9 +110,14 @@ public class GlobalTriggerManagerTest
             }
         }
 
+        waitForRecordsSent(trigMgr);
+
         for (int i = 0; i < tails.length; i++) {
             tails[i].push(StrandTail.LAST_POSSIBLE_SPLICEABLE);
         }
+
+        waitForProcessedPayloads(trigMgr);
+        waitForMainThread(trigMgr);
 
         for (int i = 0; i < 100 && splicer.getState() != Splicer.STOPPED; i++) {
             try {
@@ -127,6 +134,9 @@ public class GlobalTriggerManagerTest
         } catch (Exception ex) {
             // ignore interrupts
         }
+
+        waitForOutput(trigMgr);
+        waitForOutputThread(trigMgr);
     }
 
     public void runWithRealSplicer(GlobalTriggerManager trigMgr)
@@ -141,6 +151,8 @@ public class GlobalTriggerManagerTest
         trigMgr.setSplicer(splicer);
 
         loadAndRun(trigMgr, 10, 10);
+
+        waitForRecordsSent(trigMgr);
 
         assertEquals("Bad number of payloads written",
                      100, outProc.getNumberWritten());
@@ -168,6 +180,10 @@ public class GlobalTriggerManagerTest
         assertEquals("Bad number of log messages",
                      0, appender.getNumberOfMessages());
 
+        if (trigMgr != null) {
+            trigMgr.stopThread();
+        }
+
         super.tearDown();
     }
 
@@ -176,9 +192,8 @@ public class GlobalTriggerManagerTest
     {
         MasterPayloadFactory factory = new MasterPayloadFactory();
 
-        GlobalTriggerManager trigMgr =
-            new GlobalTriggerManager(factory, SOURCE_ID,
-                                     new TriggerRequestPayloadFactory());
+        trigMgr = new GlobalTriggerManager(factory, SOURCE_ID,
+                                           new TriggerRequestPayloadFactory());
 
         runWithRealSplicer(trigMgr);
 
@@ -190,9 +205,8 @@ public class GlobalTriggerManagerTest
     {
         MasterPayloadFactory factory = new MasterPayloadFactory();
 
-        GlobalTriggerManager trigMgr =
-            new GlobalTriggerManager(factory, SOURCE_ID,
-                                     new TriggerRequestPayloadFactory());
+        trigMgr = new GlobalTriggerManager(factory, SOURCE_ID,
+                                           new TriggerRequestPayloadFactory());
 
         trigMgr.setReportingThreshold(10);
 
@@ -212,6 +226,101 @@ public class GlobalTriggerManagerTest
         trigMgr.reset();
 
         checkLogMessages();
+    }
+
+    private static void waitForMainThread(GlobalTriggerHandler trigMgr)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (trigMgr.isMainThreadWaiting()) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // ignore interrupts
+            }
+        }
+    }
+
+    private static void waitForOutput(GlobalTriggerHandler trigMgr)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (trigMgr.getNumOutputsQueued() == 0) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // ignore interrupts
+            }
+        }
+    }
+
+    private static void waitForOutputThread(GlobalTriggerHandler trigMgr)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (trigMgr.isOutputThreadWaiting()) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // ignore interrupts
+            }
+        }
+    }
+
+    private static void waitForProcessedPayloads(GlobalTriggerHandler trigMgr)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (!trigMgr.hasUnprocessedPayloads()) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // ignore interrupts
+            }
+        }
+    }
+
+    private void waitForRecordsSent(GlobalTriggerManager trigMgr)
+    {
+        long prevSent = 0L;
+        int prevSame = 0;
+        for (int i = 0; i < 10; i++) {
+            long[] recsSent = trigMgr.getPayloadOutput().getRecordsSent();
+
+            long curSent;
+            if (recsSent == null) {
+                curSent = 0L;
+            } else {
+                curSent = recsSent[0];
+            }
+
+            if (curSent > 0L) {
+                if (curSent != prevSent) {
+                    prevSame = 0;
+                } else {
+                    prevSame++;
+                    if (prevSame == 3) {
+                        break;
+                    }
+                }
+            }
+
+            prevSent = curSent;
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // do nothing
+            }
+        }
     }
 
     public static void main(String[] args)

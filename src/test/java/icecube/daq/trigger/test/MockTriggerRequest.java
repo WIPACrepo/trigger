@@ -53,7 +53,7 @@ public class MockTriggerRequest
     public MockTriggerRequest(long firstVal, long lastVal, int type, int cfgId,
                               int srcId)
     {
-        this(firstVal, lastVal, type, cfgId, srcId, -1);
+        this(firstVal, lastVal, type, cfgId, srcId, 0);
     }
 
     public MockTriggerRequest(long firstVal, long lastVal, int type, int cfgId,
@@ -173,6 +173,11 @@ public class MockTriggerRequest
         return cfgId;
     }
 
+    public String getTriggerName()
+    {
+        return "Mock";
+    }
+
     public int getTriggerType()
     {
         return type;
@@ -236,6 +241,7 @@ public class MockTriggerRequest
     public String toString()
     {
         return "MockTriggerRequest:type#" + type + ",cfg#" + cfgId +
-            ",srcId#" + srcId + "[" + firstTime + "," + lastTime + "]";
+            ",srcId#" + srcId + ",uid#" + uid + "[" + firstTime + "," +
+            lastTime + "]";
     }
 }

@@ -1,7 +1,7 @@
 /*
  * class: TriggerManager
  *
- * Version $Id: TriggerManager.java 4902 2010-02-17 22:55:22Z dglo $
+ * Version $Id: TriggerManager.java 12315 2010-10-06 21:27:41Z dglo $
  *
  * Date: October 25 2004
  *
@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger
  *
- * @version $Id: TriggerManager.java 4902 2010-02-17 22:55:22Z dglo $
+ * @version $Id: TriggerManager.java 12315 2010-10-06 21:27:41Z dglo $
  * @author pat
  */
 public class TriggerManager
@@ -71,8 +71,6 @@ public class TriggerManager
 
     private long recycleCount;
 
-    private double totalProcessTime;
-
     /**
      * size of last input list
      */
@@ -101,7 +99,6 @@ public class TriggerManager
         start = 0;
         inputCount = 0;
         recycleCount = 0;
-        totalProcessTime = 0.0;
         lastInputListSize = 0;
         earliestTime = new UTCTime(0);
         latestTime = new UTCTime(0);
@@ -292,9 +289,8 @@ public class TriggerManager
 
     public void flush() {
         super.flush();
-        double timePerInput = totalProcessTime/inputCount;
         if (log.isInfoEnabled()) {
-            log.info("Processed " + inputCount + " hits at " + timePerInput + " ms per hit.");
+            log.info("Processed " + inputCount + " hits");
         }
     }
 

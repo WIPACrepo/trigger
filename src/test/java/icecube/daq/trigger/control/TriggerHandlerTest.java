@@ -4,7 +4,9 @@ import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.trigger.control.ITriggerInput;
 import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.test.MockOutputChannel;
@@ -40,6 +42,8 @@ public class TriggerHandlerTest
 {
     private static final MockAppender appender = new MockAppender();
 
+    private TriggerHandler trigMgr;
+
     public TriggerHandlerTest(String name)
     {
         super(name);
@@ -67,6 +71,10 @@ public class TriggerHandlerTest
         assertEquals("Bad number of log messages",
                      0, appender.getNumberOfMessages());
 
+        if (trigMgr != null) {
+            trigMgr.stopThread();
+        }
+
         super.tearDown();
     }
 
@@ -78,7 +86,7 @@ public class TriggerHandlerTest
         MockSourceID srcId =
             new MockSourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
 
-        TriggerHandler trigMgr = new TriggerHandler(srcId, factory);
+        trigMgr = new TriggerHandler(srcId, factory);
         assertNotNull("Monitor should not be null", trigMgr.getMonitor());
         assertEquals("Unexpected count difference",
                      0, trigMgr.getMonitor().getTriggerBagCountDifference());
@@ -88,11 +96,13 @@ public class TriggerHandlerTest
         List trigList = trigMgr.getTriggerList();
         assertNotNull("Trigger list should be initialized", trigList);
         assertEquals("Trigger list should be empty", 0, trigList.size());
+
+        trigMgr.stopThread();
     }
 
     public void testAddTrigger()
     {
-        TriggerHandler trigMgr = new TriggerHandler();
+        trigMgr = new TriggerHandler();
         assertEquals("Bad triggerList length",
                      0, trigMgr.getTriggerList().size());
 
@@ -103,7 +113,7 @@ public class TriggerHandlerTest
 
     public void testAddDuplicateTrigger()
     {
-        TriggerHandler trigMgr = new TriggerHandler();
+        trigMgr = new TriggerHandler();
         assertEquals("Bad triggerList length",
                      0, trigMgr.getTriggerList().size());
 
@@ -125,7 +135,7 @@ public class TriggerHandlerTest
 
     public void testAddMultipleTriggers()
     {
-        TriggerHandler trigMgr = new TriggerHandler();
+        trigMgr = new TriggerHandler();
         assertEquals("Bad triggerList length",
                      0, trigMgr.getTriggerList().size());
 
@@ -143,7 +153,7 @@ public class TriggerHandlerTest
 
     public void testAddTriggers()
     {
-        TriggerHandler trigMgr = new TriggerHandler();
+        trigMgr = new TriggerHandler();
 
         ArrayList list = new ArrayList();
         list.add(new MockTrigger());
@@ -158,7 +168,7 @@ public class TriggerHandlerTest
 
     public void testClearTriggers()
     {
-        TriggerHandler trigMgr = new TriggerHandler();
+        trigMgr = new TriggerHandler();
 
         assertEquals("Bad triggerList length",
                      0, trigMgr.getTriggerList().size());
@@ -173,7 +183,7 @@ public class TriggerHandlerTest
 
     public void testIssueNoDest()
     {
-        TriggerHandler trigMgr = new TriggerHandler();
+        trigMgr = new TriggerHandler();
 
         try {
             trigMgr.issueTriggers();
@@ -185,7 +195,7 @@ public class TriggerHandlerTest
 
     public void testIssueEmpty()
     {
-        TriggerHandler trigMgr = new TriggerHandler();
+        trigMgr = new TriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         trigMgr.setPayloadOutput(outProc);
@@ -197,7 +207,7 @@ public class TriggerHandlerTest
 
     public void testIssueOne()
     {
-        TriggerHandler trigMgr = new TriggerHandler();
+        trigMgr = new TriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -214,13 +224,16 @@ public class TriggerHandlerTest
 
         trigMgr.issueTriggers();
 
+        waitForOutput(trigMgr);
+        waitForOutputThread(trigMgr);
+
         assertEquals("Bad number of payloads written",
                      1, outProc.getNumberWritten());
     }
 
     public void testFlushEmpty()
     {
-        TriggerHandler trigMgr = new TriggerHandler();
+        trigMgr = new TriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -232,7 +245,7 @@ public class TriggerHandlerTest
 
     public void testFlushOne()
     {
-        TriggerHandler trigMgr = new TriggerHandler();
+        trigMgr = new TriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -249,13 +262,16 @@ public class TriggerHandlerTest
 
         trigMgr.flush();
 
+        waitForOutput(trigMgr);
+        waitForOutputThread(trigMgr);
+
         assertEquals("Bad number of payloads written",
                      1, outProc.getNumberWritten());
     }
 
     public void testProcessHit()
     {
-        TriggerHandler trigMgr = new TriggerHandler();
+        trigMgr = new TriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -269,15 +285,20 @@ public class TriggerHandlerTest
 
         trigMgr.process(hit);
 
+        waitForProcessedPayloads(trigMgr);
+        waitForMainThread(trigMgr);
+
         assertEquals("Bad number of input payloads",
                      1, trigMgr.getInputHandler().size());
         assertEquals("Bad number of triggers written",
                      0, outProc.getNumberWritten());
+
+        trigMgr.stopThread();
     }
 
     public void testProcessManyHitsAndReset()
     {
-        TriggerHandler trigMgr = new TriggerHandler();
+        trigMgr = new TriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -296,11 +317,21 @@ public class TriggerHandlerTest
             MockHit hit = new MockHit(100000L + (10000 * i));
 
             trigMgr.process(hit);
+
+            waitForProcessedPayloads(trigMgr);
+            waitForMainThread(trigMgr);
+
             assertEquals("Bad number of input payloads",
                          1, trigMgr.getInputHandler().size());
-            assertEquals("Bad number of triggers written (" + i + " hits)",
-                         (i / numHitsPerTrigger), outProc.getNumberWritten());
         }
+
+        trigMgr.flush();
+
+        waitForOutput(trigMgr);
+        waitForOutputThread(trigMgr);
+
+        assertEquals("Bad number of triggers written",
+                     4, outProc.getNumberWritten());
 
         trigMgr.reset();
         assertEquals("Bad number of input payloads",
@@ -309,7 +340,7 @@ public class TriggerHandlerTest
 
     public void testProcessTrigger()
     {
-        TriggerHandler trigMgr = new TriggerHandler();
+        trigMgr = new TriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -323,13 +354,17 @@ public class TriggerHandlerTest
                      0, trigMgr.getInputHandler().size());
 
         trigMgr.process(trigReq);
+
+        waitForProcessedPayloads(trigMgr);
+        waitForMainThread(trigMgr);
+
         assertEquals("Bad number of input payloads",
                      1, trigMgr.getInputHandler().size());
     }
 
     public void testProcessManyTriggers()
     {
-        TriggerHandler trigMgr = new TriggerHandler();
+        trigMgr = new TriggerHandler();
 
         MockOutputProcess outProc = new MockOutputProcess();
         outProc.setOutputChannel(new MockOutputChannel());
@@ -347,7 +382,9 @@ public class TriggerHandlerTest
         assertEquals("Unexpected count difference",
                      1, trigMgr.getMonitor().getTriggerBagCountDifference());
 
-        for (int i = 0; i < 10; i++) {
+        final int numTriggers = 10;
+
+        for (int i = 0; i < numTriggers; i++) {
             MockTriggerRequest trigReq =
                 new MockTriggerRequest(10000L * (long) (i + 1),
                                        (10000L * (long) (i + 1)) + 9999L,
@@ -355,14 +392,102 @@ public class TriggerHandlerTest
             trigReq.setSourceID(SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID);
             trigMgr.process(trigReq);
 
+            waitForCount(trigMgr, i);
+
             assertEquals("Bad number of input payloads (" + (i + 1) + " hits)",
                          i, trigMgr.getCount());
+
+            waitForProcessedPayloads(trigMgr);
+            waitForMainThread(trigMgr);
+
             assertEquals("Unexpected count difference (" + (i + 1) + " hits)",
                          0, trigMgr.getMonitor().getTriggerBagCountDifference());
-            assertEquals("Unexpected count total (" + (i + 1) + " hits)",
-                         i + 1, trigMgr.getMonitor().getTriggerBagCountTotal());
-            assertEquals("Bad number of triggers written (" + i + " hits)",
-                         i + 1, outProc.getNumberWritten());
+        }
+
+        trigMgr.flush();
+
+        waitForOutput(trigMgr);
+        waitForOutputThread(trigMgr);
+
+        assertEquals("Unexpected count total",
+                     numTriggers + 1,
+                     trigMgr.getMonitor().getTriggerBagCountTotal());
+        assertEquals("Bad number of triggers written",
+                     numTriggers + 1, outProc.getNumberWritten());
+    }
+
+    private static void waitForCount(TriggerHandler trigMgr, int count)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (trigMgr.getCount() >= count) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // ignore interrupts
+            }
+        }
+    }
+
+    private static void waitForMainThread(TriggerHandler trigMgr)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (trigMgr.isMainThreadWaiting()) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // ignore interrupts
+            }
+        }
+    }
+
+    private static void waitForOutput(TriggerHandler trigMgr)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (trigMgr.getNumOutputsQueued() == 0) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // ignore interrupts
+            }
+        }
+    }
+
+    private static void waitForOutputThread(TriggerHandler trigMgr)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (trigMgr.isOutputThreadWaiting()) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // ignore interrupts
+            }
+        }
+    }
+
+    private static void waitForProcessedPayloads(TriggerHandler trigMgr)
+    {
+        for (int i = 0; i < 10; i++) {
+            if (!trigMgr.hasUnprocessedPayloads()) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (Exception ex) {
+                // ignore interrupts
+            }
         }
     }
 

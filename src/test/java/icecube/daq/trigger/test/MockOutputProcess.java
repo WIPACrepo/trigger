@@ -53,6 +53,11 @@ public class MockOutputProcess
         return outChan;
     }
 
+    public int getNumberOfChannels()
+    {
+        throw new Error("Unimplemented");
+    }
+
     public int getNumberWritten()
     {
         if (outChan == null) {
@@ -69,7 +74,14 @@ public class MockOutputProcess
 
     public long[] getRecordsSent()
     {
-        throw new Error("Unimplemented");
+        long[] rtnval = new long[1];
+        if (outChan == null) {
+            rtnval[0] = 0L;
+        } else {
+            rtnval[0] = outChan.getNumberWritten();
+        }
+
+        return rtnval;
     }
 
     public boolean isConnected()
@@ -89,7 +101,7 @@ public class MockOutputProcess
 
     public boolean isStopped()
     {
-        throw new Error("Unimplemented");
+        return outChan.isStopped();
     }
 
     public void registerComponentObserver(DAQComponentObserver observer)

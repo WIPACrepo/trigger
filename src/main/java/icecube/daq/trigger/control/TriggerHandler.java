@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 4952 2010-03-31 21:51:09Z toale $
+ * Version $Id: TriggerHandler.java 12679 2011-02-18 21:50:24Z dglo $
  *
  * Date: October 25 2004
  *
@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -53,7 +54,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 4952 2010-03-31 21:51:09Z toale $
+ * @version $Id: TriggerHandler.java 12679 2011-02-18 21:50:24Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -64,6 +65,10 @@ public class TriggerHandler
      * Log object for this class
      */
     private static final Log log = LogFactory.getLog(TriggerHandler.class);
+
+    static final DummyPayload FLUSH_PAYLOAD = new DummyPayload(new UTCTime(0));
+
+    private static final boolean USE_THREAD = true;
 
     /**
      * List of defined triggers
@@ -133,6 +138,20 @@ public class TriggerHandler
     /** Outgoing byte buffer cache. */
     private IByteBufferCache outCache;
 
+    /** Main trigger thread */
+    private MainThread mainThread;
+
+    /** Splicer adds payloads to this queue -- ACCESS MUST BE SYNCHRONIZED. */
+    private LinkedList<ILoadablePayload> inputQueue =
+        new LinkedList<ILoadablePayload>();
+
+    /** Output thread. */
+    private OutputThread outputThread;
+
+    /** Output queue  -- ACCESS MUST BE SYNCHRONIZED. */
+    private List<ByteBuffer> outputQueue =
+        new LinkedList<ByteBuffer>();
+
     /**
      * Default constructor
      */
@@ -165,8 +184,39 @@ public class TriggerHandler
         triggerBag.setMonitor(triggerBagMonitor);
         monitor.setTriggerBagMonitor(triggerBagMonitor);
 
-	stringMap = new TreeMap<Integer, TreeSet<Integer> >();
+        stringMap = new TreeMap<Integer, TreeSet<Integer> >();
 
+        outChan = null;
+
+        if (inputQueue.size() > 0) {
+            if (log.isErrorEnabled()) {
+                log.error("Unhandled input payloads queued at init");
+            }
+
+            synchronized (inputQueue) {
+                inputQueue.clear();
+            }
+        }
+
+        if (mainThread == null) {
+            mainThread = new MainThread("Main-" + sourceId);
+            mainThread.start();
+        }
+
+        if (outputQueue.size() > 0) {
+            if (log.isErrorEnabled()) {
+                log.error("Unwritten triggers queued at reset");
+            }
+
+            synchronized (outputQueue) {
+                outputQueue.clear();
+            }
+        }
+
+        if (outputThread == null) {
+            outputThread = new OutputThread("Output-" + sourceId);
+            outputThread.start();
+        }
     }
 
     protected ITriggerBag createTriggerBag()
@@ -255,6 +305,9 @@ public class TriggerHandler
 
         // then call process with a null payload to suck the life out of the input handler
         process(null);
+        while (mainThread != null && !mainThread.sawFlush()) {
+            Thread.yield();
+        }
 
         // now flush the triggers, this should prompt them to send any known triggers to the bag
         if (log.isInfoEnabled()) {
@@ -276,6 +329,9 @@ public class TriggerHandler
 
         // one last call to process to check the bag
         process(null);
+        while (mainThread != null && !mainThread.sawFlush()) {
+            Thread.yield();
+        }
 
     }
 
@@ -292,14 +348,41 @@ public class TriggerHandler
         return payloadOutput;
     }
 
+    public boolean hasUnprocessedPayloads()
+    {
+        return inputQueue.size() > 0;
+    }
+
     /**
      * Method to process payloads, assumes that they are time ordered.
      * @param payload payload to process
      */
     public void process(ILoadablePayload payload) {
 
+        if (!USE_THREAD) {
+            if (payload != null) {
+                reprocess(payload);
+            } else {
+                reprocess(FLUSH_PAYLOAD);
+            }
+        } else {
+            synchronized (inputQueue) {
+                if (mainThread == null) {
+                    log.error("Attempting to queue input without input thread");
+                } else if (payload != null) {
+                    inputQueue.add(payload);
+                } else {
+                    mainThread.addedFlush();
+                    inputQueue.add(FLUSH_PAYLOAD);
+                }
+                inputQueue.notify();
+            }
+        }
+    }
+
+    void reprocess(ILoadablePayload payload) {
         // add payload to input handler
-        if (null != payload) {
+        if (payload != FLUSH_PAYLOAD) {
             inputHandler.addPayload(payload);
         }
 
@@ -334,7 +417,8 @@ public class TriggerHandler
 
                 // check to see if timeDiff is reasonable, if not ignore it
                 if (timeDiff < 0.0) {
-                    log.error("Hit out of order! This time - Last time = " + timeDiff);
+                    log.error("Hit out of order! This time - Last time = " +
+                              timeDiff);
                     return;
                 } else {
                     timeOfLastHit = hit.getHitTimeUTC();
@@ -400,6 +484,7 @@ public class TriggerHandler
                     log.warn("TriggerHandler only knows about either hitPayloads or TriggerRequestPayloads!");
             }
 
+            Thread.yield();
         }
 
         // Check triggerBag and issue triggers
@@ -457,6 +542,11 @@ public class TriggerHandler
         return sourceId;
     }
 
+    void complainAboutNonTrigger(IWriteablePayload payload)
+    {
+        log.error("Issuing non-request " + payload);
+    }
+
     /**
      * check triggerBag and issue triggers if possible
      *   any triggers that are earlier than the earliestPayloadOfInterest are selected
@@ -484,34 +574,34 @@ public class TriggerHandler
                 break;
             }
 
-            if (payload.getPayloadInterfaceType() == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
-                if (log.isDebugEnabled()) {
-                    ITriggerRequestPayload trigger = (ITriggerRequestPayload) payload;
+            if (payload.getPayloadInterfaceType() !=
+                PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD)
+            {
+                complainAboutNonTrigger(payload);
+            } else if (log.isDebugEnabled()) {
+                ITriggerRequestPayload trigger = (ITriggerRequestPayload) payload;
 
-                    IUTCTime firstTime = trigger.getFirstTimeUTC();
-                    IUTCTime lastTime = trigger.getLastTimeUTC();
+                IUTCTime firstTime = trigger.getFirstTimeUTC();
+                IUTCTime lastTime = trigger.getLastTimeUTC();
 
-                    int nSubPayloads = 0;
-                    try {
-                        nSubPayloads = trigger.getPayloads().size();
-                    } catch (Exception e) {
-                        log.error("Couldn't get number of subpayloads", e);
-                    }
-
-                    if (log.isDebugEnabled()) {
-                        String trType;
-                        if (0 > trigger.getTriggerType()) {
-                            trType = "triggers";
-                        } else {
-                            trType = "hits";
-                        }
-
-                        log.debug("Issue trigger: extended event time = " +
-                                  firstTime + " to " + lastTime +
-                                  " and contains " + nSubPayloads + " " +
-                                  trType);
-                    }
+                int nSubPayloads = 0;
+                try {
+                    nSubPayloads = trigger.getPayloads().size();
+                } catch (Exception e) {
+                    log.error("Couldn't get number of subpayloads", e);
                 }
+
+                String trType;
+                if (0 > trigger.getTriggerType()) {
+                    trType = "triggers";
+                } else {
+                    trType = "hits";
+                }
+
+                log.debug("Issue trigger: extended event time = " +
+                          firstTime + " to " + lastTime +
+                          " and contains " + nSubPayloads + " " +
+                          trType);
             }
 
             int bufLen = payload.getPayloadLength();
@@ -523,7 +613,7 @@ public class TriggerHandler
 //System.err.println("Alloc "+trigBuf.capacity()+" bytes from "+outCache);
             } else {
                 trigBuf = ByteBuffer.allocate(bufLen);
-System.err.println("Unattached "+SourceIdRegistry.getDAQNameFromISourceID(sourceId)+" "+trigBuf.capacity()+" bytes");
+//System.err.println("Unattached "+SourceIdRegistry.getDAQNameFromISourceID(sourceId)+" "+trigBuf.capacity()+" bytes");
             }
 
             // write trigger to a ByteBuffer
@@ -534,22 +624,11 @@ System.err.println("Unattached "+SourceIdRegistry.getDAQNameFromISourceID(source
                 trigBuf = null;
             }
 
-            // if we haven't already, get the output channel
-            if (outChan == null) {
-                if (payloadOutput == null) {
-                    log.error("Trigger destination has not been set");
-                } else {
-                    outChan = payloadOutput.getChannel();
-                    if (outChan == null) {
-                        throw new Error("Output channel has not been set in " +
-                                        payloadOutput);
-                    }
-                }
-            }
-
-            //--ship the trigger to its destination
             if (trigBuf != null) {
-                outChan.receiveByteBuffer(trigBuf);
+                synchronized (outputQueue) {
+                    outputQueue.add(trigBuf);
+                    outputQueue.notify();
+                }
             }
 
             // now recycle it
@@ -676,5 +755,230 @@ System.err.println("Unattached "+SourceIdRegistry.getDAQNameFromISourceID(source
     public void setOutgoingBufferCache(IByteBufferCache cache)
     {
         outCache = cache;
+    }
+
+    /**
+     * Stop the threads
+     */
+    public void stopThread()
+    {
+        if (mainThread != null) {
+            mainThread = null;
+
+            synchronized (inputQueue) {
+                inputQueue.notify();
+            }
+        }
+
+        if (outputThread != null) {
+            outputThread = null;
+
+            synchronized (outputQueue) {
+                outputQueue.notify();
+            }
+        }
+    }
+
+    public boolean isMainThreadWaiting()
+    {
+        if (mainThread == null) {
+            return false;
+        }
+
+        return mainThread.isWaiting();
+    }
+
+    public boolean isOutputThreadWaiting()
+    {
+        if (outputThread == null) {
+            return false;
+        }
+
+        return outputThread.isWaiting();
+    }
+
+    /**
+     * Get number of triggers queued for input.
+     *
+     * @return number of triggers queued
+     */
+    public int getNumInputsQueued()
+    {
+        return inputQueue.size();
+    }
+
+    /**
+     * Get number of triggers queued for output.
+     *
+     * @return number of triggers queued
+     */
+    public int getNumOutputsQueued()
+    {
+        return outputQueue.size();
+    }
+
+    class MainThread
+        implements Runnable
+    {
+        private Thread thread;
+        private boolean sawFlush;
+        private boolean waiting;
+
+        MainThread(String name)
+        {
+            thread = new Thread(this);
+            thread.setName(name);
+        }
+
+        void addedFlush()
+        {
+            sawFlush = false;
+        }
+
+        boolean isWaiting()
+        {
+            return waiting;
+        }
+
+        /**
+         * Main payload processing loop.
+         */
+        public void run()
+        {
+            // wait for initial assignment to complete
+            while (mainThread == null) {
+                Thread.yield();
+            }
+
+            ILoadablePayload payload;
+            while (mainThread != null) {
+                synchronized (inputQueue) {
+                    if (inputQueue.size() == 0) {
+                        try {
+                            waiting = true;
+                            inputQueue.wait();
+                        } catch (InterruptedException ie) {
+                            log.error("Interrupt while waiting for input queue",
+                                      ie);
+                        }
+                        waiting = false;
+                    }
+
+                    if (inputQueue.size() == 0) {
+                        payload = null;
+                    } else {
+                        payload = inputQueue.remove(0);
+                    }
+                }
+
+                if (payload != null) {
+                    reprocess(payload);
+                    if (payload == FLUSH_PAYLOAD) {
+                        sawFlush = true;
+                    }
+                }
+            }
+        }
+
+        boolean sawFlush()
+        {
+            return sawFlush;
+        }
+
+        void start()
+        {
+            thread.start();
+        }
+    }
+
+    /**
+     * Class which writes triggers to output channel.
+     */
+    class OutputThread
+        implements Runnable
+    {
+        private Thread thread;
+        private boolean waiting;
+
+        /**
+         * Create and start output thread.
+         *
+         * @param name thread name
+         */
+        OutputThread(String name)
+        {
+            thread = new Thread(this);
+            thread.setName(name);
+        }
+
+        boolean isWaiting()
+        {
+            return waiting;
+        }
+
+        /**
+         * Main output loop.
+         */
+        public void run()
+        {
+//System.err.println("OTtop");
+            ByteBuffer trigBuf;
+            while (outputThread != null) {
+//System.err.println("OTloop");
+                synchronized (outputQueue) {
+//System.err.println("OTq="+outputQueue.size());
+                    if (outputQueue.size() == 0) {
+                        try {
+                            waiting = true;
+//System.err.println("OTwait");
+                            outputQueue.wait();
+                        } catch (InterruptedException ie) {
+                            log.error("Interrupt while waiting for output queue",
+                                      ie);
+                        }
+                        waiting = false;
+//System.err.println("OTawake");
+                    }
+
+                    if (outputQueue.size() == 0) {
+//System.err.println("OTempty");
+                        trigBuf = null;
+                    } else {
+                        trigBuf = outputQueue.remove(0);
+//System.err.println("OTgotBuf");
+                    }
+                }
+
+                if (trigBuf == null) {
+//System.err.println("OTcont");
+                    continue;
+                }
+
+                // if we haven't already, get the output channel
+                if (outChan == null) {
+                    if (payloadOutput == null) {
+//System.err.println("OT!!noOut!!");
+                        log.error("Trigger destination has not been set");
+                    } else {
+                        outChan = payloadOutput.getChannel();
+                        if (outChan == null) {
+//System.err.println("OT!!noChan!!");
+                            throw new Error("Output channel has not been set" +
+                                            " in " + payloadOutput);
+                        }
+                    }
+                }
+
+                //--ship the trigger to its destination
+//System.err.println("OTsend");
+                outChan.receiveByteBuffer(trigBuf);
+            }
+//System.err.println("OTexit");
+        }
+
+        void start()
+        {
+            thread.start();
+        }
     }
 }

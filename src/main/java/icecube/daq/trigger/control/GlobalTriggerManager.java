@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java 12691 2011-02-21 20:22:03Z dglo $
+ * @version $Id: GlobalTriggerManager.java 12737 2011-03-02 19:35:12Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager
@@ -75,6 +75,8 @@ public class GlobalTriggerManager
     private IUTCTime latestTime;
     private LinkedList wallTimeQueue;
     private Statistic processingTime;
+
+    private IUTCTime lastTruncateTime;
 
     /**
      * Create an instance of this class.
@@ -167,13 +169,17 @@ public class GlobalTriggerManager
      * update splicer to earliest time of interest
      */
     public void updateSplicer() {
-        Spliceable update = (Spliceable) super.getEarliestPayloadOfInterest();
+        IPayload update = getEarliestPayloadOfInterest();
         if (null != update) {
-            if (log.isDebugEnabled()) {
-                log.debug("Truncating splicer at " +
-                          ((IPayload) update).getPayloadTimeUTC());
+            if (lastTruncateTime == null ||
+                !lastTruncateTime.equals(update.getPayloadTimeUTC()))
+            {
+                lastTruncateTime = update.getPayloadTimeUTC();
+                if (log.isDebugEnabled()) {
+                    log.debug("Truncating splicer at " + lastTruncateTime);
+                }
+                splicer.truncate((Spliceable) update);
             }
-            splicer.truncate(update);
         }
     }
 

@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 12628 2011-02-02 00:58:23Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 12732 2011-03-02 19:08:37Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -109,10 +109,6 @@ public class GlobalTriggerHandler
      * input handler
      */
     private ITriggerInput inputHandler;
-    /**
-     * This list is used for JUnitTest purpose.
-     */
-    private List mListAvailableTriggersToRelease;
 
     //--assign Default value.
     private int miMaxTimeGateWindow = DEFAULT_MAX_TIMEGATE_WINDOW;
@@ -331,7 +327,6 @@ public class GlobalTriggerHandler
         miTotalOutputGlobalTriggers = 0;
         miTotalOutputMergedGlobalTriggers = 0;
         earliestPayloadOfInterest = null;
-        mListAvailableTriggersToRelease = new ArrayList();
         configuredTriggerList = new ArrayList<ITrigger>();
         longestTrigger = 0.0;
 
@@ -602,12 +597,6 @@ public class GlobalTriggerHandler
                 miTotalOutputMergedGlobalTriggers++;
             }
 
-            //--add to the list for the first 100 payloads.
-            if(mListAvailableTriggersToRelease.size() <= 100)
-            {
-                mListAvailableTriggersToRelease.add(GTEventPayload);
-            }
-
             //setAvailableTriggerToRelease();
             // check first and last time of GTEventPayload to issue
             IUTCTime firstTime = GTEventPayload.getFirstTimeUTC();
@@ -783,11 +772,6 @@ public class GlobalTriggerHandler
     public DAQComponentOutputProcess getPayloadOutput()
     {
         return payloadOutput;
-    }
-
-    public List getListAvailableTriggerToRelease()
-    {
-        return mListAvailableTriggersToRelease;
     }
 
     public void setDOMRegistry(DOMRegistry registry) {

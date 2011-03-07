@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 12732 2011-03-02 19:08:37Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 12765 2011-03-07 18:42:04Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -183,7 +183,7 @@ public class GlobalTriggerHandler
         this.sourceId = sourceId;
         this.outputFactory = outputFactory;
 
-        this.init();
+        init();
         ((GlobalTriggerBag) triggerBag).setAllowTimeGap(allowTimeGap);
     }
 
@@ -348,8 +348,8 @@ public class GlobalTriggerHandler
         triggerBag.setMonitor(triggerBagMonitor);
         monitor.setTriggerBagMonitor(triggerBagMonitor);
 
-        this.setMaxTimeGateWindow((int) getMaxTimeGateWindow());
-        this.setAllowTimeGap(allowTimeGap());
+        setMaxTimeGateWindow((int) getMaxTimeGateWindow());
+        setAllowTimeGap(allowTimeGap());
 
         outChan = null;
 
@@ -538,7 +538,7 @@ public class GlobalTriggerHandler
      */
     public void reset() {
         log.info("Reseting GlobalTrigHandler");
-        this.init();
+        init();
     }
 
     /**

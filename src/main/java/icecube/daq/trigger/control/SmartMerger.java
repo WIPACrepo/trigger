@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * TODO: Massively clean up this code!!!
  *
- * @version $Id: SmartMerger.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: SmartMerger.java 12765 2011-03-07 18:42:04Z dglo $
  * @author shseo
  */
 public class SmartMerger
@@ -483,8 +483,8 @@ public class SmartMerger
     {
         return mListFinalReadoutElements_All;
     }
-    public void setPayloadFactory(PayloadFactory triggerFactory) {
-        this.triggerFactory = (TriggerRequestPayloadFactory) triggerFactory;
+    public void setPayloadFactory(PayloadFactory payloadFactory) {
+        triggerFactory = (TriggerRequestPayloadFactory) payloadFactory;
     }
 
 }

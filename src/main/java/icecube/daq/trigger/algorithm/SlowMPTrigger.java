@@ -190,7 +190,7 @@ public class SlowMPTrigger extends AbstractTrigger
 
     public void set_t_proximity(long val)
     {
-        this.t_proximity = val * 10L;
+        t_proximity = val * 10L;
     }
 
     // t_min
@@ -202,7 +202,7 @@ public class SlowMPTrigger extends AbstractTrigger
 
     public void set_t_min(long val)
     {
-        this.t_min = val * 10L;
+        t_min = val * 10L;
     }
 
     // t_max
@@ -214,7 +214,7 @@ public class SlowMPTrigger extends AbstractTrigger
 
     public void set_t_max(long val)
     {
-        this.t_max = val * 10L;
+        t_max = val * 10L;
     }
 
     // delta_d
@@ -226,7 +226,7 @@ public class SlowMPTrigger extends AbstractTrigger
 
     public void set_delta_d(int val)
     {
-        this.delta_d = val;
+        delta_d = val;
     }
 
     // rel_v
@@ -238,7 +238,7 @@ public class SlowMPTrigger extends AbstractTrigger
 
     public void set_rel_v(double val)
     {
-        this.rel_v = val;
+        rel_v = val;
     }
 
     // min_n_tuples
@@ -250,7 +250,7 @@ public class SlowMPTrigger extends AbstractTrigger
 
     public void set_min_n_tuples(int val)
     {
-        this.min_n_tuples = val;
+        min_n_tuples = val;
     }
 
     @Override

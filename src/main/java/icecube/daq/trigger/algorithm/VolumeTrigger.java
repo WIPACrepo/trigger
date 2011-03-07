@@ -324,11 +324,11 @@ class LogicalChannelVT implements Comparable<LogicalChannelVT>
     boolean isNear(LogicalChannelVT ch, int up, int down, TreeSet<Integer> neighbors)
     {
 	// First check if this string is near the hit string
-	boolean closeString = neighbors.contains(new Integer(this.string));
+	boolean closeString = neighbors.contains(new Integer(string));
 
 	// Next check if this module is near the hit module
 	boolean closeModule = false;
-        int intraStringSeparation = ch.module - this.module;
+        int intraStringSeparation = ch.module - module;
         if ((intraStringSeparation < 0 && -intraStringSeparation <= up) ||
                 (intraStringSeparation > 0 && intraStringSeparation <= down) ||
 	    intraStringSeparation == 0) closeModule =  true;

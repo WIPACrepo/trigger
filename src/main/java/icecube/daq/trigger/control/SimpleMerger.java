@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * TODO: Massively clean up this code!!!
  *
- * @version $Id: SimpleMerger.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: SimpleMerger.java 12765 2011-03-07 18:42:04Z dglo $
  * @author shseo
  */
 public class SimpleMerger
@@ -400,9 +400,9 @@ public class SimpleMerger
                                                           elem.getSourceID());
 
     }
-    public void setPayloadFactory(PayloadFactory triggerFactory)
+    public void setPayloadFactory(PayloadFactory payloadFactory)
     {
-        this.triggerFactory = (TriggerRequestPayloadFactory) triggerFactory;
+        triggerFactory = (TriggerRequestPayloadFactory) payloadFactory;
     }
     public void setAllowTimeGap(boolean val)
     {

@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java 12737 2011-03-02 19:35:12Z dglo $
+ * @version $Id: GlobalTriggerManager.java 12765 2011-03-07 18:42:04Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager
@@ -261,7 +261,7 @@ public class GlobalTriggerManager
     public void reset() {
         log.info("Reseting GlobalTrigManager");
         super.reset();
-        this.initialize();
+        initialize();
     }
 
     public IUTCTime getEarliestTime() {

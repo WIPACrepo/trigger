@@ -1,7 +1,7 @@
 /*
  * class: AbstractGlobalTrigger
  *
- * Version $Id: AbstractGlobalTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: AbstractGlobalTrigger.java 12762 2011-03-07 17:55:21Z dglo $
  *
  * Date: August 30 2005
  *
@@ -23,14 +23,13 @@ import java.util.List;
 /**
  * This class is to provide a common method for all triggers in GT.
  *
- * @version $Id: AbstractGlobalTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: AbstractGlobalTrigger.java 12762 2011-03-07 17:55:21Z dglo $
  * @author shseo
  */
 public abstract class AbstractGlobalTrigger extends AbstractTrigger
 {
     private GlobalTrigEventWrapper mtGlobalTrigEventWrapper = new GlobalTrigEventWrapper();
     private ITriggerRequestPayload mtGlobalTrigEventPayload;
-    protected List mListOutputTriggers = new ArrayList();
     protected ConditionalTriggerBag mtConditionalTriggerBag;
     /**
      *  Constructor
@@ -60,9 +59,6 @@ public abstract class AbstractGlobalTrigger extends AbstractTrigger
 
         //This list is used for JUnitTest purpose only. So it needs periodic flush for a normal run.
         if(mtGlobalTrigEventPayload != null){
-            if(mListOutputTriggers.size() <= 100){
-                mListOutputTriggers.add(mtGlobalTrigEventPayload);
-            }
 
             //--The firstTime here to set DummyPayload is the earliestReadoutTime.
             DummyPayload dummy = new DummyPayload(mtGlobalTrigEventPayload.getFirstTimeUTC());
@@ -74,26 +70,6 @@ public abstract class AbstractGlobalTrigger extends AbstractTrigger
         }else{
             throw new NullPointerException("mtGlobalTrigEventPayload is NULL in wrapTrigger()");
         }
-    }
-    /**
-     * This returns a list of selected triggers by each global trigger algorithm.
-     * This is necessary for JUnit test purpose.
-     *
-     * @return
-     */
-    public List getListOutputTriggers()
-    {
-        //--period of flush
-        int iRegulator = 100;
-        int iTotalOutputTriggers = mListOutputTriggers.size();
-        int n = iTotalOutputTriggers/iRegulator;
-
-        //--To flush.
-        if(n > 0){
-            mListOutputTriggers.removeAll(mListOutputTriggers.subList(0, n*iRegulator));
-        }
-
-        return mListOutputTriggers;
     }
 
     public ConditionalTriggerBag getBag(){

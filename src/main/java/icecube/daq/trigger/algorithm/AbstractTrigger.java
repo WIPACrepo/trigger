@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 12498 2010-12-29 21:48:22Z dglo $
+ * Version $Id: AbstractTrigger.java 12763 2011-03-07 18:22:05Z dglo $
  *
  * Date: August 19 2005
  *
@@ -46,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 12498 2010-12-29 21:48:22Z dglo $
+ * @version $Id: AbstractTrigger.java 12763 2011-03-07 18:22:05Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger
@@ -89,7 +89,7 @@ public abstract class AbstractTrigger
     private List readouts = new ArrayList();
     private List parameters = new ArrayList();
 
-    private IPayload earliestPayloadOfIterest = null;
+    private IPayload earliestPayloadOfInterest = null;
     private ITriggerHandler triggerHandler = null;
     protected TriggerRequestPayloadFactory triggerFactory = new TriggerRequestPayloadFactory();
     protected boolean onTrigger;
@@ -255,7 +255,7 @@ public abstract class AbstractTrigger
      * @return earliest payload of interest
      */
     public IPayload getEarliestPayloadOfInterest() {
-        return earliestPayloadOfIterest;
+        return earliestPayloadOfInterest;
     }
 
     /**
@@ -334,7 +334,7 @@ public abstract class AbstractTrigger
     }
 
     protected void setEarliestPayloadOfInterest(IPayload payload) {
-        this.earliestPayloadOfIterest = payload;
+        this.earliestPayloadOfInterest = payload;
     }
 
     /**

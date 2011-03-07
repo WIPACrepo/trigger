@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 12763 2011-03-07 18:22:05Z dglo $
+ * Version $Id: AbstractTrigger.java 12764 2011-03-07 18:23:59Z dglo $
  *
  * Date: August 19 2005
  *
@@ -46,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 12763 2011-03-07 18:22:05Z dglo $
+ * @version $Id: AbstractTrigger.java 12764 2011-03-07 18:23:59Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger
@@ -89,15 +89,15 @@ public abstract class AbstractTrigger
     private List readouts = new ArrayList();
     private List parameters = new ArrayList();
 
-    private IPayload earliestPayloadOfInterest = null;
-    private ITriggerHandler triggerHandler = null;
+    private IPayload earliestPayloadOfInterest;
+    private ITriggerHandler triggerHandler;
     protected TriggerRequestPayloadFactory triggerFactory = new TriggerRequestPayloadFactory();
     protected boolean onTrigger;
-    protected int triggerCounter = 0;
-    private int sentTriggerCounter = 0;
+    protected int triggerCounter;
+    private int sentTriggerCounter;
     private int printMod = 1000;
 
-    protected int triggerPrescale = 0;
+    protected int triggerPrescale;
     protected int domSetId = -1;
 
     protected HitFilter hitFilter;

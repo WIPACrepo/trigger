@@ -45,14 +45,14 @@ public class SlowMPTrigger extends AbstractTrigger
 
     private long muon_time_window;
 
-    // wont use those configure-booleans - ok ?
-/*  private boolean t_proximity_configured = false;
+    
+    private boolean t_proximity_configured = false;
     private boolean t_min_configured = false;
     private boolean t_max_configured = false;
     private boolean delta_d_configured = false;
     private boolean rel_v_configured = false;
-    private boolean min_n_tuples_configured = false;*/
-
+    private boolean min_n_tuples_configured = false;
+    private boolean max_event_length_configured = false;
 
     private class min_hit_info
     {
@@ -142,45 +142,130 @@ public class SlowMPTrigger extends AbstractTrigger
 
         // parameters that are important for the behaviour of the trigger
         // times are set in nanoseconds, later translated to tens of nanoseconds
-        set_t_proximity(2500);
-        set_t_min(0);
-        set_t_max(500000);
-        set_delta_d(500);
-        set_rel_v(0.5);
-        set_min_n_tuples(2);
+       // set_t_proximity(2500);
+       // set_t_min(0);
+       // set_t_max(500000);
+       // set_delta_d(500);
+       // set_rel_v(0.5);
+       // set_min_n_tuples(2);
 
         // max_event_length is in tens of nanoseconds
-        max_event_length = 50000000;  // we dont want longer events thatn 5 milliseconds, should not occur in 30 min run
+        //max_event_length = 50000000;  // we dont want longer events thatn 5 milliseconds, should not occur in 30 min run
 
         muon_time_window = -1;
-        configHitFilter(5);
+       // configHitFilter(5);
 
         //System.out.println("INITIALIZED SLOWMPTRIGGER");
+    }
+    
+    public boolean isConfigured()
+    {
+        return ( t_proximity_configured && t_min_configured && t_max_configured &&
+                delta_d_configured && rel_v_configured && min_n_tuples_configured && max_event_length_configured );
     }
 
     @Override
     public void addParameter(TriggerParameter parameter) throws UnknownParameterException,
-                                                                IllegalParameterValueException
-    {
-        if (parameter.getName().equals("t_proximity"))
-            set_t_proximity(Integer.parseInt(parameter.getValue()));
-        else if (parameter.getName().equals("t_min"))
-            set_t_min(Integer.parseInt(parameter.getValue()));
-        else if (parameter.getName().equals("t_max"))
-            set_t_max(Integer.parseInt(parameter.getValue()));
-        else if (parameter.getName().equals("delta_d"))
-            set_delta_d(Integer.parseInt(parameter.getValue()));
-        else if (parameter.getName().equals("rel_v"))
-            set_rel_v(Double.parseDouble(parameter.getValue()));
-        else if (parameter.getName().equals("min_n_tuples"))
-            set_delta_d(Integer.parseInt(parameter.getValue()));
-        else if (parameter.getName().equals("domSet")){
-            domSetId = Integer.parseInt(parameter.getValue());
-            configHitFilter(domSetId);
-        }
-        super.addParameter(parameter);
-    }
+               IllegalParameterValueException
+               {
+                   if (parameter.getName().equals("t_proximity"))
+		   {
+                       if(Long.parseLong(parameter.getValue())>=0)
+		       {
+                           set_t_proximity(Long.parseLong(parameter.getValue()));
+                           t_proximity_configured = true;
+                       }    
+                       else
+		       {
+                          throw new IllegalParameterValueException("Illegal t_proximity value: " + Long.parseLong(parameter.getValue()));
+                       }
+		   }
+                   else if (parameter.getName().equals("t_min"))
+		   {
+                       if(Long.parseLong(parameter.getValue())>=0) 
+		       {
+                           set_t_min(Long.parseLong(parameter.getValue()));
+                           t_min_configured = true;
+                       }
+                       else
+		       {
+                          throw new IllegalParameterValueException("Illegal t_min value: " + Long.parseLong(parameter.getValue()));
+                       }
+		   }
+                   else if (parameter.getName().equals("t_max"))
+		   {
+                       if(Long.parseLong(parameter.getValue())>=0) 
+		       {
+                           set_t_max(Long.parseLong(parameter.getValue()));
+                           t_max_configured = true;
+                       }
+		       else
+                       {
+                          throw new IllegalParameterValueException("Illegal t_max value: " + Long.parseLong(parameter.getValue()));
+                       }
+		   }
+                   else if (parameter.getName().equals("delta_d"))
+		   {
+                       if(Integer.parseInt(parameter.getValue())>=0) 
+		       {
+                           set_delta_d(Integer.parseInt(parameter.getValue()));
+                           delta_d_configured = true;
+                       }
+                       else 
+		       {
+                          throw new IllegalParameterValueException("Illegal delta_d value: " + Integer.parseInt(parameter.getValue()));
+                       }
+		   }    
+                   else if (parameter.getName().equals("rel_v"))
+		   {
+                       if(Double.parseDouble(parameter.getValue())>=0) 
+		       {
+                           set_rel_v(Double.parseDouble(parameter.getValue()));
+                           rel_v_configured = true;
+                       }
+                       else
+		       {
+                          throw new IllegalParameterValueException("Illegal rel_v value: " + Double.parseDouble(parameter.getValue()));
+                       }
+		   }    
+                   else if (parameter.getName().equals("min_n_tuples"))
+		   {
+                       if(Integer.parseInt(parameter.getValue())>=0) 
+		       {
+                           set_min_n_tuples(Integer.parseInt(parameter.getValue()));
+                           min_n_tuples_configured = true;
+                       }
+                       else 
+		       {
+                          throw new IllegalParameterValueException("Illegal min_n_tuples value: " + Integer.parseInt(parameter.getValue()));
+                       }
+		   }
+                   else if (parameter.getName().equals("max_event_length"))
+		   {
+                       if(Long.parseLong(parameter.getValue())>=0) 
+		       {
+                           set_max_event_length(Long.parseLong(parameter.getValue()));
+                           max_event_length_configured = true;
+                       }
+                       else 
+		       {
+                          throw new IllegalParameterValueException("Illegal max_event_length value: " + Long.parseLong(parameter.getValue()));
+                       }
+		   }
+                   else if (parameter.getName().equals("domset"))
+		   {
+                       if(Integer.parseInt(parameter.getValue())>=0) 
+		       {
+                           configHitFilter(Integer.parseInt(parameter.getValue()));
+                       }
+		   }
+		   else
+		   {
+		      throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
 
+		   }
+                   super.addParameter(parameter);
+               }
     // t_proximity
 
     public long get_t_proximity()
@@ -251,6 +336,16 @@ public class SlowMPTrigger extends AbstractTrigger
     public void set_min_n_tuples(int val)
     {
         min_n_tuples = val;
+    }
+    
+    public void set_max_event_length(long val)
+    {
+        max_event_length = val*10L;
+    }
+
+    public long get_max_event_length()
+    {
+        return max_event_length/10L;
     }
 
     @Override
@@ -497,10 +592,7 @@ public class SlowMPTrigger extends AbstractTrigger
         //one_hit_list.clear();
         two_hit_list.clear();
     }
-    public boolean isConfigured()
-    {
-        return true;
-    }
+    
     /*
 
       Function to check for a triple combination fullfilling the parameter boundaries

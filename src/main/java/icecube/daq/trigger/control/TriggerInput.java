@@ -1,7 +1,7 @@
 /*
  * class: TriggerInput
  *
- * Version $Id: TriggerInput.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: TriggerInput.java 12771 2011-03-12 00:02:10Z dglo $
  *
  * Date: May 2 2005
  *
@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides a simple implementation of ITriggerInput
  *
- * @version $Id: TriggerInput.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: TriggerInput.java 12771 2011-03-12 00:02:10Z dglo $
  * @author pat
  */
 public class TriggerInput
@@ -118,7 +118,7 @@ public class TriggerInput
 
                 window1.setOverlapping(false);
 
-                for (int j=i+1; j<inputList.size(); j++) {
+                for (int j=0; j<inputList.size(); j++) {
                     PayloadWindow window2 = inputList.get(j);
                     // check overlaps with all uncontained windows
                     if (!window2.isContained()) {

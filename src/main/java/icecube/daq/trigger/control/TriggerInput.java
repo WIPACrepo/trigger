@@ -1,7 +1,7 @@
 /*
  * class: TriggerInput
  *
- * Version $Id: TriggerInput.java 12771 2011-03-12 00:02:10Z dglo $
+ * Version $Id: TriggerInput.java 12778 2011-03-14 22:43:46Z dglo $
  *
  * Date: May 2 2005
  *
@@ -23,6 +23,7 @@ import icecube.daq.payload.IUTCTime;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
@@ -32,11 +33,11 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides a simple implementation of ITriggerInput
  *
- * @version $Id: TriggerInput.java 12771 2011-03-12 00:02:10Z dglo $
+ * @version $Id: TriggerInput.java 12778 2011-03-14 22:43:46Z dglo $
  * @author pat
  */
 public class TriggerInput
-        implements ITriggerInput
+    implements ITriggerInput, Iterable, Iterator
 {
 
     /**
@@ -184,6 +185,16 @@ public class TriggerInput
     }
 
     /**
+     * Return current object to be used as an iterator.
+     *
+     * @return <tt>this</tt>
+     */
+    public Iterator<ILoadablePayload> iterator()
+    {
+        return this;
+    }
+
+    /**
      * get next available payload
      * @return next ILoadablePayload
      */
@@ -203,6 +214,11 @@ public class TriggerInput
         }
 
         return inputList.remove(curIndex).getPayload();
+    }
+
+    public void remove()
+    {
+        throw new UnsupportedOperationException("Unimplemented");
     }
 
     /**

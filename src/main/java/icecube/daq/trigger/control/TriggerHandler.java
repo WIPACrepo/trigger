@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 12679 2011-02-18 21:50:24Z dglo $
+ * Version $Id: TriggerHandler.java 12777 2011-03-14 22:32:59Z dglo $
  *
  * Date: October 25 2004
  *
@@ -54,7 +54,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 12679 2011-02-18 21:50:24Z dglo $
+ * @version $Id: TriggerHandler.java 12777 2011-03-14 22:32:59Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -638,7 +638,7 @@ public class TriggerHandler
 
     }
 
-    protected IPayload getEarliestPayloadOfInterest() {
+    public IPayload getEarliestPayloadOfInterest() {
         return earliestPayloadOfInterest;
     }
 

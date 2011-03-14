@@ -346,7 +346,7 @@ public class DummyTriggerHandler
 
     }
 
-    protected IPayload getEarliestPayloadOfInterest() {
+    public IPayload getEarliestPayloadOfInterest() {
         return earliestPayloadOfInterest;
     }
 

@@ -252,7 +252,7 @@ public class SlowMPTrigger extends AbstractTrigger
                           throw new IllegalParameterValueException("Illegal max_event_length value: " + Long.parseLong(parameter.getValue()));
                        }
 		   }
-                   else if (parameter.getName().equals("domset"))
+                   else if (parameter.getName().equals("domSet"))
 		   {
                        if(Integer.parseInt(parameter.getValue())>=0) 
 		       {

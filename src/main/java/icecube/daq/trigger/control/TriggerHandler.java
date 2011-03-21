@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 12777 2011-03-14 22:32:59Z dglo $
+ * Version $Id: TriggerHandler.java 12797 2011-03-21 22:14:34Z dglo $
  *
  * Date: October 25 2004
  *
@@ -54,7 +54,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 12777 2011-03-14 22:32:59Z dglo $
+ * @version $Id: TriggerHandler.java 12797 2011-03-21 22:14:34Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -872,7 +872,14 @@ public class TriggerHandler
                 }
 
                 if (payload != null) {
-                    reprocess(payload);
+                    try {
+                        reprocess(payload);
+                    } catch (Throwable thr) {
+                        log.error("Caught exception while processing " +
+                                  payload, thr);
+                        // should probably break out of the thread after
+                        //  some number of consecutive failures
+                    }
                     if (payload == FLUSH_PAYLOAD) {
                         sawFlush = true;
                     }

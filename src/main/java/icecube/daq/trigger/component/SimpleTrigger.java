@@ -2,7 +2,7 @@ package icecube.daq.trigger.component;
 
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.OutputChannel;
-import icecube.daq.io.PayloadOutputEngine;
+import icecube.daq.io.SimpleOutputEngine;
 import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQCompServer;
@@ -322,7 +322,7 @@ public class SimpleTrigger
     private static final String COMPONENT_NAME = "simpleTrigger";
 
     private SpliceablePayloadReader hitReader;
-    private PayloadOutputEngine gtWriter;
+    private SimpleOutputEngine gtWriter;
     private Analysis analysis;
 
     /**
@@ -359,7 +359,7 @@ public class SimpleTrigger
         }
         addMonitoredEngine(DAQConnector.TYPE_STRING_HIT, hitReader);
 
-        gtWriter = new PayloadOutputEngine(COMPONENT_NAME, compId, "gtOutput");
+        gtWriter = new SimpleOutputEngine(COMPONENT_NAME, compId, "gtOutput");
         addMonitoredEngine(DAQConnector.TYPE_TRIGGER, gtWriter, true);
 
         //gtWriter.registerBufferManager(trigMgr);

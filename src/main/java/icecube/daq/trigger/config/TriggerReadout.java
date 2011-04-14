@@ -1,7 +1,7 @@
 /*
  * class: TriggerReadout
  *
- * Version $Id: TriggerReadout.java 12765 2011-03-07 18:42:04Z dglo $
+ * Version $Id: TriggerReadout.java 12879 2011-04-14 16:47:37Z dglo $
  *
  * Date: November 23 2005
  *
@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class represents a trigger readout.
  *
- * @version $Id: TriggerReadout.java 12765 2011-03-07 18:42:04Z dglo $
+ * @version $Id: TriggerReadout.java 12879 2011-04-14 16:47:37Z dglo $
  * @author pat
  */
 public class TriggerReadout
@@ -81,7 +81,7 @@ public class TriggerReadout
      * @param plus time extenstion into future
      */
     public TriggerReadout(int type, int offset, int minus, int plus) {
-        type = checkType(type);
+        this.type = checkType(type);
         this.offset = offset;
         if (minus < 0) {
             log.warn("Readout time minus should be non-negative");

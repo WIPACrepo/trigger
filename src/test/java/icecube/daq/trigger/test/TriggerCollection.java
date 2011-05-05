@@ -23,12 +23,16 @@ public abstract class TriggerCollection
     static final int GLOBAL_TRIGGER = SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID;
     static final int ICETOP_TRIGGER = SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID;
     static final int INICE_TRIGGER = SourceIdRegistry.INICE_TRIGGER_SOURCE_ID;
+    static final int SIMHUB = SourceIdRegistry.SIMULATION_HUB_SOURCE_ID;
+    static final int STRINGHUB = SourceIdRegistry.STRING_HUB_SOURCE_ID;
 
     private static ByteBuffer hitBuf;
     private static ByteBuffer stopMsg;
     private static ByteBuffer trigBuf;
 
     private ArrayList<AbstractTrigger> list = new ArrayList<AbstractTrigger>();
+
+    private int hitSrcId = SIMHUB;
 
     void add(AbstractTrigger trig)
     {
@@ -126,8 +130,7 @@ public abstract class TriggerCollection
     public abstract void sendAmandaStops(WritableByteChannel[] tails)
         throws IOException;
 
-    static void sendHit(WritableByteChannel chan, long time, int tailIndex,
-                        long domId)
+    void sendHit(WritableByteChannel chan, long time, int tailIndex, long domId)
         throws IOException
     {
         final int bufLen = 38;
@@ -139,7 +142,7 @@ public abstract class TriggerCollection
         synchronized (hitBuf) {
             final int recType = AbstractTrigger.SPE_HIT;
             final int cfgId = 2;
-            final int srcId = SourceIdRegistry.SIMULATION_HUB_SOURCE_ID;
+            final int srcId = hitSrcId + tailIndex;
             final short mode = 0;
 
             hitBuf.putInt(0, bufLen);
@@ -148,7 +151,7 @@ public abstract class TriggerCollection
 
             hitBuf.putInt(16, recType);
             hitBuf.putInt(20, cfgId);
-            hitBuf.putInt(24, srcId + tailIndex);
+            hitBuf.putInt(24, srcId);
             hitBuf.putLong(28, domId);
             hitBuf.putShort(36, mode);
 
@@ -231,5 +234,10 @@ public abstract class TriggerCollection
             trigBuf.position(0);
             chan.write(trigBuf);
         }
+    }
+
+    void setSourceId(int srcId)
+    {
+        this.hitSrcId = srcId;
     }
 }

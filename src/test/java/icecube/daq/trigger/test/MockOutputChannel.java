@@ -43,6 +43,9 @@ public class MockOutputChannel
     public void receiveByteBuffer(ByteBuffer buf)
     {
         numWritten++;
+        if (validator != null) {
+            validator.validate(buf);
+        }
     }
 
     public void registerComponentObserver(DAQComponentObserver observer,

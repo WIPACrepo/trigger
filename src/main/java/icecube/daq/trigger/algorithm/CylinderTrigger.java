@@ -11,6 +11,7 @@ import icecube.daq.util.DeployedDOM;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
@@ -67,6 +68,8 @@ public class CylinderTrigger extends AbstractTrigger
     private double height;
 
     private LinkedList<IHitPayload> triggerQueue;
+
+    private Comparator hitComparator = new HitComparator();
 
     private static final Logger logger = Logger.getLogger(CylinderTrigger.class);
 
@@ -227,6 +230,7 @@ public class CylinderTrigger extends AbstractTrigger
             }
             if (hitsInCylinder.size() >= multiplicity)
             {
+                Collections.sort((ArrayList) hitsInCylinder, hitComparator);
                 triggerQueue = new LinkedList<IHitPayload>(hitsInCylinder);
                 return true;
             }
@@ -242,3 +246,47 @@ public class CylinderTrigger extends AbstractTrigger
 
 }
 
+class HitComparator
+    implements Comparator
+{
+    public int compare(Object o1, Object o2)
+    {
+        if (o1 == null || !(o1 instanceof IHitPayload)) {
+            if (o2 == null || !(o2 instanceof IHitPayload)) {
+                return 0;
+            }
+
+            return 1;
+        } else if (o2 == null || !(o2 instanceof IHitPayload)) {
+            return -1;
+        }
+
+        IHitPayload h1 = (IHitPayload) o1;
+        IHitPayload h2 = (IHitPayload) o2;
+
+        if (h1.getHitTimeUTC() == null) {
+            if (h2.getHitTimeUTC() == null) {
+                return 0;
+            }
+
+            return 1;
+        } else if (h2.getHitTimeUTC() == null) {
+            return -1;
+        }
+
+        long val = h1.getHitTimeUTC().longValue() -
+            h2.getHitTimeUTC().longValue();
+        if (val > 0) {
+            return 1;
+        } else if (val < 0) {
+            return -1;
+        }
+
+        return 0;
+    }
+
+    public boolean equals(Object obj)
+    {
+        return obj instanceof HitComparator;
+    }
+}

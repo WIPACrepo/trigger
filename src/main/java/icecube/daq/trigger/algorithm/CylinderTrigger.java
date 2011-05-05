@@ -204,12 +204,15 @@ public class CylinderTrigger extends AbstractTrigger
 
         final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
 
+        ArrayList<IHitPayload> hitsInCylinder =
+            new ArrayList<IHitPayload>(q.length*(q.length-1));
+
         // Loop over hit pairs
         for (int ihit = 0; ihit < q.length; ihit++)
         {
             String mbid0 = String.format("%012x", q[ihit].getDOMID().longValue());
             DeployedDOM d0 = domRegistry.getDom(mbid0);
-            ArrayList<IHitPayload> hitsInCylinder = new ArrayList<IHitPayload>(q.length*(q.length-1));
+            hitsInCylinder.clear();
             hitsInCylinder.add(q[ihit]);
             for (int jhit = 0; jhit < q.length; jhit++)
             {

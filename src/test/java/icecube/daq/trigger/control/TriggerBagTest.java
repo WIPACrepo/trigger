@@ -62,6 +62,11 @@ public class TriggerBagTest
             throw new Error("Unimplemented");
         }
 
+        public long getUTCTime()
+        {
+            throw new Error("Unimplemented");
+        }
+
         public void setCache(IByteBufferCache cache)
         {
             throw new Error("Unimplemented");

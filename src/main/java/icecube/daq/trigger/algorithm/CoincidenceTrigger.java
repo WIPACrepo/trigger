@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTrigger
  *
- * Version $Id: CoincidenceTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: CoincidenceTrigger.java 12762 2011-03-07 17:55:21Z dglo $
  *
  * Date: September 2 2005
  *
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is to provide methods common to all coincidence triggers.
  *
- * @version $Id: CoincidenceTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: CoincidenceTrigger.java 12762 2011-03-07 17:55:21Z dglo $
  * @author shseo
  */
 public abstract class CoincidenceTrigger
@@ -97,10 +97,6 @@ public abstract class CoincidenceTrigger
         while (mtConditionalTriggerBag.hasNext())
         {
             ILoadablePayload tPayload = mtConditionalTriggerBag.next();
-            //--add to the list only for the first 100 payloads.
-            if(mListOutputTriggers.size() <= 100){
-                mListOutputTriggers.add(tPayload);
-            }
             //--update earliestPayloadOfInterest when there is a coincidenceTrigger.
             DummyPayload dummy = new DummyPayload(((ITriggerRequestPayload) tPayload).getFirstTimeUTC());
             setEarliestPayloadOfInterest(dummy);
@@ -275,7 +271,6 @@ public abstract class CoincidenceTrigger
         mtConditionalTriggerBag.flush();
         while(mtConditionalTriggerBag.hasNext()){
             ILoadablePayload tPayload = mtConditionalTriggerBag.next();
-            mListOutputTriggers.add(tPayload);
             reportTrigger(tPayload);
         }
     }

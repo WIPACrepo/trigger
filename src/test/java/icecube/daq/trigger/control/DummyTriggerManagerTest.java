@@ -127,7 +127,7 @@ public class DummyTriggerManagerTest
         MasterPayloadFactory factory = new MasterPayloadFactory();
 
         DummyTriggerManager trigMgr =
-            new DummyTriggerManager(factory, SOURCE_ID,
+            new DummyTriggerManager(SOURCE_ID,
                                     new TriggerRequestPayloadFactory());
 
         runWithRealSplicer(trigMgr);
@@ -153,7 +153,7 @@ public class DummyTriggerManagerTest
         MasterPayloadFactory factory = new MasterPayloadFactory();
 
         DummyTriggerManager trigMgr =
-            new DummyTriggerManager(factory, SOURCE_ID,
+            new DummyTriggerManager(SOURCE_ID,
                                     new TriggerRequestPayloadFactory());
 
         trigMgr.setNumHitsPerTrigger(numHitsPerTrigger);

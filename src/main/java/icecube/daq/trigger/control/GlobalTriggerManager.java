@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java 12315 2010-10-06 21:27:41Z dglo $
+ * @version $Id: GlobalTriggerManager.java 12766 2011-03-07 18:49:31Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager
@@ -68,27 +68,25 @@ public class GlobalTriggerManager
     private int lastInputListSize;
 
     private int nThresholdInSplicer = 2000;
-    private long startTime;
-    private int nInputs;
 
     private IUTCTime earliestTime;
     private IUTCTime latestTime;
     private LinkedList wallTimeQueue;
     private Statistic processingTime;
 
+    private IUTCTime lastTruncateTime;
+
     /**
      * Create an instance of this class.
      */
-    public GlobalTriggerManager(SpliceableFactory inputFactory,
-                                ISourceID sourceID,
+    public GlobalTriggerManager(ISourceID sourceID,
                                 TriggerRequestPayloadFactory outputFactory)
     {
-        this(inputFactory, sourceID, outputFactory, DEFAULT_TIMEGAP_OPTION,
+        this(sourceID, outputFactory, DEFAULT_TIMEGAP_OPTION,
              DEFAULT_MAX_TIMEGATE_WINDOW);
     }
 
-    private GlobalTriggerManager(SpliceableFactory inputFactory,
-                                 ISourceID sourceID,
+    private GlobalTriggerManager(ISourceID sourceID,
                                  TriggerRequestPayloadFactory outputFactory,
                                  boolean allowTimeGap, int iMax_TimeGate_Window)
     {
@@ -115,15 +113,7 @@ public class GlobalTriggerManager
 
     public void execute(List splicedObjects, int decrement) {
         // Loop over the new objects in the splicer
-//-----------------------------------------------------
-        if ((inputCount % nThresholdInSplicer) == 0) {
-            nInputs = 0;
-            startTime = System.currentTimeMillis();
-        } else {
-            nInputs++;
-        }
-
-        // Loop over the new objects in the splicer
+        //-----------------------------------------------------
         int numberOfObjectsInSplicer = splicedObjects.size();
         lastInputListSize = numberOfObjectsInSplicer - (start - decrement);
 
@@ -153,29 +143,23 @@ public class GlobalTriggerManager
         }
 
         start = numberOfObjectsInSplicer;
-
-        if ((inputCount % nThresholdInSplicer) == (nThresholdInSplicer - 1)) {
-            double timeDiff = System.currentTimeMillis() - startTime;
-            double timePerHit = timeDiff/nInputs;
-            if (log.isDebugEnabled()) {
-                log.debug("Process time per input = " +
-                          Math.round(timePerHit) + " ms");
-            }
-        }
-
     }
 
     /**
      * update splicer to earliest time of interest
      */
     public void updateSplicer() {
-        Spliceable update = (Spliceable) super.getEarliestPayloadOfInterest();
+        IPayload update = getEarliestPayloadOfInterest();
         if (null != update) {
-            if (log.isDebugEnabled()) {
-                log.debug("Truncating splicer at " +
-                          ((IPayload) update).getPayloadTimeUTC());
+            if (lastTruncateTime == null ||
+                !lastTruncateTime.equals(update.getPayloadTimeUTC()))
+            {
+                lastTruncateTime = update.getPayloadTimeUTC();
+                if (log.isDebugEnabled()) {
+                    log.debug("Truncating splicer at " + lastTruncateTime);
+                }
+                splicer.truncate((Spliceable) update);
             }
-            splicer.truncate(update);
         }
     }
 
@@ -257,7 +241,7 @@ public class GlobalTriggerManager
     public void reset() {
         log.info("Reseting GlobalTrigManager");
         super.reset();
-        this.initialize();
+        initialize();
     }
 
     public IUTCTime getEarliestTime() {

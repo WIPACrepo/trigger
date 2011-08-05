@@ -71,12 +71,7 @@ public class HitFilter
         }
 
         // if the dom is in the domSet, use the hit
-        if (domSet.inSet(hit.getDOMID())) {
-            return true;
-        } else {
-            return false;
-        }
-
+        return domSet.inSet(hit.getDOMID());
     }
 
 }

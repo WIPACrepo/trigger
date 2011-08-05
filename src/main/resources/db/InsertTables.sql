@@ -287,7 +287,6 @@ INSERT INTO TriggerName VALUES ('14', 'ClusterTrigger');
 INSERT INTO TriggerName VALUES ('17', 'MultiplicityStringTrigger');
 INSERT INTO TriggerName VALUES ('18', 'VolumeTrigger');
 INSERT INTO TriggerName VALUES ('19', 'CylinderTrigger');
-INSERT INTO TriggerName VALUES ('23', 'AMajorityTrigger');
 
 INSERT INTO TriggerId VALUES ('0', '0', '0', '4000');
 INSERT INTO TriggerId VALUES ('1', '0', '1', '4000');

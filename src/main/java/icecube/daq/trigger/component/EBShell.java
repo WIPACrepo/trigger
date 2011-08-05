@@ -4,7 +4,7 @@ import icecube.daq.io.DAQComponentObserver;
 import icecube.daq.io.IOChannelParent;
 import icecube.daq.io.InputChannel;
 import icecube.daq.io.PayloadReader;
-import icecube.daq.io.SingleOutputEngine;
+import icecube.daq.io.SimpleOutputEngine;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQCompServer;
 import icecube.daq.juggler.component.DAQComponent;
@@ -74,20 +74,22 @@ public class EBShell
     {
         super(name, id);
 
-        // Create the buffer cache
-        IByteBufferCache bufferCache = new VitreousBufferCache("EBShell");
-        addCache(bufferCache);
-
         addMBean("jvm", new MemoryStatistics());
         addMBean("system", new SystemStatistics());
+
+        IByteBufferCache inCache = new VitreousBufferCache("EBIn", 250000000);
+        addCache(DAQConnector.TYPE_READOUT_DATA, inCache);
 
         // Create and register io engines
         PayloadReader rdoutDataIn = new DevNullReader(name);
         addMonitoredEngine(DAQConnector.TYPE_READOUT_DATA, rdoutDataIn);
 
-        SingleOutputEngine rdoutReqOut =
-            new SingleOutputEngine(name, id, name + "Output");
-        rdoutReqOut.registerBufferManager(bufferCache);
+        // Create the outgoing buffer cache
+        IByteBufferCache outCache = new VitreousBufferCache("EBOut");
+        addCache(DAQConnector.TYPE_READOUT_REQUEST, outCache);
+
+        SimpleOutputEngine rdoutReqOut =
+            new SimpleOutputEngine(name, id, name + "Output");
         addMonitoredEngine(DAQConnector.TYPE_READOUT_REQUEST, rdoutReqOut,
                            true);
     }

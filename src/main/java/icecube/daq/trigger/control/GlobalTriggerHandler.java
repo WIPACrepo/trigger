@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 12628 2011-02-02 00:58:23Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 12797 2011-03-21 22:14:34Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -109,10 +109,6 @@ public class GlobalTriggerHandler
      * input handler
      */
     private ITriggerInput inputHandler;
-    /**
-     * This list is used for JUnitTest purpose.
-     */
-    private List mListAvailableTriggersToRelease;
 
     //--assign Default value.
     private int miMaxTimeGateWindow = DEFAULT_MAX_TIMEGATE_WINDOW;
@@ -187,7 +183,7 @@ public class GlobalTriggerHandler
         this.sourceId = sourceId;
         this.outputFactory = outputFactory;
 
-        this.init();
+        init();
         ((GlobalTriggerBag) triggerBag).setAllowTimeGap(allowTimeGap);
     }
 
@@ -331,7 +327,6 @@ public class GlobalTriggerHandler
         miTotalOutputGlobalTriggers = 0;
         miTotalOutputMergedGlobalTriggers = 0;
         earliestPayloadOfInterest = null;
-        mListAvailableTriggersToRelease = new ArrayList();
         configuredTriggerList = new ArrayList<ITrigger>();
         longestTrigger = 0.0;
 
@@ -353,8 +348,8 @@ public class GlobalTriggerHandler
         triggerBag.setMonitor(triggerBagMonitor);
         monitor.setTriggerBagMonitor(triggerBagMonitor);
 
-        this.setMaxTimeGateWindow((int) getMaxTimeGateWindow());
-        this.setAllowTimeGap(allowTimeGap());
+        setMaxTimeGateWindow((int) getMaxTimeGateWindow());
+        setAllowTimeGap(allowTimeGap());
 
         outChan = null;
 
@@ -543,7 +538,7 @@ public class GlobalTriggerHandler
      */
     public void reset() {
         log.info("Reseting GlobalTrigHandler");
-        this.init();
+        init();
     }
 
     /**
@@ -600,12 +595,6 @@ public class GlobalTriggerHandler
             if(-1 == GT_trigType)
             {
                 miTotalOutputMergedGlobalTriggers++;
-            }
-
-            //--add to the list for the first 100 payloads.
-            if(mListAvailableTriggersToRelease.size() <= 100)
-            {
-                mListAvailableTriggersToRelease.add(GTEventPayload);
             }
 
             //setAvailableTriggerToRelease();
@@ -783,11 +772,6 @@ public class GlobalTriggerHandler
     public DAQComponentOutputProcess getPayloadOutput()
     {
         return payloadOutput;
-    }
-
-    public List getListAvailableTriggerToRelease()
-    {
-        return mListAvailableTriggersToRelease;
     }
 
     public void setDOMRegistry(DOMRegistry registry) {
@@ -984,9 +968,11 @@ public class GlobalTriggerHandler
                 if (payload != null) {
                     try {
                         reprocess(payload);
-                    } catch (Exception ex) {
-                        log.error("Could not reprocess payload " + payload,
-                                  ex);
+                    } catch (Throwable thr) {
+                        log.error("Caught exception while processing " +
+                                  payload, thr);
+                        // should probably break out of the thread after
+                        //  some number of consecutive failures
                     }
 
                     if (payload == FLUSH_PAYLOAD) {

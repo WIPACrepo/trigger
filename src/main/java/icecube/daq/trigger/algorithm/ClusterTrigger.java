@@ -289,8 +289,8 @@ class LogicalChannel implements Comparable<LogicalChannel>
      */
     boolean isNear(LogicalChannel ch, int up, int down)
     {
-        if (this.string != ch.string) return false;
-        int intraStringSeparation = ch.module - this.module;
+        if (string != ch.string) return false;
+        int intraStringSeparation = ch.module - module;
         if ((intraStringSeparation < 0 && -intraStringSeparation <= up) ||
                 (intraStringSeparation > 0 && intraStringSeparation <= down) ||
                 intraStringSeparation == 0) return true;

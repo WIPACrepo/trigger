@@ -1,4 +1,4 @@
-package icecube.daq.trigger.test;
+package icecube.daq.trigger.algorithm;
 
 import icecube.daq.oldpayload.impl.MasterPayloadFactory;
 import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
@@ -12,6 +12,13 @@ import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.test.ComponentObserver;
+import icecube.daq.trigger.test.CylinderTriggerConfig;
+import icecube.daq.trigger.test.MockAppender;
+import icecube.daq.trigger.test.MockOutputChannel;
+import icecube.daq.trigger.test.MockOutputProcess;
+import icecube.daq.trigger.test.MockSourceID;
+import icecube.daq.trigger.test.TriggerCollection;
 import icecube.daq.util.DOMRegistry;
 
 import java.io.IOException;
@@ -28,7 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
 
-public class InIceTriggerEndToEndTest
+public class CylinderTriggerTest
     extends TestCase
 {
     private static final MockAppender appender =
@@ -37,7 +44,7 @@ public class InIceTriggerEndToEndTest
     private static final MockSourceID srcId =
         new MockSourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
 
-    public InIceTriggerEndToEndTest(String name)
+    public CylinderTriggerTest(String name)
     {
         super(name);
     }
@@ -82,7 +89,7 @@ public class InIceTriggerEndToEndTest
 
     public static Test suite()
     {
-        return new TestSuite(InIceTriggerEndToEndTest.class);
+        return new TestSuite(CylinderTriggerTest.class);
     }
 
     protected void tearDown()
@@ -97,7 +104,7 @@ public class InIceTriggerEndToEndTest
     public void testEndToEnd()
         throws IOException, SplicerException, TriggerException
     {
-        final int numTails = 10;
+        final int numTails = 4;
         final int numObjs = numTails * 10;
 
         // set up in-ice trigger
@@ -123,9 +130,9 @@ public class InIceTriggerEndToEndTest
         } catch (Exception ex) {
             throw new Error("Cannot set DOM registry", ex);
         }
-    
+
         // load all triggers
-        TriggerCollection trigCfg = new SPSIcecubeAmanda008Triggers();
+        TriggerCollection trigCfg = new CylinderTriggerConfig();
         trigCfg.addToHandler(trigMgr);
 
         MockOutputProcess outProc = new MockOutputProcess();

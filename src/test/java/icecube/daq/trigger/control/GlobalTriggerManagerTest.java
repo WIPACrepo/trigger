@@ -192,7 +192,7 @@ public class GlobalTriggerManagerTest
     {
         MasterPayloadFactory factory = new MasterPayloadFactory();
 
-        trigMgr = new GlobalTriggerManager(factory, SOURCE_ID,
+        trigMgr = new GlobalTriggerManager(SOURCE_ID,
                                            new TriggerRequestPayloadFactory());
 
         runWithRealSplicer(trigMgr);
@@ -205,7 +205,7 @@ public class GlobalTriggerManagerTest
     {
         MasterPayloadFactory factory = new MasterPayloadFactory();
 
-        trigMgr = new GlobalTriggerManager(factory, SOURCE_ID,
+        trigMgr = new GlobalTriggerManager(SOURCE_ID,
                                            new TriggerRequestPayloadFactory());
 
         trigMgr.setReportingThreshold(10);

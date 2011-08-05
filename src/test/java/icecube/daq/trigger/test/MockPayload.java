@@ -69,6 +69,11 @@ public abstract class MockPayload
 
     public abstract int getPayloadType();
 
+    public long getUTCTime()
+    {
+        return time.longValue();
+    }
+
     public int hashCode()
     {
         if (time == null) {

@@ -1,7 +1,7 @@
 /*
  * class: TriggerParameter
  *
- * Version $Id: TriggerParameter.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: TriggerParameter.java 12765 2011-03-07 18:42:04Z dglo $
  *
  * Date: November 23 2005
  *
@@ -13,7 +13,7 @@ package icecube.daq.trigger.config;
 /**
  * This class encapsulates a name/value pair that is a trigger parameter.
  *
- * @version $Id: TriggerParameter.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: TriggerParameter.java 12765 2011-03-07 18:42:04Z dglo $
  * @author pat
  */
 public class TriggerParameter
@@ -96,7 +96,7 @@ public class TriggerParameter
             return false;
         } else if (!(object instanceof TriggerParameter)) {
             return false;
-        } else if (object.hashCode() != this.hashCode()) {
+        } else if (object.hashCode() != hashCode()) {
             return false;
         } else {
             return true;

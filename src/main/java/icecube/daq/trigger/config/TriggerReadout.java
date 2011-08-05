@@ -1,7 +1,7 @@
 /*
  * class: TriggerReadout
  *
- * Version $Id: TriggerReadout.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: TriggerReadout.java 12879 2011-04-14 16:47:37Z dglo $
  *
  * Date: November 23 2005
  *
@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class represents a trigger readout.
  *
- * @version $Id: TriggerReadout.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: TriggerReadout.java 12879 2011-04-14 16:47:37Z dglo $
  * @author pat
  */
 public class TriggerReadout
@@ -251,7 +251,7 @@ public class TriggerReadout
             return false;
         } else if (!(object instanceof TriggerReadout)) {
             return false;
-        } else if (object.hashCode() != this.hashCode()) {
+        } else if (object.hashCode() != hashCode()) {
             return false;
         } else {
             return true;

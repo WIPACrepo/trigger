@@ -12,6 +12,7 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
+import icecube.daq.payload.PayloadException;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.splicer.Spliceable;
 
@@ -103,7 +104,11 @@ public class MockTriggerRequest
             new MockTriggerRequest(firstTime.longValue(),
                                    lastTime.longValue(), type, cfgId);
         if (srcId != null) {
-            tr.srcId = (ISourceID) srcId.deepCopy();
+            try {
+                tr.srcId = (ISourceID) srcId.deepCopy();
+            } catch (PayloadException pe) {
+                throw new Error("Deep copy failed", pe);
+            }
         }
 
         if (rdoutReq != null) {

@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 12765 2011-03-07 18:42:04Z dglo $
+ * Version $Id: AbstractTrigger.java 13231 2011-08-05 22:45:36Z dglo $
  *
  * Date: August 19 2005
  *
@@ -20,6 +20,7 @@ import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadException;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.config.TriggerReadout;
@@ -46,7 +47,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 12765 2011-03-07 18:42:04Z dglo $
+ * @version $Id: AbstractTrigger.java 13231 2011-08-05 22:45:36Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger
@@ -348,7 +349,8 @@ public abstract class AbstractTrigger
      */
     protected IReadoutRequestElement createReadoutElement(IUTCTime firstTime, IUTCTime lastTime,
                                                           TriggerReadout readoutConfig,
-                                                          IDOMID domId, ISourceID stringId) {
+                                                          IDOMID domId, ISourceID stringId)
+    throws PayloadException {
 
         IUTCTime timeOffset;
         IUTCTime timeMinus;
@@ -473,7 +475,9 @@ public abstract class AbstractTrigger
      * @param dom DOM id, if relevent (otherwise null)
      * @param string sourceId of string, if relevent (otherwise null)
      */
-    protected void formTrigger(List hits, IDOMID dom, ISourceID string) {
+    protected void formTrigger(List hits, IDOMID dom, ISourceID string)
+        throws PayloadException
+    {
 
         if (null == triggerFactory) {
             throw new Error("TriggerFactory is not set!");
@@ -528,7 +532,9 @@ public abstract class AbstractTrigger
     /**
      * Form a TriggerRequestPayload.
      */
-    protected void formTrigger(IUTCTime time) {
+    protected void formTrigger(IUTCTime time)
+        throws PayloadException
+    {
 
         if (null == triggerFactory) {
             throw new Error("TriggerFactory is not set!");
@@ -565,7 +571,9 @@ public abstract class AbstractTrigger
 
     }
 
-    protected void formTrigger(IHitPayload hit, IDOMID dom, ISourceID string) {
+    protected void formTrigger(IHitPayload hit, IDOMID dom, ISourceID string)
+        throws PayloadException
+    {
         List hitList = new ArrayList(1);
         hitList.add(hit);
         formTrigger(hitList, dom, string);

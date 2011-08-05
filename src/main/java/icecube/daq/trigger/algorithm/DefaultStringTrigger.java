@@ -4,6 +4,7 @@ import icecube.daq.oldpayload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.PayloadException;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -95,8 +96,13 @@ public class DefaultStringTrigger
         IPayload earliest = new DummyPayload(hit.getHitTimeUTC().getOffsetUTCTime(0.1));
         setEarliestPayloadOfInterest(earliest);
 
-        reportTrigger((ILoadablePayload) hit.deepCopy());
-
+        ILoadablePayload hitCopy;
+        try {
+            hitCopy = (ILoadablePayload) hit.deepCopy();
+        } catch (PayloadException pe) {
+            throw new TriggerException("Cannot copy hit " + hit, pe);
+        }
+        reportTrigger(hitCopy);
     }
 
     /**

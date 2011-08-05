@@ -11,6 +11,7 @@ import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadException;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.trigger.algorithm.ITrigger;
 import icecube.daq.trigger.config.TriggerParameter;
@@ -112,23 +113,35 @@ public class MockTrigger
             final IUTCTime timePlus =
                 lastTime.getOffsetUTCTime(OFFSET_PLUS);
 
-            final IReadoutRequestElement elem =
-                factory.createReadoutRequestElement(roType, timeMinus,
-                                                    timePlus, null, null);
+            final IReadoutRequestElement elem;
+            try {
+                elem = factory.createReadoutRequestElement(roType, timeMinus,
+                                                           timePlus, null,
+                                                           null);
+            } catch (PayloadException pe) {
+                throw new Error("Cannot create readout element", pe);
+            }
             readoutElems.add(elem);
         }
 
-        final IReadoutRequest readoutRequest =
-            factory.createReadoutRequest(srcId, counter, readoutElems);
+        final IReadoutRequest readoutRequest;
+        try {
+            readoutRequest = factory.createReadoutRequest(srcId, counter,
+                                                          readoutElems);
+        } catch (PayloadException pe) {
+            throw new Error("Cannot create readout request", pe);
+        }
 
         // make payload
-        TriggerRequestPayload triggerPayload
-            = (TriggerRequestPayload) factory.createPayload(counter, type,
-                                                            cfgId, srcId,
-                                                            firstTime,
-                                                            lastTime,
-                                                            new Vector(hits),
-                                                            readoutRequest);
+        TriggerRequestPayload triggerPayload;
+        try {
+            triggerPayload = (TriggerRequestPayload)
+                factory.createPayload(counter, type, cfgId, srcId, firstTime,
+                                      lastTime, new Vector(hits),
+                                      readoutRequest);
+        } catch (PayloadException pe) {
+            throw new Error("Cannot create trigger request", pe);
+        }
 
         // report it
         reportTrigger(triggerPayload);

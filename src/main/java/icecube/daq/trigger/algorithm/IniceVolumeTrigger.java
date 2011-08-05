@@ -14,6 +14,7 @@ import icecube.daq.oldpayload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadException;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.StringMap;
@@ -473,7 +474,11 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 		    numberOfHits++;
 
 		    if (numberOfHits >= threshold) {
-			formTrigger(hitsWithinTriggerWindow, null, null);
+			try {
+                            formTrigger(hitsWithinTriggerWindow, null, null);
+                        } catch (PayloadException pe) {
+                            log.error("Cannot form trigger", pe);
+                        }
 			return;
 		    }
 		}

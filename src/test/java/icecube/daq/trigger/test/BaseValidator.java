@@ -3,6 +3,7 @@ package icecube.daq.trigger.test;
 import icecube.daq.oldpayload.impl.MasterPayloadFactory;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
+import icecube.daq.payload.PayloadException;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -35,6 +36,9 @@ public abstract class BaseValidator
             len = payload.writePayload(false, 0, buf);
         } catch (java.io.IOException ioe) {
             ioe.printStackTrace();
+            len = -1;
+        } catch (PayloadException pe) {
+            pe.printStackTrace();
             len = -1;
         }
 

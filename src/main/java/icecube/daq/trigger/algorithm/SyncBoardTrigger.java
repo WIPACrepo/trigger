@@ -13,6 +13,7 @@ package icecube.daq.trigger.algorithm;
 import icecube.daq.oldpayload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.PayloadException;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -117,7 +118,11 @@ public class SyncBoardTrigger extends AbstractTrigger
         numberProcessed++;
         if (numberProcessed % prescale == 0) {
             // report this as a trigger
-            formTrigger(hit, null, null);
+            try {
+                formTrigger(hit, null, null);
+            } catch (PayloadException pe) {
+                throw new TriggerException("Cannot form trigger", pe);
+            }
 
         } else {
             // just update earliest time of interest

@@ -6,6 +6,7 @@ import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadException;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
@@ -101,17 +102,20 @@ public class DefaultIniceStringTrigger extends AbstractTrigger
 	    Vector str = new Vector();
 	    str.add(trigger);
 
-	    TriggerRequestPayload newTrigger
-		= (TriggerRequestPayload) triggerFactory.createPayload(triggerCounter,
-								       triggerType,
-								       triggerConfigId,
-								       sourceId,
-								       firstTime,
-								       lastTime,
-								       str,
-								       readoutRequest);
+	    TriggerRequestPayload newTrigger;
+            try {
+                newTrigger =
+                    (TriggerRequestPayload)
+                    triggerFactory.createPayload(triggerCounter, triggerType,
+                                                 triggerConfigId, sourceId,
+                                                 firstTime, lastTime, str,
+                                                 readoutRequest);
+            } catch (PayloadException pe) {
+                log.error("Cannot create trigger", pe);
+                newTrigger = null;
+            }
 
-	    reportTrigger(newTrigger);
+	    if (newTrigger != null) reportTrigger(newTrigger);
 
 	} else {
 	    // set earliest time of interest
@@ -119,13 +123,10 @@ public class DefaultIniceStringTrigger extends AbstractTrigger
 	    IPayload earliestPayload = new DummyPayload(earliestTime.getOffsetUTCTime(0.1));
 	    setEarliestPayloadOfInterest(earliestPayload);
 	}
-
     }
 
     public void flush() {
 	// nothing to flush
     }
-
-
 }
 

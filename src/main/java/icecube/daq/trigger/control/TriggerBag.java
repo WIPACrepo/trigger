@@ -1,7 +1,7 @@
 /*
  * class: TriggerBag
  *
- * Version $Id: TriggerBag.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: TriggerBag.java 13231 2011-08-05 22:45:36Z dglo $
  *
  * Date: March 16 2005
  *
@@ -20,6 +20,7 @@ import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadException;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID;
 import icecube.daq.payload.impl.UTCTime;
@@ -52,7 +53,7 @@ import org.apache.commons.logging.LogFactory;
  *                                   +       {===============}
  *                                   +            Merge
  *
- * @version $Id: TriggerBag.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: TriggerBag.java 13231 2011-08-05 22:45:36Z dglo $
  * @author pat
  */
 public class TriggerBag
@@ -515,24 +516,38 @@ public class TriggerBag
         }
 
         // create a readout request for the new trigger
-        List readoutElements = new Vector();
-        IReadoutRequest readoutRequest = TriggerRequestPayloadFactory.createReadoutRequest(triggerSourceID,
-                                                                                           triggerUID,
-                                                                                           readoutElements);
+        IReadoutRequest readoutRequest;
+        try {
+            readoutRequest =
+                TriggerRequestPayloadFactory.createReadoutRequest(triggerSourceID,
+                                                                  triggerUID,
+                                                                  new Vector());
+        } catch (PayloadException pe) {
+            log.error("Cannot create readout request", pe);
+            readoutRequest = null;
+        }
 
         // create the new trigger
-        ITriggerRequestPayload newTrigger = (ITriggerRequestPayload) triggerFactory.createPayload(triggerUID,
-                                                                                                triggerType,
-                                                                                                triggerConfigID,
-                                                                                                triggerSourceID,
-                                                                                                earliestTime,
-                                                                                                latestTime,
-                                                                                                subTriggers,
-                                                                                                readoutRequest);
+        ITriggerRequestPayload newTrigger;
+        if (readoutRequest == null) {
+            newTrigger = null;
+        } else {
+            try {
+                newTrigger = (ITriggerRequestPayload)
+                    triggerFactory.createPayload(triggerUID, triggerType,
+                                                 triggerConfigID,
+                                                 triggerSourceID,
+                                                 earliestTime, latestTime,
+                                                 subTriggers, readoutRequest);
+            } catch (PayloadException pe) {
+                log.error("Cannot create new trigger", pe);
+                newTrigger = null;
+            }
+        }
 
         // remove individual triggers from triggerList and add new merged trigger
         payloadList.removeAll(mergeList);
-        payloadList.add(newTrigger);
+        if (newTrigger != null) payloadList.add(newTrigger);
         nextIndex = NEXT_UNKNOWN;
 
         // recycle old subTriggers

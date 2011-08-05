@@ -4,6 +4,7 @@ import icecube.daq.oldpayload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadException;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.TriggerException;
 
@@ -58,7 +59,11 @@ public abstract class AmandaTrigger
         }
         if ((bitmask & triggerBit) == triggerBit) {
             // this is the correct type, report trigger
-            formTrigger(triggerTime);
+            try {
+                formTrigger(triggerTime);
+            } catch (PayloadException pe) {
+                throw new TriggerException("Cannot form trigger", pe);
+            }
         } else {
             // this is not, update earliest time of interest
             IPayload earliest = new DummyPayload(triggerTime.getOffsetUTCTime(0.1));

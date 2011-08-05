@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 12797 2011-03-21 22:14:34Z dglo $
+ * Version $Id: TriggerHandler.java 13231 2011-08-05 22:45:36Z dglo $
  *
  * Date: October 25 2004
  *
@@ -23,6 +23,7 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
+import icecube.daq.payload.PayloadException;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID;
 import icecube.daq.payload.impl.UTCTime;
@@ -54,7 +55,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 12797 2011-03-21 22:14:34Z dglo $
+ * @version $Id: TriggerHandler.java 13231 2011-08-05 22:45:36Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -621,6 +622,9 @@ public class TriggerHandler
                 ((IWriteablePayload) payload).writePayload(false, 0, trigBuf);
             } catch (IOException ioe) {
                 log.error("Couldn't create payload", ioe);
+                trigBuf = null;
+            } catch (PayloadException pe) {
+                log.error("Couldn't create payload", pe);
                 trigBuf = null;
             }
 

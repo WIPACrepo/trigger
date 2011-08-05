@@ -15,6 +15,7 @@ import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.impl.UTCTime;
+import icecube.daq.payload.PayloadException;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -146,7 +147,11 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
 	    deadtimeWindow = hitTime.getOffsetUTCTime(deadtime);
 	    if (numberProcessed % prescale == 0) {
 		// report this as a trigger and update the deadtime window
-		formTrigger(hit, null, null);
+		try {
+                    formTrigger(hit, null, null);
+                } catch (PayloadException pe) {
+                    throw new TriggerException("Cannot form trigger", pe);
+                }
 	    } else {
 		// just update earliest time of interest
 		IPayload earliest = new DummyPayload(hitTime.getOffsetUTCTime(0.1));

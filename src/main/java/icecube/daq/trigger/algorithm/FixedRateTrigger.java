@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: FixedRateTrigger.java 13231 2011-08-05 22:45:36Z dglo $
  *
  * Date: May 1 2006
  *
@@ -14,6 +14,7 @@ import icecube.daq.oldpayload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadException;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -26,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: FixedRateTrigger.java 13231 2011-08-05 22:45:36Z dglo $
  * @author pat
  */
 public class FixedRateTrigger extends AbstractTrigger
@@ -164,7 +165,11 @@ public class FixedRateTrigger extends AbstractTrigger
         } else {
             // issue triggers until one comes after this hit
             while (hitTimeUTC.compareTo(nextTrigger) >= 0) {
-                formTrigger(nextTrigger);
+                try {
+                    formTrigger(nextTrigger);
+                } catch (PayloadException pe) {
+                    throw new TriggerException("Cannot form trigger", pe);
+                }
                 nextTrigger = nextTrigger.getOffsetUTCTime(interval);
             }
         }

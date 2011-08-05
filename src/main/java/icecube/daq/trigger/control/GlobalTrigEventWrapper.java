@@ -18,6 +18,7 @@ import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadException;
 import icecube.daq.payload.SourceIdRegistry;
 
 import java.io.IOException;
@@ -34,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
  *  and put in the payloadList.
  * This is called in GlobalTrigBag.java.
  *
- * @version $Id: GlobalTrigEventWrapper.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: GlobalTrigEventWrapper.java 13231 2011-08-05 22:45:36Z dglo $
  * @author shseo
  */
 public class GlobalTrigEventWrapper
@@ -175,15 +176,20 @@ public class GlobalTrigEventWrapper
         vecSubpayloads.add(tTriggerRequestPayload);
 
         miTriggerUID++;
-        mtGlobalTrigEventPayload_single = (ITriggerRequestPayload) triggerFactory.
-                                createPayload(miTriggerUID,
-                                              iGTrigType,
-                                              iGTrigConfigID,
-                                              GLOBAL_TRIGGER_SOURCE_ID,
-                                              tUTCTime_earliest,
-                                              tUTCTime_latest,
-                                              vecSubpayloads,
-                                              tReadoutRequest);
+        try {
+            mtGlobalTrigEventPayload_single =
+                (ITriggerRequestPayload)
+                triggerFactory.createPayload(miTriggerUID,
+                                             iGTrigType,
+                                             iGTrigConfigID,
+                                             GLOBAL_TRIGGER_SOURCE_ID,
+                                             tUTCTime_earliest,
+                                             tUTCTime_latest,
+                                             vecSubpayloads,
+                                             tReadoutRequest);
+        } catch (PayloadException pe) {
+            log.error("Cannot create payload", pe);
+        }
 
         //no need to recycle vecSubpayloads
 
@@ -220,19 +226,31 @@ public class GlobalTrigEventWrapper
         }
         //--------------------------------------------------------------------------------------------------------/
         //--create a readout request for the new trigger
-        IReadoutRequest tReadoutRequest = TriggerRequestPayloadFactory.createReadoutRequest(GLOBAL_TRIGGER_SOURCE_ID,
-                                                                                            miTriggerUID,
-                                                                              vecGlobalReadoutRequestElements_Raw);
+        IReadoutRequest tReadoutRequest;
+        try {
+            tReadoutRequest =
+                TriggerRequestPayloadFactory.createReadoutRequest(GLOBAL_TRIGGER_SOURCE_ID,
+                                                                  miTriggerUID,
+                                                                  vecGlobalReadoutRequestElements_Raw);
+        } catch (PayloadException pe) {
+            log.error("Cannot create readout request", pe);
+            tReadoutRequest = null;
+        }
+
         miTriggerUID++;
         //--create the MergedGlobalTriggerEventPayload
-        mtGlobalTrigEventPayload_merged = (ITriggerRequestPayload) triggerFactory.createPayload(miTriggerUID,
-                                                                                               iGTrigType,
-                                                                                               iGTrigConfigID,
-                                                                                                GLOBAL_TRIGGER_SOURCE_ID,
-                                                                                                tSorter.getUTCTimeEarliest((List) vecGlobalReadoutRequestElements_Raw),
-                                                                                                tSorter.getUTCTimeLatest((List) vecGlobalReadoutRequestElements_Raw),
-                                                                                                vecGlobalSubPayload,
-                                                                                                tReadoutRequest);
+        try {
+            mtGlobalTrigEventPayload_merged =
+                (ITriggerRequestPayload) triggerFactory.createPayload(miTriggerUID,
+                                                                      iGTrigType,
+                                                                      iGTrigConfigID,
+                                                                      GLOBAL_TRIGGER_SOURCE_ID,
+                                                                      tSorter.getUTCTimeEarliest((List) vecGlobalReadoutRequestElements_Raw),
+                                                                      tSorter.getUTCTimeLatest((List) vecGlobalReadoutRequestElements_Raw),
+                                                                      vecGlobalSubPayload,
+                                                                      tReadoutRequest);
+        } catch (PayloadException pe) {
+        }
 
         Iterator iter = vecGlobalSubPayload.iterator();
         while(iter.hasNext())
@@ -297,9 +315,15 @@ public class GlobalTrigEventWrapper
 
 //---------------------------------------------------------------------------------------------------------------
         // create a readout request for the new trigger
-        IReadoutRequest tReadoutRequest = TriggerRequestPayloadFactory.createReadoutRequest(GLOBAL_TRIGGER_SOURCE_ID,
-                                                                              miTriggerUID,
-                                                                              vecGlobalReadoutRequestElements_Final);
+        IReadoutRequest tReadoutRequest;
+        try {
+            tReadoutRequest =
+                TriggerRequestPayloadFactory.createReadoutRequest(GLOBAL_TRIGGER_SOURCE_ID,
+                                                                  miTriggerUID,
+                                                                  vecGlobalReadoutRequestElements_Final);
+        } catch (PayloadException pe) {
+            tReadoutRequest = null;
+        }
 
         //For a mergedGlobalTrigEvent, iMergedTriggerType = -1, iMergedTriggerConfigID = -1.
         //does mergeList can contain one element? check GlobalTrigBag.java --> No!
@@ -308,14 +332,19 @@ public class GlobalTrigEventWrapper
 
         miTriggerUID++;
         // create the MergedGlobalTriggerEventPayload
-        mtGlobalTrigEventPayload_merged = (ITriggerRequestPayload) triggerFactory.createPayload(miTriggerUID,
-                                                                                                iMergedTriggerType,
-                                                                                                iMergedTriggerConfigID,
-                                                                                                GLOBAL_TRIGGER_SOURCE_ID,
-                                                                                                tSorter.getUTCTimeEarliest(mergeList,true),
-                                                                                                tSorter.getUTCTimeLatest(mergeList,true),
-                                                                                                vecGlobalSubPayload,
-                                                                                                tReadoutRequest);
+        try {
+            mtGlobalTrigEventPayload_merged =
+                (ITriggerRequestPayload) triggerFactory.createPayload(miTriggerUID,
+                                                                      iMergedTriggerType,
+                                                                      iMergedTriggerConfigID,
+                                                                      GLOBAL_TRIGGER_SOURCE_ID,
+                                                                      tSorter.getUTCTimeEarliest(mergeList,true),
+                                                                      tSorter.getUTCTimeLatest(mergeList,true),
+                                                                      vecGlobalSubPayload,
+                                                                      tReadoutRequest);
+        } catch (PayloadException pe) {
+            log.error("Couldn't create payload", pe);
+        }
         Iterator iter = vecGlobalSubPayload.iterator();
         while(iter.hasNext())
         {
@@ -349,9 +378,17 @@ public class GlobalTrigEventWrapper
     {
         List elems = ((IReadoutRequest) tGTEvent.getReadoutRequest()).getReadoutRequestElements();
 
-        IReadoutRequest tReadoutRequest_final = TriggerRequestPayloadFactory.createReadoutRequest(tGTEvent.getSourceID(),
-                                                                                    iEvtNumber,
-                                                                                    elems);
+        IReadoutRequest tReadoutRequest_final;
+        try {
+            tReadoutRequest_final =
+                TriggerRequestPayloadFactory.createReadoutRequest(tGTEvent.getSourceID(),
+                                                                  iEvtNumber,
+                                                                  elems);
+        } catch (PayloadException pe) {
+            log.error("Cannot create readout request", pe);
+            tReadoutRequest_final = null;
+        }
+
         try {
 
             mtGlobalTrigEventPayload_final = (ITriggerRequestPayload) triggerFactory.createPayload(iEvtNumber,
@@ -365,6 +402,8 @@ public class GlobalTrigEventWrapper
 
         } catch (DataFormatException e) {
             log.error("Couldn't create payload", e);
+        } catch (PayloadException pe) {
+            log.error("Couldn't create payload", pe);
         }
 
         //--count merged GT event.

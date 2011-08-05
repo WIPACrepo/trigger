@@ -2,6 +2,7 @@ package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.PayloadException;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -184,7 +185,13 @@ public class CylinderTrigger extends AbstractTrigger
         {
             if (triggerQueue.size() >= multiplicity && processHitQueue())
             {
-                if (triggerQueue.size() > 0) formTrigger(triggerQueue, null, null);
+                if (triggerQueue.size() > 0) {
+                    try {
+                        formTrigger(triggerQueue, null, null);
+                    } catch (PayloadException pe) {
+                        throw new TriggerException("Cannot form trigger", pe);
+                    }
+                }
                 triggerQueue.clear();
                 setEarliestPayloadOfInterest(hitPayload);
                 break;

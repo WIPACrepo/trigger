@@ -14,6 +14,7 @@ import icecube.daq.oldpayload.impl.PayloadFactory;
 import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * TODO: Massively clean up this code!!!
  *
- * @version $Id: SmartMerger.java 12765 2011-03-07 18:42:04Z dglo $
+ * @version $Id: SmartMerger.java 13231 2011-08-05 22:45:36Z dglo $
  * @author shseo
  */
 public class SmartMerger
@@ -133,6 +134,7 @@ public class SmartMerger
      * This method manages timeOverlap among differnt ReadoutTypes in InIce.
      */
     private void manageReadout_InIce()
+        throws PayloadException
     {
         //Only one ReadoutType has already been taken care in GlobalTrigEventReadoutElements.
 
@@ -260,6 +262,7 @@ public class SmartMerger
      * This method manages timeOverlap among differnt ReadoutTypes in IceTop.
      */
     private void manageReadout_IceTop()
+        throws PayloadException
     {
         // same as manageReadout_InIce() but substitute with IT
        if(0 != mListReadoutElements_IT_Global.size() &&
@@ -300,6 +303,7 @@ public class SmartMerger
      */
     private IReadoutRequestElement makeNewReadoutElement(IReadoutRequestElement tOldElement,
                                                          IUTCTime tTime_start, IUTCTime tTime_end)
+        throws PayloadException
     {
         return triggerFactory.createReadoutRequestElement(
                                                 tOldElement.getReadoutType(),
@@ -317,6 +321,7 @@ public class SmartMerger
      */
     private List getListNewAdjustedSmallerReadoutElements(List listLargerSameReadoutElements,
                                                           List listSmallerSameReadoutElements)
+        throws PayloadException
     {
         List listNewElements = new ArrayList();
 
@@ -456,9 +461,17 @@ public class SmartMerger
         assignListReadoutType(listSimplyMergedReadoutTypeLists);
 
         //InIce
-        manageReadout_InIce();
+        try {
+            manageReadout_InIce();
+        } catch (PayloadException pe) {
+            log.error("Cannot manage in-ice", pe);
+        }
         //IceTop
-        manageReadout_IceTop();
+        try {
+            manageReadout_IceTop();
+        } catch (PayloadException pe) {
+            log.error("Cannot manage icetop", pe);
+        }
 
         if(0 != mListFinalReadoutElements_InIce.size())
         {

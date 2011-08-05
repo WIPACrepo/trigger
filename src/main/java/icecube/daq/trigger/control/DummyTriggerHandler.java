@@ -23,6 +23,7 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
+import icecube.daq.payload.PayloadException;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID;
 import icecube.daq.trigger.algorithm.ITrigger;
@@ -237,20 +238,37 @@ public class DummyTriggerHandler
             Vector readouts = new Vector();
             IUTCTime timeMinus = hitTime.getOffsetUTCTime(-8000);
             IUTCTime timePlus = hitTime.getOffsetUTCTime(8000);
-            readouts.add(TriggerRequestPayloadFactory.createReadoutRequestElement(IReadoutRequestElement.READOUT_TYPE_GLOBAL,
-                                                                                  timeMinus, timePlus, null, null));
-            IReadoutRequest readout = TriggerRequestPayloadFactory.createReadoutRequest(sourceId, count, readouts);
+
+            IReadoutRequestElement elem;
+            try {
+                elem = TriggerRequestPayloadFactory.createReadoutRequestElement(IReadoutRequestElement.READOUT_TYPE_GLOBAL,
+                                                                                timeMinus, timePlus, null, null);
+            } catch (PayloadException pe) {
+                log.error("Cannot create payload", pe);
+                return;
+            }
+            readouts.add(elem);
+
+            IReadoutRequest readout;
+            try {
+                readout = TriggerRequestPayloadFactory.createReadoutRequest(sourceId, count, readouts);
+            } catch (PayloadException pe) {
+                log.error("Cannot create payload", pe);
+                return;
+            }
 
             // create trigger
-            ITriggerRequestPayload triggerPayload
-                    = (ITriggerRequestPayload) outputFactory.createPayload(count,
-                                                                          0,
-                                                                          0,
-                                                                          sourceId,
-                                                                          hitTime,
-                                                                          hitTime,
-                                                                          new Vector(),
-                                                                          readout);
+            ITriggerRequestPayload triggerPayload;
+            try {
+                triggerPayload =
+                    (ITriggerRequestPayload)
+                    outputFactory.createPayload(count, 0, 0, sourceId, hitTime,
+                                                hitTime, new Vector(), readout);
+            } catch (PayloadException pe) {
+                log.error("Cannot create payload", pe);
+                return;
+            }
+
             addToTriggerBag(triggerPayload);
 
         }
@@ -322,6 +340,9 @@ public class DummyTriggerHandler
                 ((IWriteablePayload) trigger).writePayload(false, 0, trigBuf);
             } catch (IOException ioe) {
                 log.error("Couldn't create payload", ioe);
+                trigBuf = null;
+            } catch (PayloadException pe) {
+                log.error("Couldn't create payload", pe);
                 trigBuf = null;
             }
 

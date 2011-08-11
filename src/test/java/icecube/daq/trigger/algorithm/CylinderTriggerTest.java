@@ -165,7 +165,7 @@ public class CylinderTriggerTest
             Pipe.SourceChannel sourceChannel = testPipe.source();
             sourceChannel.configureBlocking(false);
 
-            rdr.addDataChannel(sourceChannel, cache, 1024);
+            rdr.addDataChannel(sourceChannel, "CylTrig", cache, 1024);
         }
 
         rdr.startProcessing();

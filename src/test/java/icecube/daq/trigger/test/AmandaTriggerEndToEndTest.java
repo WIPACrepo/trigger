@@ -166,7 +166,7 @@ public class AmandaTriggerEndToEndTest
             Pipe.SourceChannel sourceChannel = testPipe.source();
             sourceChannel.configureBlocking(false);
 
-            rdr.addDataChannel(sourceChannel, cache, 1024);
+            rdr.addDataChannel(sourceChannel, "Chan", cache, 1024);
         }
 
         rdr.startProcessing();

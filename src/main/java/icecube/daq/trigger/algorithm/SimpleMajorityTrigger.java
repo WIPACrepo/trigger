@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 13265 2011-08-12 20:19:24Z dglo $
  *
  * Date: August 19 2005
  *
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 13265 2011-08-12 20:19:24Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -567,6 +567,15 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
             return (hits.size() >= threshold);
         }
 
+        public String toString()
+        {
+            if (hits.size() == 0) {
+                return "Window[]*0";
+            }
+
+            return "Window[" + startTime() + "-" + endTime() + "]*" +
+                hits.size();
+        }
     }
 
 }

@@ -184,6 +184,11 @@ public class TriggerComponent
         return outCache;
     }
 
+    public long getPayloadsReceived()
+    {
+        return inputEngine.getTotalRecordsReceived();
+    }
+
     public long getPayloadsSent()
     {
         return ((SimpleOutputEngine) outputEngine).getTotalRecordsSent();
@@ -346,6 +351,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 12691 2011-02-21 20:22:03Z dglo $";
+	return "$Id: TriggerComponent.java 13261 2011-08-12 18:10:44Z dglo $";
     }
 }

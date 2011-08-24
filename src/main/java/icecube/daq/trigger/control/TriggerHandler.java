@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 13276 2011-08-18 18:03:26Z dglo $
+ * Version $Id: TriggerHandler.java 13284 2011-08-24 21:05:46Z dglo $
  *
  * Date: October 25 2004
  *
@@ -54,7 +54,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 13276 2011-08-18 18:03:26Z dglo $
+ * @version $Id: TriggerHandler.java 13284 2011-08-24 21:05:46Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -982,7 +982,9 @@ public class TriggerHandler
             }
 //System.err.println("OTexit");
 
-            outChan.sendLastAndStop();
+            if (outChan != null) {
+                outChan.sendLastAndStop();
+            }
         }
 
         void start()

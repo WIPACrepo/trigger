@@ -177,8 +177,6 @@ public class CylinderTriggerTest
 
         waitUntilStopped(rdr, splicer, "StopMsg");
 
-        trigMgr.flush();
-
         assertEquals("Bad number of payloads written",
                      trigCfg.getExpectedNumberOfInIcePayloads(numObjs),
                      outProc.getNumberWritten());

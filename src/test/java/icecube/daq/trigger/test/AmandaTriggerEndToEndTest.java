@@ -178,8 +178,6 @@ public class AmandaTriggerEndToEndTest
 
         waitUntilStopped(rdr, splicer, "StopMsg");
 
-        trigMgr.flush();
-
         assertEquals("Bad number of payloads written",
                      trigCfg.getExpectedNumberOfAmandaPayloads(numObjs),
                      outProc.getNumberWritten());

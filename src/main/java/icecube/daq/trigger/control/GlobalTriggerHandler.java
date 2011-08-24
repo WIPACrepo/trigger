@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 13276 2011-08-18 18:03:26Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 13283 2011-08-24 21:05:10Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -1067,7 +1067,9 @@ public class GlobalTriggerHandler
                 }
             }
 
-            outChan.sendLastAndStop();
+            if (outChan != null) {
+                outChan.sendLastAndStop();
+            }
         }
 
         void start()

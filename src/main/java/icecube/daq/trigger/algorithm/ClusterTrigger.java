@@ -9,22 +9,21 @@ import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.util.DOMRegistry;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
 /**
- * The ClusterTrigger is a variant on the <i>StringTrigger</i> theme.  The ClusterTrigger
- * is intended for use on a central trigger module which may have inputs from multiple
- * strings.  The trigger searches for N hits clustered in a "coherence" length of M
+ * The ClusterTrigger is a variant on the <i>StringTrigger</i> theme.  
+ * The ClusterTrigger is intended for use on a central trigger module
+ * which may have inputs from multiple strings.  The trigger searches
+ * for N hits clustered in a "coherence" length of M
  * adjacent modules all within a time window of &Delta;t.
  *
- * The trigger is configured via the standard trigger config XML.  It will respond to
- * the following configuration parameters ...
+ * The trigger is configured via the standard trigger config XML.  
+ * It will respond to the following configuration parameters ...
  * <dl>
  * <dt>timeWindow</dt>
  * <dd>The time window, &Delta;t, expressed in units of ns.</dd>
@@ -34,18 +33,20 @@ import org.apache.log4j.Logger;
  * <dd>The parameter M above - the multiplicity threshold.</dd>
  * </dl>
  *
- * The implementation is straightforward.  First the overall multiplicty requirement must
- * be satisfied: hits are collected into a queue until the head and tail fall outside
- * the time window.  If the queue size is &ge; N then that forms the 'first-level trigger.'
- * Upon reaching this state, it must be checked whether the hits are clustered in space.
- * This is done by incrementing counters a length M/2 in either direction from the
- * <i>logical channel</i> taking care not to cross string boundaries.  A space cluster will
- * also maintain counter[i] &ge; N for one or more <i>logical channel</i> locations.
- * <p>
- * The trigger that is formed should <i>only</i> contain those hits which are part of a
- * space cluster.  That is, hits are not part of the trigger hit list unless they are
- * clustered both in time and in space.  Simultaneous, multiple clusters will count toward
- * a single single trigger and will not produce multiple triggers.
+ * The implementation is straightforward.  First the overall multiplicty 
+ * requirement must be satisfied: hits are collected into a queue until the 
+ * head and tail fall outside the time window.  If the queue size is &ge; N 
+ * then that forms the 'first-level trigger.' Upon reaching this state, it must
+ * be checked whether the hits are clustered in space. This is done by 
+ * incrementing counters a length M/2 in either direction from the 
+ * <i>logical channel</i> taking care not to cross string boundaries.  A space 
+ * cluster will also maintain counter[i] &ge; N for one or more 
+ * <i>logical channel</i> locations. <p>
+ * The trigger that is formed should <i>only</i> contain those hits which are 
+ * part of a space cluster.  That is, hits are not part of the trigger hit 
+ * list unless they are clustered both in time and in space.  Simultaneous, 
+ * multiple clusters will count toward a single single trigger and will not 
+ * produce multiple triggers.
  *
  * @author kael
  *
@@ -65,7 +66,8 @@ public class ClusterTrigger extends AbstractTrigger
 
     private LinkedList<IHitPayload> triggerQueue;
 
-    private static final Logger logger = Logger.getLogger(ClusterTrigger.class);
+    private static final Logger logger = Logger.getLogger(
+        ClusterTrigger.class);
 
     public ClusterTrigger()
     {
@@ -82,19 +84,19 @@ public class ClusterTrigger extends AbstractTrigger
     }
 
     @Override
-    public void addParameter(TriggerParameter parameter) throws UnknownParameterException,
-            IllegalParameterValueException
+    public void addParameter(TriggerParameter parameter) 
+        throws UnknownParameterException, IllegalParameterValueException
     {
-        if (parameter.getName().equals("timeWindow"))
+        if (parameter.getName().equals("timeWindow")) {
             setTimeWindow(Long.parseLong(parameter.getValue()));
-        else if (parameter.getName().equals("multiplicity"))
+        } else if (parameter.getName().equals("multiplicity")) {
             setMultiplicity(Integer.parseInt(parameter.getValue()));
-        else if (parameter.getName().equals("coherenceLength"))
+        } else if (parameter.getName().equals("coherenceLength")) {
             setCoherenceLength(Integer.parseInt(parameter.getValue()));
-        else if (parameter.getName().equals("domSet")) {
-	    domSetId = Integer.parseInt(parameter.getValue());
-	    configHitFilter(domSetId);
-	}
+        } else if (parameter.getName().equals("domSet")) {
+            domSetId = Integer.parseInt(parameter.getValue());
+            configHitFilter(domSetId);
+        }
         super.addParameter(parameter);
     }
 
@@ -142,33 +144,37 @@ public class ClusterTrigger extends AbstractTrigger
     @Override
     public void runTrigger(IPayload payload) throws TriggerException
     {
-        if (!(payload instanceof IHitPayload))
+        if (!(payload instanceof IHitPayload)) {
             throw new TriggerException(
-                    "Payload object " + payload + " cannot be upcast to IHitPayload."
-                    );
+                "Payload object " + payload + 
+                " cannot be upcast to IHitPayload.");
+        }
         // This upcast should be safe now
         IHitPayload hitPayload = (IHitPayload) payload;
 
-        // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
-        if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
-        if (!hitFilter.useHit(hitPayload)) return;
+        // Check hit type and perhaps pre-screen DOMs based on channel 
+        // (HitFilter)
+        if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) {
+            return;
+        }
+        if (!hitFilter.useHit(hitPayload)) {
+            return;
+        }
 
-        if (logger.isDebugEnabled())
-        {
+        if (logger.isDebugEnabled()) {
             LogicalChannel logical = LogicalChannel.fromHitPayload(
-                    hitPayload, getTriggerHandler().getDOMRegistry());
+                hitPayload, getTriggerHandler().getDOMRegistry());
             logger.debug("Received hit at UTC " +
-                    hitPayload.getHitTimeUTC() +
-                    " - logical channel " + logical +
-                    " queue size = " + triggerQueue.size());
+                hitPayload.getHitTimeUTC() +
+                " - logical channel " + logical +
+                " queue size = " + triggerQueue.size());
         }
 
         while (triggerQueue.size() > 0 &&
-                hitPayload.getHitTimeUTC().longValue() -
-                triggerQueue.element().getHitTimeUTC().longValue() > timeWindow)
+            hitPayload.getHitTimeUTC().longValue() -
+            triggerQueue.element().getHitTimeUTC().longValue() > timeWindow)
         {
-            if (triggerQueue.size() >= multiplicity && processHitQueue())
-            {
+            if (triggerQueue.size() >= multiplicity && processHitQueue()) {
                 if (triggerQueue.size() > 0) {
                     try {
                         formTrigger(triggerQueue, null, null);
@@ -179,12 +185,12 @@ public class ClusterTrigger extends AbstractTrigger
                 triggerQueue.clear();
                 setEarliestPayloadOfInterest(hitPayload);
                 break;
-            }
-            else
-            {
+            } else {
                 triggerQueue.removeFirst();
                 IHitPayload firstHitInQueue = triggerQueue.peek();
-                if (firstHitInQueue == null) firstHitInQueue = hitPayload;
+                if (firstHitInQueue == null) {
+                    firstHitInQueue = hitPayload;
+                }
                 setEarliestPayloadOfInterest(firstHitInQueue);
             }
         }
@@ -193,51 +199,68 @@ public class ClusterTrigger extends AbstractTrigger
 
     private boolean processHitQueue()
     {
-    	final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
-        final TreeMap<LogicalChannel, Integer> coherenceMap = new TreeMap<LogicalChannel, Integer>();
+        final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
+        final TreeMap<LogicalChannel, Integer> coherenceMap = 
+            new TreeMap<LogicalChannel, Integer>();
         boolean trigger = false;
 
-        for (IHitPayload hit : triggerQueue)
-        {
-            LogicalChannel central = LogicalChannel.fromHitPayload(hit, domRegistry);
-            int m0 = Math.max( 1, central.module - coherenceUp);
+        for (IHitPayload hit : triggerQueue) {
+            LogicalChannel central = LogicalChannel.fromHitPayload(hit, 
+                domRegistry);
+            int m0 = Math.max(1, central.module - coherenceUp);
             int m1 = Math.min(60, central.module + coherenceDown);
-            for (int m = m0; m <= m1; m++)
-            {
+            for (int m = m0; m <= m1; m++) {
                 LogicalChannel ch = new LogicalChannel(central.string, m);
                 int counter = 0;
-                if (coherenceMap.containsKey(ch)) counter = coherenceMap.get(ch);
+                if (coherenceMap.containsKey(ch)) {
+                    counter = coherenceMap.get(ch);
+                }
                 counter += 1;
-                if (counter >= multiplicity) trigger = true;
+                if (counter >= multiplicity) {
+                    trigger = true;
+                }
                 coherenceMap.put(ch, counter);
             }
         }
 
-        if (logger.isDebugEnabled())
-        {
-            for (LogicalChannel ch : coherenceMap.keySet())
-            {
-                logger.debug("Logical channel " + ch + " : " + coherenceMap.get(ch));
+        if (logger.isDebugEnabled()) {
+            for (LogicalChannel ch : coherenceMap.keySet()) {
+                logger.debug("Logical channel " + ch + " : " +
+                    coherenceMap.get(ch));
             }
         }
 
         // No trigger so skip next operation
-        if (!trigger) return false;
+        if (!trigger) {
+            return false;
+        }
 
         // Remove sites in coherence map less than threshold
-        for (Iterator<Integer> it = coherenceMap.values().iterator(); it.hasNext(); )
-            if (it.next() < multiplicity) it.remove();
+        for (Iterator<Integer> it = coherenceMap.values().iterator(); 
+            it.hasNext();) 
+        {
+            if (it.next() < multiplicity) { 
+                it.remove();
+            }
+        }
 
         // Prune hits not in spatial cluster out of queue as these
         // will be built into trigger very soon.
-        for (Iterator<IHitPayload> hitIt = triggerQueue.iterator(); hitIt.hasNext(); )
+        for (Iterator<IHitPayload> hitIt = triggerQueue.iterator();
+            hitIt.hasNext();)
         {
             IHitPayload hit = hitIt.next();
-            LogicalChannel testCh = LogicalChannel.fromHitPayload(hit, domRegistry);
+            LogicalChannel testCh = LogicalChannel.fromHitPayload(hit, 
+                domRegistry);
             boolean clust = false;
-            for (LogicalChannel ch : coherenceMap.keySet())
-                if (ch.isNear(testCh, coherenceUp, coherenceDown)) clust = true;
-            if (!clust) hitIt.remove();
+            for (LogicalChannel ch : coherenceMap.keySet()) {
+                if (ch.isNear(testCh, coherenceUp, coherenceDown)) {
+                    clust = true;
+                }
+            }
+            if (!clust) {
+                hitIt.remove();
+            }
         }
 
         return true;
@@ -296,11 +319,16 @@ class LogicalChannel implements Comparable<LogicalChannel>
      */
     boolean isNear(LogicalChannel ch, int up, int down)
     {
-        if (string != ch.string) return false;
+        if (string != ch.string) {
+            return false;
+        }
         int intraStringSeparation = ch.module - module;
         if ((intraStringSeparation < 0 && -intraStringSeparation <= up) ||
                 (intraStringSeparation > 0 && intraStringSeparation <= down) ||
-                intraStringSeparation == 0) return true;
+                intraStringSeparation == 0) 
+        {
+            return true;
+        }
         return false;
     }
 
@@ -312,12 +340,13 @@ class LogicalChannel implements Comparable<LogicalChannel>
 
     public int compareTo(LogicalChannel o)
     {
-        if (hashCode() < o.hashCode())
+        if (hashCode() < o.hashCode()) {
             return -1;
-        else if (hashCode() > o.hashCode())
+        } else if (hashCode() > o.hashCode()) {
             return 1;
-        else
+        } else {
             return 0;
+        }
     }
 
     @Override

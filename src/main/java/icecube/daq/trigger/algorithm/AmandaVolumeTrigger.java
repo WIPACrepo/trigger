@@ -17,12 +17,14 @@ public class AmandaVolumeTrigger
 
     private static int triggerNumber = 0;
 
-    public AmandaVolumeTrigger() {
+    public AmandaVolumeTrigger() 
+    {
         triggerNumber++;
         triggerBit = VOLUME;
     }
 
-    public void setTriggerName(String triggerName) {
+    public void setTriggerName(String triggerName) 
+    {
         super.triggerName = triggerName + triggerNumber;
         if (log.isInfoEnabled()) {
             log.info("TriggerName set to " + super.triggerName);

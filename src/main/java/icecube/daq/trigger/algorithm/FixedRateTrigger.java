@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 13231 2011-08-05 22:45:36Z dglo $
+ * Version $Id: FixedRateTrigger.java 13357 2011-09-14 22:24:32Z seshadrivija $
  *
  * Date: May 1 2006
  *
@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 13231 2011-08-05 22:45:36Z dglo $
+ * @version $Id: FixedRateTrigger.java 13357 2011-09-14 22:24:32Z seshadrivija $
  * @author pat
  */
 public class FixedRateTrigger extends AbstractTrigger
@@ -66,7 +66,8 @@ public class FixedRateTrigger extends AbstractTrigger
     /**
      * Default constructor
      */
-    public FixedRateTrigger() {
+    public FixedRateTrigger() 
+    {
         triggerNumber++;
     }
 
@@ -75,7 +76,8 @@ public class FixedRateTrigger extends AbstractTrigger
      *
      * @return true if it is
      */
-    public boolean isConfigured() {
+    public boolean isConfigured()
+    {
         return configInterval;
     }
 
@@ -87,14 +89,17 @@ public class FixedRateTrigger extends AbstractTrigger
      * @throws icecube.daq.trigger.exceptions.UnknownParameterException
      *
      */
-    public void addParameter(TriggerParameter parameter) throws UnknownParameterException, IllegalParameterValueException {
+    public void addParameter(TriggerParameter parameter) 
+        throws UnknownParameterException, IllegalParameterValueException 
+    {
         if (parameter.getName().compareTo("interval") == 0) {
             interval = Integer.parseInt(parameter.getValue());
             configInterval = true;
         } else if (parameter.getName().compareTo("triggerPrescale") == 0) {
             triggerPrescale = Integer.parseInt(parameter.getValue());
         } else {
-            throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
+            throw new UnknownParameterException("Unknown parameter: " +
+                parameter.getName());
         }
         super.addParameter(parameter);
     }
@@ -103,7 +108,8 @@ public class FixedRateTrigger extends AbstractTrigger
      * Set name of trigger, include triggerNumber
      * @param triggerName
      */
-    public void setTriggerName(String triggerName) {
+    public void setTriggerName(String triggerName) 
+    {
         super.triggerName = triggerName + triggerNumber;
         if (log.isInfoEnabled()) {
             log.info("TriggerName set to " + super.triggerName);
@@ -114,7 +120,8 @@ public class FixedRateTrigger extends AbstractTrigger
      * Get interval.
      * @return time interval between triggers (in nanoseconds)
      */
-    public int getInterval() {
+    public int getInterval()
+    {
         return interval;
     }
 
@@ -122,21 +129,25 @@ public class FixedRateTrigger extends AbstractTrigger
      * Set interval.
      * @param interval time interval between triggers (in nanoseconds)
      */
-    public void setInterval(int interval) {
+    public void setInterval(int interval) 
+    {
         this.interval = interval;
     }
 
     /**
-     * Flush the trigger. Basically indicates that there will be no further payloads to process.
+     * Flush the trigger. Basically indicates that there will be no 
+     * further payloads to process.
      */
-    public void flush() {
+    public void flush() 
+    {
         reset();
     }
 
     /**
      * reset
      */
-    private void reset() {
+    private void reset() 
+    {
         numberOfHitsProcessed = 0;
         configInterval = false;
     }
@@ -149,11 +160,13 @@ public class FixedRateTrigger extends AbstractTrigger
      * @throws icecube.daq.trigger.exceptions.TriggerException
      *          if the algorithm doesn't like this payload
      */
-    public void runTrigger(IPayload payload) throws TriggerException {
+    public void runTrigger(IPayload payload) throws TriggerException 
+    {
         // check that this is a hit
         int interfaceType = payload.getPayloadInterfaceType();
         if ((interfaceType != PayloadInterfaceRegistry.I_HIT_PAYLOAD) &&
-            (interfaceType != PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)) {
+            (interfaceType != PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD))
+        {
             throw new TriggerException("Expecting an IHitPayload");
         }
         IHitPayload hit = (IHitPayload) payload;
@@ -174,7 +187,8 @@ public class FixedRateTrigger extends AbstractTrigger
             }
         }
 
-        IPayload oldHitPlus = new DummyPayload(hitTimeUTC.getOffsetUTCTime(0.1));
+        IPayload oldHitPlus = new DummyPayload(hitTimeUTC.
+            getOffsetUTCTime(0.1));
         setEarliestPayloadOfInterest(oldHitPlus);
         numberOfHitsProcessed++;
     }

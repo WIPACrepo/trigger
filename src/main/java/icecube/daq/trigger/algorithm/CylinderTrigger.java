@@ -27,13 +27,13 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 /**
- * The VolumeTrigger is based on the ClusterTrigger, with a slight 
- * modifications to allow clusters to span neighboring strings.  The 
+ * The VolumeTrigger is based on the ClusterTrigger, with a slight
+ * modifications to allow clusters to span neighboring strings.  The
  * VolumeTrigger is intended for use on a central trigger module which may have
- * inputs from multiple strings.  The trigger searches for N hits clustered in 
- * a "coherence" length of M adjacent modules all within a time window of 
+ * inputs from multiple strings.  The trigger searches for N hits clustered in
+ * a "coherence" length of M adjacent modules all within a time window of
  * &Delta;t.
- * The trigger is configured via the standard trigger config XML.  It will 
+ * The trigger is configured via the standard trigger config XML.  It will
  * respond to the following configuration parameters ...
  * <dl>
  * <dt>timeWindow</dt>
@@ -44,19 +44,19 @@ import org.apache.log4j.Logger;
  * <dd>The parameter M above - the multiplicity threshold.</dd>
  * </dl>
  *
- * The implementation is straightforward.  First the overall multiplicty 
- * requirement must be satisfied: hits are collected into a queue until the 
- * head and tail fall outside the time window.  If the queue size is &ge; N 
+ * The implementation is straightforward.  First the overall multiplicty
+ * requirement must be satisfied: hits are collected into a queue until the
+ * head and tail fall outside the time window.  If the queue size is &ge; N
  * then that forms the 'first-level trigger.' Upon reaching this state, it must
- * be checked whether the hits are clustered in space. This is done by 
- * incrementing counters a length M/2 in either direction from the 
+ * be checked whether the hits are clustered in space. This is done by
+ * incrementing counters a length M/2 in either direction from the
  * <i>logical channel</i>, allowing for counts on neighboring strings.  A space
- * cluster will also maintain counter[i] &ge; N for one or more 
+ * cluster will also maintain counter[i] &ge; N for one or more
  * <i>logical channel</i> locations. <p>
- * The trigger that is formed should <i>only</i> contain those hits which are 
+ * The trigger that is formed should <i>only</i> contain those hits which are
  * part of a space cluster.  That is, hits are not part of the trigger hit list
  * unless they are clustered both in time and in space.  Simultaneous, multiple
- * clusters will count toward a single single trigger and will not produce 
+ * clusters will count toward a single single trigger and will not produce
  * multiple triggers.
  *
  * @author kael
@@ -74,7 +74,7 @@ public class CylinderTrigger extends AbstractTrigger
 
     private Comparator hitComparator = new HitComparator();
 
-    private static final Logger logger = 
+    private static final Logger logger =
         Logger.getLogger(CylinderTrigger.class);
 
     public CylinderTrigger()
@@ -89,7 +89,7 @@ public class CylinderTrigger extends AbstractTrigger
     }
 
     @Override
-    public void addParameter(TriggerParameter parameter) 
+    public void addParameter(TriggerParameter parameter)
         throws UnknownParameterException,
             IllegalParameterValueException
     {
@@ -101,7 +101,7 @@ public class CylinderTrigger extends AbstractTrigger
             setSimpleMultiplicity(Integer.parseInt(parameter.getValue()));
         } else if (parameter.getName().equals("radius")) {
             setRadius(Double.parseDouble(parameter.getValue()));
-        } else if (parameter.getName().equals("height")) [
+        } else if (parameter.getName().equals("height")) {
             setHeight(Double.parseDouble(parameter.getValue()));
         } else if (parameter.getName().equals("domSet")) {
             domSetId = Integer.parseInt(parameter.getValue());
@@ -173,13 +173,13 @@ public class CylinderTrigger extends AbstractTrigger
 
         if (!(payload instanceof IHitPayload)) {
             throw new TriggerException(
-                "Payload object " + payload + 
+                "Payload object " + payload +
                 " cannot be upcast to IHitPayload." );
         }
         // This upcast should be safe now
         IHitPayload hitPayload = (IHitPayload) payload;
 
-        // Check hit type and perhaps pre-screen DOMs based on channel 
+        // Check hit type and perhaps pre-screen DOMs based on channel
         // (HitFilter)
         if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) {
             return;

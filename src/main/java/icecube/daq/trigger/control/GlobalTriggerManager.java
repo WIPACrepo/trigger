@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java 12766 2011-03-07 18:49:31Z dglo $
+ * @version $Id: GlobalTriggerManager.java 13364 2011-09-15 22:30:19Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager
@@ -171,8 +171,7 @@ public class GlobalTriggerManager
     }
 
     public void stopped(SplicerChangedEvent event) {
-        log.info("Received Splicer STOPPED, flushing...");
-        getPayloadOutput().forcedStopProcessing();
+        // do nothing
     }
 
     public void starting(SplicerChangedEvent event) {
@@ -192,6 +191,7 @@ public class GlobalTriggerManager
 
         if (event.getSpliceable() == Splicer.LAST_POSSIBLE_SPLICEABLE) {
             finalFlush();
+            stopThread();
         }
 
         Iterator iter = event.getAllSpliceables().iterator();

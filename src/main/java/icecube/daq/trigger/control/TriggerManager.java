@@ -1,7 +1,7 @@
 /*
  * class: TriggerManager
  *
- * Version $Id: TriggerManager.java 12691 2011-02-21 20:22:03Z dglo $
+ * Version $Id: TriggerManager.java 13364 2011-09-15 22:30:19Z dglo $
  *
  * Date: October 25 2004
  *
@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger
  *
- * @version $Id: TriggerManager.java 12691 2011-02-21 20:22:03Z dglo $
+ * @version $Id: TriggerManager.java 13364 2011-09-15 22:30:19Z dglo $
  * @author pat
  */
 public class TriggerManager
@@ -226,10 +226,7 @@ public class TriggerManager
      * @param event the event encapsulating this state change.
      */
     public void stopped(SplicerChangedEvent event) {
-        if (log.isInfoEnabled()) {
-            log.info("Received Splicer STOPPED");
-        }
-        getPayloadOutput().forcedStopProcessing();
+        // do nothing
     }
 
     /**
@@ -260,6 +257,7 @@ public class TriggerManager
                 log.debug("This is the LAST POSSIBLE SPLICEABLE!");
             }
             flush();
+            stopThread();
         }
 
         Iterator iter = event.getAllSpliceables().iterator();
@@ -314,5 +312,4 @@ public class TriggerManager
     public int getProcessingCount() {
         return wallTimeQueue.size();
     }
-
 }

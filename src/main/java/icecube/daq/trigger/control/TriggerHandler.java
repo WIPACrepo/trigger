@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 13231 2011-08-05 22:45:36Z dglo $
+ * Version $Id: TriggerHandler.java 13364 2011-09-15 22:30:19Z dglo $
  *
  * Date: October 25 2004
  *
@@ -55,7 +55,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 13231 2011-08-05 22:45:36Z dglo $
+ * @version $Id: TriggerHandler.java 13364 2011-09-15 22:30:19Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -934,7 +934,7 @@ public class TriggerHandler
         {
 //System.err.println("OTtop");
             ByteBuffer trigBuf;
-            while (outputThread != null) {
+            while (outputThread != null || outputQueue.size() > 0) {
 //System.err.println("OTloop");
                 synchronized (outputQueue) {
 //System.err.println("OTq="+outputQueue.size());
@@ -985,6 +985,10 @@ public class TriggerHandler
                 outChan.receiveByteBuffer(trigBuf);
             }
 //System.err.println("OTexit");
+
+            if (outChan != null) {
+                outChan.sendLastAndStop();
+            }
         }
 
         void start()

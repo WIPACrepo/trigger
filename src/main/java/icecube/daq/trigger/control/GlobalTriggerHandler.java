@@ -50,7 +50,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 13231 2011-08-05 22:45:36Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 13364 2011-09-15 22:30:19Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -1028,7 +1028,7 @@ public class GlobalTriggerHandler
         public void run()
         {
             ByteBuffer trigBuf;
-            while (outputThread != null) {
+            while (outputThread != null || outputQueue.size() > 0) {
                 synchronized (outputQueue) {
                     if (outputQueue.size() == 0) {
                         try {
@@ -1069,6 +1069,10 @@ public class GlobalTriggerHandler
                 if (trigBuf != null) {
                     outChan.receiveByteBuffer(trigBuf);
                 }
+            }
+
+            if (outChan != null) {
+                outChan.sendLastAndStop();
             }
         }
 

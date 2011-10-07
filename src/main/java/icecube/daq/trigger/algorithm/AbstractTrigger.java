@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 12765 2011-03-07 18:42:04Z dglo $
+ * Version $Id: AbstractTrigger.java 13372 2011-10-07 03:20:05Z kael $
  *
  * Date: August 19 2005
  *
@@ -46,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 12765 2011-03-07 18:42:04Z dglo $
+ * @version $Id: AbstractTrigger.java 13372 2011-10-07 03:20:05Z kael $
  * @author pat
  */
 public abstract class AbstractTrigger
@@ -569,6 +569,43 @@ public abstract class AbstractTrigger
         List hitList = new ArrayList(1);
         hitList.add(hit);
         formTrigger(hitList, dom, string);
+    }
+
+    protected void formTrigger(IUTCTime time_first, IUTCTime time_last) { // formtrigger function as needed by NoiseFixedReadoutTrigger
+
+        if (null == triggerFactory) {
+            throw new Error("TriggerFactory is not set!");
+        }
+
+        if (log.isInfoEnabled() && (triggerCounter % printMod == 0)) {
+            log.info("New Trigger " + triggerCounter + " from " + triggerName);
+        }
+
+        // create readout requests
+        Vector readoutElements = new Vector();
+        Iterator readoutIter = readouts.iterator();
+        while (readoutIter.hasNext()) {
+            TriggerReadout readout = (TriggerReadout) readoutIter.next();
+            readoutElements.add(createReadoutElement(time_first, time_last, readout, null, null));
+        }
+        IReadoutRequest readoutRequest = TriggerRequestPayloadFactory.createReadoutRequest(sourceId,
+                                                                                           triggerCounter,
+                                                                                           readoutElements);
+
+        // make payload
+        TriggerRequestPayload triggerPayload
+	    = (TriggerRequestPayload) triggerFactory.createPayload(triggerCounter,
+								   triggerType,
+								   triggerConfigId,
+								   sourceId,
+								   time_first,
+								   time_last,
+								   new Vector(),
+								   readoutRequest);
+
+        // report it
+        reportTrigger(triggerPayload);
+
     }
 
     /**

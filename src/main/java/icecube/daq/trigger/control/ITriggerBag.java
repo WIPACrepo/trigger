@@ -1,7 +1,7 @@
 /*
  * class: ITriggerBag
  *
- * Version $Id: ITriggerBag.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: ITriggerBag.java 13401 2011-11-11 04:23:13Z dglo $
  *
  * Date: March 16 2005
  *
@@ -19,7 +19,7 @@ import icecube.daq.trigger.monitor.PayloadBagMonitor;
  *
  * Interface for trigger bag
  *
- * @version $Id: ITriggerBag.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: ITriggerBag.java 13401 2011-11-11 04:23:13Z dglo $
  * @author pat
  */
 public interface ITriggerBag
@@ -84,4 +84,8 @@ public interface ITriggerBag
      */
     void setMonitor(PayloadBagMonitor monitor);
 
+    /**
+     * Reset the trigger UID for a new run.
+     */
+    void resetUID();
 }

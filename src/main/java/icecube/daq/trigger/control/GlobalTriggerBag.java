@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
  * This class receives TriggerRequestPayloads from each active GlobalTrigAlgorithm
  * , merges if they overlap and produces globalTrigEventPayload.
  *
- * @version $Id: GlobalTriggerBag.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: GlobalTriggerBag.java 13401 2011-11-11 04:23:13Z dglo $
  * @author shseo
  */
 public class GlobalTriggerBag
@@ -414,5 +414,14 @@ public class GlobalTriggerBag
     protected GlobalTrigEventWrapper getGlobalTrigEventWrapper()
     {
         return mtGlobalTrigEventWrapper;
+    }
+
+    /**
+     * Reset the universal ID used for merged requests.  This method should
+     * only be used between runs (or as the target of a switchToNewRun() call.)
+     */
+    public void resetUID()
+    {
+        triggerUID = 0;
     }
 }

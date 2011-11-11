@@ -49,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 13283 2011-08-24 21:05:10Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 13401 2011-11-11 04:23:13Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -909,6 +909,11 @@ public class GlobalTriggerHandler
     public int getNumOutputsQueued()
     {
         return outputQueue.size();
+    }
+
+    public void switchToNewRun()
+    {
+        triggerBag.resetUID();
     }
 
     class MainThread

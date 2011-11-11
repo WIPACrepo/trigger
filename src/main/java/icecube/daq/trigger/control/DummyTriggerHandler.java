@@ -389,4 +389,9 @@ public class DummyTriggerHandler
         throw new Error("Unimplemented");
         //outCache = cache;
     }
+
+    public void switchToNewRun()
+    {
+        // does nothing
+    }
 }

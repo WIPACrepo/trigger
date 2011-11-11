@@ -62,6 +62,7 @@ public class TriggerComponent
     private String triggerConfigFileName;
 
     private boolean useDummy;
+    private boolean isGlobalTrigger;
 
     public TriggerComponent(String name, int id) {
         this(name, id, DEFAULT_AMANDA_HOST, DEFAULT_AMANDA_PORT);
@@ -74,7 +75,6 @@ public class TriggerComponent
         // Create the source id of this component
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
 
-        boolean isGlobalTrigger = false;
         boolean isAmandaTrigger = false;
 
         // Get input and output types
@@ -328,6 +328,19 @@ public class TriggerComponent
         TriggerRequestRecord.setTypeNames(typeNames);
     }
 
+    /**
+     * Perform any actions related to switching to a new run.
+     *
+     * @param runNumber new run number
+     *
+     * @throws DAQCompException if there is a problem switching the component
+     */
+    public void switching(int runNumber) throws DAQCompException {
+        if (isGlobalTrigger) {
+            triggerManager.switchToNewRun();
+        }
+    }
+
     public void resetting() throws DAQCompException {
         triggerManager.reset();
     }
@@ -351,6 +364,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 13261 2011-08-12 18:10:44Z dglo $";
+	return "$Id: TriggerComponent.java 13401 2011-11-11 04:23:13Z dglo $";
     }
 }

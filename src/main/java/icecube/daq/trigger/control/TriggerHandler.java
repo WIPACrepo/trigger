@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 13284 2011-08-24 21:05:46Z dglo $
+ * Version $Id: TriggerHandler.java 13401 2011-11-11 04:23:13Z dglo $
  *
  * Date: October 25 2004
  *
@@ -54,7 +54,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 13284 2011-08-24 21:05:46Z dglo $
+ * @version $Id: TriggerHandler.java 13401 2011-11-11 04:23:13Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -815,6 +815,11 @@ public class TriggerHandler
     public int getNumOutputsQueued()
     {
         return outputQueue.size();
+    }
+
+    public void switchToNewRun()
+    {
+        // does nothing
     }
 
     class MainThread

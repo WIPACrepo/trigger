@@ -273,4 +273,8 @@ public class SimpleTriggerBag
 
     }
 
+    public void resetUID()
+    {
+        // do nothing
+    }
 }

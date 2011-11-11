@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerManager
  *
- * Version $Id: ITriggerHandler.java 12315 2010-10-06 21:27:41Z dglo $
+ * Version $Id: ITriggerHandler.java 13401 2011-11-11 04:23:13Z dglo $
  *
  * Date: March 31 2005
  *
@@ -24,7 +24,7 @@ import java.util.TreeSet;
 /**
  * This interface defines the behavior of a TriggerHandler
  *
- * @version $Id: ITriggerHandler.java 12315 2010-10-06 21:27:41Z dglo $
+ * @version $Id: ITriggerHandler.java 13401 2011-11-11 04:23:13Z dglo $
  * @author pat
  */
 public interface ITriggerHandler extends IPayloadProducer
@@ -136,4 +136,9 @@ public interface ITriggerHandler extends IPayloadProducer
      * @param byte buffer cache manager
      */
     void setOutgoingBufferCache(IByteBufferCache cache);
+
+    /**
+     * Switch to a new run.
+     */
+    void switchToNewRun();
 }

@@ -56,7 +56,7 @@ public class SlowMPTrigger extends AbstractTrigger
             hit  = new_hit;
 
             utc_time = hit.getHitTimeUTC().longValue();
-            mb_id = String.format("%012x", hit.getDOMID().longValue());
+            mb_id = hit.getDOMID().toString();
         }
 
         private IHitPayload hit;

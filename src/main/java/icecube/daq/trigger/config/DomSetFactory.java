@@ -37,7 +37,7 @@ public class DomSetFactory
     private static DOMRegistry domRegistry = null;
 
     public static void setDomRegistry(DOMRegistry dr) {
-	domRegistry = dr;
+        domRegistry = dr;
     }
 
 
@@ -58,7 +58,7 @@ public class DomSetFactory
             // AMANDA SYNC (0,91)
             boolean good = false;
             ArrayList<String> domIds = new ArrayList<String>();
-            
+
             Set<DeployedDOM> doms = domRegistry.getDomsOnString(0);
             for (DeployedDOM dom: doms) {
                 int pos = dom.getStringMinor();
@@ -153,16 +153,16 @@ public class DomSetFactory
             // DomSet 6 adds to this 25, 34, 44, 47, and 54
             // DomSet 4 used 41-60
             // DomSets 5 and 6 will use 39-60
-            
+
             int[] stringList = new int[] { 26, 27, 35, 36, 37, 45, 46 };
             int minPos = 39;
             if (domSetId == 4) minPos = 41;
             int maxPos = 60;
-            if (domSetId == 6) stringList = new int[] { 
-                    25, 26, 27, 34, 35, 36, 
+            if (domSetId == 6) stringList = new int[] {
+                    25, 26, 27, 34, 35, 36,
                     37, 44, 45, 46, 47, 54 };
-            
-            for (int str = 0; str < stringList.length; str++) 
+
+            for (int str = 0; str < stringList.length; str++)
             {
                 Set<DeployedDOM> doms = domRegistry.getDomsOnString(stringList[str]);
                 for (DeployedDOM dom: doms) {
@@ -200,8 +200,8 @@ public class DomSetFactory
 
         } else {
             if (domSetId != -1) {
-                log.error("Invalid DomSetId! must be 0,1,2,3,or 4, not " +
-                        domSetId);
+                log.error("Invalid DomSetId! must be 0, 1, 2, 3, 4, 5, or 6" +
+                          " not " + domSetId);
             }
 
             return null;

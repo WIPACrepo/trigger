@@ -1,7 +1,7 @@
 /*
  * class: CoincidenceTrigger
  *
- * Version $Id: CoincidenceTrigger.java 13357 2011-09-14 22:24:32Z seshadrivija $
+ * Version $Id: CoincidenceTrigger.java 12762 2011-03-07 17:55:21Z dglo $
  *
  * Date: September 2 2005
  *
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is to provide methods common to all coincidence triggers.
  *
- * @version $Id: CoincidenceTrigger.java 13357 2011-09-14 22:24:32Z seshadrivija $
+ * @version $Id: CoincidenceTrigger.java 12762 2011-03-07 17:55:21Z dglo $
  * @author shseo
  */
 public abstract class CoincidenceTrigger
@@ -57,56 +57,48 @@ public abstract class CoincidenceTrigger
      * @param payload
      * @throws icecube.daq.trigger.exceptions.TriggerException
      */
-    public void runTrigger(IPayload payload) throws TriggerException 
-    {
+    public void runTrigger(IPayload payload) throws TriggerException {
 
-       //--updates the timeGate in coincidenceTriggerBag w/ any incoming 
-       //trigger.
-        DummyPayload dummy_one = new DummyPayload(((
-            ITriggerRequestPayload) payload).getFirstTimeUTC());
+       //--updates the timeGate in coincidenceTriggerBag w/ any incoming trigger.
+        DummyPayload dummy_one = new DummyPayload(((ITriggerRequestPayload) payload).getFirstTimeUTC());
         try {
             setEarliestTimeInConditionalTrigBag(dummy_one);
         } catch (Exception e) {
             log.error("Couldn't set earliest time", e);
         }
 
-        if (!isConfigured()) {
-            log.error(
-                "Trigger was NOT properly configured at addParameter()!");
+        if(!isConfigured()) {
+            log.error("Trigger was NOT properly configured at addParameter()!");
         }
 
         //--add a configured trigger to a coincidenceTriggerBag
-        if (isConfiguredTrigger((ITriggerRequestPayload) payload)) {
+        if(isConfiguredTrigger((ITriggerRequestPayload) payload))
+        {
             miNumIncomingConfiguredTriggers++;
             if (log.isDebugEnabled()) {
-                log.debug(
-                    "Total number of incoming configured triggers so far = " +
-                        miNumIncomingConfiguredTriggers);
+                log.debug("Total number of incoming configured triggers so far = " + miNumIncomingConfiguredTriggers);
             }
 
             mtConditionalTriggerBag.add((ILoadablePayload) payload);
 
             if (log.isDebugEnabled()) {
-                log.debug("coincidence Trigger Bag contains " + 
-                    mtConditionalTriggerBag.size() + " triggers");
+                log.debug("coincidence Trigger Bag contains " + mtConditionalTriggerBag.size() + " triggers");
             }
 
-        } else {
+        }else
+        {
             log.debug("This is an UnConfigured Trigger.");
-            List payloadsInConditionalTrigBag = mtConditionalTriggerBag.
-                getPayloadsInConditonalTriggerBag();
-            if (payloadsInConditionalTrigBag.size() == 0) {
-                DummyPayload dummy = new DummyPayload(payload.
-                    getPayloadTimeUTC());
+            List payloadsInConditionalTrigBag = mtConditionalTriggerBag.getPayloadsInConditonalTriggerBag();
+            if(payloadsInConditionalTrigBag.size() == 0){
+                DummyPayload dummy = new DummyPayload(payload.getPayloadTimeUTC());
                 setEarliestPayloadOfInterest(dummy);
             }
         }
-        while (mtConditionalTriggerBag.hasNext()) {
+        while (mtConditionalTriggerBag.hasNext())
+        {
             ILoadablePayload tPayload = mtConditionalTriggerBag.next();
-            //--update earliestPayloadOfInterest when there is a 
-            // coincidenceTrigger.
-            DummyPayload dummy = new DummyPayload(((
-                ITriggerRequestPayload) tPayload).getFirstTimeUTC());
+            //--update earliestPayloadOfInterest when there is a coincidenceTrigger.
+            DummyPayload dummy = new DummyPayload(((ITriggerRequestPayload) tPayload).getFirstTimeUTC());
             setEarliestPayloadOfInterest(dummy);
 
             //--every wrapped trigger should be reported to GlobalTrigBag.
@@ -117,21 +109,16 @@ public abstract class CoincidenceTrigger
 
     public void cleanConditionalTriggerBag()
     {
-        //--todo: need to update earliestPyalod (to flush) if conditionalBag 
-        // contains only invalidtriggers
-        List payloadsInConditionalTrigBag = mtConditionalTriggerBag.
-            getPayloadsInConditonalTriggerBag();
+        //--todo: need to update earliestPyalod (to flush) if conditionalBag contains only invalidtriggers
+        List payloadsInConditionalTrigBag = mtConditionalTriggerBag.getPayloadsInConditonalTriggerBag();
         int iNumCaididateGTeventsInBag = payloadsInConditionalTrigBag.size();
-        if (iNumCaididateGTeventsInBag == 0 && 
-            mtConditionalTriggerBag.needUpdate())
+        if( iNumCaididateGTeventsInBag == 0 && mtConditionalTriggerBag.needUpdate())
         {
-            DummyPayload dummy = new DummyPayload(mtConditionalTriggerBag.
-                getUpdater().getPayloadTimeUTC());
+            DummyPayload dummy = new DummyPayload(mtConditionalTriggerBag.getUpdater().getPayloadTimeUTC());
             setEarliestPayloadOfInterest(dummy);
         }
 
-        /* List listUnqualifiedTirggers  = mtConditionalTriggerBag.
-        getListUnqualifiedTriggers();
+   /*     List listUnqualifiedTirggers  = mtConditionalTriggerBag.getListUnqualifiedTriggers();
         Iterator iter = listUnqualifiedTirggers.iterator();
         while(iter.hasNext())
         {
@@ -141,13 +128,11 @@ public abstract class CoincidenceTrigger
     }
     public abstract List getConfiguredTriggerIDs();
 
-    public abstract boolean isConfiguredTrigger(
-        ITriggerRequestPayload tPayload);
+    public abstract boolean isConfiguredTrigger(ITriggerRequestPayload tPayload);
 
     //public abstract List selectCoincidentTrigger(List payloadList);
 
-    //public abstract boolean isCoincidentTrigger(
-    //TriggerRequestPayload tPayload_1, TriggerRequestPayload tPayload_2);
+    //public abstract boolean isCoincidentTrigger(TriggerRequestPayload tPayload_1, TriggerRequestPayload tPayload_2);
     /**
      * This method checks two triggers overlap in time or not.
      *
@@ -155,15 +140,12 @@ public abstract class CoincidenceTrigger
      * @param payload2
      * @return
      */
-    public boolean isTimeOverlap(ITriggerRequestPayload payload1,
-        ITriggerRequestPayload payload2)
+    public boolean isTimeOverlap(ITriggerRequestPayload payload1, ITriggerRequestPayload payload2)
     {
         boolean bIsOverlap = false;
 
-        IReadoutRequest tReadoutRequest_payload1 = ((
-            ITriggerRequestPayload) payload1).getReadoutRequest();
-        IReadoutRequest tReadoutRequest_payload2 = ((
-            ITriggerRequestPayload) payload2).getReadoutRequest();
+        IReadoutRequest tReadoutRequest_payload1 = ((ITriggerRequestPayload) payload1).getReadoutRequest();
+        IReadoutRequest tReadoutRequest_payload2 = ((ITriggerRequestPayload) payload2).getReadoutRequest();
 
         IUTCTime tStartTime_payload1 = null;
         IUTCTime tEndTime_payload1 = null;
@@ -172,17 +154,14 @@ public abstract class CoincidenceTrigger
 
         int type1 = payload1.getPayloadInterfaceType();
         if (type1 == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
-            try {
-                List elems = tReadoutRequest_payload1.
-                    getReadoutRequestElements();
-                tStartTime_payload1 = mtSorter.getUTCTimeEarliest(elems, 
-                    false);
+            try{
+                List elems = tReadoutRequest_payload1.getReadoutRequestElements();
+                tStartTime_payload1 = mtSorter.getUTCTimeEarliest(elems, false);
                 tEndTime_payload1 = mtSorter.getUTCTimeLatest(elems, false);
 
-            } catch (NullPointerException e) {
-                log.error(
-                    "ReadoutRequest should not be null in CoincidenceTrigger!"
-                );
+            }catch(NullPointerException e)
+            {
+                log.error("ReadoutRequest should not be null in CoincidenceTrigger!");
                 return false;
             }
         } else {
@@ -192,17 +171,14 @@ public abstract class CoincidenceTrigger
 
         int type2 = payload2.getPayloadInterfaceType();
         if (type2 == PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
-            try {
-                List elems = tReadoutRequest_payload2.
-                    getReadoutRequestElements();
-                tStartTime_payload2 = mtSorter.getUTCTimeEarliest(elems, 
-                    false);
+            try{
+                List elems = tReadoutRequest_payload2.getReadoutRequestElements();
+                tStartTime_payload2 = mtSorter.getUTCTimeEarliest(elems, false);
                 tEndTime_payload2 = mtSorter.getUTCTimeLatest(elems, false);
 
-            } catch (NullPointerException e) {
-                log.error(
-                    "ReadoutRequest should not be null in CoincidenceTrigger!"
-                );
+            }catch(NullPointerException e)
+            {
+                log.error("ReadoutRequest should not be null in CoincidenceTrigger!");
                 return false;
             }
         } else {
@@ -213,10 +189,12 @@ public abstract class CoincidenceTrigger
         double diff_1 = tStartTime_payload1.compareTo(tEndTime_payload2);
         double diff_2 = tStartTime_payload2.compareTo(tEndTime_payload1);
 
-        if (diff_1 > 0 || diff_2 > 0) {
+        if(diff_1 > 0 || diff_2 > 0)
+        {
             bIsOverlap = false;
             log.debug("No Time-Overlap in CoincidenceTrigger!");
-        } else {
+        }else
+        {
             bIsOverlap = true;
             log.debug("Time-Overlap in CoincidenceTrigger!!!");
         }
@@ -224,15 +202,13 @@ public abstract class CoincidenceTrigger
         return bIsOverlap;
     }
     /**
-     * This method checks two triggers are coincident based on 
-     * time-overlap and triggerID.
+     * This method checks two triggers are coincident based on time-overlap and triggerID.
      *
      * @param tPayload_1
      * @param tPayload_2
      * @return
      */
-    public boolean isCoincidentTrigger(ITriggerRequestPayload tPayload_1, 
-        ITriggerRequestPayload tPayload_2)
+    public boolean isCoincidentTrigger(ITriggerRequestPayload tPayload_1, ITriggerRequestPayload tPayload_2)
     {
         boolean bIsTimeOverlap = false;
         boolean bIsDifferentTriggerId = false;
@@ -240,7 +216,8 @@ public abstract class CoincidenceTrigger
         bIsTimeOverlap = isTimeOverlap(tPayload_1, tPayload_2);
         bIsDifferentTriggerId = isDifferentTriggerId(tPayload_1, tPayload_2);
 
-        if (bIsTimeOverlap && bIsDifferentTriggerId) {
+        if(bIsTimeOverlap && bIsDifferentTriggerId)
+        {
             return true;
         }
         return false;
@@ -252,10 +229,10 @@ public abstract class CoincidenceTrigger
      * @param tPayload_2
      * @return
      */
-    public boolean isDifferentTriggerId(ITriggerRequestPayload tPayload_1, 
-        ITriggerRequestPayload tPayload_2)
+    public boolean isDifferentTriggerId(ITriggerRequestPayload tPayload_1, ITriggerRequestPayload tPayload_2)
     {
-        if (getTriggerId(tPayload_1) != getTriggerId(tPayload_2)) {
+        if(getTriggerId(tPayload_1) != getTriggerId(tPayload_2))
+        {
             return true;
         }
 
@@ -269,16 +246,15 @@ public abstract class CoincidenceTrigger
      *
      * @throws Exception
      */
-    protected void setEarliestTimeInConditionalTrigBag(
-        IPayload tEarliestPayloadOfInterest) throws Exception
+    protected void setEarliestTimeInConditionalTrigBag(IPayload tEarliestPayloadOfInterest) throws Exception
     {
-        if (tEarliestPayloadOfInterest != null) {
-            mtConditionalTriggerBag.setTimeGate((
-                (IPayload) tEarliestPayloadOfInterest).getPayloadTimeUTC());
-        } else {
+        if (tEarliestPayloadOfInterest != null)
+        {
+            mtConditionalTriggerBag.setTimeGate(((IPayload) tEarliestPayloadOfInterest).getPayloadTimeUTC());
+        }else
+        {
             log.error("There is no earliestPayloadOverall.....");
-            throw new NullPointerException(
-                "earliestPayloadOverall is NULL...!");
+            throw new NullPointerException("earliestPayloadOverall is NULL...!");
         }
     }
 
@@ -293,7 +269,7 @@ public abstract class CoincidenceTrigger
     public void flush()
     {
         mtConditionalTriggerBag.flush();
-        while (mtConditionalTriggerBag.hasNext()) {
+        while(mtConditionalTriggerBag.hasNext()){
             ILoadablePayload tPayload = mtConditionalTriggerBag.next();
             reportTrigger(tPayload);
         }

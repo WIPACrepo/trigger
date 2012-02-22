@@ -123,7 +123,7 @@ public class InIceTriggerEndToEndTest
         } catch (Exception ex) {
             throw new Error("Cannot set DOM registry", ex);
         }
-
+    
         // load all triggers
         TriggerCollection trigCfg = new SPSIcecubeAmanda008Triggers();
         trigCfg.addToHandler(trigMgr);
@@ -158,7 +158,7 @@ public class InIceTriggerEndToEndTest
             Pipe.SourceChannel sourceChannel = testPipe.source();
             sourceChannel.configureBlocking(false);
 
-            rdr.addDataChannel(sourceChannel, "Chan", cache, 1024);
+            rdr.addDataChannel(sourceChannel, cache, 1024);
         }
 
         rdr.startProcessing();
@@ -169,6 +169,8 @@ public class InIceTriggerEndToEndTest
         trigCfg.sendInIceStops(tails);
 
         waitUntilStopped(rdr, splicer, "StopMsg");
+
+        trigMgr.flush();
 
         assertEquals("Bad number of payloads written",
                      trigCfg.getExpectedNumberOfInIcePayloads(numObjs),

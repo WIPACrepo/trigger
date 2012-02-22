@@ -20,7 +20,6 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
-import icecube.daq.payload.PayloadException;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID;
@@ -221,80 +220,43 @@ class Analysis
             IUTCTime minObj = new UTCTime(minTime);
             IUTCTime maxObj = new UTCTime(maxTime);
 
-            IReadoutRequestElement rrElem;
+            IReadoutRequestElement rrElem =
+                TriggerRequestPayloadFactory.createReadoutRequestElement
+                (IReadoutRequestElement.READOUT_TYPE_GLOBAL, minObj, maxObj,
+                 null, null);
+
+            Vector elems = new Vector();
+            elems.add(rrElem);
+
+            IReadoutRequest rReq =
+                TriggerRequestPayloadFactory.createReadoutRequest
+                (SOURCE_ID, triggerCount, elems);
+
+            Vector hits = new Vector();
+            hits.add(hit);
+
+            final int trigType = 1;
+            final int trigCfgId = 1;
+
+            ITriggerRequestPayload trigReq =
+                (ITriggerRequestPayload) trigReqFactory.createPayload
+                (triggerCount, trigType, trigCfgId, SOURCE_ID, minObj, maxObj,
+                 hits, rReq);
+
+            ByteBuffer trigBuf =
+                ByteBuffer.allocate(trigReq.getPayloadLength());
             try {
-                rrElem =
-                    TriggerRequestPayloadFactory.createReadoutRequestElement
-                    (IReadoutRequestElement.READOUT_TYPE_GLOBAL, minObj,
-                     maxObj, null, null);
-            } catch (PayloadException pe) {
-                LOG.error("Cannot create readout element", pe);
-                rrElem = null;
-            }
-
-            IReadoutRequest rReq;
-            if (rrElem == null) {
-                rReq = null;
-            } else {
-                Vector elems = new Vector();
-                elems.add(rrElem);
-
-                try {
-                    rReq = TriggerRequestPayloadFactory.createReadoutRequest
-                        (SOURCE_ID, triggerCount, elems);
-                } catch (PayloadException pe) {
-                    LOG.error("Cannot create readout request", pe);
-                    rReq = null;
-                }
-            }
-
-            ITriggerRequestPayload trigReq;
-            if (rReq == null) {
-                trigReq = null;
-            } else {
-                Vector hits = new Vector();
-                hits.add(hit);
-
-                final int trigType = 1;
-                final int trigCfgId = 1;
-
-                try {
-                    trigReq =
-                        (ITriggerRequestPayload)
-                        trigReqFactory.createPayload(triggerCount, trigType,
-                                                     trigCfgId, SOURCE_ID,
-                                                     minObj, maxObj, hits,
-                                                     rReq);
-                } catch (PayloadException pe) {
-                    LOG.error("Couldn't create payload", pe);
-                    trigReq = null;
-                }
-            }
-
-            ByteBuffer trigBuf;
-            if (trigReq == null) {
+                ((IWriteablePayload) trigReq).writePayload(false, 0, trigBuf);
+            } catch (IOException ioe) {
+                LOG.error("Couldn't create payload", ioe);
                 trigBuf = null;
-            } else {
-                trigBuf = ByteBuffer.allocate(trigReq.getPayloadLength());
-                try {
-                    ((IWriteablePayload) trigReq).writePayload(false, 0,
-                                                               trigBuf);
-                } catch (IOException ioe) {
-                    LOG.error("Couldn't create payload", ioe);
-                    trigBuf = null;
-                } catch (PayloadException pe) {
-                    LOG.error("Couldn't create payload", pe);
-                    trigBuf = null;
-                }
             }
 
             if (trigBuf != null) {
                 trigChan.receiveByteBuffer(trigBuf);
             }
 
-            if (trigReq != null) {
-                trigReq.recycle();
-            }
+            trigReq.recycle();
         }
     }
 

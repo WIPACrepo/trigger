@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 13364 2011-09-15 22:30:19Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: August 19 2005
  *
@@ -14,7 +14,6 @@ import icecube.daq.oldpayload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadException;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -32,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 13364 2011-09-15 22:30:19Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -383,12 +382,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
                                           + " is part of new trigger but is still in SlidingTimeWindow");
                             }
                         }
-                        try {
-                            formTrigger(hitsWithinTriggerWindow, null, null);
-                        } catch (PayloadException pe) {
-                            throw new TriggerException("Cannot form trigger",
-                                                       pe);
-                        }
+                        formTrigger(hitsWithinTriggerWindow, null, null);
 
                         onTrigger = false;
                         hitsWithinTriggerWindow.clear();
@@ -450,11 +444,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
         // form last trigger
         if (hitsWithinTriggerWindow.size() > 0 && formLast) {
-            try {
-                formTrigger(hitsWithinTriggerWindow, null, null);
-            } catch (PayloadException pe) {
-                log.error("Cannot form last trigger", pe);
-            }
+            formTrigger(hitsWithinTriggerWindow, null, null);
         }
 
         // todo: Pat is this right?
@@ -577,15 +567,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
             return (hits.size() >= threshold);
         }
 
-        public String toString()
-        {
-            if (hits.size() == 0) {
-                return "Window[]*0";
-            }
-
-            return "Window[" + startTime() + "-" + endTime() + "]*" +
-                hits.size();
-        }
     }
 
 }

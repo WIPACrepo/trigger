@@ -14,7 +14,6 @@ import icecube.daq.oldpayload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadException;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -460,9 +459,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
      * @param hitsWithinTriggerWindow
      */
 
-    public void analyzeString(LinkedList hitsWithinTriggerWindow)
-        throws TriggerException
-    {
+    public void analyzeString(LinkedList hitsWithinTriggerWindow) {
 
         if(log.isDebugEnabled()) {
             log.debug("Counting hits which meet string trigger criteria");
@@ -506,11 +503,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                     log.debug("The number of hits greater than the threshold.");
                     log.debug("Reporting trigger");
                 }
-                try {
-                    formTrigger(hitsWithinTriggerWindow, null, null);
-                } catch (PayloadException pe) {
-                    throw new TriggerException("Cannot form trigger", pe);
-                }
+                formTrigger(hitsWithinTriggerWindow, null, null);
                 return;
 
             } else {
@@ -586,11 +579,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
             }
 
             // pass last trigger
-            try {
-                analyzeString(hitsWithinTriggerWindow);
-            } catch (TriggerException te) {
-                log.error("Cannot evaluate last trigger", te);
-            }
+            analyzeString(hitsWithinTriggerWindow);
         }
         //see if TimeWindow has enough hits to form a trigger before an out of bounds hit
         else if(slidingTimeWindow.aboveThreshold()) {
@@ -606,11 +595,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
             }
 
             // pass last trigger
-            try {
-                analyzeString(hitsWithinTriggerWindow);
-            } catch (TriggerException te) {
-                log.error("Cannot evaluate last trigger", te);
-            }
+            analyzeString(hitsWithinTriggerWindow);
         }
         reset();
     }

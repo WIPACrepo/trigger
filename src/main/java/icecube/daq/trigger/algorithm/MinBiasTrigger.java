@@ -1,7 +1,7 @@
 /*
  * class: MinBiasTrigger
  *
- * Version $Id: MinBiasTrigger.java 13231 2011-08-05 22:45:36Z dglo $
+ * Version $Id: MinBiasTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: August 27 2005
  *
@@ -13,7 +13,6 @@ package icecube.daq.trigger.algorithm;
 import icecube.daq.oldpayload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.PayloadException;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -27,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
  * This class implements a simple minimum bias trigger. It simply counts hits and
  * applies a prescale for determining when a trigger should be formed.
  *
- * @version $Id: MinBiasTrigger.java 13231 2011-08-05 22:45:36Z dglo $
+ * @version $Id: MinBiasTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  * @author pat
  */
 public class MinBiasTrigger extends AbstractTrigger
@@ -119,11 +118,7 @@ public class MinBiasTrigger extends AbstractTrigger
         numberProcessed++;
         if (numberProcessed % prescale == 0) {
             // report this as a trigger
-            try {
-                formTrigger(hit, null, null);
-            } catch (PayloadException pe) {
-                throw new TriggerException("Cannot form trigger", pe);
-            }
+            formTrigger(hit, null, null);
 
         } else {
             // just update earliest time of interest

@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 13364 2011-09-15 22:30:19Z dglo $
+ * Version $Id: TriggerHandler.java 12797 2011-03-21 22:14:34Z dglo $
  *
  * Date: October 25 2004
  *
@@ -23,7 +23,6 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
-import icecube.daq.payload.PayloadException;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID;
 import icecube.daq.payload.impl.UTCTime;
@@ -55,7 +54,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 13364 2011-09-15 22:30:19Z dglo $
+ * @version $Id: TriggerHandler.java 12797 2011-03-21 22:14:34Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -623,9 +622,6 @@ public class TriggerHandler
             } catch (IOException ioe) {
                 log.error("Couldn't create payload", ioe);
                 trigBuf = null;
-            } catch (PayloadException pe) {
-                log.error("Couldn't create payload", pe);
-                trigBuf = null;
             }
 
             if (trigBuf != null) {
@@ -934,7 +930,7 @@ public class TriggerHandler
         {
 //System.err.println("OTtop");
             ByteBuffer trigBuf;
-            while (outputThread != null || outputQueue.size() > 0) {
+            while (outputThread != null) {
 //System.err.println("OTloop");
                 synchronized (outputQueue) {
 //System.err.println("OTq="+outputQueue.size());
@@ -985,10 +981,6 @@ public class TriggerHandler
                 outChan.receiveByteBuffer(trigBuf);
             }
 //System.err.println("OTexit");
-
-            if (outChan != null) {
-                outChan.sendLastAndStop();
-            }
         }
 
         void start()

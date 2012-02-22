@@ -21,7 +21,6 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IWriteablePayload;
-import icecube.daq.payload.PayloadException;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID;
 import icecube.daq.payload.impl.UTCTime;
@@ -50,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 13364 2011-09-15 22:30:19Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 12797 2011-03-21 22:14:34Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -653,9 +652,6 @@ public class GlobalTriggerHandler
             } catch (IOException ioe) {
                 log.error("Couldn't create payload", ioe);
                 trigBuf = null;
-            } catch (PayloadException pe) {
-                log.error("Couldn't create payload", pe);
-                trigBuf = null;
             }
 
             if (trigBuf != null) {
@@ -1028,7 +1024,7 @@ public class GlobalTriggerHandler
         public void run()
         {
             ByteBuffer trigBuf;
-            while (outputThread != null || outputQueue.size() > 0) {
+            while (outputThread != null) {
                 synchronized (outputQueue) {
                     if (outputQueue.size() == 0) {
                         try {
@@ -1069,10 +1065,6 @@ public class GlobalTriggerHandler
                 if (trigBuf != null) {
                     outChan.receiveByteBuffer(trigBuf);
                 }
-            }
-
-            if (outChan != null) {
-                outChan.sendLastAndStop();
             }
         }
 

@@ -7,7 +7,6 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.payload.PayloadException;
 import icecube.daq.payload.impl.SourceID;
 import icecube.daq.payload.impl.UTCTime;
 import icecube.icebucket.logging.LoggingConsumer;
@@ -154,9 +153,7 @@ public class AmandaSocketSimulator
      * Generate the next TriggerRequestPayload
      * @return a trigger payload
      */
-    private ITriggerRequestPayload generateTrigger()
-        throws PayloadException
-    {
+    private ITriggerRequestPayload generateTrigger() {
 
         int triggerType = 0;
         int configId = generateTriggerMask();
@@ -166,9 +163,7 @@ public class AmandaSocketSimulator
         IUTCTime time = new UTCTime(nextTime);
         Vector payloads = new Vector();
         Vector readouts = new Vector();
-        IReadoutRequest readout =
-            TriggerRequestPayloadFactory.createReadoutRequest(sourceId, count,
-                                                              readouts);
+        IReadoutRequest readout = TriggerRequestPayloadFactory.createReadoutRequest(sourceId, count, readouts);
         Payload trigger = triggerFactory.createPayload(count, triggerType, configId, sourceId, time, time, payloads,readout);
         count++;
         lastTime = nextTime;
@@ -180,13 +175,7 @@ public class AmandaSocketSimulator
         buffer.clear();
         for (int i=0; i<128; i++) {
             int offset = i*72;
-            ITriggerRequestPayload trigger;
-            try {
-                trigger = generateTrigger();
-            } catch (PayloadException pe) {
-                log.error("Cannot generate trigger", pe);
-                break;
-            }
+            ITriggerRequestPayload trigger = generateTrigger();
             if (log.isInfoEnabled()) {
                 log.info("Trigger size = " + trigger.getPayloadLength());
             }
@@ -194,8 +183,6 @@ public class AmandaSocketSimulator
                 trigger.writePayload(false, offset, buffer);
             } catch (IOException e) {
                 log.error("Error writing to buffer: ", e);
-            } catch (PayloadException pe) {
-                log.error("Error writing to buffer: ", pe);
             }
         }
         buffer.flip();

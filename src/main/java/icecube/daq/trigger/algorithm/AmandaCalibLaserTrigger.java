@@ -13,19 +13,16 @@ public class AmandaCalibLaserTrigger
         extends AmandaTrigger
 {
 
-    private static final Log log = 
-        LogFactory.getLog(AmandaCalibLaserTrigger.class);
+    private static final Log log = LogFactory.getLog(AmandaCalibLaserTrigger.class);
 
     private static int triggerNumber = 0;
 
-    public AmandaCalibLaserTrigger() 
-    {
+    public AmandaCalibLaserTrigger() {
         triggerNumber++;
         triggerBit = CALIB_LASER;
     }
 
-    public void setTriggerName(String triggerName) 
-    {
+    public void setTriggerName(String triggerName) {
         super.triggerName = triggerName + triggerNumber;
         if (log.isInfoEnabled()) {
             log.info("TriggerName set to " + super.triggerName);

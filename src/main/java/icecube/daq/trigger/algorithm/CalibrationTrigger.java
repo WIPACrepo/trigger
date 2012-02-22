@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 13357 2011-09-14 22:24:32Z seshadrivija $
+ * Version $Id: CalibrationTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  *
  * Date: August 27 2005
  *
@@ -13,7 +13,6 @@ package icecube.daq.trigger.algorithm;
 import icecube.daq.oldpayload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.PayloadException;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -31,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 13357 2011-09-14 22:24:32Z seshadrivija $
+ * @version $Id: CalibrationTrigger.java 4574 2009-08-28 21:32:32Z dglo $
  * @author pat
  */
 public class CalibrationTrigger extends AbstractTrigger
@@ -54,8 +53,7 @@ public class CalibrationTrigger extends AbstractTrigger
     /**
      * Constructor.
      */
-    public CalibrationTrigger() 
-    {
+    public CalibrationTrigger() {
         triggerNumber++;
     }
 
@@ -64,8 +62,7 @@ public class CalibrationTrigger extends AbstractTrigger
      *
      * @return true if it is
      */
-    public boolean isConfigured() 
-    {
+    public boolean isConfigured() {
         return configHitType;
     }
 
@@ -77,9 +74,7 @@ public class CalibrationTrigger extends AbstractTrigger
      * @throws icecube.daq.trigger.exceptions.UnknownParameterException
      *
      */
-    public void addParameter(TriggerParameter parameter) 
-        throws UnknownParameterException, IllegalParameterValueException 
-    {
+    public void addParameter(TriggerParameter parameter) throws UnknownParameterException, IllegalParameterValueException {
         if (parameter.getName().compareTo("hitType") == 0) {
             hitType = Integer.parseInt(parameter.getValue());
             configHitType = true;
@@ -89,14 +84,12 @@ public class CalibrationTrigger extends AbstractTrigger
             domSetId = Integer.parseInt(parameter.getValue());
             configHitFilter(domSetId);
         } else {
-            throw new UnknownParameterException("Unknown parameter: " + 
-                parameter.getName());
+            throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
         }
         super.addParameter(parameter);
     }
 
-    public void setTriggerName(String triggerName) 
-    {
+    public void setTriggerName(String triggerName) {
         super.triggerName = triggerName + triggerNumber;
         if (log.isInfoEnabled()) {
             log.info("TriggerName set to " + super.triggerName);
@@ -111,13 +104,11 @@ public class CalibrationTrigger extends AbstractTrigger
      * @throws icecube.daq.trigger.exceptions.TriggerException
      *          if the algorithm doesn't like this payload
      */
-    public void runTrigger(IPayload payload) throws TriggerException 
-    {
+    public void runTrigger(IPayload payload) throws TriggerException {
 
         int interfaceType = payload.getPayloadInterfaceType();
         if ((interfaceType != PayloadInterfaceRegistry.I_HIT_PAYLOAD) &&
-            (interfaceType != PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)) 
-        {
+            (interfaceType != PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)) {
             throw new TriggerException("Expecting an IHitPayload");
         }
         IHitPayload hit = (IHitPayload) payload;
@@ -134,15 +125,10 @@ public class CalibrationTrigger extends AbstractTrigger
         int type = AbstractTrigger.getHitType(hit);
         if (type == hitType) {
             // this is the correct type, report trigger
-            try {
-                formTrigger(hit, hit.getDOMID(), hit.getSourceID());
-            } catch (PayloadException pe) {
-                throw new TriggerException("Cannot form trigger", pe);
-            }
+            formTrigger(hit, hit.getDOMID(), hit.getSourceID());
         } else {
             // this is not, update earliest time of interest
-            IPayload earliest = new DummyPayload(hit.getHitTimeUTC().
-                getOffsetUTCTime(0.1));
+            IPayload earliest = new DummyPayload(hit.getHitTimeUTC().getOffsetUTCTime(0.1));
             setEarliestPayloadOfInterest(earliest);
         }
 
@@ -150,22 +136,17 @@ public class CalibrationTrigger extends AbstractTrigger
     }
 
     /**
-     * Flush the trigger. Basically indicates that there will be no further 
-     * payloads to process.
+     * Flush the trigger. Basically indicates that there will be no further payloads to process.
      */
-    public void flush() 
-    {
-        // nothing has to be done here since this trigger does not buffer 
-        // anything.
+    public void flush() {
+        // nothing has to be done here since this trigger does not buffer anything.
     }
 
-    public int getHitType() 
-    {
+    public int getHitType() {
         return hitType;
     }
 
-    public void setHitType(int hitType) 
-    {
+    public void setHitType(int hitType) {
         this.hitType = hitType;
     }
 

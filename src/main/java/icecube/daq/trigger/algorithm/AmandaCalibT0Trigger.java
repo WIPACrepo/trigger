@@ -13,19 +13,16 @@ public class AmandaCalibT0Trigger
         extends AmandaTrigger
 {
 
-    private static final Log log = 
-        LogFactory.getLog(AmandaCalibT0Trigger.class);
+    private static final Log log = LogFactory.getLog(AmandaCalibT0Trigger.class);
 
     private static int triggerNumber = 0;
 
-    public AmandaCalibT0Trigger() 
-    {
+    public AmandaCalibT0Trigger() {
         triggerNumber++;
         triggerBit = CALIB_T0;
     }
 
-    public void setTriggerName(String triggerName) 
-    {
+    public void setTriggerName(String triggerName) {
         super.triggerName = triggerName + triggerNumber;
         if (log.isInfoEnabled()) {
             log.info("TriggerName set to " + super.triggerName);

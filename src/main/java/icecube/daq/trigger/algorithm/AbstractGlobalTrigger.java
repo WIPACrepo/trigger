@@ -1,7 +1,7 @@
 /*
  * class: AbstractGlobalTrigger
  *
- * Version $Id: AbstractGlobalTrigger.java 13357 2011-09-14 22:24:32Z seshadrivija $
+ * Version $Id: AbstractGlobalTrigger.java 12762 2011-03-07 17:55:21Z dglo $
  *
  * Date: August 30 2005
  *
@@ -17,16 +17,18 @@ import icecube.daq.trigger.control.ConditionalTriggerBag;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.GlobalTrigEventWrapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class is to provide a common method for all triggers in GT.
  *
- * @version $Id: AbstractGlobalTrigger.java 13357 2011-09-14 22:24:32Z seshadrivija $
+ * @version $Id: AbstractGlobalTrigger.java 12762 2011-03-07 17:55:21Z dglo $
  * @author shseo
  */
 public abstract class AbstractGlobalTrigger extends AbstractTrigger
 {
-    private GlobalTrigEventWrapper mtGlobalTrigEventWrapper = 
-        new GlobalTrigEventWrapper();
+    private GlobalTrigEventWrapper mtGlobalTrigEventWrapper = new GlobalTrigEventWrapper();
     private ITriggerRequestPayload mtGlobalTrigEventPayload;
     protected ConditionalTriggerBag mtConditionalTriggerBag;
     /**
@@ -49,35 +51,28 @@ public abstract class AbstractGlobalTrigger extends AbstractTrigger
     //todo: is this necessary only for ThroughputTrigger....?
     public void wrapTrigger(ITriggerRequestPayload tPayload) throws Exception
     {
-        mtGlobalTrigEventWrapper.wrap(tPayload, getTriggerType(), 
-            getTriggerConfigId());
+        mtGlobalTrigEventWrapper.wrap(tPayload, getTriggerType(), getTriggerConfigId());
 
-        mtGlobalTrigEventPayload = mtGlobalTrigEventWrapper.
-            getGlobalTrigEventPayload_single();
+        mtGlobalTrigEventPayload = mtGlobalTrigEventWrapper.getGlobalTrigEventPayload_single();
         //mListAvailableTriggersToRelease.add(mtGlobalTrigEventPayload);
         //setAvailableTriggerToRelease();
 
-        //This list is used for JUnitTest purpose only. So it needs periodic 
-        // flush for a normal run.
-        if (mtGlobalTrigEventPayload != null) {
+        //This list is used for JUnitTest purpose only. So it needs periodic flush for a normal run.
+        if(mtGlobalTrigEventPayload != null){
 
-            //--The firstTime here to set DummyPayload is the 
-            // earliestReadoutTime.
-            DummyPayload dummy = new DummyPayload(mtGlobalTrigEventPayload.
-                getFirstTimeUTC());
+            //--The firstTime here to set DummyPayload is the earliestReadoutTime.
+            DummyPayload dummy = new DummyPayload(mtGlobalTrigEventPayload.getFirstTimeUTC());
             setEarliestPayloadOfInterest(dummy);
 
             //--every wrapped trigger should be reported to GlobalTrigBag.
             reportTrigger((ILoadablePayload) mtGlobalTrigEventPayload);
             mtGlobalTrigEventPayload = null;
-        } else {
-            throw new NullPointerException(
-                "mtGlobalTrigEventPayload is NULL in wrapTrigger()");
+        }else{
+            throw new NullPointerException("mtGlobalTrigEventPayload is NULL in wrapTrigger()");
         }
     }
 
-    public ConditionalTriggerBag getBag()
-    {
+    public ConditionalTriggerBag getBag(){
         return mtConditionalTriggerBag;
     }
     public int getTriggerCounter()

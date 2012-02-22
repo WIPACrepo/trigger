@@ -13,30 +13,21 @@ package icecube.daq.trigger.control;
 import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.oldpayload.impl.PayloadFactory;
 import icecube.daq.payload.IReadoutRequestElement;
-import icecube.daq.payload.PayloadException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * This class is to produce final ReadoutRequestElement for one GlobalTrigEvent.
  * Required is Input of an unorganized ReadoutRequestelements (List).
  * Both timeOverlap and spaceOverlap will be handled here via SimpleMerger.java and SmartMerger.java.
  *
- * @version $Id: GlobalTrigEventReadoutElements.java 13231 2011-08-05 22:45:36Z dglo $
+ * @version $Id: GlobalTrigEventReadoutElements.java 12765 2011-03-07 18:42:04Z dglo $
  * @author shseo
  */
 public class GlobalTrigEventReadoutElements
 {
-    /**
-     * Log object for this class
-     */
-    private static final Log log = LogFactory.getLog(GlobalTrigEventReadoutElements.class);
-
     private TriggerRequestPayloadFactory DEFAULT_TRIGGER_FACTORY = new TriggerRequestPayloadFactory();
     private TriggerRequestPayloadFactory triggerFactory;
 
@@ -82,31 +73,22 @@ public class GlobalTrigEventReadoutElements
                 //IIIT-GLOBAL needs to be separated out as II-GLOBAL and IT-GLOBAL.
                 case IReadoutRequestElement.READOUT_TYPE_GLOBAL:
 
-                    try {
-                        IReadoutRequestElement element_II =
-                            triggerFactory.createReadoutRequestElement(
-                                                                       IReadoutRequestElement.READOUT_TYPE_II_GLOBAL,
-                                                                       element.getFirstTimeUTC(),
-                                                                       element.getLastTimeUTC(),
-                                                                       element.getDomID(),
-                                                                       element.getSourceID());
-                        mListGlobal_II.add(element_II);
-                    } catch (PayloadException pe) {
-                        log.error("Cannot create readout request", pe);
-                    }
+                    IReadoutRequestElement element_II = triggerFactory.createReadoutRequestElement(
+                                                IReadoutRequestElement.READOUT_TYPE_II_GLOBAL,
+                                                element.getFirstTimeUTC(),
+                                                element.getLastTimeUTC(),
+                                                element.getDomID(),
+                                                element.getSourceID());
 
-                    try {
-                        IReadoutRequestElement element_IT =
-                            triggerFactory.createReadoutRequestElement(
-                                                                       IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL,
-                                                                       element.getFirstTimeUTC(),
-                                                                       element.getLastTimeUTC(),
-                                                                       element.getDomID(),
-                                                                       element.getSourceID());
-                        mListGlobal_IT.add(element_IT);
-                    } catch (PayloadException pe) {
-                        log.error("Cannot create readout request", pe);
-                    }
+                    IReadoutRequestElement element_IT = triggerFactory.createReadoutRequestElement(
+                                                IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL,
+                                                element.getFirstTimeUTC(),
+                                                element.getLastTimeUTC(),
+                                                element.getDomID(),
+                                                element.getSourceID());
+
+                    mListGlobal_II.add(element_II);
+                    mListGlobal_IT.add(element_IT);
                     break;
 
                 case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL:

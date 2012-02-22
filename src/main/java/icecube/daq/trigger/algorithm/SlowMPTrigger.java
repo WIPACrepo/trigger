@@ -2,7 +2,6 @@ package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.PayloadException;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -46,7 +45,7 @@ public class SlowMPTrigger extends AbstractTrigger
 
     private long muon_time_window;
 
-
+    
     private boolean t_proximity_configured = false;
     private boolean t_min_configured = false;
     private boolean t_max_configured = false;
@@ -158,7 +157,7 @@ public class SlowMPTrigger extends AbstractTrigger
 
         //System.out.println("INITIALIZED SLOWMPTRIGGER");
     }
-
+    
     public boolean isConfigured()
     {
         return ( t_proximity_configured && t_min_configured && t_max_configured &&
@@ -175,7 +174,7 @@ public class SlowMPTrigger extends AbstractTrigger
 		       {
                            set_t_proximity(Long.parseLong(parameter.getValue()));
                            t_proximity_configured = true;
-                       }
+                       }    
                        else
 		       {
                           throw new IllegalParameterValueException("Illegal t_proximity value: " + Long.parseLong(parameter.getValue()));
@@ -183,7 +182,7 @@ public class SlowMPTrigger extends AbstractTrigger
 		   }
                    else if (parameter.getName().equals("t_min"))
 		   {
-                       if(Long.parseLong(parameter.getValue())>=0)
+                       if(Long.parseLong(parameter.getValue())>=0) 
 		       {
                            set_t_min(Long.parseLong(parameter.getValue()));
                            t_min_configured = true;
@@ -195,7 +194,7 @@ public class SlowMPTrigger extends AbstractTrigger
 		   }
                    else if (parameter.getName().equals("t_max"))
 		   {
-                       if(Long.parseLong(parameter.getValue())>=0)
+                       if(Long.parseLong(parameter.getValue())>=0) 
 		       {
                            set_t_max(Long.parseLong(parameter.getValue()));
                            t_max_configured = true;
@@ -207,19 +206,19 @@ public class SlowMPTrigger extends AbstractTrigger
 		   }
                    else if (parameter.getName().equals("delta_d"))
 		   {
-                       if(Integer.parseInt(parameter.getValue())>=0)
+                       if(Integer.parseInt(parameter.getValue())>=0) 
 		       {
                            set_delta_d(Integer.parseInt(parameter.getValue()));
                            delta_d_configured = true;
                        }
-                       else
+                       else 
 		       {
                           throw new IllegalParameterValueException("Illegal delta_d value: " + Integer.parseInt(parameter.getValue()));
                        }
-		   }
+		   }    
                    else if (parameter.getName().equals("rel_v"))
 		   {
-                       if(Double.parseDouble(parameter.getValue())>=0)
+                       if(Double.parseDouble(parameter.getValue())>=0) 
 		       {
                            set_rel_v(Double.parseDouble(parameter.getValue()));
                            rel_v_configured = true;
@@ -228,34 +227,34 @@ public class SlowMPTrigger extends AbstractTrigger
 		       {
                           throw new IllegalParameterValueException("Illegal rel_v value: " + Double.parseDouble(parameter.getValue()));
                        }
-		   }
+		   }    
                    else if (parameter.getName().equals("min_n_tuples"))
 		   {
-                       if(Integer.parseInt(parameter.getValue())>=0)
+                       if(Integer.parseInt(parameter.getValue())>=0) 
 		       {
                            set_min_n_tuples(Integer.parseInt(parameter.getValue()));
                            min_n_tuples_configured = true;
                        }
-                       else
+                       else 
 		       {
                           throw new IllegalParameterValueException("Illegal min_n_tuples value: " + Integer.parseInt(parameter.getValue()));
                        }
 		   }
                    else if (parameter.getName().equals("max_event_length"))
 		   {
-                       if(Long.parseLong(parameter.getValue())>=0)
+                       if(Long.parseLong(parameter.getValue())>=0) 
 		       {
                            set_max_event_length(Long.parseLong(parameter.getValue()));
                            max_event_length_configured = true;
                        }
-                       else
+                       else 
 		       {
                           throw new IllegalParameterValueException("Illegal max_event_length value: " + Long.parseLong(parameter.getValue()));
                        }
 		   }
                    else if (parameter.getName().equals("domSet"))
 		   {
-                       if(Integer.parseInt(parameter.getValue())>=0)
+                       if(Integer.parseInt(parameter.getValue())>=0) 
 		       {
                            configHitFilter(Integer.parseInt(parameter.getValue()));
                        }
@@ -338,7 +337,7 @@ public class SlowMPTrigger extends AbstractTrigger
     {
         min_n_tuples = val;
     }
-
+    
     public void set_max_event_length(long val)
     {
         max_event_length = val*10L;
@@ -584,11 +583,8 @@ public class SlowMPTrigger extends AbstractTrigger
                 //System.out.format("FOUND TRIGGER: start: %d, end :%d with %d tuples%n",info.get_first_hit().get_time(), info.get_last_hit().get_time(), info.get_num_tuples() );
                 //log.warn("FOUND TRIGGER: length: " + (info.get_last_hit().getHitTimeUTC().longValue()-info.get_first_hit().getHitTimeUTC().longValue()) + " with " + info.get_num_tuples());
                 // form trigger here for each trigger_info
-                try {
-                    formTrigger(info.get_hit_list(), null, null);
-                } catch (PayloadException pe) {
-                    log.error("Cannot form trigger", pe);
-                }
+                formTrigger(info.get_hit_list(), null, null);
+
             }
         }
 
@@ -596,7 +592,7 @@ public class SlowMPTrigger extends AbstractTrigger
         //one_hit_list.clear();
         two_hit_list.clear();
     }
-
+    
     /*
 
       Function to check for a triple combination fullfilling the parameter boundaries

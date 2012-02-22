@@ -2,7 +2,6 @@ package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.PayloadException;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -29,7 +28,7 @@ import org.apache.log4j.Logger;
  * is intended for use on a central trigger module which may have inputs from multiple
  * strings.  The trigger searches for N hits clustered in a "coherence" length of M
  * adjacent modules all within a time window of &Delta;t.
- *
+ * 
  * The trigger is configured via the standard trigger config XML.  It will respond to
  * the following configuration parameters ...
  * <dl>
@@ -40,12 +39,12 @@ import org.apache.log4j.Logger;
  * <dt>multiplicity</dt>
  * <dd>The parameter M above - the multiplicity threshold.</dd>
  * </dl>
- *
+ * 
  * The implementation is straightforward.  First the overall multiplicty requirement must
  * be satisfied: hits are collected into a queue until the head and tail fall outside
  * the time window.  If the queue size is &ge; N then that forms the 'first-level trigger.'
  * Upon reaching this state, it must be checked whether the hits are clustered in space.
- * This is done by incrementing counters a length M/2 in either direction from the
+ * This is done by incrementing counters a length M/2 in either direction from the 
  * <i>logical channel</i>, allowing for counts on neighboring strings.  A space cluster will
  * also maintain counter[i] &ge; N for one or more <i>logical channel</i> locations.
  * <p>
@@ -53,7 +52,7 @@ import org.apache.log4j.Logger;
  * space cluster.  That is, hits are not part of the trigger hit list unless they are
  * clustered both in time and in space.  Simultaneous, multiple clusters will count toward
  * a single single trigger and will not produce multiple triggers.
- *
+ * 
  * @author kael
  *
  */
@@ -69,14 +68,14 @@ public class VolumeTrigger extends AbstractTrigger
     private int  coherenceUp;
     private int  coherenceDown;
     private boolean configCoherence;
-
+    
     private LinkedList<IHitPayload> triggerQueue;
 
     private boolean needStringMap;
     private TreeMap<Integer, TreeSet<Integer>> stringMap;
 
     private static final Logger logger = Logger.getLogger(VolumeTrigger.class);
-
+    
     public VolumeTrigger()
     {
         triggerQueue    = new LinkedList<IHitPayload>();
@@ -92,7 +91,7 @@ public class VolumeTrigger extends AbstractTrigger
 
 	needStringMap = true;
     }
-
+    
     @Override
     public void addParameter(TriggerParameter parameter) throws UnknownParameterException,
             IllegalParameterValueException
@@ -161,7 +160,7 @@ public class VolumeTrigger extends AbstractTrigger
 	    needStringMap = false;
 	}
 
-        if (!(payload instanceof IHitPayload))
+        if (!(payload instanceof IHitPayload)) 
             throw new TriggerException(
                     "Payload object " + payload + " cannot be upcast to IHitPayload."
                     );
@@ -171,30 +170,24 @@ public class VolumeTrigger extends AbstractTrigger
         // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
         if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
         if (!hitFilter.useHit(hitPayload)) return;
-
-        if (logger.isDebugEnabled())
+        
+        if (logger.isDebugEnabled()) 
         {
             LogicalChannelVT logical = LogicalChannelVT.fromHitPayload(
                     hitPayload, getTriggerHandler().getDOMRegistry());
-            logger.debug("Received hit at UTC " +
+            logger.debug("Received hit at UTC " + 
                     hitPayload.getHitTimeUTC() +
-                    " - logical channel " + logical +
+                    " - logical channel " + logical + 
                     " queue size = " + triggerQueue.size());
         }
-
+        
         while (triggerQueue.size() > 0 &&
                 hitPayload.getHitTimeUTC().longValue() -
                 triggerQueue.element().getHitTimeUTC().longValue() > timeWindow)
         {
             if (triggerQueue.size() >= multiplicity && processHitQueue())
-            {
-                if (triggerQueue.size() > 0) {
-                    try {
-                        formTrigger(triggerQueue, null, null);
-                    } catch (PayloadException pe) {
-                        throw new TriggerException("Cannot form trigger", pe);
-                    }
-                }
+            {   
+                if (triggerQueue.size() > 0) formTrigger(triggerQueue, null, null);
                 triggerQueue.clear();
                 setEarliestPayloadOfInterest(hitPayload);
                 break;
@@ -209,14 +202,14 @@ public class VolumeTrigger extends AbstractTrigger
         }
         triggerQueue.add(hitPayload);
     }
-
+    
     private boolean processHitQueue()
     {
     	final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
 
         final TreeMap<LogicalChannelVT, Integer> coherenceMap = new TreeMap<LogicalChannelVT, Integer>();
         boolean trigger = false;
-
+        
         for (IHitPayload hit : triggerQueue)
         {
             LogicalChannelVT central = LogicalChannelVT.fromHitPayload(hit, domRegistry);
@@ -230,7 +223,7 @@ public class VolumeTrigger extends AbstractTrigger
 
 		int m0 = Math.max( 1, central.module - coherenceUp);
 		int m1 = Math.min(60, central.module + coherenceDown);
-		for (int m = m0; m <= m1; m++)
+		for (int m = m0; m <= m1; m++) 
 		    {
 			LogicalChannelVT ch = new LogicalChannelVT(st.intValue(), m);
 			int counter = 0;
@@ -241,7 +234,7 @@ public class VolumeTrigger extends AbstractTrigger
 		    }
 	    }
         }
-
+        
         if (logger.isDebugEnabled())
         {
             for (LogicalChannelVT ch : coherenceMap.keySet())
@@ -249,14 +242,14 @@ public class VolumeTrigger extends AbstractTrigger
                 logger.debug("Logical channel " + ch + " : " + coherenceMap.get(ch));
             }
         }
-
+        
         // No trigger so skip next operation
         if (!trigger) return false;
-
+        
         // Remove sites in coherence map less than threshold
         for (Iterator<Integer> it = coherenceMap.values().iterator(); it.hasNext(); )
             if (it.next() < multiplicity) it.remove();
-
+        
         // Prune hits not in spatial cluster out of queue as these
         // will be built into trigger very soon.
         for (Iterator<IHitPayload> hitIt = triggerQueue.iterator(); hitIt.hasNext(); )
@@ -273,7 +266,7 @@ public class VolumeTrigger extends AbstractTrigger
                 if (ch.isNear(testCh, coherenceUp, coherenceDown, strings)) clust = true;
             if (!clust) hitIt.remove();
         }
-
+        
         return true;
     }
 
@@ -290,12 +283,12 @@ class LogicalChannelVT implements Comparable<LogicalChannelVT>
     int module;
     long numericMBID;
     String mbid;
-
+    
     LogicalChannelVT()
     {
         this(0, 0);
     }
-
+    
     LogicalChannelVT(int string, int module)
     {
         this.string = string;
@@ -303,13 +296,13 @@ class LogicalChannelVT implements Comparable<LogicalChannelVT>
         this.numericMBID = 0x00000000000L;
         this.mbid   = "000000000000";
     }
-
+    
     @Override
     public int hashCode()
     {
         return 64 * string + module - 1;
     }
-
+    
     static LogicalChannelVT fromHitPayload(IHitPayload hit, DOMRegistry registry)
     {
         LogicalChannelVT logCh = new LogicalChannelVT();
@@ -319,10 +312,10 @@ class LogicalChannelVT implements Comparable<LogicalChannelVT>
         logCh.module        = registry.getStringMinor(logCh.mbid);
         return logCh;
     }
-
+    
     /**
      * Determine whether given channel is inside [up,down] radius of this
-     * channel.
+     * channel.  
      * @param ch test channel to compare
      * @param up up radius
      * @param down down radius
@@ -366,8 +359,8 @@ class LogicalChannelVT implements Comparable<LogicalChannelVT>
     {
         return hashCode() == obj.hashCode();
     }
-
-
-
-
+    
+    
+    
+    
 }

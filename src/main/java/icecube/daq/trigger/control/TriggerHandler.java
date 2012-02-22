@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 12797 2011-03-21 22:14:34Z dglo $
+ * Version $Id: TriggerHandler.java 13515 2012-02-22 18:21:28Z dglo $
  *
  * Date: October 25 2004
  *
@@ -54,7 +54,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 12797 2011-03-21 22:14:34Z dglo $
+ * @version $Id: TriggerHandler.java 13515 2012-02-22 18:21:28Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -419,7 +419,7 @@ public class TriggerHandler
                 if (timeDiff < 0.0) {
                     log.error("Hit out of order! This time - Last time = " +
                               timeDiff);
-                    return;
+                    continue;
                 } else {
                     timeOfLastHit = hit.getHitTimeUTC();
                     count++;

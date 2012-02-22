@@ -9,12 +9,7 @@ import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.util.DOMRegistry;
 import icecube.daq.util.DeployedDOM;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.ListIterator;
-import java.util.Arrays;
-import java.lang.Math;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,7 +40,7 @@ public class SlowMPTrigger extends AbstractTrigger
 
     private long muon_time_window;
 
-    
+
     private boolean t_proximity_configured = false;
     private boolean t_min_configured = false;
     private boolean t_max_configured = false;
@@ -54,6 +49,8 @@ public class SlowMPTrigger extends AbstractTrigger
     private boolean min_n_tuples_configured = false;
     private boolean max_event_length_configured = false;
 
+    private DOMRegistry domRegistry;
+
     private class min_hit_info
     {
         min_hit_info(IHitPayload new_hit)
@@ -61,13 +58,15 @@ public class SlowMPTrigger extends AbstractTrigger
             hit  = new_hit;
 
             utc_time = hit.getHitTimeUTC().longValue();
-            mb_id = String.format("%012x", hit.getDOMID().longValue());
+            mb_id = hit.getDOMID().toString();
         }
 
         private IHitPayload hit;
 
         private String mb_id;
         private long utc_time;
+
+        private DeployedDOM dom;
 
         public String get_mb_id()
         {
@@ -82,6 +81,19 @@ public class SlowMPTrigger extends AbstractTrigger
         public IHitPayload get_hit()
         {
             return hit;
+        }
+
+        public DeployedDOM get_dom()
+        {
+            if (dom == null) {
+                if (domRegistry == null) {
+                    domRegistry = getTriggerHandler().getDOMRegistry();
+                }
+
+                dom = domRegistry.getDom(mb_id);
+            }
+
+            return dom;
         }
     }
 
@@ -157,7 +169,7 @@ public class SlowMPTrigger extends AbstractTrigger
 
         //System.out.println("INITIALIZED SLOWMPTRIGGER");
     }
-    
+
     public boolean isConfigured()
     {
         return ( t_proximity_configured && t_min_configured && t_max_configured &&
@@ -174,7 +186,7 @@ public class SlowMPTrigger extends AbstractTrigger
 		       {
                            set_t_proximity(Long.parseLong(parameter.getValue()));
                            t_proximity_configured = true;
-                       }    
+                       }
                        else
 		       {
                           throw new IllegalParameterValueException("Illegal t_proximity value: " + Long.parseLong(parameter.getValue()));
@@ -182,7 +194,7 @@ public class SlowMPTrigger extends AbstractTrigger
 		   }
                    else if (parameter.getName().equals("t_min"))
 		   {
-                       if(Long.parseLong(parameter.getValue())>=0) 
+                       if(Long.parseLong(parameter.getValue())>=0)
 		       {
                            set_t_min(Long.parseLong(parameter.getValue()));
                            t_min_configured = true;
@@ -194,7 +206,7 @@ public class SlowMPTrigger extends AbstractTrigger
 		   }
                    else if (parameter.getName().equals("t_max"))
 		   {
-                       if(Long.parseLong(parameter.getValue())>=0) 
+                       if(Long.parseLong(parameter.getValue())>=0)
 		       {
                            set_t_max(Long.parseLong(parameter.getValue()));
                            t_max_configured = true;
@@ -206,19 +218,19 @@ public class SlowMPTrigger extends AbstractTrigger
 		   }
                    else if (parameter.getName().equals("delta_d"))
 		   {
-                       if(Integer.parseInt(parameter.getValue())>=0) 
+                       if(Integer.parseInt(parameter.getValue())>=0)
 		       {
                            set_delta_d(Integer.parseInt(parameter.getValue()));
                            delta_d_configured = true;
                        }
-                       else 
+                       else
 		       {
                           throw new IllegalParameterValueException("Illegal delta_d value: " + Integer.parseInt(parameter.getValue()));
                        }
-		   }    
+		   }
                    else if (parameter.getName().equals("rel_v"))
 		   {
-                       if(Double.parseDouble(parameter.getValue())>=0) 
+                       if(Double.parseDouble(parameter.getValue())>=0)
 		       {
                            set_rel_v(Double.parseDouble(parameter.getValue()));
                            rel_v_configured = true;
@@ -227,34 +239,34 @@ public class SlowMPTrigger extends AbstractTrigger
 		       {
                           throw new IllegalParameterValueException("Illegal rel_v value: " + Double.parseDouble(parameter.getValue()));
                        }
-		   }    
+		   }
                    else if (parameter.getName().equals("min_n_tuples"))
 		   {
-                       if(Integer.parseInt(parameter.getValue())>=0) 
+                       if(Integer.parseInt(parameter.getValue())>=0)
 		       {
                            set_min_n_tuples(Integer.parseInt(parameter.getValue()));
                            min_n_tuples_configured = true;
                        }
-                       else 
+                       else
 		       {
                           throw new IllegalParameterValueException("Illegal min_n_tuples value: " + Integer.parseInt(parameter.getValue()));
                        }
 		   }
                    else if (parameter.getName().equals("max_event_length"))
 		   {
-                       if(Long.parseLong(parameter.getValue())>=0) 
+                       if(Long.parseLong(parameter.getValue())>=0)
 		       {
                            set_max_event_length(Long.parseLong(parameter.getValue()));
                            max_event_length_configured = true;
                        }
-                       else 
+                       else
 		       {
                           throw new IllegalParameterValueException("Illegal max_event_length value: " + Long.parseLong(parameter.getValue()));
                        }
 		   }
                    else if (parameter.getName().equals("domSet"))
 		   {
-                       if(Integer.parseInt(parameter.getValue())>=0) 
+                       if(Integer.parseInt(parameter.getValue())>=0)
 		       {
                            configHitFilter(Integer.parseInt(parameter.getValue()));
                        }
@@ -337,7 +349,7 @@ public class SlowMPTrigger extends AbstractTrigger
     {
         min_n_tuples = val;
     }
-    
+
     public void set_max_event_length(long val)
     {
         max_event_length = val*10L;
@@ -372,13 +384,16 @@ public class SlowMPTrigger extends AbstractTrigger
         // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
         if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
         if (!hitFilter.useHit(hitPayload)) return;
-        final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
+
+        //if (domRegistry == null) {
+        //    domRegistry = getTriggerHandler().getDOMRegistry();
+        //}
 
         if(one_hit_list.size() == 0) // size is 0, so just add it to the list
         {
             min_hit_info new_hit = new min_hit_info(hitPayload);
-            //int string_nr = domRegistry.getDom(new_hit.get_mb_id()).getStringMajor();
-            //int om_nr = domRegistry.getDom(new_hit.get_mb_id()).getStringMinor();
+            //int string_nr = new_hit.get_dom().getStringMajor();
+            //int om_nr = new_hit.get_dom().getStringMinor();
             // log.warn("FIRST HIT IN LIST: time " +new_hit.get_time() + " string: " + string_nr + " om: " + om_nr);
             one_hit_list.add(new_hit);
         }
@@ -390,8 +405,8 @@ public class SlowMPTrigger extends AbstractTrigger
             // remove this next line again
 
 
-            //int string_nr = domRegistry.getDom(new_hit.get_mb_id()).getStringMajor();
-            //int om_nr = domRegistry.getDom(new_hit.get_mb_id()).getStringMinor();
+            //int string_nr = new_hit.get_dom().getStringMajor();
+            //int om_nr = new_hit.get_dom().getStringMinor();
             //log.warn("LATER HIT IN LIST: time " +new_hit.get_time() + " string: " + string_nr + " om: " + om_nr + "diff: " + (new_hit.get_time()-one_hit_list.getFirst().get_time()));
             //System.out.format("list contains %d entries..%n TWOHIT_list contains %d entries..%n", one_hit_list.size(), two_hit_list.size() );
             while( new_hit.get_time() - one_hit_list.element().get_time() > 10000L)
@@ -592,7 +607,7 @@ public class SlowMPTrigger extends AbstractTrigger
         //one_hit_list.clear();
         two_hit_list.clear();
     }
-    
+
     /*
 
       Function to check for a triple combination fullfilling the parameter boundaries
@@ -609,7 +624,9 @@ public class SlowMPTrigger extends AbstractTrigger
         {
             long t_diff3 = hit3.get_time() - hit1.get_time();
 
-            final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
+            if (domRegistry == null) {
+                domRegistry = getTriggerHandler().getDOMRegistry();
+            }
 
             double p_diff1 = domRegistry.distanceBetweenDOMs(hit1.get_mb_id(), hit2.get_mb_id());
             double p_diff2 = domRegistry.distanceBetweenDOMs(hit2.get_mb_id(), hit3.get_mb_id());
@@ -681,15 +698,26 @@ public class SlowMPTrigger extends AbstractTrigger
     */
     private min_hit_info HLCPairCheck(min_hit_info hit1, min_hit_info hit2)
     {
-        final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
+        if (domRegistry == null) {
+            domRegistry = getTriggerHandler().getDOMRegistry();
+        }
 
-        int string_nr1 = domRegistry.getDom(hit1.get_mb_id()).getStringMajor();
-        int string_nr2 = domRegistry.getDom(hit2.get_mb_id()).getStringMajor();
+        DeployedDOM dom1 = hit1.get_dom();
+        if (dom1 == null) {
+            throw new Error("Cannot find " + hit1.get_mb_id());
+        }
+        DeployedDOM dom2 = hit2.get_dom();
+        if (dom2 == null) {
+            throw new Error("Cannot find " + hit2.get_mb_id());
+        }
+
+        int string_nr1 = dom1.getStringMajor();
+        int string_nr2 = dom2.getStringMajor();
 
         if(string_nr1 == string_nr2)
         {
-            int om_nr1 = domRegistry.getDom(hit1.get_mb_id()).getStringMinor();
-            int om_nr2 = domRegistry.getDom(hit2.get_mb_id()).getStringMinor();
+            int om_nr1 = dom1.getStringMinor();
+            int om_nr2 = dom2.getStringMinor();
 
             if( Math.abs(om_nr1 - om_nr2) <= 2)
             {

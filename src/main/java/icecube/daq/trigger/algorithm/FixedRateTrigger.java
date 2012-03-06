@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 13498 2012-02-20 21:11:34Z kael $
+ * Version $Id: FixedRateTrigger.java 13532 2012-03-06 15:52:08Z kael $
  *
  * Date: May 1 2006
  *
@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 13498 2012-02-20 21:11:34Z kael $
+ * @version $Id: FixedRateTrigger.java 13532 2012-03-06 15:52:08Z kael $
  * @author pat
  */
 public class FixedRateTrigger extends AbstractTrigger
@@ -43,7 +43,7 @@ public class FixedRateTrigger extends AbstractTrigger
     private static int triggerNumber = 0;
 
     /**
-     * Time interval between triggers (in nanoseconds)
+     * Time interval between triggers (in integral number of nanoseconds)
      */
     private long interval;
 
@@ -88,7 +88,7 @@ public class FixedRateTrigger extends AbstractTrigger
      */
     public void addParameter(TriggerParameter parameter) throws UnknownParameterException, IllegalParameterValueException {
         if (parameter.getName().compareTo("interval") == 0) {
-            interval = Long.parseLong(parameter.getValue());
+            interval = Long.parseLong(parameter.getValue()) * 10L;
             configInterval = true;
         } else if (parameter.getName().compareTo("triggerPrescale") == 0) {
             triggerPrescale = Integer.parseInt(parameter.getValue());

@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerManager
  *
- * Version $Id: ITriggerHandler.java 13401 2011-11-11 04:23:13Z dglo $
+ * Version $Id: ITriggerHandler.java 13553 2012-03-09 20:49:47Z dglo $
  *
  * Date: March 31 2005
  *
@@ -17,6 +17,7 @@ import icecube.daq.trigger.algorithm.ITrigger;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
 
+import java.io.File;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -24,7 +25,7 @@ import java.util.TreeSet;
 /**
  * This interface defines the behavior of a TriggerHandler
  *
- * @version $Id: ITriggerHandler.java 13401 2011-11-11 04:23:13Z dglo $
+ * @version $Id: ITriggerHandler.java 13553 2012-03-09 20:49:47Z dglo $
  * @author pat
  */
 public interface ITriggerHandler extends IPayloadProducer
@@ -115,9 +116,9 @@ public interface ITriggerHandler extends IPayloadProducer
 
     /**
      * Create the map of neighboring strings
-     * @param stringMapFileName Name of the text file to create the map from
+     * @param stringMapFile Location of text file to create the map from
      */
-    void createStringMap(String stringMapFileName);
+    void createStringMap(File stringMapFile);
 
     /**
      * Get the string map

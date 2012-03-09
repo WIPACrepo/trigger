@@ -32,6 +32,7 @@ import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 13401 2011-11-11 04:23:13Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 13553 2012-03-09 20:49:47Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -783,7 +784,7 @@ public class GlobalTriggerHandler
 	return domRegistry;
     }
 
-    public void createStringMap(String stringMapFileName) {
+    public void createStringMap(File stringMapFile) {
 
 
     }

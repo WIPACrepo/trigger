@@ -14,31 +14,26 @@ import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.oldpayload.impl.TriggerRequestRecord;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ISourceID;
-import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
+import icecube.daq.trigger.algorithm.ITrigger;
 import icecube.daq.trigger.config.TriggerBuilder;
-import icecube.daq.trigger.config.triggers.TriggerConfigType;
 import icecube.daq.trigger.control.DummyTriggerManager;
 import icecube.daq.trigger.control.GlobalTriggerManager;
-import icecube.daq.trigger.control.ITriggerControl;
 import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.TriggerManager;
+import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.util.DOMRegistry;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xml.sax.SAXException;
 
 public class TriggerComponent
     extends DAQComponent
@@ -59,7 +54,7 @@ public class TriggerComponent
     private DAQComponentOutputProcess outputEngine;
 
     private String globalConfigurationDir;
-    private String triggerConfigFileName;
+    private File triggerConfigFile;
 
     private boolean useDummy;
     private boolean isGlobalTrigger;
@@ -226,27 +221,27 @@ public class TriggerComponent
      */
     public void configuring(String configName) throws DAQCompException {
 
-    	// Setup DOMRegistry as 1st thing to do ...
-    	try {
-    		triggerManager.setDOMRegistry(DOMRegistry.loadRegistry(globalConfigurationDir));
-    		log.info("loaded DOM registry");
-    	}
-    	catch (Exception ex) {
-    		throw new DAQCompException("Error loading DOM registry", ex);
-    	}
+        // Initialize DOMRegistry
+        DOMRegistry registry;
+        try {
+            registry = DOMRegistry.loadRegistry(globalConfigurationDir);
+            log.info("loaded DOM registry");
+        } catch (Exception ex) {
+            throw new DAQCompException("Error loading DOM registry", ex);
+        }
+        triggerManager.setDOMRegistry(registry);
 
-	// Also create the string map
-	String stringMapFile = globalConfigurationDir + "/" + DEFAULT_STRING_MAP_FILE_NAME;
-	triggerManager.createStringMap(stringMapFile);
+        // Also create the string map
+        File stringMapFile = new File(globalConfigurationDir,
+                                      DEFAULT_STRING_MAP_FILE_NAME);
+        triggerManager.createStringMap(stringMapFile);
 
-        // Lookup the trigger configuration
-        String globalConfigurationFileName = globalConfigurationDir + "/" +
-            configName;;
-        File cfgFile = new File(globalConfigurationFileName);
+        // Build the trigger configuration directory
+        File cfgFile = new File(globalConfigurationDir, configName);
         if (!cfgFile.isFile()) {
-            if (!globalConfigurationFileName.endsWith(".xml")) {
-                globalConfigurationFileName += ".xml";
-                cfgFile = new File(globalConfigurationFileName);
+            if (!configName.endsWith(".xml")) {
+                cfgFile = new File(globalConfigurationDir,
+                                   configName + ".xml");
             }
 
             if (!cfgFile.isFile()) {
@@ -255,74 +250,78 @@ public class TriggerComponent
             }
         }
 
+        // Lookup the trigger configuration
         String triggerConfiguration;
         try {
-            triggerConfiguration = GlobalConfiguration.getTriggerConfig(globalConfigurationFileName);
+            triggerConfiguration = TriggerBuilder.getTriggerConfig(cfgFile);
         } catch (Exception e) {
             log.error("Error extracting trigger configuration name from" +
                       " global configuraion file.", e);
             throw new DAQCompException("Cannot get trigger configuration name.",
                                        e);
         }
-        triggerConfigFileName = globalConfigurationDir + "/trigger/" +
-            triggerConfiguration;
-        File f = new File(triggerConfigFileName);
-        if (!f.isFile()) {
-            if (!triggerConfigFileName.endsWith(".xml")) {
-                triggerConfigFileName += ".xml";
-                f = new File(triggerConfigFileName);
+
+        File triggerConfigDir = new File(globalConfigurationDir, "trigger");
+        triggerConfigFile = new File(triggerConfigDir, triggerConfiguration);
+        if (!triggerConfigFile.isFile()) {
+            if (!triggerConfiguration.endsWith(".xml")) {
+                triggerConfigFile =
+                    new File(triggerConfigDir, triggerConfiguration + ".xml");
             }
 
-            if (!f.isFile()) {
+            if (!triggerConfigFile.isFile()) {
                 throw new DAQCompException("Trigger configuration file \"" +
-                                           triggerConfigFileName +
+                                           triggerConfigFile +
                                            "\" (from \"" + configName +
                                            "\") does not exist");
             }
         }
 
-        List triggerConfigs =
-            TriggerBuilder.getTriggerConfig(triggerConfigFileName);
-
         // Add triggers to the trigger manager
-        List currentTriggers =
-            TriggerBuilder.buildTriggers(triggerConfigs, sourceId);
-        Iterator triggerIter = currentTriggers.iterator();
-        while (triggerIter.hasNext()) {
-            ITriggerControl trigger = (ITriggerControl) triggerIter.next();
+        List<ITrigger> currentTriggers;
+        try {
+            currentTriggers =
+                TriggerBuilder.buildTriggers(triggerConfigFile, sourceId);
+        } catch (TriggerException te) {
+            throw new DAQCompException("Cannot build triggers from \"" +
+                                       triggerConfigFile + "\" for " +
+                                       sourceId, te);
+        }
+
+        for (ITrigger trigger : currentTriggers) {
             trigger.setTriggerHandler(triggerManager);
         }
         triggerManager.addTriggers(currentTriggers);
 
-        addTriggerNames(triggerConfigs);
+        addTriggerNames(currentTriggers);
     }
 
-    private static final void addTriggerNames(List triggerConfigs)
+    private static final void addTriggerNames(List<ITrigger> triggers)
     {
         int max = 0;
 
-        Iterator triggerIter = triggerConfigs.iterator();
-        while (triggerIter.hasNext()) {
-            TriggerConfigType cfgType = (TriggerConfigType) triggerIter.next();
-            if (max < cfgType.getTriggerType()) {
-                max = cfgType.getTriggerType();
+        for (ITrigger trig : triggers) {
+            if (max < trig.getTriggerType()) {
+                max = trig.getTriggerType();
             }
         }
 
         String[] typeNames = new String[max + 1];
 
-        triggerIter = triggerConfigs.iterator();
-        while (triggerIter.hasNext()) {
-            TriggerConfigType cfgType = (TriggerConfigType) triggerIter.next();
+        for (ITrigger trig : triggers) {
+            String trigName = trig.getTriggerName();
 
-            String trigName = cfgType.getTriggerName();
+            if (trigName == null) {
+                System.err.println("Class " + trig.getClass().getName() + " has no name");
+                continue;
+            }
 
             int idx = trigName.indexOf("Trigger");
             if (idx > 0) {
                 trigName = trigName.substring(0, idx);
             }
 
-            typeNames[cfgType.getTriggerType()] = trigName;
+            typeNames[trig.getTriggerType()] = trigName;
         }
 
         TriggerRequestRecord.setTypeNames(typeNames);
@@ -349,8 +348,8 @@ public class TriggerComponent
         return triggerManager;
     }
 
-    public String getTriggerConfigFileName(){
-        return triggerConfigFileName;
+    public File getTriggerConfigFile(){
+        return triggerConfigFile;
     }
 
     public ISourceID getSourceID(){
@@ -364,6 +363,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 13401 2011-11-11 04:23:13Z dglo $";
+	return "$Id: TriggerComponent.java 13553 2012-03-09 20:49:47Z dglo $";
     }
 }

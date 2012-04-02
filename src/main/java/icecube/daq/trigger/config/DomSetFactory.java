@@ -59,7 +59,7 @@ public class DomSetFactory
             boolean good = false;
             ArrayList<String> domIds = new ArrayList<String>();
 
-            Set<DeployedDOM> doms = domRegistry.getDomsOnString(0);
+            Set<DeployedDOM> doms = domRegistry.getDomsOnHub(0);
             for (DeployedDOM dom: doms) {
                 int pos = dom.getStringMinor();
                 if (pos == 91) {
@@ -82,7 +82,7 @@ public class DomSetFactory
             boolean good = false;
             ArrayList<String> domIds = new ArrayList<String>();
 
-            Set<DeployedDOM> doms = domRegistry.getDomsOnString(0);
+            Set<DeployedDOM> doms = domRegistry.getDomsOnHub(0);
             for (DeployedDOM dom: doms) {
                 int pos = dom.getStringMinor();
                 if (pos == 92) {
@@ -106,7 +106,7 @@ public class DomSetFactory
             ArrayList<String> domIds = new ArrayList<String>();
 
             for (int str=1; str<=78; str++) {
-                Set<DeployedDOM> doms = domRegistry.getDomsOnString(str);
+                Set<DeployedDOM> doms = domRegistry.getDomsOnHub(str);
                 for (DeployedDOM dom: doms) {
                     int pos = dom.getStringMinor();
                     if ( (pos >= 1) && (pos <= 60) ) {
@@ -128,7 +128,7 @@ public class DomSetFactory
             ArrayList<String> domIds = new ArrayList<String>();
 
             for (int str=201; str<=220; str++) {
-                Set<DeployedDOM> doms = domRegistry.getDomsOnString(str);
+                Set<DeployedDOM> doms = domRegistry.getDomsOnHub(str);
                 for (DeployedDOM dom: doms) {
                     int pos = dom.getStringMinor();
                     if ( (pos >= 61) && (pos <= 64) ) {
@@ -164,7 +164,7 @@ public class DomSetFactory
 
             for (int str = 0; str < stringList.length; str++)
             {
-                Set<DeployedDOM> doms = domRegistry.getDomsOnString(stringList[str]);
+                Set<DeployedDOM> doms = domRegistry.getDomsOnHub(stringList[str]);
                 for (DeployedDOM dom: doms) {
                     int pos = dom.getStringMinor();
                     if ( (pos >= minPos) && (pos <= maxPos) ) {
@@ -178,7 +178,7 @@ public class DomSetFactory
             maxPos = 60;
 
             for (int str=79; str<=86; str++) {
-                Set<DeployedDOM> doms = domRegistry.getDomsOnString(str);
+                Set<DeployedDOM> doms = domRegistry.getDomsOnHub(str);
                 for (DeployedDOM dom: doms) {
                     int pos = dom.getStringMinor();
                     if ( (pos >= minPos) && (pos <= maxPos) ) {

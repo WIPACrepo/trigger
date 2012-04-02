@@ -288,6 +288,12 @@ public class TriggerComponent
                                        sourceId, te);
         }
 
+        if (currentTriggers.size()  == 0) {
+            throw new DAQCompException("No triggers specified in \"" +
+                                       triggerConfigFile + "\" for " +
+                                       sourceId);
+        }
+
         for (ITrigger trigger : currentTriggers) {
             trigger.setTriggerHandler(triggerManager);
         }
@@ -363,6 +369,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 13553 2012-03-09 20:49:47Z dglo $";
+	return "$Id: TriggerComponent.java 13612 2012-04-02 22:16:42Z dglo $";
     }
 }

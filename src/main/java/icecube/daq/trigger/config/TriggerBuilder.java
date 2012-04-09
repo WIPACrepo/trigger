@@ -129,6 +129,11 @@ public class TriggerBuilder
                                                    rplus));
             }
 
+            if (!trig.isConfigured()) {
+                throw new ConfigException("Trigger " + name +
+                                          " is not fully configured");
+            }
+
             trigList.add(trig);
         }
 

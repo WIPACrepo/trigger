@@ -1,7 +1,7 @@
 /*
  * class: MinBiasTrigger
  *
- * Version $Id: MinBiasTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: MinBiasTrigger.java 13679 2012-05-02 15:12:38Z dglo $
  *
  * Date: August 27 2005
  *
@@ -15,6 +15,7 @@ import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -26,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  * This class implements a simple minimum bias trigger. It simply counts hits and
  * applies a prescale for determining when a trigger should be formed.
  *
- * @version $Id: MinBiasTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: MinBiasTrigger.java 13679 2012-05-02 15:12:38Z dglo $
  * @author pat
  */
 public class MinBiasTrigger extends AbstractTrigger
@@ -73,7 +74,12 @@ public class MinBiasTrigger extends AbstractTrigger
             triggerPrescale = Integer.parseInt(parameter.getValue());
         } else if (parameter.getName().compareTo("domSet") == 0) {
             domSetId = Integer.parseInt(parameter.getValue());
-            configHitFilter(domSetId);
+            try {
+                configHitFilter(domSetId);
+            } catch (ConfigException ce) {
+                throw new IllegalParameterValueException("Bad DomSet #" +
+                                                         domSetId);
+            }
         } else {
             throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
         }

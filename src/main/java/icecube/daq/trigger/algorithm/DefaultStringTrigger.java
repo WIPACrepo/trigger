@@ -6,6 +6,7 @@ import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -53,7 +54,12 @@ public class DefaultStringTrigger
             triggerPrescale = Integer.parseInt(parameter.getValue());
         } else if (parameter.getName().compareTo("domSet") == 0) {
             domSetId = Integer.parseInt(parameter.getValue());
-            configHitFilter(domSetId);
+            try {
+                configHitFilter(domSetId);
+            } catch (ConfigException ce) {
+                throw new IllegalParameterValueException("Bad DomSet #" +
+                                                         domSetId);
+            }
         } else {
             throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
         }

@@ -1,6 +1,7 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.trigger.config.DomSetFactory;
+import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.test.MockHit;
 import icecube.daq.util.DOMRegistry;
 
@@ -78,30 +79,35 @@ public class HitFilterTest
     }
 
     public void testSyncFilter()
+        throws ConfigException
     {
         checkResponses(new HitFilter(0), "sync",
                        true, false, false, false, false);
     }
 
     public void testTrigFilter()
+        throws ConfigException
     {
         checkResponses(new HitFilter(1), "trig",
                        false, true, false, false, false);
     }
 
     public void testInIceFilter()
+        throws ConfigException
     {
         checkResponses(new HitFilter(2), "in-ice",
                        false, false, true, false, false);
     }
 
     public void testIceTopFilter()
+        throws ConfigException
     {
         checkResponses(new HitFilter(3), "icetop",
                        false, false, false, true, false);
     }
 
     public void testDeepCoreFilter()
+        throws ConfigException
     {
         checkResponses(new HitFilter(4), "deep-core",
                        false, false, false, false, true);

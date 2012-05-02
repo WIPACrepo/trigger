@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 13372 2011-10-07 03:20:05Z kael $
+ * Version $Id: AbstractTrigger.java 13679 2012-05-02 15:12:38Z dglo $
  *
  * Date: August 19 2005
  *
@@ -26,6 +26,7 @@ import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.HitFilter;
 import icecube.daq.trigger.control.ITriggerHandler;
+import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -46,7 +47,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 13372 2011-10-07 03:20:05Z kael $
+ * @version $Id: AbstractTrigger.java 13679 2012-05-02 15:12:38Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger
@@ -681,12 +682,12 @@ public abstract class AbstractTrigger
         return domSetId;
     }
 
-    public void setDomSetId(int domSetId) {
+    public void setDomSetId(int domSetId) throws ConfigException {
         this.domSetId = domSetId;
         configHitFilter(domSetId);
     }
 
-    protected void configHitFilter(int domSetId) {
+    protected void configHitFilter(int domSetId) throws ConfigException {
         hitFilter = new HitFilter(domSetId);
     }
 

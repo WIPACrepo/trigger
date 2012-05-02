@@ -20,6 +20,7 @@ import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.trigger.algorithm.ITrigger;
+import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.config.TriggerBuilder;
 import icecube.daq.trigger.control.DummyTriggerManager;
 import icecube.daq.trigger.control.GlobalTriggerManager;
@@ -236,6 +237,14 @@ public class TriggerComponent
                                       DEFAULT_STRING_MAP_FILE_NAME);
         triggerManager.createStringMap(stringMapFile);
 
+        // Inform DomSetFactory of the configuration directory location
+        try {
+            DomSetFactory.setConfigurationDirectory(globalConfigurationDir);
+        } catch (TriggerException ex) {
+            throw new DAQCompException("Bad trigger configuration directory",
+                                       ex);
+        }
+
         // Build the trigger configuration directory
         File cfgFile = new File(globalConfigurationDir, configName);
         if (!cfgFile.isFile()) {
@@ -369,6 +378,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 13612 2012-04-02 22:16:42Z dglo $";
+	return "$Id: TriggerComponent.java 13679 2012-05-02 15:12:38Z dglo $";
     }
 }

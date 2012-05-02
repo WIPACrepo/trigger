@@ -43,6 +43,19 @@ public class DomSet
     }
 
     /**
+     * Compare this DomSet with another DomSet.
+     *
+     * @param other DomSet being compared
+     *
+     * @return <tt>true</tt> if both sets contain the same DOM IDs
+     */
+    public boolean equals(DomSet other)
+    {
+        return other != null && set.size() == other.set.size() &&
+            set.containsAll(other.set);
+    }
+
+    /**
      * Get the name of this DomSet
      * @return name
      */
@@ -60,4 +73,8 @@ public class DomSet
         return set.contains(domId);
     }
 
+    public String toString()
+    {
+        return name + "*" + set.size();
+    }
 }

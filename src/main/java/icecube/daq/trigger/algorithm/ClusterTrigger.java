@@ -97,7 +97,7 @@ public class ClusterTrigger extends AbstractTrigger
                 configHitFilter(domSetId);
             } catch (ConfigException ce) {
                 throw new IllegalParameterValueException("Bad DomSet #" +
-                                                         domSetId);
+                                                         domSetId, ce);
             }
         }
         super.addParameter(parameter);

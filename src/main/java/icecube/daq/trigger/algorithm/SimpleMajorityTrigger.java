@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 13679 2012-05-02 15:12:38Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 13696 2012-05-14 17:35:47Z dglo $
  *
  * Date: August 19 2005
  *
@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 13679 2012-05-02 15:12:38Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 13696 2012-05-14 17:35:47Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -113,7 +113,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
                 configHitFilter(domSetId);
             } catch (ConfigException ce) {
                 throw new IllegalParameterValueException("Bad DomSet #" +
-                                                         domSetId);
+                                                         domSetId, ce);
             }
         } else {
             throw new UnknownParameterException("Unknown parameter: " + parameter.getName());

@@ -88,7 +88,7 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
                 configHitFilter(domSetId);
             } catch (ConfigException ce) {
                 throw new IllegalParameterValueException("Bad DomSet #" +
-                                                         domSetId);
+                                                         domSetId, ce);
             }
         } else {
             throw new UnknownParameterException("Unknown parameter: " + parameter.getName());

@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 13679 2012-05-02 15:12:38Z dglo $
+ * Version $Id: CalibrationTrigger.java 13696 2012-05-14 17:35:47Z dglo $
  *
  * Date: August 27 2005
  *
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 13679 2012-05-02 15:12:38Z dglo $
+ * @version $Id: CalibrationTrigger.java 13696 2012-05-14 17:35:47Z dglo $
  * @author pat
  */
 public class CalibrationTrigger extends AbstractTrigger
@@ -87,7 +87,7 @@ public class CalibrationTrigger extends AbstractTrigger
                 configHitFilter(domSetId);
             } catch (ConfigException ce) {
                 throw new IllegalParameterValueException("Bad DomSet #" +
-                                                         domSetId);
+                                                         domSetId, ce);
             }
         } else {
             throw new UnknownParameterException("Unknown parameter: " + parameter.getName());

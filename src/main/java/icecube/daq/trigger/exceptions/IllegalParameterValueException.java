@@ -1,7 +1,7 @@
 /*
  * class: TimeOutOfOrderException
  *
- * Version $Id: IllegalParameterValueException.java 13696 2012-05-14 17:35:47Z dglo $
+ * Version $Id: IllegalParameterValueException.java 13698 2012-05-14 17:42:35Z dglo $
  *
  * Date: March 31 2005
  *
@@ -14,7 +14,7 @@ package icecube.daq.trigger.exceptions;
 /**
  * This class provides a specific exception
  *
- * @version $Id: IllegalParameterValueException.java 13696 2012-05-14 17:35:47Z dglo $
+ * @version $Id: IllegalParameterValueException.java 13698 2012-05-14 17:42:35Z dglo $
  * @author pat
  */
 public class IllegalParameterValueException
@@ -44,8 +44,9 @@ public class IllegalParameterValueException
     }
 
     /**
-     * constructor taking a message
+     * constructor taking a message and an exception
      * @param message message associated with this exception
+     * @param exception the exception
      */
     public IllegalParameterValueException(String message, Exception exception) {
         super(message, exception);

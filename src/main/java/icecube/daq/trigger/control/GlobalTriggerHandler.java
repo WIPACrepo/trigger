@@ -50,7 +50,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 13553 2012-03-09 20:49:47Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 13798 2012-07-16 19:44:30Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -132,11 +132,6 @@ public class GlobalTriggerHandler
     private double longestTrigger;
 
     private DOMRegistry domRegistry;
-
-    /**
-     * String map
-     */
-    private TreeMap<Integer, TreeSet<Integer> > stringMap;
 
     /** Outgoing byte buffer cache. */
     private IByteBufferCache outCache;
@@ -782,15 +777,6 @@ public class GlobalTriggerHandler
 
     public DOMRegistry getDOMRegistry() {
 	return domRegistry;
-    }
-
-    public void createStringMap(File stringMapFile) {
-
-
-    }
-
-    public TreeMap<Integer, TreeSet<Integer> > getStringMap() {
-	return stringMap;
     }
 
     public int getCount()

@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerManager
  *
- * Version $Id: ITriggerHandler.java 13553 2012-03-09 20:49:47Z dglo $
+ * Version $Id: ITriggerHandler.java 13798 2012-07-16 19:44:30Z dglo $
  *
  * Date: March 31 2005
  *
@@ -25,7 +25,7 @@ import java.util.TreeSet;
 /**
  * This interface defines the behavior of a TriggerHandler
  *
- * @version $Id: ITriggerHandler.java 13553 2012-03-09 20:49:47Z dglo $
+ * @version $Id: ITriggerHandler.java 13798 2012-07-16 19:44:30Z dglo $
  * @author pat
  */
 public interface ITriggerHandler extends IPayloadProducer
@@ -113,18 +113,6 @@ public interface ITriggerHandler extends IPayloadProducer
      * @return the DOMRegistry to use
      */
     DOMRegistry getDOMRegistry();
-
-    /**
-     * Create the map of neighboring strings
-     * @param stringMapFile Location of text file to create the map from
-     */
-    void createStringMap(File stringMapFile);
-
-    /**
-     * Get the string map
-     * @return the map of neighboring strings
-     */
-    TreeMap<Integer, TreeSet<Integer> > getStringMap();
 
     /**
      * Get the number of payloads processed.

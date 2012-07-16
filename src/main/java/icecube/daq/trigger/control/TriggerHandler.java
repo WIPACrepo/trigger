@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 13553 2012-03-09 20:49:47Z dglo $
+ * Version $Id: TriggerHandler.java 13798 2012-07-16 19:44:30Z dglo $
  *
  * Date: October 25 2004
  *
@@ -55,7 +55,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 13553 2012-03-09 20:49:47Z dglo $
+ * @version $Id: TriggerHandler.java 13798 2012-07-16 19:44:30Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -131,11 +131,6 @@ public class TriggerHandler
      */
     private DOMRegistry domRegistry;
 
-    /**
-     * String map
-     */
-    private TreeMap<Integer, TreeSet<Integer> > stringMap;
-
     /** Outgoing byte buffer cache. */
     private IByteBufferCache outCache;
 
@@ -184,8 +179,6 @@ public class TriggerHandler
         PayloadBagMonitor triggerBagMonitor = new PayloadBagMonitor();
         triggerBag.setMonitor(triggerBagMonitor);
         monitor.setTriggerBagMonitor(triggerBagMonitor);
-
-        stringMap = new TreeMap<Integer, TreeSet<Integer> >();
 
         outChan = null;
 
@@ -685,69 +678,6 @@ public class TriggerHandler
 
     public DOMRegistry getDOMRegistry() {
         return domRegistry;
-    }
-
-    public void createStringMap(File stringMapFile) {
-
-        if (log.isDebugEnabled()) {
-            log.debug("Creating string map...");
-        }
-
-        BufferedReader reader;
-        try {
-            reader = new BufferedReader(new FileReader(stringMapFile));
-        } catch(FileNotFoundException fnfe) {
-            log.error("Exception opening string map file: " + fnfe);
-            return;
-        }
-
-        while (true) {
-            String line;
-            try {
-                line = reader.readLine();
-            } catch (IOException ioe) {
-                log.error("Exception reading string map file: " + ioe);
-                break;
-            }
-
-            if (line == null) {
-                break;
-            }
-
-            String[] nums = line.split("\\s");
-            Integer currentString = Integer.parseInt(nums[0]);
-
-            if (log.isDebugEnabled()) {
-                log.debug(" Getting neighbors of string " + currentString);
-            }
-
-            TreeSet<Integer> neighbors = new TreeSet<Integer>();
-            neighbors.add(currentString);
-            for (int i = 1; i < nums.length; i++) {
-                Integer neighborString = Integer.parseInt(nums[i]);
-
-                if (log.isDebugEnabled()) {
-                    log.debug("   Adding string " + neighborString);
-                }
-                neighbors.add(neighborString);
-            }
-
-            if (log.isDebugEnabled()) {
-                log.debug("  String " + currentString + " has " +
-                          neighbors.size() + " neighbors");
-            }
-
-            stringMap.put(currentString, neighbors);
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug(" String map contains " + stringMap.size() +
-                      " strings");
-        }
-    }
-
-    public TreeMap<Integer, TreeSet<Integer> > getStringMap() {
-        return stringMap;
     }
 
     public void setOutputFactory(TriggerRequestPayloadFactory factory)

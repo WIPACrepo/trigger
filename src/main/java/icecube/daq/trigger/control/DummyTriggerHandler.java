@@ -94,11 +94,6 @@ public class DummyTriggerHandler
     private DOMRegistry domRegistry;
 
     /**
-     * String map
-     */
-    private TreeMap<Integer, TreeSet<Integer> > stringMap;
-
-    /**
      * Default constructor
      */
     public DummyTriggerHandler() {
@@ -362,15 +357,6 @@ public class DummyTriggerHandler
 
     public DOMRegistry getDOMRegistry() {
         return domRegistry;
-    }
-
-    public void createStringMap(File stringMapFile) {
-
-
-    }
-
-    public TreeMap<Integer, TreeSet<Integer> > getStringMap() {
-	return stringMap;
     }
 
     public void setOutputFactory(TriggerRequestPayloadFactory factory)

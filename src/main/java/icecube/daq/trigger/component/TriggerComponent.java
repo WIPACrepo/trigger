@@ -232,11 +232,6 @@ public class TriggerComponent
         }
         triggerManager.setDOMRegistry(registry);
 
-        // Also create the string map
-        File stringMapFile = new File(globalConfigurationDir,
-                                      DEFAULT_STRING_MAP_FILE_NAME);
-        triggerManager.createStringMap(stringMapFile);
-
         // Inform DomSetFactory of the configuration directory location
         try {
             DomSetFactory.setConfigurationDirectory(globalConfigurationDir);
@@ -378,6 +373,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 13679 2012-05-02 15:12:38Z dglo $";
+	return "$Id: TriggerComponent.java 13798 2012-07-16 19:44:30Z dglo $";
     }
 }

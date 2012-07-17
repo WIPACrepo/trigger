@@ -44,8 +44,6 @@ public class TriggerComponent
     public static final String DEFAULT_AMANDA_HOST = "ic-twrdaq00";
     public static final int DEFAULT_AMANDA_PORT = 12014;
 
-    public static final String DEFAULT_STRING_MAP_FILE_NAME = "hexagon_near.geo";
-
     private ISourceID sourceId;
     private IByteBufferCache inCache;
     private IByteBufferCache outCache;
@@ -373,6 +371,6 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-	return "$Id: TriggerComponent.java 13798 2012-07-16 19:44:30Z dglo $";
+	return "$Id: TriggerComponent.java 13803 2012-07-17 17:41:53Z dglo $";
     }
 }

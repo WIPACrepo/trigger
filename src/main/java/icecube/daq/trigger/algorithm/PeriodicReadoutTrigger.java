@@ -30,20 +30,20 @@ public class PeriodicReadoutTrigger extends AbstractTrigger
 {
 
     private static final Log log = LogFactory.getLog(PeriodicReadoutTrigger.class);
-    
+
     // internal variables of trigger start/stop
-    
+
     private IUTCTime current_trigger_start;
     private IUTCTime current_trigger_end;
-    
+
     private boolean trigger_window_set;
 
-    
+
     // important steerable quantities
-    
-    private long prescale_delta_t;  
+
+    private long prescale_delta_t;
     private long readout_length;
-    
+
     private boolean delta_t_configured = false;
     private boolean readout_length_configured = false;
 
@@ -51,7 +51,7 @@ public class PeriodicReadoutTrigger extends AbstractTrigger
     {
 	trigger_window_set = false;
     }
-    
+
     public boolean isConfigured()
     {
         return ( delta_t_configured && readout_length_configured );
@@ -68,7 +68,7 @@ public class PeriodicReadoutTrigger extends AbstractTrigger
                            prescale_delta_t= Long.parseLong(parameter.getValue())*1000000000L; // parameter is configured in seconds....
                            delta_t_configured = true;
 			   //log.warn("configured prescale_delta_t");
-                       }    
+                       }
                        else
 		       {
                           throw new IllegalParameterValueException("Illegal t_proximity value: " + Long.parseLong(parameter.getValue()));
@@ -76,7 +76,7 @@ public class PeriodicReadoutTrigger extends AbstractTrigger
 		   }
                    else if (parameter.getName().equals("readout_length"))
 		   {
-                       if(Long.parseLong(parameter.getValue())>=0) 
+                       if(Long.parseLong(parameter.getValue())>=0)
 		       {
                            readout_length = Long.parseLong(parameter.getValue()); // readout_length is configued in nanoseconds....
                            readout_length_configured = true;
@@ -87,7 +87,7 @@ public class PeriodicReadoutTrigger extends AbstractTrigger
                           throw new IllegalParameterValueException("Illegal t_min value: " + Long.parseLong(parameter.getValue()));
                        }
 		   }
-                  
+
 		   else
 		   {
 		      throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
@@ -95,7 +95,7 @@ public class PeriodicReadoutTrigger extends AbstractTrigger
 		   }
                    super.addParameter(parameter);
                }
-   
+
     @Override
     public void flush()
     {
@@ -114,9 +114,9 @@ public class PeriodicReadoutTrigger extends AbstractTrigger
 
         // Check hit type
         if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
-	
+
 	IUTCTime sample_hit_time=hitPayload.getHitTimeUTC();
-	
+
 	//trigger_window_set is only false after initialization
 	if(trigger_window_set==false){
 	    current_trigger_start=sample_hit_time.getOffsetUTCTime(5000000); // go 5 ms after the hit and start the trigger algorithm from here
@@ -129,11 +129,11 @@ public class PeriodicReadoutTrigger extends AbstractTrigger
 	else{
 	    if(sample_hit_time.timeDiff_ns(current_trigger_start) < 0){
 		// we are before the actual trigger readout - so we can safely set earliest payload to zero and do nothing
-		setEarliestPayloadOfInterest(hitPayload);		
+		setEarliestPayloadOfInterest(hitPayload);
 	    }
 	    else{
-		
-		// time difference is bigger .. check if we are in the trigger window.. then do nothing... otherwhise we are the first hit after the 
+
+		// time difference is bigger .. check if we are in the trigger window.. then do nothing... otherwhise we are the first hit after the
 		// window - so we need to form the trigger and reset the current_trigger_start/end to the next readout
 		if(sample_hit_time.timeDiff_ns(current_trigger_end) > 0){
 		    formTrigger(current_trigger_start, current_trigger_end);

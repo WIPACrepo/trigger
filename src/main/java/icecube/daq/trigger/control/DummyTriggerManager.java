@@ -10,18 +10,14 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.oldpayload.impl.MasterPayloadFactory;
 import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.Spliceable;
-import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 

@@ -3,7 +3,6 @@ package icecube.daq.trigger.monitor;
 import icecube.daq.oldpayload.impl.TriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 
-import java.io.IOException;
 import java.util.zip.DataFormatException;
 
 import org.apache.commons.logging.Log;

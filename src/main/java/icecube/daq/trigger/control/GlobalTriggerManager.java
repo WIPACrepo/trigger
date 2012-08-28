@@ -10,22 +10,17 @@
 
 package icecube.daq.trigger.control;
 
-import icecube.daq.oldpayload.impl.MasterPayloadFactory;
 import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadRegistry;
-import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.UTCTime;
 import icecube.daq.splicer.Spliceable;
-import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
 import icecube.daq.trigger.monitor.Statistic;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class...
  *
- * @version $Id: GlobalTriggerManager.java 13276 2011-08-18 18:03:26Z dglo $
+ * @version $Id: GlobalTriggerManager.java 13874 2012-08-28 19:14:11Z dglo $
  * @author shseo
  */
 public class GlobalTriggerManager

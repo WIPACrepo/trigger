@@ -6,8 +6,6 @@ import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.util.DOMRegistry;
-import icecube.daq.util.DeployedDOM;
 import icecube.daq.payload.IUTCTime;
 
 //import java.util.ArrayList;

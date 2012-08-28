@@ -9,10 +9,8 @@ import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.util.DOMRegistry;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;

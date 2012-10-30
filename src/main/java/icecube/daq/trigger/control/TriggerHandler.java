@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 13874 2012-08-28 19:14:11Z dglo $
+ * Version $Id: TriggerHandler.java 13989 2012-10-30 18:53:19Z dglo $
  *
  * Date: October 25 2004
  *
@@ -48,7 +48,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 13874 2012-08-28 19:14:11Z dglo $
+ * @version $Id: TriggerHandler.java 13989 2012-10-30 18:53:19Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -93,6 +93,11 @@ public class TriggerHandler
      * earliest thing of interest to the analysis
      */
     private IPayload earliestPayloadOfInterest;
+
+    /**
+     * source of last hit, used for monitoring
+     */
+    private ISourceID srcOfLastHit;
 
     /**
      * time of last hit, used for monitoring
@@ -162,6 +167,7 @@ public class TriggerHandler
 
         count = 0;
         earliestPayloadOfInterest = null;
+        srcOfLastHit = null;
         timeOfLastHit = null;
         inputHandler = new TriggerInput();
         triggerList = new ArrayList<ITrigger>();
@@ -404,11 +410,15 @@ public class TriggerHandler
 
                 // check to see if timeDiff is reasonable, if not ignore it
                 if (timeDiff < 0.0) {
-                    log.error("Hit out of order! This time - Last time = " +
-                              timeDiff);
+                    log.error("Hit from " + hit.getSourceID() +
+                              " out of order! This time - Last time = " +
+                              timeDiff + (srcOfLastHit == null ? "" :
+                                          ", src of last hit = " +
+                                          srcOfLastHit));
                     continue;
                 } else {
                     timeOfLastHit = hit.getHitTimeUTC();
+                    srcOfLastHit = hit.getSourceID();
                     count++;
                 }
 

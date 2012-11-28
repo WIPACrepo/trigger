@@ -32,6 +32,7 @@ import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 12797 2011-03-21 22:14:34Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 13553 2012-03-09 20:49:47Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -783,7 +784,7 @@ public class GlobalTriggerHandler
 	return domRegistry;
     }
 
-    public void createStringMap(String stringMapFileName) {
+    public void createStringMap(File stringMapFile) {
 
 
     }
@@ -911,6 +912,11 @@ public class GlobalTriggerHandler
         return outputQueue.size();
     }
 
+    public void switchToNewRun()
+    {
+        triggerBag.resetUID();
+    }
+
     class MainThread
         implements Runnable
     {
@@ -1024,7 +1030,7 @@ public class GlobalTriggerHandler
         public void run()
         {
             ByteBuffer trigBuf;
-            while (outputThread != null) {
+            while (outputThread != null || outputQueue.size() > 0) {
                 synchronized (outputQueue) {
                     if (outputQueue.size() == 0) {
                         try {
@@ -1065,6 +1071,10 @@ public class GlobalTriggerHandler
                 if (trigBuf != null) {
                     outChan.receiveByteBuffer(trigBuf);
                 }
+            }
+
+            if (outChan != null) {
+                outChan.sendLastAndStop();
             }
         }
 

@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 13696 2012-05-14 17:35:47Z dglo $
  *
  * Date: August 19 2005
  *
@@ -16,6 +16,7 @@ import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TimeOutOfOrderException;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -31,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 13696 2012-05-14 17:35:47Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -108,7 +109,12 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
             triggerPrescale = Integer.parseInt(parameter.getValue());
         } else if (parameter.getName().compareTo("domSet") == 0) {
             domSetId = Integer.parseInt(parameter.getValue());
-            configHitFilter(domSetId);
+            try {
+                configHitFilter(domSetId);
+            } catch (ConfigException ce) {
+                throw new IllegalParameterValueException("Bad DomSet #" +
+                                                         domSetId, ce);
+            }
         } else {
             throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
         }
@@ -567,6 +573,15 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
             return (hits.size() >= threshold);
         }
 
+        public String toString()
+        {
+            if (hits.size() == 0) {
+                return "Window[]*0";
+            }
+
+            return "Window[" + startTime() + "-" + endTime() + "]*" +
+                hits.size();
+        }
     }
 
 }

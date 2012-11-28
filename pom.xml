@@ -25,22 +25,6 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.jvnet.jaxb1.maven2</groupId>
-        <artifactId>maven-jaxb1-plugin</artifactId>
-        <version>1.0-rc11</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <schemaDirectory>src/main/resources/icecube/daq/trigger/config</schemaDirectory>
-          <generateDirectory>${project.build.directory}/jaxb-source</generateDirectory>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <executions>
@@ -185,8 +169,8 @@ Remove this comment to enable SimpleTrigger -->
     </dependency>
 
     <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
+      <groupId>jaxen</groupId>
+      <artifactId>jaxen</artifactId>
     </dependency>
   </dependencies>
 

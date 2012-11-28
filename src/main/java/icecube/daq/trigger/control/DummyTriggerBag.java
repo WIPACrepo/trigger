@@ -165,4 +165,8 @@ public class DummyTriggerBag
     public void setMonitor(PayloadBagMonitor monitor) {
     }
 
+    public void resetUID()
+    {
+        // do nothing
+    }
 }

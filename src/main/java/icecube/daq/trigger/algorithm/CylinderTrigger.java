@@ -3,6 +3,7 @@ package icecube.daq.trigger.algorithm;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -100,9 +101,14 @@ public class CylinderTrigger extends AbstractTrigger
             setHeight(Double.parseDouble(parameter.getValue()));
         else if (parameter.getName().equals("domSet"))
         {
-    	    domSetId = Integer.parseInt(parameter.getValue());
-    	    configHitFilter(domSetId);
-    	}
+            domSetId = Integer.parseInt(parameter.getValue());
+            try {
+                configHitFilter(domSetId);
+            } catch (ConfigException ce) {
+                throw new IllegalParameterValueException("Bad DomSet #" +
+                                                         domSetId, ce);
+            }
+        }
         super.addParameter(parameter);
     }
 

@@ -1,7 +1,7 @@
 /*
  * class: TriggerBag
  *
- * Version $Id: TriggerBag.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: TriggerBag.java 13401 2011-11-11 04:23:13Z dglo $
  *
  * Date: March 16 2005
  *
@@ -52,7 +52,7 @@ import org.apache.commons.logging.LogFactory;
  *                                   +       {===============}
  *                                   +            Merge
  *
- * @version $Id: TriggerBag.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: TriggerBag.java 13401 2011-11-11 04:23:13Z dglo $
  * @author pat
  */
 public class TriggerBag
@@ -611,5 +611,14 @@ public class TriggerBag
         }
         return true;
 
+    }
+
+    /**
+     * Reset the universal ID used for merged requests.  This method should
+     * only be used between runs (or as the target of a switchToNewRun() call.)
+     */
+    public void resetUID()
+    {
+        triggerUID = 0;
     }
 }

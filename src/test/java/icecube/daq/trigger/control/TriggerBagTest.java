@@ -25,6 +25,9 @@ import org.apache.log4j.BasicConfigurator;
 public class TriggerBagTest
     extends TestCase
 {
+    private static final int SOURCE_ID =
+        SourceIdRegistry.INICE_TRIGGER_SOURCE_ID;
+
     class BogusPayload
         extends MockPayload
     {
@@ -331,6 +334,85 @@ public class TriggerBagTest
         assertNotNull("Expected to get next trigger", trp);
         assertEquals("Unexpected output total",
                      1, bag.getMonitor().getOutputCountTotal());
+
+        assertEquals("Unexpected UID for first request", 0, trp.getUID());
+    }
+
+    public void testMerge()
+    {
+        TriggerBag bag = new TriggerBag();
+        assertEquals("Unexpected input total",
+                     0, bag.getMonitor().getInputCountTotal());
+
+        long timeStep = 10000L;
+
+        long firstTime = timeStep + 1234L;
+        long lastTime = timeStep * 2;
+        int type = 1;
+        int cfgId = 11;
+        long nextGate = lastTime + 1;
+        int nextUID = 1;
+
+        int numAdded = 0;
+        int numIssued = 0;
+
+        int expUID = 1;
+
+        for (int i = 0; i < 3; i++) {
+            if (i == 2) {
+                bag.resetUID();
+                expUID = 1;
+            }
+
+            bag.add(new MockTriggerRequest(firstTime,
+                                           lastTime - (timeStep / 2),
+                                           type, cfgId, SOURCE_ID,
+                                           nextUID++));
+            numAdded++;
+            assertEquals("Unexpected input total",
+                         numAdded, bag.getMonitor().getInputCountTotal());
+            assertEquals("Unexpected output total",
+                         numIssued, bag.getMonitor().getOutputCountTotal());
+
+            bag.add(new MockTriggerRequest((lastTime - (timeStep / 2)) - 1,
+                                           lastTime, type, cfgId, SOURCE_ID,
+                                           nextUID++));
+            numAdded++;
+            assertEquals("Unexpected input total",
+                         numAdded, bag.getMonitor().getInputCountTotal());
+            assertEquals("Unexpected output total",
+                         numIssued, bag.getMonitor().getOutputCountTotal());
+
+            long gateTime;
+            gateTime = nextGate - (timeStep + 1);
+            bag.setTimeGate(new MockUTCTime(gateTime));
+            assertFalse("Didn't expect to have a 'next' trigger for" +
+                        " gateTime " + gateTime, bag.hasNext());
+            assertNull("Didn't expect to get next trigger", bag.next());
+            assertEquals("Unexpected output total",
+                         numIssued, bag.getMonitor().getOutputCountTotal());
+
+            gateTime = nextGate;
+            bag.setTimeGate(new MockUTCTime(gateTime));
+            assertTrue("Expected to have a 'next' trigger", bag.hasNext());
+
+            numIssued += 1;
+
+            ITriggerRequestPayload trp = bag.next();
+            assertNotNull("Expected to get next trigger", trp);
+            assertEquals("Unexpected output total",
+                         numIssued, bag.getMonitor().getOutputCountTotal());
+
+            assertEquals("Unexpected UID for request #" + numIssued,
+                         expUID, trp.getUID());
+
+            firstTime += timeStep;
+            lastTime += timeStep;
+            type += 1;
+            cfgId += 11;
+            nextGate += timeStep;
+            expUID += 1;
+        }
     }
 
     public static void main(String[] args)

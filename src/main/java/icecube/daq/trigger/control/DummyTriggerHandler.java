@@ -30,6 +30,7 @@ import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -363,7 +364,7 @@ public class DummyTriggerHandler
         return domRegistry;
     }
 
-    public void createStringMap(String stringMapFileName) {
+    public void createStringMap(File stringMapFile) {
 
 
     }
@@ -388,5 +389,10 @@ public class DummyTriggerHandler
     {
         throw new Error("Unimplemented");
         //outCache = cache;
+    }
+
+    public void switchToNewRun()
+    {
+        // does nothing
     }
 }

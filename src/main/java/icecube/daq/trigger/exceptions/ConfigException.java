@@ -1,7 +1,7 @@
 /*
- * class: TriggerException
+ * class: ConfigException
  *
- * Version $Id: TriggerException.java 13553 2012-03-09 20:49:47Z dglo $
+ * Version $Id: ConfigException.java 2125 2007-10-12 18:27:05Z ksb $
  *
  * Date: November 13 2004
  *
@@ -11,25 +11,26 @@
 package icecube.daq.trigger.exceptions;
 
 /**
- * This class defines a general trigger exception
+ * This class defines a trigger configuration exception
  *
- * @version $Id: TriggerException.java 13553 2012-03-09 20:49:47Z dglo $
+ * @version $Id: ConfigException.java 2125 2007-10-12 18:27:05Z ksb $
  * @author pat
  */
-public class TriggerException extends Exception
+public class ConfigException
+    extends TriggerException
 {
 
     /**
      * default constructor
      */
-    TriggerException() {
+    ConfigException() {
     }
 
     /**
      * constructor taking a message
      * @param message message associated with this exception
      */
-    public TriggerException(String message) {
+    public ConfigException(String message) {
         super(message);
     }
 
@@ -37,7 +38,7 @@ public class TriggerException extends Exception
      * constructor taking an exception
      * @param exception the exception
      */
-    public TriggerException(Exception exception) {
+    public ConfigException(Exception exception) {
         super(exception);
     }
 
@@ -46,7 +47,7 @@ public class TriggerException extends Exception
      * @param message message associated with this exception
      * @param exception the exception
      */
-    public TriggerException(String message, Exception exception) {
+    public ConfigException(String message, Exception exception) {
         super(message, exception);
     }
 

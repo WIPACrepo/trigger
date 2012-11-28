@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 13515 2012-02-22 18:21:28Z dglo $
+ * Version $Id: TriggerHandler.java 13553 2012-03-09 20:49:47Z dglo $
  *
  * Date: October 25 2004
  *
@@ -33,6 +33,7 @@ import icecube.daq.trigger.monitor.PayloadBagMonitor;
 import icecube.daq.trigger.monitor.TriggerHandlerMonitor;
 import icecube.daq.util.DOMRegistry;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -54,7 +55,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 13515 2012-02-22 18:21:28Z dglo $
+ * @version $Id: TriggerHandler.java 13553 2012-03-09 20:49:47Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -678,66 +679,75 @@ public class TriggerHandler
     }
 
     public void setDOMRegistry(DOMRegistry registry) {
-	domRegistry = registry;
+        domRegistry = registry;
         DomSetFactory.setDomRegistry(registry);
     }
 
     public DOMRegistry getDOMRegistry() {
-	return domRegistry;
+        return domRegistry;
     }
 
-    public void createStringMap(String stringMapFileName) {
+    public void createStringMap(File stringMapFile) {
 
-	if (log.isDebugEnabled()) {
-	    log.debug("Creating string map...");
-	}
-
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(stringMapFileName));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-
-                String[] nums = line.split("\\s");
-                Integer currentString = Integer.parseInt(nums[0]);
-
-		if (log.isDebugEnabled()) {
-		    log.debug(" Getting neighbors of string " + currentString);
-		}
-
-                TreeSet<Integer> neighbors = new TreeSet<Integer>();
-                neighbors.add(currentString);
-                for (int i = 1; i < nums.length; i++) {
-                    Integer neighborString = Integer.parseInt(nums[i]);
-
-		    if (log.isDebugEnabled()) {
-			log.debug("   Adding string " + neighborString);
-		    }
-                    neighbors.add(neighborString);
-                }
-
-		if (log.isDebugEnabled()) {
-		    log.debug("  String " + currentString + " has " + neighbors.size() + " neighbors");
-		}
-
-                stringMap.put(currentString, neighbors);
-
-            }
-
-	    if (log.isDebugEnabled()) {
-		log.debug(" String map contains " + stringMap.size() + " strings");
-	    }
-
-        } catch(FileNotFoundException fnfe) {
-	    log.error("Exception opening string map file: " + fnfe);
-        } catch (IOException ioe) {
-	    log.error("Exception reading string map file: " + ioe);
+        if (log.isDebugEnabled()) {
+            log.debug("Creating string map...");
         }
 
+        BufferedReader reader;
+        try {
+            reader = new BufferedReader(new FileReader(stringMapFile));
+        } catch(FileNotFoundException fnfe) {
+            log.error("Exception opening string map file: " + fnfe);
+            return;
+        }
+
+        while (true) {
+            String line;
+            try {
+                line = reader.readLine();
+            } catch (IOException ioe) {
+                log.error("Exception reading string map file: " + ioe);
+                break;
+            }
+
+            if (line == null) {
+                break;
+            }
+
+            String[] nums = line.split("\\s");
+            Integer currentString = Integer.parseInt(nums[0]);
+
+            if (log.isDebugEnabled()) {
+                log.debug(" Getting neighbors of string " + currentString);
+            }
+
+            TreeSet<Integer> neighbors = new TreeSet<Integer>();
+            neighbors.add(currentString);
+            for (int i = 1; i < nums.length; i++) {
+                Integer neighborString = Integer.parseInt(nums[i]);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("   Adding string " + neighborString);
+                }
+                neighbors.add(neighborString);
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("  String " + currentString + " has " +
+                          neighbors.size() + " neighbors");
+            }
+
+            stringMap.put(currentString, neighbors);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug(" String map contains " + stringMap.size() +
+                      " strings");
+        }
     }
 
     public TreeMap<Integer, TreeSet<Integer> > getStringMap() {
-	return stringMap;
+        return stringMap;
     }
 
     public void setOutputFactory(TriggerRequestPayloadFactory factory)
@@ -815,6 +825,11 @@ public class TriggerHandler
     public int getNumOutputsQueued()
     {
         return outputQueue.size();
+    }
+
+    public void switchToNewRun()
+    {
+        // does nothing
     }
 
     class MainThread
@@ -930,7 +945,7 @@ public class TriggerHandler
         {
 //System.err.println("OTtop");
             ByteBuffer trigBuf;
-            while (outputThread != null) {
+            while (outputThread != null || outputQueue.size() > 0) {
 //System.err.println("OTloop");
                 synchronized (outputQueue) {
 //System.err.println("OTq="+outputQueue.size());
@@ -981,6 +996,10 @@ public class TriggerHandler
                 outChan.receiveByteBuffer(trigBuf);
             }
 //System.err.println("OTexit");
+
+            if (outChan != null) {
+                outChan.sendLastAndStop();
+            }
         }
 
         void start()

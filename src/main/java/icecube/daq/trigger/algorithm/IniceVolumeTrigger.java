@@ -498,7 +498,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	if (maxPos > 60) maxPos = 60;
 
 	// add doms on center string, skipping center om
-	Collection<DeployedDOM> allDoms = getTriggerHandler().getDOMRegistry().getDomsOnString(centerString);
+	Collection<DeployedDOM> allDoms = getTriggerHandler().getDOMRegistry().getDomsOnHub(centerString);
 	for (DeployedDOM dom : allDoms) {
 	    int position = dom.getStringMinor();
 	    if (position != centerPosition) {
@@ -522,7 +522,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	    if (maxPos > 60) maxPos = 60;
 
 	    // get the doms on this string
-	    allDoms = getTriggerHandler().getDOMRegistry().getDomsOnString(string.intValue());
+	    allDoms = getTriggerHandler().getDOMRegistry().getDomsOnHub(string.intValue());
 
 	    // loop over the doms and get the ones with positions in the correct range
 	    for (DeployedDOM dom : allDoms) {

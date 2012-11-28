@@ -24,10 +24,10 @@ class DevNullChannel
     private IByteBufferCache bufMgr;
 
     DevNullChannel(IOChannelParent parent, SelectableChannel channel,
-                   IByteBufferCache bufMgr, int bufSize)
+                   String name, IByteBufferCache bufMgr, int bufSize)
         throws IOException
     {
-        super(parent, channel, bufMgr, bufSize);
+        super(parent, channel, name, bufMgr, bufSize);
 
         this.bufMgr = bufMgr;
     }
@@ -53,11 +53,11 @@ class DevNullReader
         super(name);
     }
 
-    public InputChannel createChannel(SelectableChannel channel,
+    public InputChannel createChannel(SelectableChannel channel, String name,
                                       IByteBufferCache bufMgr, int bufSize)
         throws IOException
     {
-        return new DevNullChannel(this, channel, bufMgr, bufSize);
+        return new DevNullChannel(this, channel, name, bufMgr, bufSize);
     }
 }
 

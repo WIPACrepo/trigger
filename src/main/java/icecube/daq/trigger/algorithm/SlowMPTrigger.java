@@ -3,6 +3,7 @@ package icecube.daq.trigger.algorithm;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -42,7 +43,7 @@ public class SlowMPTrigger extends AbstractTrigger
 
     private long muon_time_window;
     private double cos_alpha_min;
-    
+
     private boolean t_proximity_configured = false;
     private boolean t_min_configured = false;
     private boolean t_max_configured = false;
@@ -173,13 +174,13 @@ public class SlowMPTrigger extends AbstractTrigger
 
         //System.out.println("INITIALIZED SLOWMPTRIGGER");
     }
-    
+
     public boolean isConfigured()
     {
     	if (dc_algo_configured)
     	{
     		if (dc_algo)
-    		{    	
+    		{
     			return ( t_proximity_configured && t_min_configured && t_max_configured &&
     					delta_d_configured && rel_v_configured && min_n_tuples_configured && max_event_length_configured );
     		}
@@ -233,12 +234,12 @@ public class SlowMPTrigger extends AbstractTrigger
                           throw new IllegalParameterValueException("Illegal t_max value: " + Long.parseLong(parameter.getValue()));
                        }
 		   }
-                   
+
                    else if (parameter.getName().equals("dc_algo"))
 		   {
                            set_dc_algo(Boolean.parseBoolean(parameter.getValue()));
                            dc_algo_configured = true;
-		   }    
+		   }
                    else if (parameter.getName().equals("delta_d"))
 		   {
                        if(Integer.parseInt(parameter.getValue())>=0)
@@ -259,7 +260,7 @@ public class SlowMPTrigger extends AbstractTrigger
 			   cos_alpha_min = Math.cos((Math.PI/180)*alpha_min); // cos_alpha_min is the cos of alpha_min not the min of cos_alpha
                            alpha_min_configured = true;
                        }
-                       else 
+                       else
 		       {
                           throw new IllegalParameterValueException("Illegal alpha_min value: " + Double.parseDouble(parameter.getValue()));
                        }
@@ -302,9 +303,15 @@ public class SlowMPTrigger extends AbstractTrigger
 		   }
                    else if (parameter.getName().equals("domSet"))
 		   {
-                       if(Integer.parseInt(parameter.getValue())>=0)
+                       int domSetId = Integer.parseInt(parameter.getValue());
+                       if(domSetId>=0)
 		       {
-                           configHitFilter(Integer.parseInt(parameter.getValue()));
+                           try {
+                               configHitFilter(domSetId);
+                           } catch (ConfigException ce) {
+                               throw new IllegalParameterValueException("Bad DomSet #" +
+                                                                        domSetId, ce);
+                           }
                        }
 		   }
 		   else
@@ -349,7 +356,7 @@ public class SlowMPTrigger extends AbstractTrigger
     {
         t_max = val * 10L;
     }
-    
+
     // dc_algo
 
     public boolean get_dc_algo()
@@ -361,7 +368,7 @@ public class SlowMPTrigger extends AbstractTrigger
     {
         dc_algo = val;
     }
-    
+
     // delta_d
 
     public int get_delta_d()
@@ -373,7 +380,7 @@ public class SlowMPTrigger extends AbstractTrigger
     {
         delta_d = val;
     }
-    
+
     // alpha_min
 
     public double get_alpha_min()
@@ -385,7 +392,7 @@ public class SlowMPTrigger extends AbstractTrigger
     {
         alpha_min = val;
     }
-    
+
     // rel_v
 
     public double get_rel_v()
@@ -409,9 +416,9 @@ public class SlowMPTrigger extends AbstractTrigger
     {
         min_n_tuples = val;
     }
-    
+
     // max_event_length
-    
+
     public void set_max_event_length(long val)
     {
         max_event_length = val*10L;
@@ -695,21 +702,21 @@ public class SlowMPTrigger extends AbstractTrigger
             double p_diff3 = domRegistry.distanceBetweenDOMs(hit1.get_mb_id(), hit3.get_mb_id());
             double cos_alpha = 1.0;
             //log.warn("    ->step2 - p_diff1: " + p_diff1 + " p_diff2: " + p_diff2 + " pdiff3: " + p_diff3);
-            
+
             if ( !( (p_diff1 > 0) && (p_diff2 > 0) && (p_diff3 > 0) ))
             {
                //log.warn("exiting check triple because p_diff1: " +  p_diff1 + " p_diff2: " + p_diff2 +  " p_diff3:" + p_diff3);
                return;
             }
-            
+
             if (!dc_algo)
-	    { 
+	    {
                 cos_alpha =  ( Math.pow(p_diff1,2) + Math.pow(p_diff2,2) - Math.pow(p_diff3,2)) / ( 2*p_diff1*p_diff2 );
                 //double alpha = (180/Math.PI)*Math.acos(cos_alpha);
                 //log.warn("    ->step2 - p_diff1: " + p_diff1 + " p_diff2: " + p_diff2 + " pdiff3: " + p_diff3 );
                 //log.warn("cos_alpha: " + cos_alpha + " alpha: " + alpha + " cos_alpha_min: " + cos_alpha_min + " alpha_min: " + alpha_min );
             }
-            //else 
+            //else
             //{
             //    log.warn("    ->step2 - p_diff1: " + p_diff1 + " p_diff2: " + p_diff2 + " pdiff3: " + p_diff3 + " delta_d: " + delta_d );
             //}

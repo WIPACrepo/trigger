@@ -17,6 +17,7 @@ import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.impl.UTCTime;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -83,7 +84,12 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
             triggerPrescale = Integer.parseInt(parameter.getValue());
         } else if (parameter.getName().compareTo("domSet") == 0) {
             domSetId = Integer.parseInt(parameter.getValue());
-            configHitFilter(domSetId);
+            try {
+                configHitFilter(domSetId);
+            } catch (ConfigException ce) {
+                throw new IllegalParameterValueException("Bad DomSet #" +
+                                                         domSetId, ce);
+            }
         } else {
             throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
         }

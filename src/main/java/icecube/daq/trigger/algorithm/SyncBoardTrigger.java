@@ -15,6 +15,7 @@ import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
+import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -45,7 +46,7 @@ public class SyncBoardTrigger extends AbstractTrigger
 
     private boolean configPrescale = false;
 
-    public SyncBoardTrigger() {
+    public SyncBoardTrigger() throws ConfigException {
         triggerNumber++;
         configHitFilter(0);
     }

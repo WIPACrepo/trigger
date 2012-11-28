@@ -166,7 +166,7 @@ public class AmandaTriggerEndToEndTest
             Pipe.SourceChannel sourceChannel = testPipe.source();
             sourceChannel.configureBlocking(false);
 
-            rdr.addDataChannel(sourceChannel, cache, 1024);
+            rdr.addDataChannel(sourceChannel, "Chan", cache, 1024);
         }
 
         rdr.startProcessing();
@@ -177,8 +177,6 @@ public class AmandaTriggerEndToEndTest
         trigCfg.sendAmandaStops(tails);
 
         waitUntilStopped(rdr, splicer, "StopMsg");
-
-        trigMgr.flush();
 
         assertEquals("Bad number of payloads written",
                      trigCfg.getExpectedNumberOfAmandaPayloads(numObjs),

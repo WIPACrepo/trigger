@@ -5,10 +5,11 @@ import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQCompServer;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.trigger.config.ITriggerConfig;
+import icecube.daq.trigger.algorithm.ITrigger;
 import icecube.daq.trigger.config.TriggerBuilder;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.control.GlobalTriggerManager;
+import icecube.daq.trigger.exceptions.TriggerException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -52,11 +53,21 @@ public class GlobalTriggerComponent
 
     }
 
-    private List getReadouts(ISourceID sourceId) {
+    private List getReadouts(ISourceID sourceId)
+        throws DAQCompException
+    {
+        List<ITrigger> list;
+        try {
+            list =
+                TriggerBuilder.buildTriggers(getTriggerConfigFile(), sourceId);
+        } catch (TriggerException te) {
+            throw new DAQCompException("Cannot get readouts from \"" +
+                                       getTriggerConfigFile() + "\" for " +
+                                       sourceId, te);
+        }
+
         List readouts = new ArrayList();
-        Iterator iter = TriggerBuilder.buildTriggers(getTriggerConfigFileName(), sourceId).iterator();
-        while (iter.hasNext()) {
-            ITriggerConfig trigger = (ITriggerConfig) iter.next();
+        for (ITrigger trigger : list) {
             readouts.addAll(trigger.getReadoutList());
         }
         return readouts;

@@ -1,218 +1,215 @@
-/*
- * class: TriggerBuilder
- *
- * Version $Id: TriggerBuilder.java 12665 2011-02-15 21:00:42Z dglo $
- *
- * Date: August 18 2005
- *
- * (c) 2005 IceCube Collaboration
- */
-
 package icecube.daq.trigger.config;
 
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.impl.SourceID;
-import icecube.daq.trigger.config.triggers.ActiveTriggers;
-import icecube.daq.trigger.config.triggers.ParameterConfigType;
-import icecube.daq.trigger.config.triggers.ReadoutConfigType;
-import icecube.daq.trigger.config.triggers.TriggerConfigType;
-import icecube.daq.trigger.exceptions.IllegalParameterValueException;
-import icecube.daq.trigger.exceptions.UnknownParameterException;
+import icecube.daq.trigger.algorithm.ITrigger;
+import icecube.daq.trigger.exceptions.ConfigException;
+import icecube.daq.trigger.exceptions.TriggerException;
 
-import java.io.InputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.dom4j.Branch;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Node;
+import org.dom4j.io.SAXReader;
 
 /**
- * This class builds triggers from a trigger configuration object.
- *
- * @version $Id: TriggerBuilder.java 12665 2011-02-15 21:00:42Z dglo $
- * @author pat
+ * Configuration file utility
  */
 public class TriggerBuilder
 {
-
     /**
-     * Logging object for this class.
+     * Build and configure all triggers from a configuration file
+     *
+     * @param triggerConfig location of trigger configuration file
+     * @param srcId source ID of trigger component
+     *
+     * @throws TriggerException if there is a problem
      */
-    private static final Log log = LogFactory.getLog(TriggerBuilder.class);
-
-    /**
-     * Build and configure a trigger from a trigger configuration object.
-     * @param triggerConfiguration TriggerConfigType
-     * @return ITrigger
-     */
-    public static ITriggerConfig buildTrigger(TriggerConfigType triggerConfiguration) {
-
-        // first get name of trigger and create instance of it
-        String triggerName = triggerConfiguration.getTriggerName();
-        String className = "icecube.daq.trigger.algorithm." + triggerName;
-        if (log.isDebugEnabled()) {
-            log.debug("Building trigger: " + className);
-        }
-        ITriggerConfig trigger = null;
+    public static List<ITrigger> buildTriggers(File triggerConfig,
+                                               ISourceID srcId)
+        throws TriggerException
+    {
+        // open trigger config file
+        FileInputStream in;
         try {
-            trigger = (ITriggerConfig) Class.forName(className).newInstance();
-        } catch (ClassNotFoundException cnfe) {
-            log.error("Error building trigger " + className, cnfe);
-        } catch (InstantiationException ie) {
-            log.error("Error building trigger " + className, ie);
-        } catch (IllegalAccessException iae) {
-            log.error("Error building trigger " + className, iae);
+            in = new FileInputStream(triggerConfig);
+        } catch (IOException ioe) {
+            throw new ConfigException("Cannot open trigger configuration" +
+                                       " file \"" + triggerConfig + "\"", ioe);
         }
 
-        // now configure trigger
-        trigger.setTriggerType(triggerConfiguration.getTriggerType());
-        trigger.setTriggerConfigId(triggerConfiguration.getTriggerConfigId());
-        trigger.setSourceId(new SourceID(triggerConfiguration.getSourceId()));
-        trigger.setTriggerName(triggerConfiguration.getTriggerName());
-
-        Iterator paramIter = triggerConfiguration.getParameterConfig().iterator();
-        while (paramIter.hasNext()) {
-            ParameterConfigType paramConfig = (ParameterConfigType) paramIter.next();
-            if (log.isDebugEnabled()) {
-                log.debug("Adding parameter " + paramConfig.getParameterName()
-                         + " = " + paramConfig.getParameterValue());
-            }
-            TriggerParameter parameter = new TriggerParameter(paramConfig.getParameterName(),
-                                                              paramConfig.getParameterValue());
-
+        // load and configure all triggers
+        try {
+            SAXReader rdr = new SAXReader();
+            Document doc;
             try {
-                trigger.addParameter(parameter);
-            } catch (UnknownParameterException e) {
-                // there is an error, log it and make the trigger null
-                log.error(e);
-                trigger = null;
-            } catch(IllegalParameterValueException e) {
-                // there is an error, log it and make the trigger null
-                log.error(e);
-                trigger = null;
+                doc = rdr.read(in);
+            } catch (DocumentException de) {
+                throw new ConfigException("Cannot read run configuration" +
+                                           " file \"" + triggerConfig + "\"",
+                                           de);
             }
 
-        }
-
-        Iterator readoutIter = triggerConfiguration.getReadoutConfig().iterator();
-        while (readoutIter.hasNext()) {
-            ReadoutConfigType readoutConfig = (ReadoutConfigType) readoutIter.next();
-            TriggerReadout readout = new TriggerReadout(readoutConfig.getReadoutType(),
-                                                        readoutConfig.getTimeOffset(),
-                                                        readoutConfig.getTimeMinus(),
-                                                        readoutConfig.getTimePlus());
-            if (log.isDebugEnabled()) {
-                log.debug("Adding readout " + readoutConfig.getReadoutType()
-                         + " = " + readoutConfig.getTimeOffset()
-                         + ", " + readoutConfig.getTimeMinus() + ", " + readoutConfig.getTimePlus());
+            return TriggerBuilder.buildTriggers(doc, srcId);
+        } finally {
+            try {
+                in.close();
+            } catch (IOException ioe) {
+                // ignore errors on close
             }
-            trigger.addReadout(readout);
         }
-
-        return trigger;
-
     }
 
     /**
-     * Build a list of triggers from an xml file on an input stream.
-     * @param stream input stream tied to xml file
-     * @return list of ITriggerConfig's
+     * Build and configure all triggers specified in the XML document
+     *
+     * @param doc XML document
+     * @param componentId source ID of trigger component
+     *
+     * @return list of configured triggers
+     *
+     * @throws TriggerException if there is a problem
      */
-    public static List buildTriggers(InputStream stream) {
-        return buildTriggers(TriggerXMLParser.parse(stream));
-    }
+    public static List<ITrigger> buildTriggers(Document doc,
+                                               ISourceID componentId)
+        throws TriggerException
+    {
+        ArrayList<ITrigger> trigList = new ArrayList<ITrigger>();
 
-    /**
-     * Build a list of triggers from an xml file given by file name.
-     * @param fileName name of xml file
-     * @return list of ITriggerConfig's
-     */
-    public static List buildTriggers(String fileName) {
-        return buildTriggers(TriggerXMLParser.parse(fileName));
-    }
+        List<Node> nodeList = doc.selectNodes("activeTriggers/triggerConfig");
+        for (Node n : nodeList) {
 
-    /**
-     * Build a list of triggers from a trigger configuration object.
-     * @param activeTriggers jaxb trigger configuration object
-     * @return list of ITriggerConfig's
-     */
-    public static List buildTriggers(ActiveTriggers activeTriggers) {
-        return buildTriggers(activeTriggers.getTriggerConfig());
-    }
-
-    /**
-     * Build a list of triggers from a list of trigger configuration objects.
-     * @param triggerConfigs list of TriggerConfigType's
-     * @return list of ITriggerConfig's
-     */
-    public static List buildTriggers(List triggerConfigs) {
-        List triggerList = new ArrayList();
-
-        // loop over triggers
-        Iterator triggerIter = triggerConfigs.iterator();
-        while (triggerIter.hasNext()) {
-            TriggerConfigType triggerConfiguration = (TriggerConfigType) triggerIter.next();
-            ITriggerConfig trigger = buildTrigger(triggerConfiguration);
-
-            // add configured trigger to list
-            if (null != trigger) {
-                triggerList.add(trigger);
+            int srcId = Integer.parseInt(n.valueOf("sourceId"));
+            if (srcId != componentId.getSourceID()) {
+                continue;
             }
 
-        }
+            String name = n.valueOf("triggerName");
 
-        return triggerList;
-
-    }
-
-    /**
-     * Build a list of triggers from an xml file given by file name.
-     * @param fileName name of xml file
-     * @param sourceId sourceId of trigger component
-     * @return list of ITriggerConfig's
-     */
-    public static List buildTriggers(String fileName, ISourceID sourceId) {
-        return buildTriggers(TriggerXMLParser.parse(fileName), sourceId);
-    }
-
-    /**
-     * Build a list of triggers from a trigger configuration object.
-     * @param activeTriggers jaxb trigger configuration object
-     * @param sourceId sourceId of trigger component
-     * @return list of ITriggerConfig's
-     */
-    public static List buildTriggers(ActiveTriggers activeTriggers, ISourceID sourceId) {
-        return buildTriggers(activeTriggers.getTriggerConfig(), sourceId);
-    }
-
-    /**
-     * Build a list of triggers from a list of trigger configuration objects.
-     * @param triggerConfigs list of TriggerConfigType's
-     * @param sourceId sourceId of trigger component
-     * @return list of ITriggerConfig's
-     */
-    public static List buildTriggers(List triggerConfigs, ISourceID sourceId) {
-        List triggerList = new ArrayList();
-
-        // loop over triggers
-        Iterator triggerIter = triggerConfigs.iterator();
-        while (triggerIter.hasNext()) {
-            TriggerConfigType triggerConfiguration = (TriggerConfigType) triggerIter.next();
-            ITriggerConfig trigger = buildTrigger(triggerConfiguration);
-
-            // add configured trigger to list
-            if ((null != trigger) && (trigger.getSourceId().getSourceID() == sourceId.getSourceID())) {
-                triggerList.add(trigger);
+            ITrigger trig;
+            try {
+                Class trigClass =
+                    Class.forName("icecube.daq.trigger.algorithm." + name);
+                trig = (ITrigger) trigClass.newInstance();
+            } catch (Exception ex) {
+                throw new ConfigException("Cannot load trigger \"" + name +
+                                          "\"", ex);
             }
 
+            trig.setTriggerName(name);
+            trig.setSourceId(new SourceID(srcId));
+
+            int cfgId = Integer.parseInt(n.valueOf("triggerConfigId"));
+            trig.setTriggerConfigId(cfgId);
+
+            int trigType = Integer.parseInt(n.valueOf("triggerType"));
+            trig.setTriggerType(trigType);
+
+            List<Node> paramList = n.selectNodes("parameterConfig");
+            for (Node pnode : paramList) {
+                String pname = pnode.valueOf("parameterName");
+                String pval = pnode.valueOf("parameterValue");
+                trig.addParameter(new TriggerParameter(pname, pval));
+            }
+
+            List<Node> rdoutList = n.selectNodes("readoutConfig");
+            for (Node rnode : rdoutList) {
+                int rtype = Integer.parseInt(rnode.valueOf("readoutType"));
+                int roff = Integer.parseInt(rnode.valueOf("timeOffset"));
+                int rminus = Integer.parseInt(rnode.valueOf("timeMinus"));
+                int rplus = Integer.parseInt(rnode.valueOf("timePlus"));
+                trig.addReadout(new TriggerReadout(rtype, roff, rminus,
+                                                   rplus));
+            }
+
+            if (!trig.isConfigured()) {
+                throw new ConfigException("Trigger " + name +
+                                          " is not fully configured");
+            }
+
+            trigList.add(trig);
         }
 
-        return triggerList;
-
+        return trigList;
     }
 
-    public static List getTriggerConfig(String fileName) {
-        return TriggerXMLParser.parse(fileName).getTriggerConfig();
+    /**
+     * Get the text associated with an XML node.
+     *
+     * @param branch node containing text
+     */
+    public static String getNodeText(Branch branch)
+    {
+        StringBuilder str = new StringBuilder();
+
+        for (Iterator iter = branch.nodeIterator(); iter.hasNext(); ) {
+            Node node = (Node) iter.next();
+
+            if (node.getNodeType() != Node.TEXT_NODE) {
+                continue;
+            }
+
+            str.append(node.getText());
+        }
+
+        return str.toString().trim();
+    }
+
+    /**
+     * Extract the name of the trigger configuration file from a run
+     * configuration file.
+     *
+     * @param runConfig location of run configuration file
+     *
+     * @throws ConfigException if there is a problem
+     */
+    public static String getTriggerConfig(File runConfig)
+        throws ConfigException
+    {
+        if (!runConfig.exists()) {
+            throw new ConfigException("Cannot find run configuration file \"" +
+                                      runConfig + "\"");
+        }
+
+        FileInputStream in;
+        try {
+            in = new FileInputStream(runConfig);
+        } catch (IOException ioe) {
+            throw new ConfigException("Cannot open run configuration file \"" +
+                                      runConfig + "\"", ioe);
+        }
+
+        try {
+            SAXReader rdr = new SAXReader();
+            Document doc;
+            try {
+                doc = rdr.read(in);
+            } catch (DocumentException de) {
+                throw new ConfigException("Cannot read run configuration" +
+                                          " file \"" + runConfig + "\"", de);
+            }
+
+            Node tcNode = doc.selectSingleNode("runConfig/triggerConfig");
+            if (tcNode == null) {
+                throw new ConfigException("Run configuration file \"" +
+                                          runConfig + " does not contain" +
+                                          " <triggerConfig>");
+            }
+
+            return getNodeText((Branch) tcNode);
+        } finally {
+            try {
+                in.close();
+            } catch (IOException ioe) {
+                // ignore errors on close
+            }
+        }
     }
 }

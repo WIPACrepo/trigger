@@ -3,6 +3,7 @@ package icecube.daq.trigger.control;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.trigger.config.DomSet;
 import icecube.daq.trigger.config.DomSetFactory;
+import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.util.DOMRegistry;
 
 /**
@@ -22,15 +23,12 @@ public class HitFilter
     /**
      * DomSet to use
      */
-    private DomSet domSet = null;
-
-    private int domSetId = -1;
+    private DomSet domSet;
 
     /**
      * Default constructor
      */
     public HitFilter() {
-        this(-1);
     }
 
     /**
@@ -41,8 +39,7 @@ public class HitFilter
         setDomSet(domSet);
     }
 
-    public HitFilter(int domSetId) {
-        this.domSetId = domSetId;
+    public HitFilter(int domSetId) throws ConfigException {
 	setDomSet(DomSetFactory.getDomSet(domSetId));
     }
 

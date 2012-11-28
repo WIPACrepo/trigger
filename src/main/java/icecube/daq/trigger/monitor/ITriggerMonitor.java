@@ -1,7 +1,7 @@
 /*
  * interface: ITriggerMonitor
  *
- * Version $Id: ITriggerMonitor.java 2125 2007-10-12 18:27:05Z ksb $
+ * Version $Id: ITriggerMonitor.java 14073 2012-11-28 18:56:56Z dglo $
  *
  * Date: August 22 2005
  *
@@ -10,10 +10,12 @@
 
 package icecube.daq.trigger.monitor;
 
+import java.util.Map;
+
 /**
  * This interface defines the control aspect of a trigger.
  *
- * @version $Id: ITriggerMonitor.java 2125 2007-10-12 18:27:05Z ksb $
+ * @version $Id: ITriggerMonitor.java 14073 2012-11-28 18:56:56Z dglo $
  * @author pat
  */
 public interface ITriggerMonitor
@@ -27,4 +29,5 @@ public interface ITriggerMonitor
 
     TriggerMonitor getTriggerMonitor();
 
+    Map<String, Object> getTriggerMonitorMap();
 }

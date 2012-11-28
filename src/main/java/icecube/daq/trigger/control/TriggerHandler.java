@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 13553 2012-03-09 20:49:47Z dglo $
+ * Version $Id: TriggerHandler.java 14073 2012-11-28 18:56:56Z dglo $
  *
  * Date: October 25 2004
  *
@@ -55,7 +55,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 13553 2012-03-09 20:49:47Z dglo $
+ * @version $Id: TriggerHandler.java 14073 2012-11-28 18:56:56Z dglo $
  * @author pat
  */
 public class TriggerHandler
@@ -287,6 +287,24 @@ public class TriggerHandler
         for (ITrigger trigger : triggerList) {
             map.put(trigger.getTriggerName(),
                     new Long(trigger.getTriggerCounter()));
+        }
+
+        return map;
+    }
+
+    public Map<String, Object> getTriggerMonitorMap()
+    {
+        HashMap<String, Object> map = new HashMap<String, Object>();
+
+        for (ITrigger trigger : triggerList) {
+            Map<String, Object> moniMap = trigger.getTriggerMonitorMap();
+            if (moniMap != null && moniMap.size() > 0) {
+                String trigName = trigger.getTriggerName() + "-" +
+                    trigger.getTriggerConfigId();
+                for (String key : moniMap.keySet()) {
+                    map.put(trigName + "-" + key, moniMap.get(key));
+                }
+            }
         }
 
         return map;

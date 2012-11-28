@@ -50,7 +50,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 13553 2012-03-09 20:49:47Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 14073 2012-11-28 18:56:56Z dglo $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -242,6 +242,10 @@ public class GlobalTriggerHandler
         }
 
         return map;
+    }
+
+    public Map<String, Object> getTriggerMonitorMap() {
+        return null;
     }
 
     public List<ITrigger> getConfiguredTriggerList() {

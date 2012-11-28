@@ -1,7 +1,7 @@
 /*
  * class: AbstractTrigger
  *
- * Version $Id: AbstractTrigger.java 13679 2012-05-02 15:12:38Z dglo $
+ * Version $Id: AbstractTrigger.java 14069 2012-11-28 16:50:58Z dglo $
  *
  * Date: August 19 2005
  *
@@ -37,6 +37,7 @@ import icecube.icebucket.monitor.simple.ScalarFlowMonitorImpl;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
@@ -47,7 +48,7 @@ import org.apache.commons.logging.LogFactory;
  * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
  * classes derive from this class.
  *
- * @version $Id: AbstractTrigger.java 13679 2012-05-02 15:12:38Z dglo $
+ * @version $Id: AbstractTrigger.java 14069 2012-11-28 16:50:58Z dglo $
  * @author pat
  */
 public abstract class AbstractTrigger
@@ -307,6 +308,10 @@ public abstract class AbstractTrigger
 
     public TriggerMonitor getTriggerMonitor() {
         return triggerMonitor;
+    }
+
+    public Map<String, Object> getTriggerMonitorMap() {
+        return null;
     }
 
     /*

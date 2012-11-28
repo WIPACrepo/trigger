@@ -23,6 +23,7 @@ import icecube.daq.trigger.monitor.TriggerMonitor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 public class MockTrigger
@@ -170,6 +171,11 @@ public class MockTrigger
     }
 
     public TriggerMonitor getTriggerMonitor()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public Map<String, Object> getTriggerMonitorMap()
     {
         throw new Error("Unimplemented");
     }

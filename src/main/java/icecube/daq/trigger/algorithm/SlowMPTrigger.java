@@ -10,7 +10,9 @@ import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.util.DOMRegistry;
 import icecube.daq.util.DeployedDOM;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -438,6 +440,17 @@ public class SlowMPTrigger extends AbstractTrigger
         log.info("FLUSHHH!!!");
 
         muon_time_window = -1;
+    }
+
+    public Map<String, Object> getTriggerMonitorMap() {
+        HashMap<String, Object> map = new HashMap<String, Object>();
+
+        map.put("t_max", t_max);
+        map.put("one_hit_list", one_hit_list.size());
+        map.put("two_hit_list", two_hit_list.size());
+        map.put("trigger_list", trigger_list.size());
+
+        return map;
     }
 
     @Override

@@ -4,7 +4,8 @@ import java.util.Map;
 
 public interface TriggerManagerMBean
 {
-    Map<String, Long> getTriggerCounts();
     int getNumInputsQueued();
     int getNumOutputsQueued();
+    Map<String, Long> getTriggerCounts();
+    Map<String, Object> getTriggerMonitorMap();
 }

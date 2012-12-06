@@ -352,7 +352,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
                     // if this hit is not part of the trigger, update the earliest time of interest
                     if ( (hitsWithinTriggerWindow == null) ||
-                         ((hitsWithinTriggerWindow != null) && (!hitsWithinTriggerWindow.contains(oldHit))) ) {
+                         (!hitsWithinTriggerWindow.contains(oldHit))) {
                         IPayload oldHitPlus = new DummyPayload(oldHit.getHitTimeUTC().getOffsetUTCTime(0.1));
                         setEarliestPayloadOfInterest(oldHitPlus);
                     }

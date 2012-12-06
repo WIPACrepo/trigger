@@ -363,7 +363,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
                     IHitPayload oldHit = slidingTimeWindow.slide();
 
                     if ( (hitsWithinTriggerWindow == null) ||
-                         ((hitsWithinTriggerWindow != null) && (!hitsWithinTriggerWindow.contains(oldHit))) ) {
+                         (!hitsWithinTriggerWindow.contains(oldHit))) {
                         IPayload oldHitPlus = new DummyPayload(oldHit.getHitTimeUTC().getOffsetUTCTime(0.1));
                         setEarliestPayloadOfInterest(oldHitPlus);
                     }

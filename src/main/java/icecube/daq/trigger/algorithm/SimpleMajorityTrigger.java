@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 14090 2012-12-06 23:14:27Z mnewcomb $
+ * Version $Id: SimpleMajorityTrigger.java 14091 2012-12-06 23:34:45Z mnewcomb $
  *
  * Date: August 19 2005
  *
@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 14090 2012-12-06 23:14:27Z mnewcomb $
+ * @version $Id: SimpleMajorityTrigger.java 14091 2012-12-06 23:34:45Z mnewcomb $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -337,7 +337,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
                     IHitPayload oldHit = slidingTimeWindow.slide();
 
                     if ( (hitsWithinTriggerWindow == null) ||
-                         ((hitsWithinTriggerWindow != null) && (!hitsWithinTriggerWindow.contains(oldHit))) ) {
+                         (!hitsWithinTriggerWindow.contains(oldHit))) {
                         IPayload oldHitPlus = new DummyPayload(oldHit.getHitTimeUTC().getOffsetUTCTime(0.1));
                         setEarliestPayloadOfInterest(oldHitPlus);
                     }

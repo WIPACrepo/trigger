@@ -258,6 +258,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
              */
             if (hitTimeUTC == null) {
                 log.error("hitTimeUTC is null!!!");
+		throw new TriggerException("hitTimeUTC was null");
             } else if (slidingTimeWindow.startTime() == null) {
                 log.error("SlidingTimeWindow startTime is null!!!");
                 for (int i=0; i<slidingTimeWindow.size(); i++) {

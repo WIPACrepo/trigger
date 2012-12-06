@@ -244,6 +244,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
              */
             if (hitTimeUTC == null) {
                 log.error("hitTimeUTC is null!!!");
+		throw new TriggerException("hitTimeUTC was null");
             } else if (slidingTimeWindow.startTime() == null) {
                 log.error("SlidingTimeWindow startTime is null!!!");
                 for (int i=0; i<slidingTimeWindow.size(); i++) {
@@ -489,7 +490,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	int centerPosition = getTriggerHandler().getDOMRegistry().getStringMinor(centerDom);
 
 	// get the vertical shift of the center string
-	int vShift = stringMap.getVerticalOffset(new Integer(centerString));
+	int vShift = stringMap.getVerticalOffset(Integer.valueOf(centerString));
 
 	// calculate the range of DOM positions in this volume element
 	int minPos = centerPosition - volumeHeight;
@@ -509,11 +510,11 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	}
 
 	// get list of neighboring strings
-	ArrayList<Integer> neighborStrings = stringMap.getNeighbors(new Integer(centerString));
+	ArrayList<Integer> neighborStrings = stringMap.getNeighbors(Integer.valueOf(centerString));
 	for (Integer string : neighborStrings) {
 
 	    // calculate the range for this string
-	    int thisShift = stringMap.getVerticalOffset(new Integer(string));
+	    int thisShift = stringMap.getVerticalOffset(Integer.valueOf(string));
 	    int omShift = thisShift - vShift;
 
 	    minPos += omShift;

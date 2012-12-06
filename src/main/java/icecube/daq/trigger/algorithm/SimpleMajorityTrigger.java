@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 13696 2012-05-14 17:35:47Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 14088 2012-12-06 22:03:24Z mnewcomb $
  *
  * Date: August 19 2005
  *
@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 13696 2012-05-14 17:35:47Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 14088 2012-12-06 22:03:24Z mnewcomb $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -205,6 +205,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
              */
             if (hitTimeUTC == null) {
                 log.error("hitTimeUTC is null!!!");
+		throw new TriggerException("HitTimeUTC was null");
             } else if (slidingTimeWindow.startTime() == null) {
                 log.error("SlidingTimeWindow startTime is null!!!");
                 int i = 0;

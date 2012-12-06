@@ -196,6 +196,8 @@ class Analysis
                 if (LOG.isErrorEnabled()) {
                     LOG.error("Trigger output has not been set");
                 }
+		//TODO: Is this what you want to do?
+		return;
             }
 
             trigChan = trigOut.getChannel();

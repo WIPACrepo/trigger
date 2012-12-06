@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
  *  and put in the payloadList.
  * This is called in GlobalTrigBag.java.
  *
- * @version $Id: GlobalTrigEventWrapper.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: GlobalTrigEventWrapper.java 14087 2012-12-06 20:02:03Z mnewcomb $
  * @author shseo
  */
 public class GlobalTrigEventWrapper
@@ -156,17 +156,15 @@ public class GlobalTrigEventWrapper
         // tReadoutRequest is the same for a single payload.
         IReadoutRequest tReadoutRequest = tTriggerRequestPayload.getReadoutRequest();
 
-        List elems;
-
         if(null != tReadoutRequest){
+	    List elems;
 
             elems = tReadoutRequest.getReadoutRequestElements();
             tUTCTime_earliest = tSorter.getUTCTimeEarliest(elems, false);
             tUTCTime_latest = tSorter.getUTCTimeLatest(elems, false);
 
         } else {//--Make sure ReadoutReqeust is null for Beacon, Stop triggers.
-
-            elems = new Vector();
+            //elems = new Vector();
             tUTCTime_earliest = tTriggerRequestPayload.getFirstTimeUTC();
             tUTCTime_latest = tTriggerRequestPayload.getLastTimeUTC();
         }

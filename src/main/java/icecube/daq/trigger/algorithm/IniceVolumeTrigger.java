@@ -514,7 +514,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	for (Integer string : neighborStrings) {
 
 	    // calculate the range for this string
-	    int thisShift = stringMap.getVerticalOffset(Integer.valueOf(string));
+	    int thisShift = stringMap.getVerticalOffset(string);
 	    int omShift = thisShift - vShift;
 
 	    minPos += omShift;

@@ -1,7 +1,7 @@
 /*
  * class: TriggerHandler
  *
- * Version $Id: TriggerHandler.java 14069 2012-11-28 16:50:58Z dglo $
+ * Version $Id: TriggerHandler.java 14113 2012-12-13 18:20:53Z mnewcomb $
  *
  * Date: October 25 2004
  *
@@ -48,7 +48,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class provides the analysis framework for the inice trigger.
  *
- * @version $Id: TriggerHandler.java 14069 2012-11-28 16:50:58Z dglo $
+ * @version $Id: TriggerHandler.java 14113 2012-12-13 18:20:53Z mnewcomb $
  * @author pat
  */
 public class TriggerHandler
@@ -932,14 +932,15 @@ public class TriggerHandler
                     if (payloadOutput == null) {
 //System.err.println("OT!!noOut!!");
                         log.error("Trigger destination has not been set");
-                    } else {
-                        outChan = payloadOutput.getChannel();
-                        if (outChan == null) {
-//System.err.println("OT!!noChan!!");
-                            throw new Error("Output channel has not been set" +
-                                            " in " + payloadOutput);
-                        }
-                    }
+			throw new Error("Trigger destination not set");
+                    } 
+		    
+		    outChan = payloadOutput.getChannel();
+		    if (outChan == null) {
+			//System.err.println("OT!!noChan!!");
+			throw new Error("Output channel has not been set" +
+					" in " + payloadOutput);
+		    }
                 }
 
                 //--ship the trigger to its destination

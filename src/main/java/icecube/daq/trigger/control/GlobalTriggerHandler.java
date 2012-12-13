@@ -47,7 +47,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class ...does what?
  *
- * @version $Id: GlobalTriggerHandler.java 14069 2012-11-28 16:50:58Z dglo $
+ * @version $Id: GlobalTriggerHandler.java 14113 2012-12-13 18:20:53Z mnewcomb $
  * @author shseo
  */
 public class GlobalTriggerHandler
@@ -1045,19 +1045,19 @@ public class GlobalTriggerHandler
                 if (outChan == null) {
                     if (payloadOutput == null) {
                         log.error("Trigger destination has not been set");
-                    } else {
-                        outChan = payloadOutput.getChannel();
-                        if (outChan == null) {
-                            throw new Error("Output channel has not been set" +
-                                            " in " + payloadOutput);
-                        }
-                    }
+			throw new Error("Trigger destination not set!");
+                    } 
+		    outChan = payloadOutput.getChannel();
+		    if (outChan == null) {
+			throw new Error("Output channel has not been set" +
+					" in " + payloadOutput);
+		    }
                 }
 
                 //--ship the trigger to its destination
-                if (trigBuf != null) {
-                    outChan.receiveByteBuffer(trigBuf);
-                }
+		// removed if trigBuf!=null test as it's 
+		// tested above
+		outChan.receiveByteBuffer(trigBuf);
             }
 
             if (outChan != null) {

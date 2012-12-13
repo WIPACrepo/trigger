@@ -12,6 +12,7 @@ import icecube.daq.util.DOMRegistry;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -212,10 +213,9 @@ public class ClusterTrigger extends AbstractTrigger
 
         if (logger.isDebugEnabled())
         {
-            for (LogicalChannel ch : coherenceMap.keySet())
-            {
-                logger.debug("Logical channel " + ch + " : " + coherenceMap.get(ch));
-            }
+	    for (Map.Entry entry : coherenceMap.entrySet()) {
+                logger.debug("Logical channel " + entry.getKey() + " : " + entry.getValue());
+	    }
         }
 
         // No trigger so skip next operation

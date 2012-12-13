@@ -49,10 +49,20 @@ public class DomSet
      *
      * @return <tt>true</tt> if both sets contain the same DOM IDs
      */
-    public boolean equals(DomSet other)
+    public boolean equals(Object other)
     {
-        return other != null && set.size() == other.set.size() &&
-            set.containsAll(other.set);
+	if (this==other) {
+	    return true;
+	}
+	
+	if ((other==null) || (!(other instanceof DomSet))) {
+	    return false;
+	}
+
+	DomSet other_d = (DomSet)other;
+	
+        return set.size() == other_d.set.size() &&
+            set.containsAll(other_d.set);
     }
 
     /**

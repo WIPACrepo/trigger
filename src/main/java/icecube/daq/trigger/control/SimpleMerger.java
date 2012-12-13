@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * TODO: Massively clean up this code!!!
  *
- * @version $Id: SimpleMerger.java 12765 2011-03-07 18:42:04Z dglo $
+ * @version $Id: SimpleMerger.java 14112 2012-12-13 17:59:32Z mnewcomb $
  * @author shseo
  */
 public class SimpleMerger
@@ -78,7 +78,7 @@ public class SimpleMerger
         {
             //First of all, time-order the inputList.
             List tempList = tSorter.getReadoutElementsUTCTimeSorted(listSameReadoutElements);
-            listSameReadoutElements = new ArrayList();
+
             listSameReadoutElements = tempList;
 
             List listTimeManagedSameIDElements = new ArrayList();
@@ -297,7 +297,7 @@ public class SimpleMerger
         }else if(listSameReadoutElementsSameID.size() > 1)
         {
             List listTemp = tSorter.getReadoutElementsUTCTimeSorted(listSameReadoutElementsSameID);
-            listSameReadoutElementsSameID = new ArrayList();
+            
             listSameReadoutElementsSameID = listTemp;
 
             for(int i=0; i < listSameReadoutElementsSameID.size() - 1; i++)
@@ -358,7 +358,7 @@ public class SimpleMerger
      * @param listSameReadoutElementsSameID: list of ReadoutElements w/ the same ISourceID or IDOMID.
      */
     private List manageTimeOverlap(List listSameReadoutElementsSameID, boolean allowTimeGap) throws Exception {
-        List listTimeManagedElementsSameID = new ArrayList();
+        List listTimeManagedElementsSameID;
 
         if(!allowTimeGap)
         {

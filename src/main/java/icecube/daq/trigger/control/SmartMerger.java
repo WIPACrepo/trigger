@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * TODO: Massively clean up this code!!!
  *
- * @version $Id: SmartMerger.java 14087 2012-12-06 20:02:03Z mnewcomb $
+ * @version $Id: SmartMerger.java 14112 2012-12-13 17:59:32Z mnewcomb $
  * @author shseo
  */
 public class SmartMerger
@@ -474,7 +474,6 @@ public class SmartMerger
         {
             List listTimeordered;
             listTimeordered =mtSorter.getReadoutElementsUTCTimeSorted(mListFinalReadoutElements_All);
-            mListFinalReadoutElements_All = new ArrayList();
             mListFinalReadoutElements_All = listTimeordered;
         }
 

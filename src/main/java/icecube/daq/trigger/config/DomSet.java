@@ -42,6 +42,23 @@ public class DomSet
         this.set.addAll(set);
     }
 
+    
+    /**
+     * Compute a hashcode for this object
+     */
+    public int hashCode() {
+	final int prime = 31;
+
+	int result = 1;
+	
+	result = (int)(prime * result + name.hashCode());
+	result = (int)(prime * result + set.hashCode());
+
+	return result;
+    }
+
+    
+
     /**
      * Compare this DomSet with another DomSet.
      *

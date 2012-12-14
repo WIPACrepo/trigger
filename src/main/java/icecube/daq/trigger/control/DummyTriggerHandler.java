@@ -320,12 +320,10 @@ public class DummyTriggerHandler
 
             // if we haven't already, get the output channel
             if (outChan == null) {
-                if (payloadOutput == null) {
-                    log.error("Trigger destination has not been set");
-                } else {
-                    outChan = payloadOutput.getChannel();
-                }
-            }
+		// Removed check on payloadOutput as it's checked 
+		// before entering this loop
+		outChan = payloadOutput.getChannel();
+	    }
 
             //--ship the trigger to its destination
             if (trigBuf != null) {

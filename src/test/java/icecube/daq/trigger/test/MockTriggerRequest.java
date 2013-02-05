@@ -213,6 +213,16 @@ public class MockTriggerRequest
         this.srcId = new MockSourceID(srcVal);
     }
 
+    /**
+     * Set the universal ID for global requests which will become events.
+     *
+     * @param uid new UID
+     */
+    public void setUID(int uid)
+    {
+        throw new Error("Unimplemented");
+    }
+
     public int writePayload(boolean writeLoaded, IPayloadDestination dest)
         throws IOException
     {

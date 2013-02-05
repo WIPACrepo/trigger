@@ -79,6 +79,16 @@ class MockHitRequest
     {
         this.rdoutReq = rdoutReq;
     }
+
+    /**
+     * Set the universal ID for global requests which will become events.
+     *
+     * @param uid new UID
+     */
+    public void setUID(int uid)
+    {
+        throw new Error("Unimplemented");
+    }
 }
 
 public class GlobalTriggerBagTest

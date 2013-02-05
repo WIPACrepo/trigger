@@ -90,6 +90,11 @@ public class MockReadoutRequest
         return uid;
     }
 
+    public long getUTCTime()
+    {
+        throw new Error("Unimplemented");
+    }
+
     public int length()
     {
         throw new Error("Unimplemented");
@@ -103,5 +108,26 @@ public class MockReadoutRequest
     public void recycle()
     {
         // do nothing
+    }
+
+    /**
+     * Set the source ID. Needed for backward compatiblility with the old
+     * global request handler implementation.
+     *
+     * @param srcId new source ID
+     */
+    public void setSourceID(ISourceID srcId)
+    {
+        throw new Error("Unimplemented");
+    }
+
+    /**
+     * Set the universal ID for global requests which will become events.
+     *
+     * @param uid new UID
+     */
+    public void setUID(int uid)
+    {
+        throw new Error("Unimplemented");
     }
 }

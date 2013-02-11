@@ -10,11 +10,10 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TimeOutOfOrderException;
@@ -43,7 +42,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
      * Log object for this class
      */
 
-    private static final Log log = LogFactory.getLog(MultiplicityStringTrigger.class);
+    private static final Log LOG =
+        LogFactory.getLog(MultiplicityStringTrigger.class);
 
     private static int triggerNumber = 0;
 
@@ -93,7 +93,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
     private boolean configMaxLength = false;
     private boolean configString = false;
 
-    public MultiplicityStringTrigger() {
+    public MultiplicityStringTrigger()
+    {
         triggerNumber++;
     }
 
@@ -109,73 +110,77 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
      * @return true if it is
      */
 
-    public boolean isConfigured() {
+    public boolean isConfigured()
+    {
         return (configThreshold&&configTimeWindow&&configNumberOfVetoTopDoms&&configMaxLength&&configString);
     }
 
     /**
-     * Add a parameter.
+     * Add a trigger parameter.
      *
-     * @param parameter TriggerParameter object.
+     * @param name parameter name
+     * @param value parameter value
      *
-     * @throws icecube.daq.trigger.exceptions.UnknownParameterException
-     * @throws icecube.daq.trigger.exceptions.IllegalParameterValueException
+     * @throws UnknownParameterException if the parameter is unknown
+     * @throws IllegalParameterValueException if the parameter value is bad
      */
-
-    public void addParameter(TriggerParameter parameter) throws UnknownParameterException, IllegalParameterValueException {
-        if (parameter.getName().compareTo("numberOfVetoTopDoms") == 0) {
-           if(Integer.parseInt(parameter.getValue())>=0) {
-               numberOfVetoTopDoms = Integer.parseInt(parameter.getValue());
+    public void addParameter(String name, String value)
+        throws UnknownParameterException, IllegalParameterValueException
+    {
+        if (name.compareTo("numberOfVetoTopDoms") == 0) {
+           if(Integer.parseInt(value)>=0) {
+               numberOfVetoTopDoms = Integer.parseInt(value);
                configNumberOfVetoTopDoms = true;
             } else {
-                throw new IllegalParameterValueException("Illegal number of exlcuded top doms value: " + parameter.getValue());
+                throw new IllegalParameterValueException("Illegal number of exlcuded top doms value: " + value);
             }
         }
-        else if (parameter.getName().compareTo("maxLength")==0) {
-            if(Integer.parseInt(parameter.getValue())>0) {
-                maxLength = Integer.parseInt(parameter.getValue());
+        else if (name.compareTo("maxLength")==0) {
+            if(Integer.parseInt(value)>0) {
+                maxLength = Integer.parseInt(value);
                 configMaxLength = true;
             } else
-                throw new IllegalParameterValueException("Illegal max length value:" +parameter.getValue());
+                throw new IllegalParameterValueException("Illegal max length value:" +value);
         }
-        else if (parameter.getName().compareTo("threshold") == 0) {
-            if(Integer.parseInt(parameter.getValue())>=0) {
-                threshold = Integer.parseInt(parameter.getValue());
+        else if (name.compareTo("threshold") == 0) {
+            if(Integer.parseInt(value)>=0) {
+                threshold = Integer.parseInt(value);
                 configThreshold = true;
             }
             else {
-                throw new IllegalParameterValueException("Illegal Threshold value: " + Integer.parseInt(parameter.getValue()));
+                throw new IllegalParameterValueException("Illegal Threshold value: " + Integer.parseInt(value));
             }
         }
-        else if(parameter.getName().compareTo("string")==0) {
+        else if(name.compareTo("string")==0) {
 	    // Can't have this check on SPTS
-	    // if(Integer.parseInt(parameter.getValue())>0&&Integer.parseInt(parameter.getValue())<=80) {
-                string = Integer.parseInt(parameter.getValue());
+	    // if(Integer.parseInt(value)>0&&Integer.parseInt(value)<=80) {
+                string = Integer.parseInt(value);
                 configString = true;
 	    //            }
 	    //else {
-	    //    throw new IllegalParameterValueException("Illegal String value: " + Integer.parseInt(parameter.getValue()));
+	    //    throw new IllegalParameterValueException("Illegal String value: " + Integer.parseInt(value));
 	    //}
         }
-        else if (parameter.getName().compareTo("timeWindow") == 0) {
-            if(Integer.parseInt(parameter.getValue())>=0) {
-                timeWindow = Integer.parseInt(parameter.getValue());
+        else if (name.compareTo("timeWindow") == 0) {
+            if(Integer.parseInt(value)>=0) {
+                timeWindow = Integer.parseInt(value);
                 configTimeWindow = true;
             }
             else {
-                throw new IllegalParameterValueException("Illegal timeWindow value: " + Integer.parseInt(parameter.getValue()));
+                throw new IllegalParameterValueException("Illegal timeWindow value: " + Integer.parseInt(value));
             }
         }
         else {
-            throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
+            throw new UnknownParameterException("Unknown parameter: " + name);
         }
-        super.addParameter(parameter);
+        super.addParameter(name, value);
     }
 
-    public void setTriggerName(String triggerName) {
+    public void setTriggerName(String triggerName)
+    {
         super.triggerName = triggerName + triggerNumber;
-        if (log.isInfoEnabled()) {
-            log.info("TriggerName set to " + super.triggerName);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("TriggerName set to " + super.triggerName);
         }
     }
 
@@ -195,7 +200,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
      */
 
     public void runTrigger(IPayload payload)
-        throws TriggerException {
+            throws TriggerException
+        {
 
         // check that this is a hit
         int interfaceType = payload.getPayloadInterfaceType();
@@ -208,8 +214,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
         // make sure spe bit is on for this hit (must have 0x02)
         int type = AbstractTrigger.getHitType(hit);
         if (type != AbstractTrigger.SPE_HIT) {
-            if (log.isDebugEnabled()) {
-                log.debug("Hit type is " + hit.getTriggerType() + ", returning.");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Hit type is " + hit.getTriggerType() + ", returning.");
             }
             return;
         }
@@ -217,8 +223,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 	// make sure this hit is on the proper string
 	int hitString = getTriggerHandler().getDOMRegistry().getStringMajor(hit.getDOMID().toString());
 	if (hitString != string) {
-		if(log.isDebugEnabled())
-			log.debug("This hit is not on the proper string.");
+		if(LOG.isDebugEnabled())
+			LOG.debug("This hit is not on the proper string.");
 		return;
 	}
 
@@ -237,9 +243,9 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
             // initialize earliest time of interest
             setEarliestPayloadOfInterest(hit);
 
-            if (log.isDebugEnabled()) {
-                log.debug("This is the first hit, initializing...");
-                log.debug("slidingTimeWindowStart set to " + slidingTimeWindow.startTime());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("This is the first hit, initializing...");
+                LOG.debug("slidingTimeWindowStart set to " + slidingTimeWindow.startTime());
             }
 
         }
@@ -248,8 +254,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
          */
         else {
 
-            if (log.isDebugEnabled()) {
-                log.debug("Processing hit at time " + hitTimeUTC);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Processing hit at time " + hitTimeUTC);
             }
 
             /*
@@ -257,19 +263,18 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
              * hitTime < slidingTimeWindowStart
              */
             if (hitTimeUTC == null) {
-                log.error("hitTimeUTC is null!!!");
-		throw new TriggerException("hitTimeUTC was null");
+                throw new TriggerException("hitTimeUTC was null");
             } else if (slidingTimeWindow.startTime() == null) {
-                log.error("SlidingTimeWindow startTime is null!!!");
+                LOG.error("SlidingTimeWindow startTime is null!!!");
                 for (int i=0; i<slidingTimeWindow.size(); i++) {
                     IHitPayload h = (IHitPayload) slidingTimeWindow.hits.get(i);
                     if (h == null) {
-                        log.error("  Hit " + i + " is null");
+                        LOG.error("  Hit " + i + " is null");
                     } else {
                         if (h.getPayloadTimeUTC() == null) {
-                            log.error("  Hit " + i + " has a null time");
+                            LOG.error("  Hit " + i + " has a null time");
                         } else {
-                            log.error("  Hit " + i + " has time = " + h.getPayloadTimeUTC());
+                            LOG.error("  Hit " + i + " has time = " + h.getPayloadTimeUTC());
                         }
                     }
                 }
@@ -292,8 +297,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                     addHitToTriggerWindow(hit);
                 }
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Hit falls within slidingTimeWindow numberOfHitsInSlidingTimeWindow now equals "
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Hit falls within slidingTimeWindow numberOfHitsInSlidingTimeWindow now equals "
                               + slidingTimeWindow.size());
                 }
 
@@ -304,8 +309,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
              */
             else {
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Hit falls outside slidingTimeWindow, numberOfHitsInSlidingTimeWindow is "
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Hit falls outside slidingTimeWindow, numberOfHitsInSlidingTimeWindow is "
                               + slidingTimeWindow.size());
                 }
 
@@ -315,8 +320,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                     // onTrigger?
                     if (onTrigger) {
 
-                        if (log.isDebugEnabled()) {
-                            log.debug("Trigger is already on. Changing triggerWindowStop to "
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Trigger is already on. Changing triggerWindowStop to "
                                       + getTriggerWindowStop());
                         }
 
@@ -326,8 +331,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                         hitsWithinTriggerWindow.addAll(slidingTimeWindow.copy());
                         numberOfHitsInTriggerWindow = hitsWithinTriggerWindow.size();
 
-                        if (log.isDebugEnabled()) {
-                            log.debug("Trigger is now on, numberOfHitsInTriggerWindow = "
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Trigger is now on, numberOfHitsInTriggerWindow = "
                                       + numberOfHitsInTriggerWindow + " triggerWindowStart = "
                                       + getTriggerWindowStart() + " triggerWindowStop = "
                                       + getTriggerWindowStop());
@@ -340,8 +345,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
                 }
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Now slide the window...");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Now slide the window...");
                 }
 
                 // Now advance the slidingTimeWindow until the hit is inside or there is only 1 hit left in window
@@ -352,20 +357,20 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
                     // if this hit is not part of the trigger, update the earliest time of interest
                     if ( (hitsWithinTriggerWindow == null) ||
-                         (!hitsWithinTriggerWindow.contains(oldHit))) {
+                         ((hitsWithinTriggerWindow != null) && (!hitsWithinTriggerWindow.contains(oldHit))) ) {
                         IPayload oldHitPlus = new DummyPayload(oldHit.getHitTimeUTC().getOffsetUTCTime(0.1));
                         setEarliestPayloadOfInterest(oldHitPlus);
                     }
 
-                    if (log.isDebugEnabled()) {
-                        log.debug("numberOfHitsInSlidingTimeWindow is now " + slidingTimeWindow.size()
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("numberOfHitsInSlidingTimeWindow is now " + slidingTimeWindow.size()
                                   + " slidingTimeWindowStart is now " + slidingTimeWindow.startTime());
                     }
 
                 }
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Done sliding");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Done sliding");
                 }
 
                 /*
@@ -377,15 +382,15 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                     IHitPayload oldHit = slidingTimeWindow.slide();
 
                     if ( (hitsWithinTriggerWindow == null) ||
-                         (!hitsWithinTriggerWindow.contains(oldHit))) {
+                         ((hitsWithinTriggerWindow != null) && (!hitsWithinTriggerWindow.contains(oldHit))) ) {
                         IPayload oldHitPlus = new DummyPayload(oldHit.getHitTimeUTC().getOffsetUTCTime(0.1));
                         setEarliestPayloadOfInterest(oldHitPlus);
                     }
 
                     slidingTimeWindow.add(hit);
 
-                    if (log.isDebugEnabled()) {
-                        log.debug("Hit still outside slidingTimeWindow, start a new one "
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Hit still outside slidingTimeWindow, start a new one "
                                   + "numberOfHitsInSlidingTimeWindow = " + slidingTimeWindow.size()
                                   + " slidingTimeWindowStart = " + slidingTimeWindow.startTime());
                     }
@@ -395,8 +400,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                 else {
                     slidingTimeWindow.add(hit);
 
-                    if (log.isDebugEnabled()) {
-                        log.debug("Hit is now in slidingTimeWindow numberOfHitsInSlidingTimeWindow = "
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Hit is now in slidingTimeWindow numberOfHitsInSlidingTimeWindow = "
                                   + slidingTimeWindow.size());
                     }
 
@@ -407,8 +412,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                  */
                 if (onTrigger) {
 
-                    if (log.isDebugEnabled()) {
-                        log.debug("Trigger is on, numberOfHitsInSlidingTimeWindow = "
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Trigger is on, numberOfHitsInSlidingTimeWindow = "
                                   + slidingTimeWindow.size());
                     }
 
@@ -416,15 +421,15 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                            (!slidingTimeWindow.overlaps(hitsWithinTriggerWindow)) ) ||
                          ( (slidingTimeWindow.size() == 1) && (threshold == 1) ) ) {
 
-                        if (log.isDebugEnabled()) {
-                            log.debug("Pass trigger to analyzeTopology and reset");
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Pass trigger to analyzeTopology and reset");
                         }
 
                         // pass trigger and reset
                         for (int i=0; i<hitsWithinTriggerWindow.size(); i++) {
                             IHitPayload h = (IHitPayload) hitsWithinTriggerWindow.get(i);
                             if (slidingTimeWindow.contains(h)) {
-                                log.error("Hit at time " + h.getPayloadTimeUTC()
+                                LOG.error("Hit at time " + h.getPayloadTimeUTC()
                                           + " is part of new trigger but is still in SlidingTimeWindow");
                             }
                         }
@@ -437,8 +442,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                     } else {
                         addHitToTriggerWindow(hit);
 
-                        if (log.isDebugEnabled()) {
-                            log.debug("Still on trigger, numberOfHitsInTriggerWindow = "
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Still on trigger, numberOfHitsInTriggerWindow = "
                                       + numberOfHitsInTriggerWindow);
                         }
 
@@ -460,10 +465,11 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
      * @param hitsWithinTriggerWindow
      */
 
-    public void analyzeString(LinkedList hitsWithinTriggerWindow) {
+    public void analyzeString(LinkedList hitsWithinTriggerWindow)
+    {
 
-        if(log.isDebugEnabled()) {
-            log.debug("Counting hits which meet string trigger criteria");
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Counting hits which meet string trigger criteria");
         }
 
         Iterator iter = hitsWithinTriggerWindow.iterator();
@@ -473,8 +479,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
             IHitPayload hit = (IHitPayload) iter.next();
             int hitPosition = getTriggerHandler().getDOMRegistry().getStringMinor(hit.getDOMID().toString());
             if (hitPosition <= numberOfVetoTopDoms) {
-                if (log.isDebugEnabled())
-                    log.debug("The event contains a hit in the veto region, vetoing event.");
+                if (LOG.isDebugEnabled())
+                    LOG.debug("The event contains a hit in the veto region, vetoing event.");
                 return;
             }
         }
@@ -494,23 +500,23 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                     numberOfHits++;
             }
 
-            if(log.isDebugEnabled()) {
-                log.debug("The number of hits between positions " + topPosition + " and " + (topPosition+maxLength) + " is " + numberOfHits);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("The number of hits between positions " + topPosition + " and " + (topPosition+maxLength) + " is " + numberOfHits);
             }
 
             if(numberOfHits>=threshold) {
 
-                if(log.isDebugEnabled()) {
-                    log.debug("The number of hits greater than the threshold.");
-                    log.debug("Reporting trigger");
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("The number of hits greater than the threshold.");
+                    LOG.debug("Reporting trigger");
                 }
                 formTrigger(hitsWithinTriggerWindow, null, null);
                 return;
 
             } else {
-                if(log.isDebugEnabled()) {
-                    log.debug("The number of hits is less than the threshold");
-                    log.debug("Trying next hit at topPostion");
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("The number of hits is less than the threshold");
+                    LOG.debug("Trying next hit at topPostion");
                 }
             }
         }
@@ -524,8 +530,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
 //    public void analyzeString(LinkedList hitsWithinTriggerWindow) {
 //
-//        if(log.isDebugEnabled()) {
-//            log.debug("Counting hits which meet string trigger criteria");
+//        if(LOG.isDebugEnabled()) {
+//            LOG.debug("Counting hits which meet string trigger criteria");
 //        }
 //
 //        Iterator iter = hitsWithinTriggerWindow.iterator();
@@ -543,23 +549,23 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 //                        numberOfHits++;
 //                }
 //
-//                if(log.isDebugEnabled()) {
-//                    log.debug("The number of hits between positions " + topPosition + " and " + (topPosition+maxLength) + " is " + numberOfHits);
+//                if(LOG.isDebugEnabled()) {
+//                    LOG.debug("The number of hits between positions " + topPosition + " and " + (topPosition+maxLength) + " is " + numberOfHits);
 //                }
 //
 //                if(numberOfHits>=threshold) {
 //
-//                    if(log.isDebugEnabled()) {
-//                        log.debug("The number of hits greater than the threshold.");
-//                        log.debug("Reporting trigger");
+//                    if(LOG.isDebugEnabled()) {
+//                        LOG.debug("The number of hits greater than the threshold.");
+//                        LOG.debug("Reporting trigger");
 //                    }
 //                    formTrigger(hitsWithinTriggerWindow, null, null);
 //                    return;
 //
 //                } else {
-//                    if(log.isDebugEnabled()) {
-//                        log.debug("The number of hits is less than the threshold");
-//                        log.debug("Trying next hit at topPostion");
+//                    if(LOG.isDebugEnabled()) {
+//                        LOG.debug("The number of hits is less than the threshold");
+//                        LOG.debug("Trying next hit at topPostion");
 //                    }
 //                }
 //            }
@@ -571,11 +577,12 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
      * and no further calls to runTrigger.
      */
 
-    public void flush() {
+    public void flush()
+    {
         // see if we're above threshold, if so form a trigger
         if (onTrigger) {
-            if (log.isDebugEnabled()) {
-                log.debug("Last Trigger is on, numberOfHitsInTriggerWindow = "
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Last Trigger is on, numberOfHitsInTriggerWindow = "
                           + numberOfHitsInTriggerWindow);
             }
 
@@ -588,8 +595,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
             hitsWithinTriggerWindow.addAll(slidingTimeWindow.copy());
             numberOfHitsInTriggerWindow = hitsWithinTriggerWindow.size();
 
-            if (log.isDebugEnabled()) {
-                log.debug(" Last Trigger is now on, numberOfHitsInTriggerWindow = "
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(" Last Trigger is now on, numberOfHitsInTriggerWindow = "
                 + numberOfHitsInTriggerWindow + " triggerWindowStart = "
                 + getTriggerWindowStart() + " triggerWindowStop = "
                 + getTriggerWindowStop());
@@ -604,23 +611,28 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
      *Get Parameter Methods
      */
 
-    public int getThreshold() {
+    public int getThreshold()
+    {
         return threshold;
     }
 
-    public int getTimeWindow() {
+    public int getTimeWindow()
+    {
         return timeWindow;
     }
 
-    public int getNumberOfVetoTopDoms() {
+    public int getNumberOfVetoTopDoms()
+    {
         return numberOfVetoTopDoms;
     }
 
-    public int getMaxLength() {
+    public int getMaxLength()
+    {
         return maxLength;
     }
 
-    public int getString() {
+    public int getString()
+    {
         return string;
     }
 
@@ -629,7 +641,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
      * @return start of trigger window
      */
 
-    private IUTCTime getTriggerWindowStart() {
+    private IUTCTime getTriggerWindowStart()
+    {
         return ((IHitPayload) hitsWithinTriggerWindow.getFirst()).getHitTimeUTC();
     }
 
@@ -638,15 +651,18 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
      * @return stop of trigger window
      */
 
-    private IUTCTime getTriggerWindowStop() {
+    private IUTCTime getTriggerWindowStop()
+    {
         return ((IHitPayload) hitsWithinTriggerWindow.getLast()).getHitTimeUTC();
     }
 
-    public int getNumberOfHitsWithinSlidingTimeWindow() {
+    public int getNumberOfHitsWithinSlidingTimeWindow()
+    {
         return slidingTimeWindow.size();
     }
 
-    public int getNumberOfHitsWithinTriggerWindow() {
+    public int getNumberOfHitsWithinTriggerWindow()
+    {
         return hitsWithinTriggerWindow.size();
     }
 
@@ -654,23 +670,28 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
      *Set Parameter Methods
      */
 
-    public void setThreshold(int Threshold) {
+    public void setThreshold(int Threshold)
+    {
         this.threshold = Threshold;
     }
 
-    public void setTimeWindow(int timeWindow) {
+    public void setTimeWindow(int timeWindow)
+    {
         this.timeWindow = timeWindow;
     }
 
-    public void setNumberOfVetoTopDoms(int VetoTopDoms) {
+    public void setNumberOfVetoTopDoms(int VetoTopDoms)
+    {
         this.numberOfVetoTopDoms = VetoTopDoms;
     }
 
-    public void setMaxLength(int MaxLength) {
+    public void setMaxLength(int MaxLength)
+    {
         this.maxLength = MaxLength;
     }
 
-    public void setString(int String) {
+    public void setString(int String)
+    {
         this.string = String;
     }
 
@@ -679,12 +700,14 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
      * @param triggerPrimitive hit to add
      */
 
-    private void addHitToTriggerWindow(IHitPayload triggerPrimitive) {
+    private void addHitToTriggerWindow(IHitPayload triggerPrimitive)
+    {
         hitsWithinTriggerWindow.addLast(triggerPrimitive);
         numberOfHitsInTriggerWindow = hitsWithinTriggerWindow.size();
     }
 
-    private void reset() {
+    private void reset()
+    {
 
         /**
          *Reseting SimpleMajorityTrigger parameters
@@ -716,44 +739,54 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
         private LinkedList hits;
 
-        private SlidingTimeWindow() {
+        private SlidingTimeWindow()
+        {
             hits = new LinkedList();
         }
 
-        private void add(IHitPayload hit) {
+        private void add(IHitPayload hit)
+        {
             hits.addLast(hit);
         }
 
-        private int size() {
+        private int size()
+        {
             return hits.size();
         }
 
-        private IHitPayload slide() {
+        private IHitPayload slide()
+        {
             return (IHitPayload) hits.removeFirst();
         }
 
-        private IUTCTime startTime() {
+        private IUTCTime startTime()
+        {
             return ((IHitPayload) hits.getFirst()).getHitTimeUTC();
         }
 
-        private IUTCTime endTime() {
+        private IUTCTime endTime()
+        {
             return (startTime().getOffsetUTCTime((double) timeWindow));
         }
 
-        private boolean inTimeWindow(IUTCTime hitTime) {
+        private boolean inTimeWindow(IUTCTime hitTime)
+        {
             return (hitTime.compareTo(startTime()) >= 0) &&
                    (hitTime.compareTo(endTime()) <= 0);
         }
 
-        private LinkedList copy() {
+        private LinkedList copy()
+        {
             return (LinkedList) hits.clone();
         }
 
-        private boolean contains(Object object) {
+        private boolean contains(Object object)
+        {
             return hits.contains(object);
         }
 
-        private boolean overlaps(List list) {
+        private boolean overlaps(List list)
+        {
             Iterator iter = list.iterator();
             while (iter.hasNext()) {
                 if (contains(iter.next())) {
@@ -763,7 +796,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
             return false;
         }
 
-        private boolean aboveThreshold() {
+        private boolean aboveThreshold()
+        {
             return (hits.size() >= threshold);
         }
     }

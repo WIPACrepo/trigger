@@ -73,14 +73,14 @@ public class CylinderTriggerConfig
         AbstractTrigger trig;
 
         trig = createTrigger(21, 21001, INICE_TRIGGER, "CylinderTrigger");
-        trig.addParameter(new TriggerParameter("multiplicity", "4"));
-        trig.addParameter(new TriggerParameter("simpleMultiplicity", "8"));
-        trig.addParameter(new TriggerParameter("radius", "175"));
-        trig.addParameter(new TriggerParameter("height", "75"));
-        trig.addParameter(new TriggerParameter("timeWindow", "1000"));
-        trig.addParameter(new TriggerParameter("domSet", "2"));
-        trig.addReadout(new TriggerReadout(1, 0, 10000, 10000));
-        trig.addReadout(new TriggerReadout(2, 0, 4000, 6000));
+        trig.addParameter("multiplicity", "4");
+        trig.addParameter("simpleMultiplicity", "8");
+        trig.addParameter("radius", "175");
+        trig.addParameter("height", "75");
+        trig.addParameter("timeWindow", "1000");
+        trig.addParameter("domSet", "2");
+        trig.addReadout(1, 0, 10000, 10000);
+        trig.addReadout(2, 0, 4000, 6000);
         add(trig);
 
         numHitsPerTrigger = 8;
@@ -163,7 +163,7 @@ public class CylinderTriggerConfig
             nextEnd = nextStart + timeSpan;
         }
 
-        public void validate(IWriteablePayload payload)
+        public boolean validate(IWriteablePayload payload)
         {
             if (!(payload instanceof ITriggerRequestPayload)) {
                 throw new Error("Unexpected payload " +
@@ -201,6 +201,8 @@ System.err.println(" Last: EXP "+nextEnd+" ACT "+lastTime+" DIFF "+(lastTime-nex
                 jumpHack = false;
             }
             nextEnd = lastTime + timeBase + timeSpan;
+
+            return true;
         }
     }
 }

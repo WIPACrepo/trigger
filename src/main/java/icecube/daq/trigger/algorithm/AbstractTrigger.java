@@ -1,486 +1,329 @@
-/*
- * class: AbstractTrigger
- *
- * Version $Id: AbstractTrigger.java 14069 2012-11-28 16:50:58Z dglo $
- *
- * Date: August 19 2005
- *
- * (c) 2005 IceCube Collaboration
- */
-
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.oldpayload.impl.TriggerRequestPayload;
-import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
 import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.IHitPayload;
-import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.payload.impl.ReadoutRequest;
+import icecube.daq.payload.impl.ReadoutRequestElement;
+import icecube.daq.payload.impl.TriggerRequest;
+import icecube.daq.payload.impl.TriggerRequestFactory;
+import icecube.daq.trigger.common.ITriggerManager;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.HitFilter;
-import icecube.daq.trigger.control.ITriggerHandler;
+import icecube.daq.trigger.control.INewManager;
+import icecube.daq.trigger.control.Interval;
+import icecube.daq.trigger.control.TriggerCollector;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.exceptions.UnimplementedError;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.trigger.monitor.TriggerMonitor;
-import icecube.icebucket.monitor.ScalarFlowMonitor;
-import icecube.icebucket.monitor.simple.ScalarFlowMonitorImpl;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * This class is an abstract Trigger. It implments nearly all of the methods of the
- * ITriggerConfig, ITriggerControl, and ITriggerMonitor interfaces. All specific trigger
- * classes derive from this class.
- *
- * @version $Id: AbstractTrigger.java 14069 2012-11-28 16:50:58Z dglo $
- * @author pat
+ * Base class for trigger algorithms.
  */
 public abstract class AbstractTrigger
-    implements ITrigger
+    implements INewAlgorithm
 {
+    /** Log object for this class */
+    private static final Log LOG = LogFactory.getLog(AbstractTrigger.class);
 
-    /**
-     * Log object for this class
-     */
-    private static final Log log = LogFactory.getLog(AbstractTrigger.class);
-
-    /**
-     * hit type for test pattern, based on engineering format version 2+
-     */
-    public static final int TEST_HIT  = 0x00;
-    /**
-     * hit type for cpu hit, based on engineering format version 2+
-     */
-    public static final int CPU_HIT   = 0x01;
-    /**
-     * hit type for spe hit, based on engineering format version 2+
-     */
-    public static final int SPE_HIT   = 0x02;
-    /**
-     * hit type for flasher hit, based on engineering format version 2+
-     */
-    public static final int FLASH_HIT = 0x03;
-
-    /**
-     * status flags, based on engineering format version 2
-     */
-    public static final int FB_RUN    = 0x10;
-    public static final int LC_DOWN   = 0x20;
-    public static final int LC_UP     = 0x40;
-
-    protected int triggerType;
-    protected int triggerConfigId;
-    protected ISourceID sourceId;
-    protected String triggerName;
-    private List readouts = new ArrayList();
-    private List parameters = new ArrayList();
-
-    private IPayload earliestPayloadOfInterest;
-    private ITriggerHandler triggerHandler;
-    protected TriggerRequestPayloadFactory triggerFactory = new TriggerRequestPayloadFactory();
-    protected boolean onTrigger;
-    protected int triggerCounter;
-    private int sentTriggerCounter;
-    private int printMod = 1000;
+    /** SPE hit type */
+    public static final int SPE_HIT = 0x02;
 
     protected int triggerPrescale;
     protected int domSetId = -1;
+    protected HitFilter hitFilter = new HitFilter();
 
-    protected HitFilter hitFilter;
+    protected String triggerName;
+    private int trigCfgId;
+    private int trigType;
+    private int srcId;
+    private ArrayList<TriggerReadout> readouts =
+        new ArrayList<TriggerReadout>();
+    private ArrayList<TriggerParameter> params =
+        new ArrayList<TriggerParameter>();
 
-    private ScalarFlowMonitor countMonitor;
-    private ScalarFlowMonitor byteMonitor;
-    private TriggerMonitor triggerMonitor;
+    private ITriggerManager mgr;
+    protected TriggerRequestFactory triggerFactory;
+    protected boolean onTrigger;
+    protected int triggerCounter;
+    protected int sentTriggerCounter;
+    private int printMod = 1000;
+
+    private IPayload earliestPayloadOfInterest;
+    private boolean sawFlush;
+
+    private IPayload releaseTime;
+
+    private ArrayList<ITriggerRequestPayload> requests =
+        new ArrayList<ITriggerRequestPayload>();
+    private TriggerCollector collector;
 
     /**
-     * Default constructor
-     */
-    public AbstractTrigger() {
-        countMonitor = new ScalarFlowMonitorImpl();
-        byteMonitor  = new ScalarFlowMonitorImpl();
-        triggerMonitor = new TriggerMonitor(countMonitor, byteMonitor);
-
-        // setup default hitFilter
-        hitFilter = new HitFilter();
-    }
-
-    /*
+     * Add a trigger parameter.
      *
-     * Methods of ITriggerConfig
+     * @param name parameter name
+     * @param value parameter value
      *
+     * @throws UnknownParameterException if the parameter is unknown
+     * @throws IllegalParameterValueException if the parameter value is bad
      */
-
-    /**
-     * Get trigger type.
-     * @return triggerType
-     */
-    public int getTriggerType() {
-        return triggerType;
+    public void addParameter(String name, String value)
+        throws UnknownParameterException, IllegalParameterValueException
+    {
+        params.add(new TriggerParameter(name, value));
     }
 
     /**
-     * Set trigger type.
-     * @param triggerType
-     */
-    public void setTriggerType(int triggerType) {
-        this.triggerType = triggerType;
-        if (log.isDebugEnabled()) {
-            log.debug("TriggerType = " + triggerType);
-        }
-    }
-
-    /**
-     * Get trigger configuration id.
-     * @return triggerConfigId
-     */
-    public int getTriggerConfigId() {
-        return triggerConfigId;
-    }
-
-    /**
-     * Set trigger configuration id.
-     * @param triggerConfigId
-     */
-    public void setTriggerConfigId(int triggerConfigId) {
-        this.triggerConfigId = triggerConfigId;
-        if (log.isDebugEnabled()) {
-            log.debug("TriggerConfigId = " + triggerConfigId);
-        }
-    }
-
-    /**
-     * Get source id.
-     * @return sourceId
-     */
-    public ISourceID getSourceId() {
-        return sourceId;
-    }
-
-    /**
-     * Set source id.
-     * @param sourceId
-     */
-    public void setSourceId(ISourceID sourceId) {
-        this.sourceId = sourceId;
-        if (log.isDebugEnabled()) {
-            log.debug("SourceId = " + sourceId.getSourceID());
-        }
-    }
-
-    /**
-     * Get trigger name.
-     * @return triggerName
-     */
-    public String getTriggerName() {
-        return triggerName;
-    }
-
-    /**
-     * Set trigger name.
-     * @param triggerName
-     */
-    public void setTriggerName(String triggerName) {
-        this.triggerName = triggerName;
-        if (log.isDebugEnabled()) {
-            log.debug("TriggerName = " + triggerName);
-        }
-    }
-
-    /**
-     * Add a readout.
-     * @param readout TriggerReadout object
-     */
-    public void addReadout(TriggerReadout readout) {
-        readouts.add(readout);
-        if (log.isDebugEnabled()) {
-            log.debug("Added Readout: " + readout.toString());
-        }
-    }
-
-    /**
-     * Get list of trigger readouts.
+     * Add a readout entry to the cached list.
      *
-     * @return readout list
+     * @param rdoutType readout type
+     * @param offset offset value
+     * @param minus minus
+     * @param plus plus
      */
-    public List getReadoutList() {
-        return readouts;
+    public void addReadout(int rdoutType, int offset, int minus, int plus)
+    {
+        readouts.add(new TriggerReadout(rdoutType, offset, minus, plus));
+    }
+
+    protected void configHitFilter(int domSetId)
+        throws ConfigException
+    {
+        hitFilter = new HitFilter(domSetId);
     }
 
     /**
-     * Add a parameter.
-     *
-     * @param parameter TriggerParameter object.
-     *
-     * @throws icecube.daq.trigger.exceptions.UnknownParameterException
-     *
-     */
-    public void addParameter(TriggerParameter parameter) throws UnknownParameterException, IllegalParameterValueException {
-        parameters.add(parameter);
-        if (log.isDebugEnabled()) {
-            log.debug("Added Parameter: " + parameter.toString());
-        }
-    }
-
-    /**
-     * Get list of trigger parameters.
-     *
-     * @return parameter list
-     */
-    public List getParameterList() {
-        return parameters;
-    }
-
-    /*
-     *
-     * Methods of ITriggerControl
-     *
-     */
-
-    /**
-     * Get the earliest payload still of interest to this trigger.
-     * @return earliest payload of interest
-     */
-    public IPayload getEarliestPayloadOfInterest() {
-        return earliestPayloadOfInterest;
-    }
-
-    /**
-     * Set the trigger handler of this trigger.
-     * @param triggerHandler trigger handler
-     */
-    public void setTriggerHandler(ITriggerHandler triggerHandler) {
-        this.triggerHandler = triggerHandler;
-
-	// pass DOMRegistry to hitFilter
-	hitFilter.setDomRegistry(triggerHandler.getDOMRegistry());
-    }
-
-    public ITriggerHandler getTriggerHandler() {
-	return triggerHandler;
-    }
-
-    public void setTriggerFactory(TriggerRequestPayloadFactory triggerFactory) {
-        this.triggerFactory = triggerFactory;
-    }
-
-    /**
-     * Run the trigger algorithm on a payload.
-     * @param payload payload to process
-     * @throws icecube.daq.trigger.exceptions.TriggerException if the algorithm doesn't like this payload
-     */
-    public abstract void runTrigger(IPayload payload) throws TriggerException;
-
-    /**
-     * Flush the trigger.
-     * Basically indicates that there will be no further payloads to process.
-     */
-    public abstract void flush();
-
-    /*
-     *
-     * Methods of ITriggerMonitor
-     *
-     */
-
-    public int getTriggerCounter() {
-        return sentTriggerCounter;
-    }
-
-    public boolean isOnTrigger() {
-        return onTrigger;
-    }
-
-    public TriggerMonitor getTriggerMonitor() {
-        return triggerMonitor;
-    }
-
-    public Map<String, Object> getTriggerMonitorMap() {
-        return null;
-    }
-
-    /*
-     *
-     * AbstractTrigger methods
-     *
-     */
-
-    /**
-     * Report a new trigger to the trigger handler.
-     * @param payload single payload forming a trigger
-     */
-    protected void reportTrigger(ILoadablePayload payload) {
-        if (null == triggerHandler) {
-            throw new Error("TriggerHandler was not set!");
-        }
-        triggerCounter++;
-        if ((triggerPrescale == 0) || ((triggerCounter % triggerPrescale) == 0)) {
-            triggerHandler.addToTriggerBag(payload);
-            sentTriggerCounter++;
-            countMonitor.measure(1);
-            byteMonitor.measure(payload.getPayloadLength());
-        } else {
-            payload.recycle();
-        }
-    }
-
-    protected void setEarliestPayloadOfInterest(IPayload payload) {
-        earliestPayloadOfInterest = payload;
-    }
-
-    /**
-     * Form a ReadoutRequestElement based on the trigger and the readout configuration.
+     * Form a ReadoutRequestElement based on the trigger and the readout
+     * configuration.
      * @param firstTime earliest time of trigger
-     * @param readoutConfig ReadoutConfiguration object
+     * @param roCfg ReadoutConfiguration object
      * @param domId domId, null if readout type is not MODULE
      * @param stringId stringId, null if readout type is not MODULE or STRING
      * @return IReadoutRequestElement
      *
      */
-    protected IReadoutRequestElement createReadoutElement(IUTCTime firstTime, IUTCTime lastTime,
-                                                          TriggerReadout readoutConfig,
-                                                          IDOMID domId, ISourceID stringId) {
-
+    protected IReadoutRequestElement createReadoutElement(IUTCTime firstTime,
+                                                          IUTCTime lastTime,
+                                                          TriggerReadout roCfg,
+                                                          IDOMID domId,
+                                                          ISourceID stringId)
+    {
         IUTCTime timeOffset;
         IUTCTime timeMinus;
         IUTCTime timePlus;
 
-        int type = readoutConfig.getType();
+        int type = roCfg.getType();
         switch (type) {
-            case IReadoutRequestElement.READOUT_TYPE_GLOBAL:
-                if (null != stringId) {
-                    stringId = null;
-                }
-                if (null != domId) {
-                    domId = null;
-                }
-                timeMinus = firstTime.getOffsetUTCTime(-readoutConfig.getMinus());
-                timePlus = lastTime.getOffsetUTCTime(readoutConfig.getPlus());
-                break;
-            case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL:
-                if (null != stringId) {
-                    stringId = null;
-                }
-                if (null != domId) {
-                    domId = null;
-                }
-                if (sourceId.getSourceID() == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
-                    timeOffset = firstTime.getOffsetUTCTime(readoutConfig.getOffset());
-                    timeMinus = timeOffset.getOffsetUTCTime(-readoutConfig.getMinus());
-                    timePlus = timeOffset.getOffsetUTCTime(readoutConfig.getPlus());
-                } else {
-                    timeMinus = firstTime.getOffsetUTCTime(-readoutConfig.getMinus());
-                    timePlus = lastTime.getOffsetUTCTime(readoutConfig.getPlus());
-                }
-                break;
-            case IReadoutRequestElement.READOUT_TYPE_II_STRING:
-                // need stringId
-                if (null == stringId) {
-                    log.error("ReadoutType = " + type + " but StringId is NULL!");
-                }
-                if (null != domId) {
-                    domId = null;
-                }
-                if (sourceId.getSourceID() == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
-                    timeOffset = firstTime.getOffsetUTCTime(readoutConfig.getOffset());
-                    timeMinus = timeOffset.getOffsetUTCTime(-readoutConfig.getMinus());
-                    timePlus = timeOffset.getOffsetUTCTime(readoutConfig.getPlus());
-                } else {
-                    timeMinus = firstTime.getOffsetUTCTime(-readoutConfig.getMinus());
-                    timePlus = lastTime.getOffsetUTCTime(readoutConfig.getPlus());
-                }
-                break;
-            case IReadoutRequestElement.READOUT_TYPE_II_MODULE:
-                // need stringId and domId
-                if (null == stringId) {
-                    log.error("ReadoutType = " + type + " but StringId is NULL!");
-                }
-                if (null == domId) {
-                    log.error("ReadoutType = " + type + " but DomId is NULL!");
-                }
-                if (sourceId.getSourceID() == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
-                    timeOffset = firstTime.getOffsetUTCTime(readoutConfig.getOffset());
-                    timeMinus = timeOffset.getOffsetUTCTime(-readoutConfig.getMinus());
-                    timePlus = timeOffset.getOffsetUTCTime(readoutConfig.getPlus());
-                } else {
-                    timeMinus = firstTime.getOffsetUTCTime(-readoutConfig.getMinus());
-                    timePlus = lastTime.getOffsetUTCTime(readoutConfig.getPlus());
-                }
-                break;
-            case IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL:
-                if (null != stringId) {
-                    stringId = null;
-                }
-                if (null != domId) {
-                    domId = null;
-                }
-                if (sourceId.getSourceID() == SourceIdRegistry.INICE_TRIGGER_SOURCE_ID) {
-                    timeOffset = firstTime.getOffsetUTCTime(readoutConfig.getOffset());
-                    timeMinus = timeOffset.getOffsetUTCTime(-readoutConfig.getMinus());
-                    timePlus = timeOffset.getOffsetUTCTime(readoutConfig.getPlus());
-                } else {
-                    timeMinus = firstTime.getOffsetUTCTime(-readoutConfig.getMinus());
-                    timePlus = lastTime.getOffsetUTCTime(readoutConfig.getPlus());
-                }
-                break;
-            case IReadoutRequestElement.READOUT_TYPE_IT_MODULE:
-                // need stringId and domId
-                if (null == stringId) {
-                    log.error("ReadoutType = " + type + " but StringId is NULL!");
-                }
-                if (null == domId) {
-                    log.error("ReadoutType = " + type + " but DomId is NULL!");
-                }
-                if (sourceId.getSourceID() == SourceIdRegistry.INICE_TRIGGER_SOURCE_ID) {
-                    timeOffset = firstTime.getOffsetUTCTime(readoutConfig.getOffset());
-                    timeMinus = timeOffset.getOffsetUTCTime(-readoutConfig.getMinus());
-                    timePlus = timeOffset.getOffsetUTCTime(readoutConfig.getPlus());
-                } else {
-                    timeMinus = firstTime.getOffsetUTCTime(-readoutConfig.getMinus());
-                    timePlus = lastTime.getOffsetUTCTime(readoutConfig.getPlus());
-                }
-                break;
-            default:
-                log.error("Unknown ReadoutType: " + type + " -> Making it GLOBAL");
-                type = IReadoutRequestElement.READOUT_TYPE_GLOBAL;
-                timeMinus = firstTime.getOffsetUTCTime(-readoutConfig.getMinus());
-                timePlus = lastTime.getOffsetUTCTime(readoutConfig.getPlus());
-                break;
+        case IReadoutRequestElement.READOUT_TYPE_GLOBAL:
+            if (null != stringId) {
+                stringId = null;
+            }
+            if (null != domId) {
+                domId = null;
+            }
+            timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
+            timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
+            break;
+        case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL:
+            if (null != stringId) {
+                stringId = null;
+            }
+            if (null != domId) {
+                domId = null;
+            }
+            if (srcId == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
+                timeOffset =
+                    firstTime.getOffsetUTCTime(roCfg.getOffset());
+                timeMinus =
+                    timeOffset.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus =
+                    timeOffset.getOffsetUTCTime(roCfg.getPlus());
+            } else {
+                timeMinus =
+                    firstTime.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus =
+                    lastTime.getOffsetUTCTime(roCfg.getPlus());
+            }
+            break;
+        case IReadoutRequestElement.READOUT_TYPE_II_STRING:
+            // need stringId
+            if (null == stringId) {
+                LOG.error("ReadoutType = " + type +
+                          " but StringId is NULL!");
+            }
+            if (null != domId) {
+                domId = null;
+            }
+            if (srcId == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
+                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset());
+                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus());
+            } else {
+                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
+            }
+            break;
+        case IReadoutRequestElement.READOUT_TYPE_II_MODULE:
+            // need stringId and domId
+            if (null == stringId) {
+                LOG.error("ReadoutType = " + type +
+                          " but StringId is NULL!");
+            }
+            if (null == domId) {
+                LOG.error("ReadoutType = " + type + " but DomId is NULL!");
+            }
+            if (srcId == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
+                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset());
+                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus());
+            } else {
+                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
+            }
+            break;
+        case IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL:
+            if (null != stringId) {
+                stringId = null;
+            }
+            if (null != domId) {
+                domId = null;
+            }
+            if (srcId == SourceIdRegistry.INICE_TRIGGER_SOURCE_ID) {
+                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset());
+                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus());
+            } else {
+                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
+            }
+            break;
+        case IReadoutRequestElement.READOUT_TYPE_IT_MODULE:
+            // need stringId and domId
+            if (null == stringId) {
+                LOG.error("ReadoutType = " + type +
+                          " but StringId is NULL!");
+            }
+            if (null == domId) {
+                LOG.error("ReadoutType = " + type + " but DomId is NULL!");
+            }
+            if (srcId == SourceIdRegistry.INICE_TRIGGER_SOURCE_ID) {
+                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset());
+                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus());
+            } else {
+                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
+            }
+            break;
+        default:
+            LOG.error("Unknown ReadoutType: " + type +
+                      " -> Making it GLOBAL");
+            type = IReadoutRequestElement.READOUT_TYPE_GLOBAL;
+            timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
+            timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
+            break;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Creating readout: Type = " + type +
-                      " FirstTime = " + timeMinus.longValue()/10.0 +
-                      " LastTime = " + timePlus.longValue()/10.0);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Creating readout: Type = " + type +
+                      " FirstTime = " + timeMinus.longValue() / 10.0 +
+                      " LastTime = " + timePlus.longValue() / 10.0);
         }
 
-        return TriggerRequestPayloadFactory.createReadoutRequestElement(type, timeMinus, timePlus, domId, stringId);
+        int rreSrcId;
+        if (stringId == null) {
+            rreSrcId = -1;
+        } else {
+            rreSrcId = stringId.getSourceID();
+        }
 
+        long rreDomId;
+        if (domId == null) {
+            rreDomId = -1;
+        } else {
+            rreDomId = domId.longValue();
+        }
+
+        return new ReadoutRequestElement(type, rreSrcId,
+                                         timeMinus.longValue(),
+                                         timePlus.longValue(),
+                                         rreDomId);
     }
 
     /**
-     * Form a TriggerRequestPayload.
-     * @param hits hits that participated in trigger (must be time ordered)
-     * @param dom DOM id, if relevent (otherwise null)
-     * @param string sourceId of string, if relevent (otherwise null)
+     * Flush the algorithm.
      */
-    protected void formTrigger(List hits, IDOMID dom, ISourceID string) {
+    public abstract void flush();
 
+    protected void formTrigger(IUTCTime time)
+    {
+        if (null == triggerFactory) {
+            throw new Error("TriggerFactory is not set!");
+        }
+
+        // create readout requests
+        ArrayList<IReadoutRequestElement> readoutElements =
+            new ArrayList<IReadoutRequestElement>();
+        Iterator readoutIter = readouts.iterator();
+        while (readoutIter.hasNext()) {
+            TriggerReadout readout = (TriggerReadout) readoutIter.next();
+            readoutElements.add(createReadoutElement(time, time, readout, null,
+                                                     null));
+        }
+
+        final int uid = getNextUID();
+
+        IReadoutRequest readoutRequest =
+            new ReadoutRequest(time.longValue(), uid, srcId, readoutElements);
+
+        // make payload
+        ArrayList<IWriteablePayload> hitList =
+            new ArrayList<IWriteablePayload>();
+        TriggerRequest triggerPayload =
+            (TriggerRequest) triggerFactory.createPayload(uid, trigType,
+                                                          trigCfgId, srcId,
+                                                          time.longValue(),
+                                                          time.longValue(),
+                                                          readoutRequest,
+                                                          hitList);
+
+        // report it
+        reportTrigger(triggerPayload);
+    }
+
+    protected void formTrigger(IUTCTime firstTime, IUTCTime lastTime)
+    {
+        throw new UnimplementedError();
+    }
+
+    protected void formTrigger(IHitPayload hit, IDOMID dom, ISourceID string)
+    {
+        List hitList = new ArrayList(1);
+        hitList.add(hit);
+        formTrigger(hitList, dom, string);
+    }
+
+    protected void formTrigger(List hits, IDOMID dom, ISourceID string)
+    {
         if (null == triggerFactory) {
             throw new Error("TriggerFactory is not set!");
         }
@@ -491,209 +334,584 @@ public abstract class AbstractTrigger
         }
 
         // get times (this assumes that the hits are time-ordered)
-        IUTCTime firstTime = ((IHitPayload) hits.get(0)).getPayloadTimeUTC();
-        IUTCTime lastTime = ((IHitPayload) hits.get(numberOfHits-1)).getPayloadTimeUTC();
+        IUTCTime firstTime =
+            ((IHitPayload) hits.get(0)).getPayloadTimeUTC();
+        IUTCTime lastTime =
+            ((IHitPayload) hits.get(numberOfHits - 1)).getPayloadTimeUTC();
 
-        if (log.isDebugEnabled() && (triggerCounter % printMod == 0)) {
-            log.debug("New Trigger " + triggerCounter + " from " + triggerName +
-                      " includes " + numberOfHits + " hits:  First time = " +
-                      firstTime + " Last time = " + lastTime);
+        if (LOG.isDebugEnabled() && (triggerCounter % printMod == 0)) {
+            LOG.debug("New Trigger " + triggerCounter + " from " +
+                      triggerName + " includes " + numberOfHits +
+                      " hits:  First time = " + firstTime + " Last time = " +
+                      lastTime);
         }
 
         // set earliest payload of interest to 1/10 ns after the last hit
-        IPayload earliest
-                = new DummyPayload(((IHitPayload) hits.get(numberOfHits-1)).getHitTimeUTC().getOffsetUTCTime(0.1));
-        setEarliestPayloadOfInterest(earliest);
+        IUTCTime lastHitTime =
+            ((IHitPayload) hits.get(numberOfHits - 1)).getHitTimeUTC();
+
+        final int uid = getNextUID();
 
         // create readout requests
-        Vector readoutElements = new Vector();
+        ArrayList<IReadoutRequestElement> readoutElements =
+            new ArrayList<IReadoutRequestElement>();
         Iterator readoutIter = readouts.iterator();
         while (readoutIter.hasNext()) {
             TriggerReadout readout = (TriggerReadout) readoutIter.next();
-            readoutElements.add(createReadoutElement(firstTime, lastTime, readout, dom, string));
+            readoutElements.add(createReadoutElement(firstTime, lastTime,
+                                                     readout, dom, string));
         }
-        IReadoutRequest readoutRequest = TriggerRequestPayloadFactory.createReadoutRequest(sourceId,
-                                                                                           triggerCounter,
-                                                                                           readoutElements);
+        IReadoutRequest readoutRequest =
+            new ReadoutRequest(firstTime.longValue(), uid, srcId,
+                               readoutElements);
+
+        // copy hits so they can be recycled
+        ArrayList<IWriteablePayload> hitList =
+            new ArrayList<IWriteablePayload>();
+        for (Object obj : hits) {
+            IWriteablePayload hit = (IWriteablePayload) obj;
+            hitList.add((IWriteablePayload) hit.deepCopy());
+        }
 
         // make payload
-        TriggerRequestPayload triggerPayload
-                = (TriggerRequestPayload) triggerFactory.createPayload(triggerCounter,
-                                                                       triggerType,
-                                                                       triggerConfigId,
-                                                                       sourceId,
-                                                                       firstTime,
-                                                                       lastTime,
-                                                                       new Vector(hits),
-                                                                       readoutRequest);
+        TriggerRequest triggerPayload =
+            (TriggerRequest) triggerFactory.createPayload(uid, trigType,
+                                                          trigCfgId, srcId,
+                                                          firstTime.longValue(),
+                                                          lastTime.longValue(),
+                                                          readoutRequest,
+                                                          hitList);
 
         // report it
         reportTrigger(triggerPayload);
 
-    }
-    /**
-     * Form a TriggerRequestPayload.
-     */
-    protected void formTrigger(IUTCTime time) {
-
-        if (null == triggerFactory) {
-            throw new Error("TriggerFactory is not set!");
-        }
-
-        if (log.isInfoEnabled() && (triggerCounter % printMod == 0)) {
-            log.info("New Trigger " + triggerCounter + " from " + triggerName);
-        }
-
-        // create readout requests
-        Vector readoutElements = new Vector();
-        Iterator readoutIter = readouts.iterator();
-        while (readoutIter.hasNext()) {
-            TriggerReadout readout = (TriggerReadout) readoutIter.next();
-            readoutElements.add(createReadoutElement(time, time, readout, null, null));
-        }
-        IReadoutRequest readoutRequest = TriggerRequestPayloadFactory.createReadoutRequest(sourceId,
-                                                                                           triggerCounter,
-                                                                                           readoutElements);
-
-        // make payload
-        TriggerRequestPayload triggerPayload
-                = (TriggerRequestPayload) triggerFactory.createPayload(triggerCounter,
-                                                                       triggerType,
-                                                                       triggerConfigId,
-                                                                       sourceId,
-                                                                       time,
-                                                                       time,
-                                                                       new Vector(),
-                                                                       readoutRequest);
-
-        // report it
-        reportTrigger(triggerPayload);
-
-    }
-
-    protected void formTrigger(IHitPayload hit, IDOMID dom, ISourceID string) {
-        List hitList = new ArrayList(1);
-        hitList.add(hit);
-        formTrigger(hitList, dom, string);
-    }
-
-    protected void formTrigger(IUTCTime time_first, IUTCTime time_last) { // formtrigger function as needed by NoiseFixedReadoutTrigger
-
-        if (null == triggerFactory) {
-            throw new Error("TriggerFactory is not set!");
-        }
-
-        if (log.isInfoEnabled() && (triggerCounter % printMod == 0)) {
-            log.info("New Trigger " + triggerCounter + " from " + triggerName);
-        }
-
-        // create readout requests
-        Vector readoutElements = new Vector();
-        Iterator readoutIter = readouts.iterator();
-        while (readoutIter.hasNext()) {
-            TriggerReadout readout = (TriggerReadout) readoutIter.next();
-            readoutElements.add(createReadoutElement(time_first, time_last, readout, null, null));
-        }
-        IReadoutRequest readoutRequest = TriggerRequestPayloadFactory.createReadoutRequest(sourceId,
-                                                                                           triggerCounter,
-                                                                                           readoutElements);
-
-        // make payload
-        TriggerRequestPayload triggerPayload
-	    = (TriggerRequestPayload) triggerFactory.createPayload(triggerCounter,
-								   triggerType,
-								   triggerConfigId,
-								   sourceId,
-								   time_first,
-								   time_last,
-								   new Vector(),
-								   readoutRequest);
-
-        // report it
-        reportTrigger(triggerPayload);
-
+        // update earliest hit time
+        IPayload dummy = new DummyPayload(lastHitTime.getOffsetUTCTime(0.1));
+        setEarliestPayloadOfInterest(dummy);
     }
 
     /**
-     * Dump the trigger configuration.
-     * @return string dump of trigger
+     * Get the earliest payload of interest for this algorithm.
+     *
+     * @return earlist payload
      */
-    public String toString() {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append(triggerName + ":\n");
-        buffer.append("\tTriggerType     = " + triggerType + "\n");
-        buffer.append("\tTriggerConfigId = " + triggerConfigId + "\n");
-        buffer.append("\tSourceId        = " + sourceId + "\n");
-        if (!parameters.isEmpty()) {
-            buffer.append("\tParameters:\n");
-            Iterator iter = parameters.iterator();
-            while (iter.hasNext()) {
-                buffer.append("\t\t" + ((TriggerParameter) iter.next()).toString() + "\n");
-            }
-        }
-        if (!readouts.isEmpty()) {
-            buffer.append("\tReadouts:\n");
-            Iterator iter = readouts.iterator();
-            while (iter.hasNext()) {
-                buffer.append("\t\t" + ((TriggerReadout) iter.next()).toString() + "\n");
-            }
-        }
-        return buffer.toString();
+    public IPayload getEarliestPayloadOfInterest()
+    {
+        return earliestPayloadOfInterest;
     }
 
     /**
-     * method for retrieving the hit type from the trigger mode byte
-     * @param hit hit
-     * @return hit type (integer in range 1 to 4)
-     * <table>
-     * <tr><th>Hit Type ID</th><th>Description</th></tr>
-     * <tr><td>0</td><td>Test pattern trigger (engineering fmt)</td></tr>
-     * <tr><td>1</td><td>Forced trigger</td></tr>
-     * <tr><td>2</td><td>SPE / MPE trigger</td></td></tr>
-     * <tr><td>3</td><td>Flasher trigger</td></td></tr>
-     * <tr><td>4</td><td>IceTop minimum bias trigger</td></tr>
-     * </table>
-     * <br>NOTE: Only the low 4 bits of the trigger type are returned.
+     * Get this hit's type.
+     *
+     * @param hit hit to evaluate
+     *
+     * @return hit type
      */
-    public static int getHitType(IHitPayload hit) {
-
+    public static int getHitType(IHitPayload hit)
+    {
         return hit.getTriggerType() & 0xf;
-
     }
 
     /**
-     * method for retrieving the LC tag from the trigger mode byte
-     * @param hit hit
-     * @return LC Tag (integer in range 0 to 63)
+     * Get the next interval.
+     *
+     * @param interval interval being considered
+     *
+     * @return next interval
      */
-    public static int getLcTag(IHitPayload hit) {
+    public Interval getInterval(Interval interval)
+    {
+        if (interval.isEmpty()) {
+            Interval rtnInterval;
+            synchronized (requests) {
+                if (requests.size() > 0) {
+                    ITriggerRequestPayload req = requests.get(0);
 
-        // right shift 2 bits
-        int lcTag = hit.getTriggerType() >> 2;
-        // clear all bits except 5..0
-        return (lcTag & 0x3f);
+                    rtnInterval =
+                        new Interval(req.getFirstTimeUTC().longValue(),
+                                     req.getLastTimeUTC().longValue());
+                } else {
+                    rtnInterval = interval;
+                }
+            }
 
+            return rtnInterval;
+        }
+
+        long start = interval.start;
+        long end = interval.end;
+
+        synchronized (requests) {
+            for (ITriggerRequestPayload req : requests) {
+                long firstTime = req.getFirstTimeUTC().longValue();
+                long lastTime = req.getLastTimeUTC().longValue();
+
+                // if this request precedes the interval, start a new interval
+                if (start > lastTime) {
+                    start = firstTime;
+                    end = lastTime;
+                    break;
+                }
+
+                // if this request is past the end of the interval, we're done
+                if (end < firstTime) {
+                    break;
+                }
+
+                // if necessary, widen the interval
+                if (firstTime < start) {
+                    start = firstTime;
+                }
+                if (lastTime > end) {
+                    end = lastTime;
+                }
+            }
+        }
+
+        // if this trigger is still interested in hits within the interval,
+        //  return null to signal that the current interval is invalid
+        if (earliestPayloadOfInterest == null ||
+            (earliestPayloadOfInterest.getUTCTime() !=
+             FlushRequest.FLUSH_TIME &&
+             (start >= earliestPayloadOfInterest.getUTCTime() ||
+              end >= earliestPayloadOfInterest.getUTCTime())))
+        {
+            return null;
+        }
+
+        if (start == interval.start && end == interval.end) {
+            return interval;
+        }
+
+        return new Interval(start, end);
     }
 
-    public int getTriggerPrescale() {
-        return triggerPrescale;
+    /**
+     * Get the next request UID.
+     * NOTE: this increments the trigger-wide UID counter
+     *
+     * @return next uid
+     */
+    public int getNextUID()
+    {
+        return triggerCounter++;
     }
 
-    public void setTriggerPrescale(int triggerPrescale) {
-        this.triggerPrescale = triggerPrescale;
+    /**
+     * Get number of cached requests.
+     *
+     * @return number of cached requests
+     */
+    public int getNumberOfCachedRequests()
+    {
+        return requests.size();
     }
 
-    public int getDomSetId() {
-        return domSetId;
+    /**
+     * Get the time of the last released trigger.
+     *
+     * @return release time
+     */
+    public IPayload getReleaseTime()
+    {
+        return releaseTime;
     }
 
-    public void setDomSetId(int domSetId) throws ConfigException {
+    /**
+     * Get the source ID.
+     *
+     * @return source ID
+     */
+    public int getSourceId()
+    {
+        return srcId;
+    }
+
+    /**
+     * Get the configuration ID.
+     *
+     * @return configuration ID
+     */
+    public int getTriggerConfigId()
+    {
+        return trigCfgId;
+    }
+
+    /**
+     * Get the ID of the most recent trigger request.
+     *
+     * @return counter value
+     */
+    public int getTriggerCounter()
+    {
+        return triggerCounter;
+    }
+
+    /**
+     * Get the trigger handler.
+     *
+     * @return trigger handler
+     * @deprecated use getTriggerManager()
+     */
+    public INewManager getTriggerHandler()
+    {
+        return (INewManager) mgr;
+    }
+
+    /**
+     * Get the trigger manager.
+     *
+     * @return trigger manager
+     */
+    public ITriggerManager getTriggerManager()
+    {
+        return mgr;
+    }
+
+    /**
+     * Get the map of monitored quantitied for this algorithm.
+     *
+     * @return map of monitored quantity names and values
+     */
+    public Map<String, Object> getTriggerMonitorMap()
+    {
+        return null;
+    }
+
+    /**
+     * Get trigger name.
+     * @return triggerName
+     */
+    public String getTriggerName()
+    {
+        return triggerName;
+    }
+
+    /**
+     * Get the trigger type.
+     *
+     * @return trigger type
+     */
+    public int getTriggerType()
+    {
+        return trigType;
+    }
+
+    /**
+     * Has this algorithm been fully configured?
+     *
+     * @return <tt>true</tt> if the algorithm has been fully configured
+     */
+    public abstract boolean isConfigured();
+
+    /**
+     * Recycle all unused requests still cached in the algorithms.
+     */
+    public void recycleUnusedRequests()
+    {
+        int count = 0;
+        for (ITriggerRequestPayload req : requests) {
+            req.recycle();
+            if (!(req instanceof FlushRequest)) {
+                count++;
+            }
+        }
+        if (count > 0) {
+            LOG.error("Recycled " + count + " unused " + toString() +
+                      " requests");
+        }
+    }
+
+    /**
+     * Add all requests in the interval to the list of released requests.
+     *
+     * @param interval time interval to check
+     * @param released list of released requests
+     */
+    public void release(Interval interval,
+                        List<ITriggerRequestPayload> released)
+    {
+        synchronized (requests) {
+            int i = 0;
+            for (ITriggerRequestPayload req : requests) {
+                if (interval.start > req.getFirstTimeUTC().longValue() ||
+                    interval.start > req.getLastTimeUTC().longValue())
+                {
+                    // yikes, found a request preceding the interval!
+                    LOG.error("Found request " + req +
+                              " before start of interval " + interval +
+                              " (startDiff " +
+                              (interval.start -
+                               req.getFirstTimeUTC().longValue()) +
+                              ", endDiff " +
+                              (interval.start -
+                               req.getLastTimeUTC().longValue()) + ")");
+                    break;
+                }
+
+                if (interval.end < req.getLastTimeUTC().longValue()) {
+                    // if request is past the end of the interval, we're done
+                    break;
+                }
+
+                i++;
+            }
+
+            // release all requests found in the interval
+            if (i > 0) {
+                List<ITriggerRequestPayload> sub =
+                    requests.subList(0, i);
+
+                // save the last released time
+                ITriggerRequestPayload req = sub.get(i-1);
+                if (req instanceof FlushRequest) {
+                    releaseTime = req;
+                } else {
+                    releaseTime = new DummyPayload(req.getLastTimeUTC());
+                }
+
+                // add released requests to the list and remove from the cache
+                released.addAll(sub);
+                sub.clear();
+            }
+        }
+    }
+
+    public void reportHit(IHitPayload hit)
+    {
+        throw new UnimplementedError();
+    }
+
+    /**
+     * Report the trigger request.
+     *
+     * @param trigReq new request
+     */
+    public void reportTrigger(ITriggerRequestPayload trigReq)
+    {
+        // if prescaling, should we throw out this trigger request?
+        if ((triggerPrescale != 0) &&
+            ((triggerCounter % triggerPrescale) != 0))
+        {
+            trigReq.recycle();
+        } else {
+            synchronized (requests) {
+                requests.add(trigReq);
+                sentTriggerCounter++;
+            }
+
+            collector.setChanged();
+        }
+    }
+
+    /**
+     * Run trigger algorithm on the payload.
+     *
+     * @param payload payload to process
+     *
+     * @throws TriggerException if there was a problem running the algorithm
+     */
+    public abstract void runTrigger(IPayload payload)
+        throws TriggerException;
+
+    /**
+     * Have we seen a flush request?
+     *
+     * @return <tt>true</tt> if all hits have been seen
+     */
+    public boolean sawFlush()
+    {
+        return sawFlush;
+    }
+
+    /**
+     * Clear out all remaining payloads.
+     */
+    public void sendLast()
+    {
+        flush();
+
+        FlushRequest flushReq = new FlushRequest();
+        setEarliestPayloadOfInterest(flushReq);
+        synchronized (requests) {
+            requests.add(flushReq);
+        }
+    }
+
+    /**
+     * Set DOM set ID
+     *
+     * @param domSetId DOM set ID
+     *
+     * @throws ConfigException if the DOMSet ID was not valid
+     */
+    public void setDomSetId(int domSetId)
+        throws ConfigException
+    {
         this.domSetId = domSetId;
         configHitFilter(domSetId);
     }
 
-    protected void configHitFilter(int domSetId) throws ConfigException {
-        hitFilter = new HitFilter(domSetId);
+    /**
+     * Set earliest hit to keep.
+     *
+     * @param payload earliest payload
+     */
+    protected void setEarliestPayloadOfInterest(IPayload payload)
+    {
+        earliestPayloadOfInterest = payload;
+        mgr.setEarliestPayloadOfInterest(earliestPayloadOfInterest);
     }
 
+    /**
+     * Set source ID.
+     *
+     * @param val source ID
+     */
+    public void setSourceId(int val)
+    {
+        srcId = val;
+    }
+
+    /**
+     * Set request collector.
+     *
+     * @param collector trigger collector
+     */
+    public void setTriggerCollector(TriggerCollector collector)
+    {
+        this.collector = collector;
+    }
+
+    /**
+     * Set configuration ID.
+     *
+     * @param val configuration ID
+     */
+    public void setTriggerConfigId(int val)
+    {
+        trigCfgId = val;
+    }
+
+    /**
+     * Set the factory used to create trigger requests.
+     *
+     * @param triggerFactory trigger factory
+     */
+    public void setTriggerFactory(TriggerRequestFactory triggerFactory)
+    {
+        this.triggerFactory = triggerFactory;
+    }
+
+    /**
+     * Set the trigger manager for this trigger.
+     *
+     * @param mgr trigger manager
+     */
+    public void setTriggerManager(ITriggerManager mgr)
+    {
+        this.mgr = mgr;
+    }
+
+    /**
+     * Set trigger name.
+     *
+     * @param triggerName trigger name
+     */
+    public void setTriggerName(String triggerName)
+    {
+        this.triggerName = triggerName;
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("TriggerName = " + triggerName);
+        }
+    }
+
+    /**
+     * Set trigger type.
+     *
+     * @param val trigger type
+     */
+    public void setTriggerType(int val)
+    {
+        trigType = val;
+    }
+
+    /**
+     * Wrap the trigger in a global trigger jacket and report it.
+     *
+     * @param trigReq trigger request
+     */
+    public void wrapTrigger(ITriggerRequestPayload trigReq)
+    {
+        // rReq is the same for a single payload.
+        IReadoutRequest rReq =
+            trigReq.getReadoutRequest();
+
+        List elems;
+        if (rReq == null) {
+            elems = null;
+        } else {
+            elems = rReq.getReadoutRequestElements();
+        }
+
+        IUTCTime earliest;
+        IUTCTime latest;
+
+        if (rReq == null || elems == null || elems.size() == 0) {
+            earliest = trigReq.getFirstTimeUTC();
+            latest = trigReq.getLastTimeUTC();
+        } else {
+            earliest = null;
+            latest = null;
+            for (Object obj : elems) {
+                IReadoutRequestElement rrElem = (IReadoutRequestElement) obj;
+
+                if (earliest == null ||
+                    earliest.longValue() >
+                    rrElem.getFirstTimeUTC().longValue())
+                {
+                    earliest = rrElem.getFirstTimeUTC();
+                }
+
+                if (latest == null ||
+                    latest.longValue() < rrElem.getLastTimeUTC().longValue())
+                {
+                    latest = rrElem.getLastTimeUTC();
+                }
+            }
+
+            if (earliest == null || latest == null) {
+                throw new Error("Couldn't find earliest/latest time for " +
+                                rReq);
+            }
+        }
+
+        List list = new ArrayList();
+        list.add(trigReq.deepCopy());
+
+        final int uid = getNextUID();
+
+        IReadoutRequest newRdoutReq =
+            new ReadoutRequest(rReq.getUTCTime(), uid, srcId, elems);
+
+        ITriggerRequestPayload newReq =
+            (ITriggerRequestPayload) triggerFactory.
+            createPayload(uid, getTriggerType(), getTriggerConfigId(),
+                          srcId, earliest.longValue(), latest.longValue(),
+                          newRdoutReq, list);
+
+        reportTrigger(newReq);
+
+        setEarliestPayloadOfInterest(new DummyPayload(earliest));
+    }
+
+    /**
+     * Debugging string.
+     *
+     * @return debugging string
+     */
+    public String toString()
+    {
+        return triggerName + "#" + triggerCounter;
+    }
 }

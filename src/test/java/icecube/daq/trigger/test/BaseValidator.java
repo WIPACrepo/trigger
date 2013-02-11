@@ -1,8 +1,9 @@
 package icecube.daq.trigger.test;
 
-import icecube.daq.oldpayload.impl.MasterPayloadFactory;
-import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.impl.TriggerRequestFactory;
+import icecube.daq.trigger.exceptions.UnimplementedError;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -15,59 +16,42 @@ public abstract class BaseValidator
 {
     private static final Log LOG = LogFactory.getLog(BaseValidator.class);
 
-    private MasterPayloadFactory factory;
+    private TriggerRequestFactory factory;
 
-    static long getUTC(IUTCTime time)
+    public boolean foundInvalid()
     {
-        if (time == null) {
+        throw new UnimplementedError();
+    }
+
+    public long getUTC(IUTCTime utc)
+    {
+        if (utc == null) {
             return -1L;
         }
 
-        return time.longValue();
+        return utc.longValue();
     }
 
-    static void dumpPayloadBytes(IWriteablePayload payload)
-    {
-        ByteBuffer buf = ByteBuffer.allocate(payload.getPayloadLength());
-
-        int len;
-        try {
-            len = payload.writePayload(false, 0, buf);
-        } catch (java.io.IOException ioe) {
-            ioe.printStackTrace();
-            len = -1;
-        }
-
-        StringBuffer strbuf = new StringBuffer();
-        for (int i = 0; i < buf.limit(); i++) {
-            String str = Integer.toHexString(buf.get(i));
-            if (str.length() < 2) {
-                strbuf.append('0').append(str);
-            } else if (str.length() > 2) {
-                strbuf.append(str.substring(str.length() - 2));
-            } else {
-                strbuf.append(str);
-            }
-            strbuf.append(' ');
-        }
-
-        System.err.println("LEN "+len+" HEX "+strbuf.toString());
-    }
-
-    public void validate(ByteBuffer payBuf)
+    public boolean validate(ByteBuffer payBuf)
     {
         if (factory == null) {
-            factory = new MasterPayloadFactory();
+            factory = new TriggerRequestFactory(null);
         }
 
         IWriteablePayload payload;
         try {
-            payload = factory.createPayload(0, payBuf, false);
+            payload = factory.createPayload(payBuf, 0);
         } catch (Exception ex) {
             LOG.error("Couldn't validate byte buffer", ex);
-            return;
+            return false;
         }
 
-        validate(payload);
+        return validate(payload);
     }
+
+    public boolean validate(IWriteablePayload payload)
+    {
+        throw new UnimplementedError();
+    }
+
 }

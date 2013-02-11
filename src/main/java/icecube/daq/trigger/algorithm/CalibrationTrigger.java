@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 13696 2012-05-14 17:35:47Z dglo $
+ * Version $Id: CalibrationTrigger.java 14207 2013-02-11 22:18:48Z dglo $
  *
  * Date: August 27 2005
  *
@@ -10,10 +10,9 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -26,12 +25,12 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is an implementation of a calibration trigger. It checks each hit
  * to see if it is the correct type (flasher hit for instance), and if so it
- * forms a TriggerRequestPayload.
+ * forms a TriggerRequest.
  *
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 13696 2012-05-14 17:35:47Z dglo $
+ * @version $Id: CalibrationTrigger.java 14207 2013-02-11 22:18:48Z dglo $
  * @author pat
  */
 public class CalibrationTrigger extends AbstractTrigger
@@ -40,7 +39,8 @@ public class CalibrationTrigger extends AbstractTrigger
     /**
      * Log object for this class
      */
-    private static final Log log = LogFactory.getLog(CalibrationTrigger.class);
+    private static final Log LOG =
+        LogFactory.getLog(CalibrationTrigger.class);
 
     private static int triggerNumber = 0;
 
@@ -54,7 +54,8 @@ public class CalibrationTrigger extends AbstractTrigger
     /**
      * Constructor.
      */
-    public CalibrationTrigger() {
+    public CalibrationTrigger()
+    {
         triggerNumber++;
     }
 
@@ -63,26 +64,30 @@ public class CalibrationTrigger extends AbstractTrigger
      *
      * @return true if it is
      */
-    public boolean isConfigured() {
+    public boolean isConfigured()
+    {
         return configHitType;
     }
 
     /**
-     * Add a parameter.
+     * Add a trigger parameter.
      *
-     * @param parameter TriggerParameter object.
+     * @param name parameter name
+     * @param value parameter value
      *
-     * @throws icecube.daq.trigger.exceptions.UnknownParameterException
-     *
+     * @throws UnknownParameterException if the parameter is unknown
+     * @throws IllegalParameterValueException if the parameter value is bad
      */
-    public void addParameter(TriggerParameter parameter) throws UnknownParameterException, IllegalParameterValueException {
-        if (parameter.getName().compareTo("hitType") == 0) {
-            hitType = Integer.parseInt(parameter.getValue());
+    public void addParameter(String name, String value)
+        throws UnknownParameterException, IllegalParameterValueException
+    {
+        if (name.compareTo("hitType") == 0) {
+            hitType = Integer.parseInt(value);
             configHitType = true;
-        } else if (parameter.getName().compareTo("triggerPrescale") == 0) {
-            triggerPrescale = Integer.parseInt(parameter.getValue());
-        } else if (parameter.getName().compareTo("domSet") == 0) {
-            domSetId = Integer.parseInt(parameter.getValue());
+        } else if (name.compareTo("triggerPrescale") == 0) {
+            triggerPrescale = Integer.parseInt(value);
+        } else if (name.compareTo("domSet") == 0) {
+            domSetId = Integer.parseInt(value);
             try {
                 configHitFilter(domSetId);
             } catch (ConfigException ce) {
@@ -90,15 +95,16 @@ public class CalibrationTrigger extends AbstractTrigger
                                                          domSetId, ce);
             }
         } else {
-            throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
+            throw new UnknownParameterException("Unknown parameter: " + name);
         }
-        super.addParameter(parameter);
+        super.addParameter(name, value);
     }
 
-    public void setTriggerName(String triggerName) {
+    public void setTriggerName(String triggerName)
+    {
         super.triggerName = triggerName + triggerNumber;
-        if (log.isInfoEnabled()) {
-            log.info("TriggerName set to " + super.triggerName);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("TriggerName set to " + super.triggerName);
         }
     }
 
@@ -110,7 +116,9 @@ public class CalibrationTrigger extends AbstractTrigger
      * @throws icecube.daq.trigger.exceptions.TriggerException
      *          if the algorithm doesn't like this payload
      */
-    public void runTrigger(IPayload payload) throws TriggerException {
+    public void runTrigger(IPayload payload)
+        throws TriggerException
+    {
 
         int interfaceType = payload.getPayloadInterfaceType();
         if ((interfaceType != PayloadInterfaceRegistry.I_HIT_PAYLOAD) &&
@@ -121,8 +129,8 @@ public class CalibrationTrigger extends AbstractTrigger
 
         // check hit filter
         if (!hitFilter.useHit(hit)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Hit from DOM " + hit.getDOMID() + " not in DomSet");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Hit from DOM " + hit.getDOMID() + " not in DomSet");
             }
             return;
         }
@@ -144,15 +152,18 @@ public class CalibrationTrigger extends AbstractTrigger
     /**
      * Flush the trigger. Basically indicates that there will be no further payloads to process.
      */
-    public void flush() {
+    public void flush()
+    {
         // nothing has to be done here since this trigger does not buffer anything.
     }
 
-    public int getHitType() {
+    public int getHitType()
+    {
         return hitType;
     }
 
-    public void setHitType(int hitType) {
+    public void setHitType(int hitType)
+    {
         this.hitType = hitType;
     }
 

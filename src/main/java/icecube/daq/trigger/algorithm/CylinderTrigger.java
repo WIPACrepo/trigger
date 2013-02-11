@@ -2,7 +2,6 @@ package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -14,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
-
-import org.apache.log4j.Logger;
 
 /**
  * The VolumeTrigger is based on the ClusterTrigger, with a slight modifications to
@@ -63,8 +60,6 @@ public class CylinderTrigger extends AbstractTrigger
 
     private Comparator hitComparator = new HitComparator();
 
-    private static final Logger logger = Logger.getLogger(CylinderTrigger.class);
-
     public CylinderTrigger()
     {
         triggerQueue    = new LinkedList<IHitPayload>();
@@ -76,23 +71,32 @@ public class CylinderTrigger extends AbstractTrigger
         setHeight(100.0);
     }
 
+    /**
+     * Add a trigger parameter.
+     *
+     * @param name parameter name
+     * @param value parameter value
+     *
+     * @throws UnknownParameterException if the parameter is unknown
+     * @throws IllegalParameterValueException if the parameter value is bad
+     */
     @Override
-    public void addParameter(TriggerParameter parameter) throws UnknownParameterException,
-            IllegalParameterValueException
+    public void addParameter(String name, String value)
+        throws UnknownParameterException, IllegalParameterValueException
     {
-        if (parameter.getName().equals("timeWindow"))
-            setTimeWindow(Long.parseLong(parameter.getValue()));
-        else if (parameter.getName().equals("multiplicity"))
-            setMultiplicity(Integer.parseInt(parameter.getValue()));
-        else if (parameter.getName().equals("simpleMultiplicity"))
-            setSimpleMultiplicity(Integer.parseInt(parameter.getValue()));
-        else if (parameter.getName().equals("radius"))
-            setRadius(Double.parseDouble(parameter.getValue()));
-        else if (parameter.getName().equals("height"))
-            setHeight(Double.parseDouble(parameter.getValue()));
-        else if (parameter.getName().equals("domSet"))
+        if (name.equals("timeWindow"))
+            setTimeWindow(Long.parseLong(value));
+        else if (name.equals("multiplicity"))
+            setMultiplicity(Integer.parseInt(value));
+        else if (name.equals("simpleMultiplicity"))
+            setSimpleMultiplicity(Integer.parseInt(value));
+        else if (name.equals("radius"))
+            setRadius(Double.parseDouble(value));
+        else if (name.equals("height"))
+            setHeight(Double.parseDouble(value));
+        else if (name.equals("domSet"))
         {
-            domSetId = Integer.parseInt(parameter.getValue());
+            domSetId = Integer.parseInt(value);
             try {
                 configHitFilter(domSetId);
             } catch (ConfigException ce) {
@@ -100,7 +104,7 @@ public class CylinderTrigger extends AbstractTrigger
                                                          domSetId, ce);
             }
         }
-        super.addParameter(parameter);
+        super.addParameter(name, value);
     }
 
     public int getSimpleMultiplicity()
@@ -212,6 +216,10 @@ public class CylinderTrigger extends AbstractTrigger
         {
             String mbid0 = String.format("%012x", q[ihit].getDOMID().longValue());
             DeployedDOM d0 = domRegistry.getDom(mbid0);
+            if (d0 == null) {
+                throw new Error("Cannot find DOM " + mbid0);
+            }
+
             hitsInCylinder.clear();
             hitsInCylinder.add(q[ihit]);
             for (int jhit = 0; jhit < q.length; jhit++)
@@ -219,6 +227,10 @@ public class CylinderTrigger extends AbstractTrigger
                 if (ihit == jhit) continue;
                 String mbid1 = String.format("%012x", q[jhit].getDOMID().longValue());
                 DeployedDOM d1 = domRegistry.getDom(mbid1);
+                if (d1 == null) {
+                    throw new Error("Cannot find DOM " + mbid1);
+                }
+
                 double dx = d1.getX() - d0.getX();
                 double dy = d1.getY() - d0.getY();
                 double dz = d1.getZ() - d0.getZ();

@@ -11,11 +11,13 @@ import icecube.daq.util.DOMRegistry;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
 /**
- * The ClusterTrigger is a variant on the <i>StringTrigger</i> theme.  The ClusterTrigger
+ * The VolumeTrigger is based on the ClusterTrigger, with a slight modifications to
+ * allow clusters to span neighboring strings.  The VolumeTrigger
  * is intended for use on a central trigger module which may have inputs from multiple
  * strings.  The trigger searches for N hits clustered in a "coherence" length of M
  * adjacent modules all within a time window of &Delta;t.
@@ -36,7 +38,7 @@ import org.apache.log4j.Logger;
  * the time window.  If the queue size is &ge; N then that forms the 'first-level trigger.'
  * Upon reaching this state, it must be checked whether the hits are clustered in space.
  * This is done by incrementing counters a length M/2 in either direction from the
- * <i>logical channel</i> taking care not to cross string boundaries.  A space cluster will
+ * <i>logical channel</i>, allowing for counts on neighboring strings.  A space cluster will
  * also maintain counter[i] &ge; N for one or more <i>logical channel</i> locations.
  * <p>
  * The trigger that is formed should <i>only</i> contain those hits which are part of a
@@ -47,7 +49,7 @@ import org.apache.log4j.Logger;
  * @author kael
  *
  */
-public class ClusterTrigger extends AbstractTrigger
+public class VolumeTrigger extends AbstractTrigger
 {
     private long timeWindow;
     private boolean configTimeWindow;
@@ -62,9 +64,12 @@ public class ClusterTrigger extends AbstractTrigger
 
     private LinkedList<IHitPayload> triggerQueue;
 
-    private static final Logger logger = Logger.getLogger(ClusterTrigger.class);
+    private boolean needStringMap;
+    private TreeMap<Integer, TreeSet<Integer>> stringMap;
 
-    public ClusterTrigger()
+    private static final Logger logger = Logger.getLogger(VolumeTrigger.class);
+
+    public VolumeTrigger()
     {
         triggerQueue    = new LinkedList<IHitPayload>();
 
@@ -76,6 +81,8 @@ public class ClusterTrigger extends AbstractTrigger
 
         setCoherenceLength(7);
         configCoherence = false;
+
+	needStringMap = true;
     }
 
     /**
@@ -153,6 +160,13 @@ public class ClusterTrigger extends AbstractTrigger
     @Override
     public void runTrigger(IPayload payload) throws TriggerException
     {
+
+	// Get the string map if we haven't already
+	if (needStringMap) {
+	    stringMap = getTriggerHandler().getStringMap();
+	    needStringMap = false;
+	}
+
         if (!(payload instanceof IHitPayload))
             throw new TriggerException(
                     "Payload object " + payload + " cannot be upcast to IHitPayload."
@@ -166,7 +180,7 @@ public class ClusterTrigger extends AbstractTrigger
 
         if (logger.isDebugEnabled())
         {
-            LogicalChannel logical = LogicalChannel.fromHitPayload(
+            LogicalChannelVT logical = LogicalChannelVT.fromHitPayload(
                     hitPayload, getTriggerHandler().getDOMRegistry());
             logger.debug("Received hit at UTC " +
                     hitPayload.getHitTimeUTC() +
@@ -199,28 +213,38 @@ public class ClusterTrigger extends AbstractTrigger
     private boolean processHitQueue()
     {
             final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
-        final TreeMap<LogicalChannel, Integer> coherenceMap = new TreeMap<LogicalChannel, Integer>();
+
+        final TreeMap<LogicalChannelVT, Integer> coherenceMap = new TreeMap<LogicalChannelVT, Integer>();
         boolean trigger = false;
 
         for (IHitPayload hit : triggerQueue)
         {
-            LogicalChannel central = LogicalChannel.fromHitPayload(hit, domRegistry);
-            int m0 = Math.max( 1, central.module - coherenceUp);
-            int m1 = Math.min(60, central.module + coherenceDown);
-            for (int m = m0; m <= m1; m++)
-            {
-                LogicalChannel ch = new LogicalChannel(central.string, m);
-                int counter = 0;
-                if (coherenceMap.containsKey(ch)) counter = coherenceMap.get(ch);
-                counter += 1;
-                if (counter >= multiplicity) trigger = true;
-                coherenceMap.put(ch, counter);
-            }
+            LogicalChannelVT central = LogicalChannelVT.fromHitPayload(hit, domRegistry);
+
+	    // Get the neighboring strings
+	    Integer stringNum = new Integer(central.string);
+	    TreeSet<Integer> strings = stringMap.get(stringNum);
+
+	    // Iterate over the set of neighbors
+	    for (Integer st : strings ) {
+
+		int m0 = Math.max( 1, central.module - coherenceUp);
+		int m1 = Math.min(60, central.module + coherenceDown);
+		for (int m = m0; m <= m1; m++)
+		    {
+			LogicalChannelVT ch = new LogicalChannelVT(st.intValue(), m);
+			int counter = 0;
+			if (coherenceMap.containsKey(ch)) counter = coherenceMap.get(ch);
+			counter += 1;
+			if (counter >= multiplicity) trigger = true;
+			coherenceMap.put(ch, counter);
+		    }
+	    }
         }
 
         if (logger.isDebugEnabled())
         {
-            for (LogicalChannel ch : coherenceMap.keySet())
+            for (LogicalChannelVT ch : coherenceMap.keySet())
             {
                 logger.debug("Logical channel " + ch + " : " + coherenceMap.get(ch));
             }
@@ -238,10 +262,15 @@ public class ClusterTrigger extends AbstractTrigger
         for (Iterator<IHitPayload> hitIt = triggerQueue.iterator(); hitIt.hasNext(); )
         {
             IHitPayload hit = hitIt.next();
-            LogicalChannel testCh = LogicalChannel.fromHitPayload(hit, domRegistry);
+            LogicalChannelVT testCh = LogicalChannelVT.fromHitPayload(hit, domRegistry);
+
+	    // Get the neighboring strings
+	    Integer stringNum = new Integer(testCh.string);
+	    TreeSet<Integer> strings = stringMap.get(stringNum);
+
             boolean clust = false;
-            for (LogicalChannel ch : coherenceMap.keySet())
-                if (ch.isNear(testCh, coherenceUp, coherenceDown)) clust = true;
+            for (LogicalChannelVT ch : coherenceMap.keySet())
+                if (ch.isNear(testCh, coherenceUp, coherenceDown, strings)) clust = true;
             if (!clust) hitIt.remove();
         }
 
@@ -255,19 +284,19 @@ public class ClusterTrigger extends AbstractTrigger
 
 }
 
-class LogicalChannel implements Comparable<LogicalChannel>
+class LogicalChannelVT implements Comparable<LogicalChannelVT>
 {
     int string;
     int module;
     long numericMBID;
     String mbid;
 
-    LogicalChannel()
+    LogicalChannelVT()
     {
         this(0, 0);
     }
 
-    LogicalChannel(int string, int module)
+    LogicalChannelVT(int string, int module)
     {
         this.string = string;
         this.module = module;
@@ -281,9 +310,9 @@ class LogicalChannel implements Comparable<LogicalChannel>
         return 64 * string + module - 1;
     }
 
-    static LogicalChannel fromHitPayload(IHitPayload hit, DOMRegistry registry)
+    static LogicalChannelVT fromHitPayload(IHitPayload hit, DOMRegistry registry)
     {
-        LogicalChannel logCh = new LogicalChannel();
+        LogicalChannelVT logCh = new LogicalChannelVT();
         logCh.numericMBID   = hit.getDOMID().longValue();
         logCh.mbid          = String.format("%012x", logCh.numericMBID);
         logCh.string        = registry.getStringMajor(logCh.mbid);
@@ -299,13 +328,20 @@ class LogicalChannel implements Comparable<LogicalChannel>
      * @param down down radius
      * @return true if within near neighborhood
      */
-    boolean isNear(LogicalChannel ch, int up, int down)
+    boolean isNear(LogicalChannelVT ch, int up, int down, TreeSet<Integer> neighbors)
     {
-        if (string != ch.string) return false;
+	// First check if this string is near the hit string
+	boolean closeString = neighbors.contains(new Integer(string));
+
+	// Next check if this module is near the hit module
+	boolean closeModule = false;
         int intraStringSeparation = ch.module - module;
         if ((intraStringSeparation < 0 && -intraStringSeparation <= up) ||
                 (intraStringSeparation > 0 && intraStringSeparation <= down) ||
-                intraStringSeparation == 0) return true;
+	    intraStringSeparation == 0) closeModule =  true;
+
+	if (closeString && closeModule) return true;
+
         return false;
     }
 
@@ -315,7 +351,7 @@ class LogicalChannel implements Comparable<LogicalChannel>
         return String.format("(%d, %d)", string, module);
     }
 
-    public int compareTo(LogicalChannel o)
+    public int compareTo(LogicalChannelVT o)
     {
         if (hashCode() < o.hashCode())
             return -1;
@@ -328,10 +364,6 @@ class LogicalChannel implements Comparable<LogicalChannel>
     @Override
     public boolean equals(Object obj)
     {
-       if (obj==null) {
-           return false;
-       }
-
         return hashCode() == obj.hashCode();
     }
 

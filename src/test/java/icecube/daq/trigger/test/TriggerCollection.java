@@ -1,15 +1,14 @@
 package icecube.daq.trigger.test;
 
-import icecube.daq.oldpayload.RecordTypeRegistry;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.payload.impl.SourceID;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
 import icecube.daq.trigger.algorithm.AbstractTrigger;
-import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.trigger.common.ITriggerManager;
 import icecube.daq.trigger.config.TriggerReadout;
-import icecube.daq.trigger.control.ITriggerHandler;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -26,6 +25,11 @@ public abstract class TriggerCollection
     static final int SIMHUB = SourceIdRegistry.SIMULATION_HUB_SOURCE_ID;
     static final int STRINGHUB = SourceIdRegistry.STRING_HUB_SOURCE_ID;
 
+    static final int RECORD_TYPE_TRIGGER_REQUEST = 4;
+
+    private static final String PACKAGE_NAME =
+        "icecube.daq.trigger.algorithm";
+
     private static ByteBuffer hitBuf;
     private static ByteBuffer stopMsg;
     private static ByteBuffer trigBuf;
@@ -39,20 +43,20 @@ public abstract class TriggerCollection
         list.add(trig);
     }
 
-    public void addToHandler(ITriggerHandler trigHandler)
+    public void addToHandler(ITriggerManager trigHandler)
     {
-        ISourceID srcId = trigHandler.getSourceID();
+        int srcId = trigHandler.getSourceId();
 
         int numAdded = 0;
         for (AbstractTrigger t : list) {
-            if (srcId.equals(t.getSourceId())) {
+            if (srcId == t.getSourceId()) {
                 trigHandler.addTrigger(t);
                 numAdded++;
             }
         }
 
         if (numAdded == 0) {
-            throw new Error("No triggers added for " + srcId);
+            throw new Error("No triggers added for " + new SourceID(srcId));
         }
     }
 
@@ -69,13 +73,13 @@ public abstract class TriggerCollection
     static AbstractTrigger createTrigger(int type, int cfgId, int srcId,
                                          String name)
     {
-        String className = "icecube.daq.trigger.algorithm." + name;
+        String className = PACKAGE_NAME + "." + name;
 
         Class trigClass;
         try {
             trigClass = Class.forName(className);
         } catch (ClassNotFoundException cnfe) {
-            throw new Error("Cannot find " + name + " trigger");
+            throw new Error("Cannot find " + PACKAGE_NAME + "." + name);
         }
 
         AbstractTrigger trig;
@@ -87,7 +91,7 @@ public abstract class TriggerCollection
 
         trig.setTriggerType(type);
         trig.setTriggerConfigId(cfgId);
-        trig.setSourceId(new MockSourceID(srcId));
+        trig.setSourceId(srcId);
         trig.setTriggerName(name);
 
         return trig;
@@ -201,8 +205,7 @@ public abstract class TriggerCollection
         }
 
         synchronized (trigBuf) {
-            final int recType =
-                RecordTypeRegistry.RECORD_TYPE_TRIGGER_REQUEST;
+            final int recType = RECORD_TYPE_TRIGGER_REQUEST;
             final int uid = trigUID++;
 
             int amCfgId = getAmandaConfigId(trigType);

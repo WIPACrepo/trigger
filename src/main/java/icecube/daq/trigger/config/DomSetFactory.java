@@ -1,8 +1,8 @@
 package icecube.daq.trigger.config;
 
+import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.util.DOMRegistry;
 import icecube.daq.util.DeployedDOM;
-import icecube.daq.trigger.exceptions.ConfigException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,7 +22,7 @@ import org.dom4j.io.SAXReader;
 /**
  * Configuration file utility
  */
-public class DomSetFactory
+public abstract class DomSetFactory
 {
     /**
      * logging object
@@ -38,13 +38,15 @@ public class DomSetFactory
      * Trigger configuration directory
      * (usually ~pdaq/pDAQ__current/config/trigger)
      */
-    private static File TRIGGER_CONFIG_DIR;
+    private static File triggerConfigDir;
+
+    /** DOMRegistry */
+    private static DOMRegistry domRegistry;
 
     /**
-     * DOMRegistry
+     * Add all DOMs from <tt>hub</tt> within the range
+     * [<tt>low</tt>-<tt>high</tt>] to the <tt>domIds</tt> list.
      */
-    private static DOMRegistry domRegistry = null;
-
     private static void addAllDoms(List<String>domIds, int hub, int low,
                                    int high)
     {
@@ -61,6 +63,8 @@ public class DomSetFactory
      *
      * @param id DomSet ID
      *
+     * @return DOMs in the named set
+     *
      * @throws ConfigException if there is a problem
      */
     public static DomSet getDomSet(int id)
@@ -75,16 +79,21 @@ public class DomSetFactory
      * @param id DomSet ID
      * @param filename name of XML file containing DomSet definitions
      *
+     * @return DOMs in the named set
+     *
      * @throws ConfigException if there is a problem
      */
     public static DomSet getDomSet(int id, String filename)
         throws ConfigException
     {
+        String realname;
         if (filename == null) {
-            filename = DOMSET_DEFS_FILE;
+            realname = DOMSET_DEFS_FILE;
+        } else {
+            realname = filename;
         }
 
-        Document doc = loadXMLDocument(filename);
+        Document doc = loadXMLDocument(realname);
         List<Node> nodeList = doc.selectNodes("//domsets/domset");
         for (Node n : nodeList) {
             int dsid;
@@ -105,9 +114,11 @@ public class DomSetFactory
     }
 
     /**
-     * Load the specified DomSet.
+     * Load the specified DomSet from the default DomSet file.
      *
      * @param name DomSet name
+     *
+     * @return DOMs in the named set
      *
      * @throws ConfigException if there is a problem
      */
@@ -123,6 +134,8 @@ public class DomSetFactory
      * @param name DomSet name
      * @param filename name of XML file containing DomSet definitions
      *
+     * @return DOMs in the named set
+     *
      * @throws ConfigException if there is a problem
      */
     public static DomSet getDomSet(String name, String filename)
@@ -131,11 +144,15 @@ public class DomSetFactory
         if (name == null) {
             throw new ConfigException("DomSet name cannot be null");
         }
+
+        String realname;
         if (filename == null) {
-            filename = DOMSET_DEFS_FILE;
+            realname = DOMSET_DEFS_FILE;
+        } else {
+            realname = filename;
         }
 
-        Document doc = loadXMLDocument(filename);
+        Document doc = loadXMLDocument(realname);
         List<Node> nodeList = doc.selectNodes("//domsets/domset");
         for (Node n : nodeList) {
             if (name.equals(n.valueOf("@name"))) {
@@ -271,15 +288,24 @@ public class DomSetFactory
         }
     }
 
+    /**
+     * Read the specified file into an XML <tt>Document</tt>.
+     *
+     * @param filename name of trigger configuration file
+     *
+     * @return XML document
+     *
+     * @throws ConfigException if there is a problem
+     */
     private static Document loadXMLDocument(String filename)
         throws ConfigException
     {
-        if (TRIGGER_CONFIG_DIR == null) {
+        if (triggerConfigDir == null) {
             throw new ConfigException("Trigger configuration directory" +
                                       " has not been set");
         }
 
-        File defnFile = new File(TRIGGER_CONFIG_DIR, filename);
+        File defnFile = new File(triggerConfigDir, filename);
         if (!defnFile.isFile()) {
             throw new ConfigException("DomSet definitions file \"" +
                                       defnFile + "\" does not exist");
@@ -315,23 +341,37 @@ public class DomSetFactory
         }
     }
 
+    /**
+     * Set the configuration directory.
+     *
+     * @param configDir absolute path of DAQ configuration directory
+     *
+     * @throws ConfigException if there is a problem
+     */
     public static void setConfigurationDirectory(String configDir)
         throws ConfigException
     {
         if (configDir == null) {
-            TRIGGER_CONFIG_DIR = null;
+            triggerConfigDir = null;
         } else {
             File tmpDir = new File(configDir, "trigger");
             if (!tmpDir.isDirectory()) {
-                throw new ConfigException("Trigger configuration directory \"" +
-                                          tmpDir + "\" does not exist");
+                throw new ConfigException("Trigger configuration" +
+                                          " directory \"" + tmpDir +
+                                          "\" does not exist");
             }
 
-            TRIGGER_CONFIG_DIR = tmpDir;
+            triggerConfigDir = tmpDir;
         }
     }
 
-    public static void setDomRegistry(DOMRegistry dr) {
+    /**
+     * Set the DOM registry used to find all DOMs associated with a hub.
+     *
+     * @param dr DOM registry
+     */
+    public static void setDomRegistry(DOMRegistry dr)
+    {
         domRegistry = dr;
     }
 }

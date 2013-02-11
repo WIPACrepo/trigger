@@ -1,7 +1,7 @@
 /*
  * class: VetoTrigger
  *
- * Version $Id: VetoTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: VetoTrigger.java 14207 2013-02-11 22:18:48Z dglo $
  *
  * Date: January 25 2006
  *
@@ -22,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is to provide commond methods for any N-VetoTrigger.
  *
- * @version $Id: VetoTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: VetoTrigger.java 14207 2013-02-11 22:18:48Z dglo $
  * @author shseo
  */
 public abstract class VetoTrigger
@@ -31,7 +31,8 @@ public abstract class VetoTrigger
     /**
     * Log object for this class
     */
-    private static final Log log = LogFactory.getLog(VetoTrigger.class);
+    private static final Log LOG =
+        LogFactory.getLog(VetoTrigger.class);
 
     private int miNumIncomingSelectedTriggers;
     /**
@@ -50,23 +51,23 @@ public abstract class VetoTrigger
 
     public void runTrigger(IPayload payload) throws TriggerException
     {
-        log.debug("inside runTrigger in VetoTrigger");
+        LOG.debug("inside runTrigger in VetoTrigger");
 
         //--Configured trigger needs to be vetoed.
          if(!isConfiguredTrigger((ITriggerRequestPayload) payload))
          {
              miNumIncomingSelectedTriggers++;
-             if (log.isDebugEnabled()) {
-                 log.debug("Total number of incoming Unvetoed triggers so far = " + miNumIncomingSelectedTriggers);
+             if (LOG.isDebugEnabled()) {
+                 LOG.debug("Total number of incoming Unvetoed triggers so far = " + miNumIncomingSelectedTriggers);
              }
              try {
                  wrapTrigger((ITriggerRequestPayload) payload);
              } catch (Exception e) {
-                 log.error("Couldn't wrap trigger", e);
+                 LOG.error("Couldn't wrap trigger", e);
              }
          }else
          {
-             log.debug("This Trigger is being vetoed.");
+             LOG.debug("This Trigger is being vetoed.");
              //DummyPayload dummy = new DummyPayload(((ITriggerRequestPayload) payload).getFirstTimeUTC());
              //setEarliestPayloadOfInterest(dummy);
          }

@@ -1,7 +1,7 @@
 /*
  * class: ThreeVetoTrigger
  *
- * Version $Id: ThreeVetoTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: ThreeVetoTrigger.java 14207 2013-02-11 22:18:48Z dglo $
  *
  * Date: January 25 2006
  *
@@ -11,7 +11,6 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.ITriggerRequestPayload;
-import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 
@@ -24,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is accept all incoming triggers but to veto three configured triggers.
  *
- * @version $Id: ThreeVetoTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: ThreeVetoTrigger.java 14207 2013-02-11 22:18:48Z dglo $
  * @author shseo
  */
 public class ThreeVetoTrigger
@@ -33,7 +32,8 @@ public class ThreeVetoTrigger
     /**
     * Log object for this class
     */
-    private static final Log log = LogFactory.getLog(ThreeVetoTrigger.class);
+    private static final Log LOG =
+        LogFactory.getLog(ThreeVetoTrigger.class);
     private int miConfiguredTriggerType_1;
     private int miConfiguredTriggerConfigId_1;
     private int miConfiguredSourceId_1;
@@ -145,55 +145,59 @@ public class ThreeVetoTrigger
 
     }
     /**
-     * This method is to obtain trigger configuration information.
+     * Add a trigger parameter.
      *
-     * @param parameter TriggerParameter object
-     * @throws icecube.daq.trigger.exceptions.UnknownParameterException
+     * @param name parameter name
+     * @param value parameter value
+     *
+     * @throws UnknownParameterException if the parameter is unknown
+     * @throws IllegalParameterValueException if the parameter value is bad
      */
-    public void addParameter(TriggerParameter parameter) throws UnknownParameterException, IllegalParameterValueException
+    public void addParameter(String name, String value)
+        throws UnknownParameterException, IllegalParameterValueException
     {
         miCountConfigurationParameters++;
 
-        String paramName = parameter.getName();
-        String paramValue = parameter.getValue();
+        String paramName = name;
+        String paramValue = value;
 
-        if (paramName.compareTo("triggerType1") == 0) {
+        if (paramName.compareTo("getTriggerType()1") == 0) {
             miConfiguredTriggerType_1 = Integer.parseInt(paramValue);
             mbConfiguredTriggerType_1 = true;
-        } else if (paramName.compareTo("triggerConfigId1") == 0) {
+        } else if (paramName.compareTo("getTriggerConfigId()1") == 0) {
             miConfiguredTriggerConfigId_1 = Integer.parseInt(paramValue);
             mbConfiguredTriggerConfigId_1 = true;
-        } else if (paramName.compareTo("sourceId1") == 0) {
+        } else if (paramName.compareTo("getSourceId()1") == 0) {
             miConfiguredSourceId_1 = Integer.parseInt(paramValue);
             mbConfiguredSourceId_1 = true;
-        } else if (paramName.compareTo("triggerType2") == 0) {
+        } else if (paramName.compareTo("getTriggerType()2") == 0) {
             miConfiguredTriggerType_2 = Integer.parseInt(paramValue);
             mbConfiguredTriggerType_2 = true;
-        } else if (paramName.compareTo("triggerConfigId2") == 0) {
+        } else if (paramName.compareTo("getTriggerConfigId()2") == 0) {
             miConfiguredTriggerConfigId_2 = Integer.parseInt(paramValue);
             mbConfiguredTriggerConfigId_2 = true;
-        } else if (paramName.compareTo("sourceId2") == 0) {
+        } else if (paramName.compareTo("getSourceId()2") == 0) {
             miConfiguredSourceId_2 = Integer.parseInt(paramValue);
             mbConfiguredSourceId_2 = true;
-        } else if (paramName.compareTo("triggerType3") == 0) {
+        } else if (paramName.compareTo("getTriggerType()3") == 0) {
             miConfiguredTriggerType_3 = Integer.parseInt(paramValue);
             mbConfiguredTriggerType_3 = true;
-        } else if (paramName.compareTo("triggerConfigId3") == 0) {
+        } else if (paramName.compareTo("getTriggerConfigId()3") == 0) {
             miConfiguredTriggerConfigId_3 = Integer.parseInt(paramValue);
             mbConfiguredTriggerConfigId_3 = true;
-        } else if (paramName.compareTo("sourceId3") == 0) {
+        } else if (paramName.compareTo("getSourceId()3") == 0) {
             miConfiguredSourceId_3 = Integer.parseInt(paramValue);
             mbConfiguredSourceId_3 = true;
         }
 
-        super.addParameter(parameter);
+        super.addParameter(name, value);
 
         if(miCountConfigurationParameters == NUMBER_OF_REQUIRED_CONFIG_PARAMETERS){
             if(!isConfigured())
             {
-                log.error("ThreecoincidenceTrigger was NOT properly configured!");
+                LOG.error("ThreecoincidenceTrigger was NOT properly configured!");
             }else{
-                log.info("ThreecoincidenceTrigger was properly configured!");
+                LOG.info("ThreecoincidenceTrigger was properly configured!");
             }
         }
 

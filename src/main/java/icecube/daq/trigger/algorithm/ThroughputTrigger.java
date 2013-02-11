@@ -12,7 +12,6 @@ package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ITriggerRequestPayload;
-import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 
@@ -21,10 +20,10 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * This class receives unconditional-triggers,
- *  makes a new TriggerRequestPayload for each input TriggerRequestPayload
+ *  makes a new TriggerRequest for each input TriggerRequest
  *  and then pass them to GlobalTrigBag.java.
  *
- * @version $Id: ThroughputTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: ThroughputTrigger.java 14207 2013-02-11 22:18:48Z dglo $
  * @author shseo
  */
 public class ThroughputTrigger
@@ -33,7 +32,8 @@ public class ThroughputTrigger
     /**
      * Log object for this class
      */
-    private static final Log log = LogFactory.getLog(ThroughputTrigger.class);
+    private static final Log LOG =
+        LogFactory.getLog(ThroughputTrigger.class);
 
     /**
      * Create an instance of this class.
@@ -54,13 +54,13 @@ public class ThroughputTrigger
      */
     public void runTrigger(IPayload payload) throws TriggerException
     {
-        log.debug("inside runTrigger in ThroughputTrigger");
+        LOG.debug("inside runTrigger in ThroughputTrigger");
         //DummyPayload dummy = new DummyPayload(mtGlobalTrigEventPayload.getFirstTimeUTC());
         //setEarliestPayloadOfInterest(dummy);
         try {
             wrapTrigger((ITriggerRequestPayload) payload);
         } catch (Exception e) {
-            log.error("Couldn't wrap trigger", e);
+            LOG.error("Couldn't wrap trigger", e);
         }
 
     }
@@ -69,15 +69,26 @@ public class ThroughputTrigger
       * method to flush the trigger
       * basically indicates that there will be no further payloads to process
       */
-     public void flush() {
+     public void flush()
+     {
         //--nothing needs to be done in this ThroughputTrigger algorithm!
      }
 
-    public boolean isConfigured() {
+    public boolean isConfigured()
+    {
         return true;
     }
 
-    public void addParameter(TriggerParameter parameter) throws UnknownParameterException
+    /**
+     * Add a trigger parameter.
+     *
+     * @param name parameter name
+     * @param value parameter value
+     *
+     * @throws UnknownParameterException if the parameter is unknown
+     */
+    public void addParameter(String name, String value)
+        throws UnknownParameterException
     {
         throw new UnknownParameterException("This trigger needs no parameter");
     }

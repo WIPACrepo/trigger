@@ -10,6 +10,7 @@ import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
+import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.ComponentObserver;
@@ -113,7 +114,7 @@ public class CylinderTriggerTest
         MasterPayloadFactory factory = new MasterPayloadFactory(cache);
 
         TriggerManager trigMgr =
-            new TriggerManager(srcId, getTriggerRequestFactory(factory));
+            new TriggerManager(srcId, cache);
 
         String configDir =
             getClass().getResource("/config/").getPath();
@@ -124,6 +125,8 @@ public class CylinderTriggerTest
             configDir = configDir.substring(0, breakPt) + "test-" +
                 configDir.substring(breakPt);
         }
+
+        DomSetFactory.setConfigurationDirectory(configDir);
 
         try {
             trigMgr.setDOMRegistry(DOMRegistry.loadRegistry(configDir));
@@ -139,7 +142,7 @@ public class CylinderTriggerTest
         outProc.setOutputChannel(new MockOutputChannel());
         outProc.setValidator(trigCfg.getInIceValidator());
 
-        trigMgr.setPayloadOutput(outProc);
+        trigMgr.setOutputEngine(outProc);
 
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
         trigMgr.setSplicer(splicer);

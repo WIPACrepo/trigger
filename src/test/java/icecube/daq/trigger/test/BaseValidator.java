@@ -18,9 +18,11 @@ public abstract class BaseValidator
 
     private TriggerRequestFactory factory;
 
+    private int invalidCount;
+
     public boolean foundInvalid()
     {
-        throw new UnimplementedError();
+        return invalidCount > 0;
     }
 
     public long getUTC(IUTCTime utc)
@@ -38,15 +40,26 @@ public abstract class BaseValidator
             factory = new TriggerRequestFactory(null);
         }
 
+        if (payBuf.limit() == 4 && payBuf.getInt(0) == 4) {
+            // ignore stop message
+            return true;
+        }
+
         IWriteablePayload payload;
         try {
             payload = factory.createPayload(payBuf, 0);
         } catch (Exception ex) {
             LOG.error("Couldn't validate byte buffer", ex);
+            invalidCount++;
             return false;
         }
 
-        return validate(payload);
+        if (!validate(payload)) {
+            invalidCount++;
+            return false;
+        }
+
+        return true;
     }
 
     public boolean validate(IWriteablePayload payload)

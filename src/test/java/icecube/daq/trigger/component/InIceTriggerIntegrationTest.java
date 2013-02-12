@@ -21,6 +21,8 @@ import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
+import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.DeployedDOM;
 
 import java.io.File;
 import java.io.IOException;
@@ -108,9 +110,11 @@ public class InIceTriggerIntegrationTest
         }
     }
 
-    private void sendInIceData(Pipe[] tails, int numObjs)
+    private void sendInIceData(Pipe[] tails, int numObjs, DOMRegistry registry)
         throws IOException
     {
+        java.util.Iterator<String> domIter = registry.keys().iterator();
+
         for (int i = 0; i < numObjs; i++) {
             final long time;
             if (i == 0) {
@@ -120,8 +124,11 @@ public class InIceTriggerIntegrationTest
                     (TIME_STEP * i);
             }
 
+            DeployedDOM dom = registry.getDom(domIter.next());
+
             final int tailIndex = i % tails.length;
-            sendHit(tails[tailIndex].sink(), time, tailIndex, 987654321L * i);
+            sendHit(tails[tailIndex].sink(), time, tailIndex,
+                    dom.getNumericMainboardId());
         }
     }
 
@@ -168,7 +175,14 @@ public class InIceTriggerIntegrationTest
 
         File cfgFile =
             DAQTestUtil.buildConfigFile(getClass().getResource("/").getPath(),
-                                        "sps-icecube-amanda-008");
+                                        "sps-2012-013");
+
+        DOMRegistry domReg;
+        try {
+            domReg = DOMRegistry.loadRegistry(cfgFile.getParent());
+        } catch (Exception ex) {
+            throw new Error("Cannot load DOM registry", ex);
+        }
 
         // set up in-ice trigger
         comp = new IniceTriggerComponent();
@@ -189,7 +203,7 @@ public class InIceTriggerIntegrationTest
         ActivityMonitor activity = new ActivityMonitor(comp, "II");
 
         // load data into input channels
-        sendInIceData(tails, numObjs);
+        sendInIceData(tails, numObjs, domReg);
 
         final int expTriggers = numObjs / NUM_HITS_PER_TRIGGER;
 

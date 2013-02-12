@@ -115,12 +115,46 @@ public final class DAQTestUtil
     public static void checkCaches(TriggerComponent comp)
         throws DAQCompException
     {
-        throw new UnimplementedError();
+        checkCaches(comp, comp.getName(), false);
     }
 
-    public static final void closePipeList(Pipe[] pipeList)
+    public static void checkCaches(TriggerComponent comp, String name,
+                                   boolean debug)
+        throws DAQCompException
     {
-        throw new UnimplementedError();
+        IByteBufferCache inCache = comp.getInputCache();
+        if (debug) System.err.println(name+" INcache " + inCache);
+        assertTrue(name + " input buffer cache is unbalanced (" + inCache + ")",
+                   inCache.isBalanced());
+        assertTrue(name + " input buffer cache was unused (" + inCache + ")",
+                   inCache.getTotalBuffersAcquired() > 0);
+
+        IByteBufferCache outCache = comp.getOutputCache();
+        if (debug) System.err.println(name+" OUTcache " + outCache);
+        assertTrue(name + " output buffer cache is unbalanced (" + outCache +
+                   ")", outCache.isBalanced());
+        assertTrue(name + " output buffer cache was unused (" + outCache + ")",
+                   outCache.getTotalBuffersAcquired() > 0);
+
+        assertEquals(name + " mismatch between triggers allocated and sent",
+                     outCache.getTotalBuffersAcquired(),
+                     comp.getPayloadsSent() - 1);
+    }
+
+    public static final void closePipeList(Pipe[] list)
+    {
+        for (int i = 0; i < list.length; i++) {
+            try {
+                list[i].sink().close();
+            } catch (IOException ioe) {
+                // ignore errors on close
+            }
+            try {
+                list[i].source().close();
+            } catch (IOException ioe) {
+                // ignore errors on close
+            }
+        }
     }
 
     public static Pipe[] connectToReader(PayloadReader rdr,
@@ -208,7 +242,8 @@ public final class DAQTestUtil
 
     public static void destroyComponentIO(TriggerComponent comp)
     {
-        throw new UnimplementedError();
+        comp.getReader().destroyProcessor();
+        comp.getWriter().destroyProcessor();
     }
 
     public static void sendStopMsg(WritableByteChannel chan)

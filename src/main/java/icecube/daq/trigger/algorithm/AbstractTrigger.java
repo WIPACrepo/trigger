@@ -424,14 +424,14 @@ public abstract class AbstractTrigger
         if (interval.isEmpty()) {
             Interval rtnInterval;
             synchronized (requests) {
-                if (requests.size() > 0) {
+                if (requests.size() == 0) {
+                    rtnInterval = interval;
+                } else {
                     ITriggerRequestPayload req = requests.get(0);
 
                     rtnInterval =
                         new Interval(req.getFirstTimeUTC().longValue(),
                                      req.getLastTimeUTC().longValue());
-                } else {
-                    rtnInterval = interval;
                 }
             }
 

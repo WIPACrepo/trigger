@@ -72,7 +72,7 @@ public class TriggerCollector
      */
     public TriggerCollector(int srcId, List<INewAlgorithm> algorithms,
                             DAQComponentOutputProcess outputEngine,
-                            IByteBufferCache outCache, Splicer splicer)
+                            IByteBufferCache outCache)
     {
         this.srcId = srcId;
         this.algorithms = new ArrayList<INewAlgorithm>(algorithms);
@@ -86,13 +86,6 @@ public class TriggerCollector
         for (INewAlgorithm a : algorithms) {
             a.setTriggerCollector(this);
         }
-
-        Thread thread = new Thread(this);
-        thread.setName("TriggerCollector");
-        thread.start();
-
-        outThrd = new OutputThread("OutputThread", splicer);
-        outThrd.start();
     }
 
     private Interval findInterval()
@@ -178,8 +171,8 @@ public class TriggerCollector
                 }
 
                 if (oldInterval != null && interval.start < oldInterval.end) {
-                    throw new Error("Old interval " + oldInterval +
-                                    " overlaps new interval " + interval);
+                    LOG.error("Old interval " + oldInterval +
+                              " overlaps new interval " + interval);
                 }
                 oldInterval = interval;
 
@@ -259,6 +252,21 @@ public class TriggerCollector
             }
             threadLock.notify();
         }
+    }
+
+    /**
+     * Start collector and output threads.
+     *
+     * @param splicer object to which requests are sent
+     */
+    public void startThreads(Splicer splicer)
+    {
+        Thread thread = new Thread(this);
+        thread.setName("TriggerCollector");
+        thread.start();
+
+        outThrd = new OutputThread("OutputThread", splicer);
+        outThrd.start();
     }
 
     /**

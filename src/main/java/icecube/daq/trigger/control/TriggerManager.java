@@ -589,7 +589,8 @@ public class TriggerManager
     {
         if (collector == null || collector.isStopped()) {
             collector = new TriggerCollector(srcId, triggerList, outputEngine,
-                                             outCache, splicer);
+                                             outCache);
+            collector.startThreads(splicer);
         }
 
         int id = 0;

@@ -122,7 +122,7 @@ public class TriggerManager
 
     private TriggerRequestFactory trFactory;
     private DAQComponentOutputProcess outputEngine;
-    private List<INewAlgorithm> triggerList =
+    private List<INewAlgorithm> algorithms =
         new ArrayList<INewAlgorithm>();
 
     private SubscribedList inputList = new SubscribedList();
@@ -191,7 +191,7 @@ public class TriggerManager
         INewAlgorithm trig = (INewAlgorithm) val;
 
         boolean good = true;
-        for (INewAlgorithm t : triggerList) {
+        for (INewAlgorithm t : algorithms) {
             if ((trig.getTriggerType() == t.getTriggerType()) &&
                 trig.getTriggerConfigId() == t.getTriggerConfigId() &&
                 trig.getSourceId() == t.getSourceId())
@@ -205,7 +205,7 @@ public class TriggerManager
         }
 
         if (good) {
-            triggerList.add((INewAlgorithm) trig);
+            algorithms.add((INewAlgorithm) trig);
             trig.setTriggerManager(this);
             trig.setTriggerFactory(trFactory);
 
@@ -418,7 +418,7 @@ public class TriggerManager
     {
         HashMap<String, Long> map = new HashMap<String, Long>();
 
-        for (INewAlgorithm trigger : triggerList) {
+        for (INewAlgorithm trigger : algorithms) {
             map.put(trigger.getTriggerName(),
                     Long.valueOf(trigger.getTriggerCounter()));
         }
@@ -435,7 +435,7 @@ public class TriggerManager
     {
         HashMap<String, Object> map = new HashMap<String, Object>();
 
-        for (INewAlgorithm trigger : triggerList) {
+        for (INewAlgorithm trigger : algorithms) {
             Map<String, Object> moniMap = trigger.getTriggerMonitorMap();
             if (moniMap != null && moniMap.size() > 0) {
                 String trigName = trigger.getTriggerName() + "-" +
@@ -588,13 +588,13 @@ public class TriggerManager
     public void starting(SplicerChangedEvent evt)
     {
         if (collector == null || collector.isStopped()) {
-            collector = new TriggerCollector(srcId, triggerList, outputEngine,
+            collector = new TriggerCollector(srcId, algorithms, outputEngine,
                                              outCache);
             collector.startThreads(splicer);
         }
 
         int id = 0;
-        for (INewAlgorithm trig : triggerList) {
+        for (INewAlgorithm trig : algorithms) {
             TriggerThread thread =
                 new TriggerThread(id,
                                   inputList.subscribe(trig.getTriggerName()),

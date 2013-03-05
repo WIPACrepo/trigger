@@ -223,6 +223,11 @@ public class FlushRequest
         return utcTime;
     }
 
+    public boolean isMerged()
+    {
+        throw new Error("Unimplemented");
+    }
+
     /**
      * Initializes Payload from backing so it can be used as an IPayload.
      */

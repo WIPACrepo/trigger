@@ -569,11 +569,6 @@ public class TriggerManager
         return true;
     }
 
-    private void pauseTriggerGeneration()
-    {
-        throw new UnimplementedError("Need to pause trigger generation");
-    }
-
     private void pushInput(ILoadablePayload payload)
     {
         if (payload.getPayloadInterfaceType() ==

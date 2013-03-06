@@ -1,6 +1,7 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.io.DAQComponentOutputProcess;
+import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.ILoadablePayload;
@@ -19,6 +20,7 @@ import icecube.daq.splicer.SplicerListener;
 import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.common.ITriggerAlgorithm;
 import icecube.daq.trigger.config.DomSetFactory;
+import icecube.daq.trigger.exceptions.MultiplicityDataException;
 import icecube.daq.trigger.exceptions.UnimplementedError;
 import icecube.daq.util.DOMRegistry;
 
@@ -128,6 +130,9 @@ public class TriggerManager
     private SubscribedList inputList = new SubscribedList();
     private List<TriggerThread> threadList = new ArrayList<TriggerThread>();
 
+    /** gather histograms for monitoring */
+    private MultiplicityDataManager multiDataMgr;
+
     private IByteBufferCache outCache;
     private TriggerCollector collector;
 
@@ -166,12 +171,14 @@ public class TriggerManager
      * @param srcObj source ID object
      * @param outCache output buffer cache
      */
-    public TriggerManager(ISourceID srcObj, IByteBufferCache outCache)
+    public TriggerManager(ISourceID srcObj, IByteBufferCache outCache,
+                          Alerter alerter)
     {
         this.srcId = srcObj.getSourceID();
         this.outCache = outCache;
 
         trFactory = new TriggerRequestFactory(outCache);
+        multiDataMgr = new MultiplicityDataManager(alerter);
 
         init();
     }
@@ -336,6 +343,29 @@ public class TriggerManager
     }
 
     /**
+     * Get the most recent set of trigger counts to be used for
+     * detector monitoring.
+     *
+     * @return list of trigger count data.
+     */
+    public List<Map> getMoniCounts()
+    {
+        List<Map> mapList;
+        try {
+            mapList = multiDataMgr.getCounts();
+        } catch (MultiplicityDataException mde) {
+            LOG.error("Cannot get trigger counts for monitoring", mde);
+            mapList = null;
+        }
+
+        if (mapList == null) {
+            return new ArrayList<Map>();
+        }
+
+        return mapList;
+    }
+
+    /**
      * XXX Use getQueuedInputsMap instead
      *
      * @return number of queued inputs
@@ -457,6 +487,11 @@ public class TriggerManager
         lastInputListSize = 0;
     }
 
+    private void pauseTriggerGeneration()
+    {
+        throw new UnimplementedError("Need to pause trigger generation");
+    }
+
     private void pushInput(ILoadablePayload payload)
     {
         if (payload.getPayloadInterfaceType() ==
@@ -473,7 +508,7 @@ public class TriggerManager
             }
 
             ITriggerRequestPayload req = (ITriggerRequestPayload) payload;
-            if (req.getTriggerType() == -1) {
+            if (req.isMerged()) {
                 // extract list of merged triggers
                 List subList;
                 try {
@@ -513,6 +548,32 @@ public class TriggerManager
         inputList.push(payload);
     }
 
+    public void resetUIDs()
+    {
+        for (INewAlgorithm a : algorithms) {
+            a.resetUID();
+        }
+    }
+
+    private void resumeTriggerGeneration()
+    {
+        throw new UnimplementedError("Need to resume trigger generation");
+    }
+
+    /**
+     * Send per-run histograms
+     *
+     * @param alerter used to send per-run histograms
+     */
+    public void sendHistograms()
+    {
+        try {
+            multiDataMgr.send();
+        } catch (MultiplicityDataException mde) {
+            LOG.error("Cannot send multiplicity data", mde);
+        }
+    }
+
     /**
      * Set the DOM registry.
      *
@@ -541,6 +602,16 @@ public class TriggerManager
     public void setOutputEngine(DAQComponentOutputProcess outputEngine)
     {
         this.outputEngine = outputEngine;
+    }
+
+    /**
+     * Set the run number for conventional runs.
+     *
+     * @param runNum run number
+     */
+    public void setRunNumber(int runNum)
+    {
+        multiDataMgr.start(runNum);
     }
 
     /**
@@ -589,7 +660,7 @@ public class TriggerManager
     {
         if (collector == null || collector.isStopped()) {
             collector = new TriggerCollector(srcId, algorithms, outputEngine,
-                                             outCache);
+                                             outCache, multiDataMgr);
             collector.startThreads(splicer);
         }
 
@@ -626,11 +697,19 @@ public class TriggerManager
 
     /**
      * Switch to a new run.
+     *
+     * @param alerter used to send per-run histograms
+     * @param runNumber new run number
      */
-    public void switchToNewRun()
+    public void switchToNewRun(Alerter alerter, int runNumber)
     {
         if (srcId == SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID) {
-            throw new Error("Need to reset global trigger UID");
+            try {
+                multiDataMgr.setNextRunNumber(runNumber);
+            } catch (MultiplicityDataException mde) {
+                LOG.error("Cannot set next run number", mde);
+            }
+            resetUIDs();
         }
     }
 

@@ -705,6 +705,14 @@ public abstract class AbstractTrigger
     }
 
     /**
+     * Reset the UID to signal a run switch.
+     */
+    public void resetUID()
+    {
+        // do nothing
+    }
+
+    /**
      * Run trigger algorithm on the payload.
      *
      * @param payload payload to process

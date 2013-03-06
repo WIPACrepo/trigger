@@ -114,7 +114,7 @@ public class CylinderTriggerTest
         MasterPayloadFactory factory = new MasterPayloadFactory(cache);
 
         TriggerManager trigMgr =
-            new TriggerManager(srcId, cache);
+            new TriggerManager(srcId, cache, null);
 
         String configDir =
             getClass().getResource("/config/").getPath();

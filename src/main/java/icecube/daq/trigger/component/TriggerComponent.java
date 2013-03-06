@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,7 +40,6 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
-//import org.xml.sax.SAXException;
 
 /**
  * Base class for trigger handlers.
@@ -113,7 +113,7 @@ public class TriggerComponent
 
         SpliceableFactory factory = new PayloadFactory(inCache);
 
-        triggerManager = new TriggerManager(sourceId, outCache);
+        triggerManager = new TriggerManager(sourceId, outCache, getAlerter());
         addMBean("manager", triggerManager);
 
         // Create splicer and introduce it to the trigger manager
@@ -255,6 +255,17 @@ public class TriggerComponent
     }
 
     /**
+     * Get the trigger counts for detector monitoring.
+     *
+     *
+     * @return list of trigger count data.
+     */
+    public List<Map> getMoniCounts()
+    {
+        return triggerManager.getMoniCounts();
+    }
+
+    /**
      * Get the ByteBufferCache used to track the outgoing request payloads
      *
      * @return output cache
@@ -331,7 +342,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 14207 2013-02-11 22:18:48Z dglo $";
+        return "$Id: TriggerComponent.java 14299 2013-03-06 02:14:30Z dglo $";
     }
 
     /**
@@ -452,6 +463,29 @@ public class TriggerComponent
     }
 
     /**
+     * Set the initial run number for a "conventional" run.
+     *
+     * @param runNumber run number
+     */
+    public void setRunNumber(int runNumber)
+    {
+        triggerManager.setRunNumber(runNumber);
+    }
+
+    /**
+     * Send histograms after run has stopped.
+     *
+     * @throws DAQCompException if there is a problem sending histograms
+     */
+    public void stopped()
+        throws DAQCompException
+    {
+        if (isGlobalTrigger) {
+            triggerManager.sendHistograms();
+        }
+    }
+
+    /**
      * Perform any actions related to switching to a new run.
      *
      * @param runNumber new run number
@@ -462,7 +496,8 @@ public class TriggerComponent
         throws DAQCompException
     {
         if (isGlobalTrigger) {
-            triggerManager.switchToNewRun();
+            // histograms are sent inside switchToNewRun()
+            triggerManager.switchToNewRun(getAlerter(), runNumber);
         }
     }
 }

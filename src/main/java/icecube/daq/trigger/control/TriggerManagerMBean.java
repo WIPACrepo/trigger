@@ -1,5 +1,6 @@
 package icecube.daq.trigger.control;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -7,7 +8,6 @@ import java.util.Map;
  */
 public interface TriggerManagerMBean
 {
-
     /**
      * Get the number of requests queued for writing
      *

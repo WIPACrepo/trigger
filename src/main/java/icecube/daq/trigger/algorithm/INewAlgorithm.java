@@ -67,6 +67,11 @@ public interface INewAlgorithm
                  List<ITriggerRequestPayload> released);
 
     /**
+     * Reset the UID to signal a run switch.
+     */
+    void resetUID();
+
+    /**
      * Have we seen a flush request?
      *
      * @return <tt>true</tt> if all hits have been seen

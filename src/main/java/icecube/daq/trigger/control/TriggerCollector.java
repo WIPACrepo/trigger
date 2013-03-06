@@ -13,6 +13,7 @@ import icecube.daq.payload.impl.TriggerRequest;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.trigger.algorithm.FlushRequest;
 import icecube.daq.trigger.algorithm.INewAlgorithm;
+import icecube.daq.trigger.exceptions.MultiplicityDataException;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -57,6 +58,9 @@ public class TriggerCollector
     private Deque<ByteBuffer> outputQueue =
         new ArrayDeque<ByteBuffer>();
 
+    /** Multiplicity data manager */
+    private MultiplicityDataManager multiDataMgr;
+
     private boolean stopping;
     private boolean stopOutput;
     private boolean stopped;
@@ -72,12 +76,14 @@ public class TriggerCollector
      */
     public TriggerCollector(int srcId, List<INewAlgorithm> algorithms,
                             DAQComponentOutputProcess outputEngine,
-                            IByteBufferCache outCache)
+                            IByteBufferCache outCache,
+                            MultiplicityDataManager multiDataMgr)
     {
         this.srcId = srcId;
         this.algorithms = new ArrayList<INewAlgorithm>(algorithms);
         this.outputEngine = outputEngine;
         this.outCache = outCache;
+        this.multiDataMgr = multiDataMgr;
 
         if (outCache == null) {
             throw new Error("Output cache is not set");
@@ -131,6 +137,45 @@ public class TriggerCollector
     public boolean isStopped()
     {
         return stopped;
+    }
+
+    private void pushTrigger(ITriggerRequestPayload req)
+    {
+        if (srcId == SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID) {
+            if (req.getUID() == 0) {
+                boolean doReset;
+                try {
+                    doReset = multiDataMgr.send();
+                } catch (MultiplicityDataException mde) {
+                    LOG.error("Failed to send multiplicity data", mde);
+                    doReset = true;
+                }
+
+                if (doReset) {
+                    try {
+                        multiDataMgr.reset();
+                    } catch (MultiplicityDataException mde) {
+                        LOG.error("Failed to send multiplicity data", mde);
+                    }
+                }
+            }
+
+            try {
+                multiDataMgr.add(req);
+            } catch (MultiplicityDataException mde) {
+                LOG.error("Cannot add multiplicity data", mde);
+            }
+        }
+
+        outThrd.push(req);
+    }
+
+    /**
+     * Reset the UID in order to switch to a new run.
+     */
+    public void resetUID()
+    {
+        mergedUID = 0;
     }
 
     /**
@@ -203,7 +248,7 @@ public class TriggerCollector
         if (released.size() == 0) {
             LOG.error("No requests found for interval " + interval);
         } else if (released.size() == 1) {
-            outThrd.push(released.get(0));
+            pushTrigger(released.get(0));
         } else {
             TriggerRequestComparator trigReqCmp =
                 new TriggerRequestComparator();
@@ -227,7 +272,7 @@ public class TriggerCollector
             ITriggerRequestPayload mergedReq =
                 new TriggerRequest(mergedUID, -1, -1, srcId, interval.start,
                                    interval.end, rReq, outList);
-            outThrd.push(mergedReq);
+            pushTrigger(mergedReq);
         }
     }
 

@@ -487,6 +487,88 @@ public class TriggerManager
         lastInputListSize = 0;
     }
 
+    private boolean isValidIncomingPayload(ILoadablePayload payload)
+    {
+        int iType = payload.getPayloadInterfaceType();
+
+        // make sure we have hit payloads (or hit data payloads)
+        if (iType == PayloadInterfaceRegistry.I_HIT_PAYLOAD ||
+            iType == PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)
+        {
+            IHitPayload hit = (IHitPayload) payload;
+            if (hit.getHitTimeUTC() == null) {
+                LOG.error("Bad hit buf " + payload.getPayloadBacking() +
+                          " len " + payload.getPayloadLength() +
+                          " type " + payload.getPayloadType() +
+                          " utc " + payload.getPayloadTimeUTC());
+                return false;
+            }
+
+            // Calculate time since last hit
+            double timeDiff;
+            if (timeOfLastHit == null) {
+                timeDiff = 0.0;
+            } else {
+                timeDiff = hit.getHitTimeUTC().timeDiff_ns(timeOfLastHit);
+            }
+
+            // check to see if timeDiff is reasonable, if not ignore it
+            if (timeDiff < 0.0) {
+                LOG.error("Hit from " + hit.getSourceID() +
+                          " out of order! This time - Last time = " +
+                          timeDiff + (srcOfLastHit == null ? "" :
+                                      ", src of last hit = " +
+                                      srcOfLastHit));
+                return false;
+            }
+
+            timeOfLastHit = hit.getHitTimeUTC();
+            srcOfLastHit = hit.getSourceID();
+        } else if (iType == PayloadInterfaceRegistry.I_TRIGGER_REQUEST) {
+            if (srcId != SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID) {
+                LOG.error("Source #" + srcId +
+                          " cannot process trigger requests");
+                return false;
+            }
+
+            try {
+                payload.loadPayload();
+            } catch (IOException e) {
+                LOG.error("Couldn't load payload", e);
+                return false;
+            } catch (DataFormatException e) {
+                LOG.error("Couldn't load payload", e);
+                return false;
+            }
+
+            ITriggerRequestPayload tPayload =
+                (ITriggerRequestPayload) payload;
+
+            if (tPayload.getSourceID() == null) {
+                if (tPayload.getPayloadLength() == 0 &&
+                    tPayload.getPayloadTimeUTC() == null &&
+                    ((IPayload) tPayload).getPayloadBacking() == null)
+                {
+                    LOG.error("Ignoring recycled payload");
+                } else {
+                    LOG.error("Unexpected null SourceID in payload (len=" +
+                              tPayload.getPayloadLength() + ", time=" +
+                              (tPayload.getPayloadTimeUTC() == null ?
+                               "null" : "" + tPayload.getPayloadTimeUTC()) +
+                              ", buf=" + payload.getPayloadBacking() + ")");
+                }
+
+                return false;
+            }
+        } else {
+            LOG.warn("TriggerHandler only knows about either HitPayloads or" +
+                     " TriggerRequestPayloads!");
+            return false;
+        }
+
+        return true;
+    }
+
     private void pauseTriggerGeneration()
     {
         throw new UnimplementedError("Need to pause trigger generation");
@@ -747,87 +829,5 @@ public class TriggerManager
             payload.recycle();
             recycleCount++;
         }
-    }
-
-    private boolean isValidIncomingPayload(ILoadablePayload payload)
-    {
-        int iType = payload.getPayloadInterfaceType();
-
-        // make sure we have hit payloads (or hit data payloads)
-        if (iType == PayloadInterfaceRegistry.I_HIT_PAYLOAD ||
-            iType == PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)
-        {
-            IHitPayload hit = (IHitPayload) payload;
-            if (hit.getHitTimeUTC() == null) {
-                LOG.error("Bad hit buf " + payload.getPayloadBacking() +
-                          " len " + payload.getPayloadLength() +
-                          " type " + payload.getPayloadType() +
-                          " utc " + payload.getPayloadTimeUTC());
-                return false;
-            }
-
-            // Calculate time since last hit
-            double timeDiff;
-            if (timeOfLastHit == null) {
-                timeDiff = 0.0;
-            } else {
-                timeDiff = hit.getHitTimeUTC().timeDiff_ns(timeOfLastHit);
-            }
-
-            // check to see if timeDiff is reasonable, if not ignore it
-            if (timeDiff < 0.0) {
-                LOG.error("Hit from " + hit.getSourceID() +
-                          " out of order! This time - Last time = " +
-                          timeDiff + (srcOfLastHit == null ? "" :
-                                      ", src of last hit = " +
-                                      srcOfLastHit));
-                return false;
-            }
-
-            timeOfLastHit = hit.getHitTimeUTC();
-            srcOfLastHit = hit.getSourceID();
-        } else if (iType == PayloadInterfaceRegistry.I_TRIGGER_REQUEST) {
-            if (srcId != SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID) {
-                LOG.error("Source #" + srcId +
-                          " cannot process trigger requests");
-                return false;
-            }
-
-            try {
-                payload.loadPayload();
-            } catch (IOException e) {
-                LOG.error("Couldn't load payload", e);
-                return false;
-            } catch (DataFormatException e) {
-                LOG.error("Couldn't load payload", e);
-                return false;
-            }
-
-            ITriggerRequestPayload tPayload =
-                (ITriggerRequestPayload) payload;
-
-            if (tPayload.getSourceID() == null) {
-                if (tPayload.getPayloadLength() == 0 &&
-                    tPayload.getPayloadTimeUTC() == null &&
-                    ((IPayload) tPayload).getPayloadBacking() == null)
-                {
-                    LOG.error("Ignoring recycled payload");
-                } else {
-                    LOG.error("Unexpected null SourceID in payload (len=" +
-                              tPayload.getPayloadLength() + ", time=" +
-                              (tPayload.getPayloadTimeUTC() == null ?
-                               "null" : "" + tPayload.getPayloadTimeUTC()) +
-                              ", buf=" + payload.getPayloadBacking() + ")");
-                }
-
-                return false;
-            }
-        } else {
-            LOG.warn("TriggerHandler only knows about either HitPayloads or" +
-                     " TriggerRequestPayloads!");
-            return false;
-        }
-
-        return true;
     }
 }

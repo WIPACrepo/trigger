@@ -313,6 +313,10 @@ public abstract class AbstractTrigger
 
         // report it
         reportTrigger(triggerPayload);
+
+        // update earliest hit time
+        IPayload dummy = new DummyPayload(time.getOffsetUTCTime(0.1));
+        setEarliestPayloadOfInterest(dummy);
     }
 
     protected void formTrigger(IUTCTime firstTime, IUTCTime lastTime)

@@ -393,7 +393,7 @@ public abstract class AbstractTrigger
     /**
      * Get the earliest payload of interest for this algorithm.
      *
-     * @return earlist payload
+     * @return earliest payload
      */
     public IPayload getEarliestPayloadOfInterest()
     {

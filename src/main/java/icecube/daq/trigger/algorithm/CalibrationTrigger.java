@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * Version $Id: CalibrationTrigger.java 14370 2013-03-27 16:33:37Z dglo $
  *
  * Date: August 27 2005
  *
@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * @version $Id: CalibrationTrigger.java 14370 2013-03-27 16:33:37Z dglo $
  * @author pat
  */
 public class CalibrationTrigger extends AbstractTrigger
@@ -127,17 +127,7 @@ public class CalibrationTrigger extends AbstractTrigger
         }
         IHitPayload hit = (IHitPayload) payload;
 
-        // check hit filter
-        if (!hitFilter.useHit(hit)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Hit from DOM " + hit.getDOMID() + " not in DomSet");
-            }
-            return;
-        }
-
-        // check the hit type
-        int type = AbstractTrigger.getHitType(hit);
-        if (type == hitType) {
+        if (getHitType(hit) == hitType && hitFilter.useHit(hit)) {
             // this is the correct type, report trigger
             formTrigger(hit, hit.getDOMID(), hit.getSourceID());
         } else {
@@ -145,8 +135,6 @@ public class CalibrationTrigger extends AbstractTrigger
             IPayload earliest = new DummyPayload(hit.getHitTimeUTC().getOffsetUTCTime(0.1));
             setEarliestPayloadOfInterest(earliest);
         }
-
-
     }
 
     /**

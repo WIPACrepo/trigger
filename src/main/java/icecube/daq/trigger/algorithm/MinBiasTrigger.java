@@ -1,7 +1,7 @@
 /*
  * class: MinBiasTrigger
  *
- * Version $Id: MinBiasTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * Version $Id: MinBiasTrigger.java 14370 2013-03-27 16:33:37Z dglo $
  *
  * Date: August 27 2005
  *
@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  * This class implements a simple minimum bias trigger. It simply counts hits and
  * applies a prescale for determining when a trigger should be formed.
  *
- * @version $Id: MinBiasTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * @version $Id: MinBiasTrigger.java 14370 2013-03-27 16:33:37Z dglo $
  * @author pat
  */
 public class MinBiasTrigger
@@ -114,6 +114,10 @@ public class MinBiasTrigger
     public void runTrigger(IPayload payload)
         throws TriggerException
     {
+        if (prescale == -1) {
+            throw new TriggerException("Prescale has not been set!");
+        }
+
         int interfaceType = payload.getPayloadInterfaceType();
         if ((interfaceType != PayloadInterfaceRegistry.I_HIT_PAYLOAD) &&
             (interfaceType != PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD))
@@ -123,24 +127,17 @@ public class MinBiasTrigger
         }
         IHitPayload hit = (IHitPayload) payload;
 
-        // check hit filter
-        if (!hitFilter.useHit(hit)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Hit from DOM " + hit.getDOMID() + " not in DomSet");
-            }
-            return;
-        }
-
-        if (prescale == -1) {
-            throw new TriggerException("Prescale has not been set!");
-        }
-
+        boolean formedTrigger = false;
+        if (hitFilter.useHit(hit)) {
         numberProcessed++;
         if (numberProcessed % prescale == 0) {
             // report this as a trigger
             formTrigger(hit, null, null);
+                formedTrigger = true;
+            }
+        }
 
-        } else {
+        if (!formedTrigger) {
             // just update earliest time of interest
             IUTCTime offsetTime = hit.getHitTimeUTC().getOffsetUTCTime(0.1);
             IPayload earliest = new DummyPayload(offsetTime);

@@ -120,6 +120,10 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
     public void runTrigger(IPayload payload)
         throws TriggerException
     {
+        if (prescale == -1) {
+            throw new TriggerException("Prescale has not been set!");
+        }
+
         int interfaceType = payload.getPayloadInterfaceType();
         if ((interfaceType != PayloadInterfaceRegistry.I_HIT_PAYLOAD) &&
             (interfaceType != PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)) {
@@ -128,52 +132,35 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
         }
         IHitPayload hit = (IHitPayload) payload;
 
-        // make sure spe bit is on for this hit
-        int type = AbstractTrigger.getHitType(hit);
-        if (type != AbstractTrigger.SPE_HIT) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Hit type is " + hit.getTriggerType() +
-                          ", returning.");
-            }
-            return;
-        }
-
-        // check hit filter
-        if (!hitFilter.useHit(hit)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Hit from DOM " + hit.getDOMID() + " not in DomSet");
-            }
-            return;
-        }
-
-        if (prescale == -1) {
-            throw new TriggerException("Prescale has not been set!");
-        }
+        boolean usableHit =
+            getHitType(hit) == AbstractTrigger.SPE_HIT &&
+            hitFilter.useHit(hit);
 
         IUTCTime hitTime = hit.getHitTimeUTC();
+        if (hitTime == null) {
+            throw new TriggerException("Hit time was null");
+        }
 
-        if (hitTime.compareTo(deadtimeWindow) <= 0) {
-            // this hit comes before the end of the deadtime window,
-            // do not count it
-            IPayload earliest =
-                new DummyPayload(hitTime.getOffsetUTCTime(0.1));
-            setEarliestPayloadOfInterest(earliest);
-        } else {
-            // this hit comes after the end of the deadtime window, count it
+        boolean formedTrigger = false;
+        if (usableHit && hitTime.compareTo(deadtimeWindow) > 0) {
+            // this hit comes after the end of the deadtime window,
+            // count it
             numberProcessed++;
             deadtimeWindow = hitTime.getOffsetUTCTime(deadtime);
             if (numberProcessed % prescale == 0) {
                 // report this as a trigger and update the deadtime window
                 formTrigger(hit, null, null);
-            } else {
+                formedTrigger = true;
+            }
+        }
+
+        if (!formedTrigger) {
                 // just update earliest time of interest
                 IPayload earliest =
                     new DummyPayload(hitTime.getOffsetUTCTime(0.1));
                 setEarliestPayloadOfInterest(earliest);
             }
         }
-
-    }
 
     /**
      * Flush the trigger. Basically indicates that there will be no further

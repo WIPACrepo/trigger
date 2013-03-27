@@ -476,26 +476,22 @@ public class SlowMPTrigger extends AbstractTrigger
         // This upcast should be safe now
         IHitPayload hitPayload = (IHitPayload) payload;
         //LOG.warn("HITTIME: " + hitPayload.getHitTimeUTC() + "PAYLOADTIME: " + hitPayload.getPayloadTimeUTC());
-        // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
-        if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
-        if (!hitFilter.useHit(hitPayload)) return;
+        // Check hit type and perhaps pre-screen DOMs based on channel
+        boolean usableHit =
+            getHitType(hitPayload) == AbstractTrigger.SPE_HIT &&
+            hitFilter.useHit(hitPayload);
 
         //if (domRegistry == null) {
         //    domRegistry = getTriggerHandler().getDOMRegistry();
         //}
 
-        if(one_hit_list.size() == 0) // size is 0, so just add it to the list
-        {
             min_hit_info new_hit = new min_hit_info(hitPayload);
-            //int string_nr = new_hit.get_dom().getStringMajor();
-            //int om_nr = new_hit.get_dom().getStringMinor();
-            // LOG.warn("FIRST HIT IN LIST: time " +new_hit.get_time() + " string: " + string_nr + " om: " + om_nr);
-            one_hit_list.add(new_hit);
-        }
-        else // not zero, so compare payload with current one_hit_list if any hlc pair can be formed
-        {
 
-            min_hit_info new_hit = new min_hit_info(hitPayload);
+        if(usableHit && one_hit_list.size() == 0) // size is 0, so just add it to the list
+        {
+            one_hit_list.add(new_hit);
+            return;
+        }
 
             // remove this next line again
 
@@ -504,17 +500,23 @@ public class SlowMPTrigger extends AbstractTrigger
             //int om_nr = new_hit.get_dom().getStringMinor();
             //LOG.warn("LATER HIT IN LIST: time " +new_hit.get_time() + " string: " + string_nr + " om: " + om_nr + "diff: " + (new_hit.get_time()-one_hit_list.getFirst().get_time()));
             //System.out.format("list contains %d entries..%n TWOHIT_list contains %d entries..%n", one_hit_list.size(), two_hit_list.size() );
-            while( new_hit.get_time() - one_hit_list.element().get_time() > 10000L)
+        while(one_hit_list.size() > 0 &&
+              new_hit.get_time() - one_hit_list.element().get_time() > 10000L)
                 // makes no sense to compare HLC hits that are longer apart than 1000 nanoseconds, so remove first from list
             {
                 //  LOG.warn("remove first hit from onehitlist because time diff > 10000, actually:" +( new_hit.get_time()-one_hit_list.element().get_time()));
                 //System.out.format("REMOVED FIRST ELEMENT !");
                 one_hit_list.removeFirst();
+        }
 
-                if(one_hit_list.size() == 0)
+        if (!usableHit)
                 {
-                    break;
+            if (one_hit_list.size() == 0 && two_hit_list.size() == 0)
+            {
+                setEarliestPayloadOfInterest(hitPayload);
                 }
+
+            return;
             }
 
             //LOG.warn("ONEHITLIST: " + one_hit_list.size() + " newwest " +  new_hit.get_time());
@@ -533,7 +535,12 @@ public class SlowMPTrigger extends AbstractTrigger
                 min_hit_info check_payload = HLCPairCheck(one_hit_array[i], new_hit);
                 //check_payload = one_hit_array[i];
 
-                if(check_payload != null)
+            if(check_payload == null)
+            {
+                //LOG.info("NULL:::::");
+                //System.out.format("NULLLLLLL");
+            }
+            else
                 {
                     if(two_hit_list.size() == 0)        // the pair list is empty
                     {
@@ -572,19 +579,14 @@ public class SlowMPTrigger extends AbstractTrigger
                             }
                             else
                             {
-                                if((check_payload.get_time()-two_hit_list.getLast().get_time() < t_max)
-                                   && (check_payload.get_time() - two_hit_list.getFirst().get_time() <
+                            if((check_payload.get_time()-two_hit_list.getLast().get_time() >= t_max)
+                               || (check_payload.get_time() - two_hit_list.getFirst().get_time() >=
                                        max_event_length))
                                 {
-                                    two_hit_list.add(check_payload);
-                                    //LOG.info("adding twohitlist... below time differences..");
-                                }
-                                else
-                                {
                                     CheckTriggerStatus(); // checks current two_hit_list for 3-tuples
-                                    //LOG.info("Adding twohitlist... after chewcking trigger status");
-                                    two_hit_list.add(check_payload);
                                 }
+
+                            two_hit_list.add(check_payload);
                             }
                         }
                         else
@@ -596,19 +598,14 @@ public class SlowMPTrigger extends AbstractTrigger
                             else
                             {
                                 muon_time_window = -1;
-                                if((check_payload.get_time()- two_hit_list.getLast().get_time() < t_max)
-                                   && (check_payload.get_time() - two_hit_list.getFirst().get_time() <
+                            if((check_payload.get_time()- two_hit_list.getLast().get_time() >= t_max)
+                               || (check_payload.get_time() - two_hit_list.getFirst().get_time() >=
                                        max_event_length))
                                 {
-                                    two_hit_list.add(check_payload); // checks current two_hit_list for 3-tupleseckTriggerStatus(); // checks current two_hit_list for 3-tuples
-                                    //LOG.info("Adding twohitlist... below time differences............");
-                                }
-                                else
-                                {
                                     CheckTriggerStatus();
-                                    //LOG.info("ADding twohitlist... after checking trigger status");
-                                    two_hit_list.add(check_payload);
                                 }
+
+                            two_hit_list.add(check_payload);
                             }
                         }
                     }
@@ -618,36 +615,19 @@ public class SlowMPTrigger extends AbstractTrigger
 
                     //iter.remove();
                 }
-                else
-                {
-                    //LOG.info("NULL:::::");
-                    //System.out.format("NULLLLLLL");
-                }
                 // with the remaining Payloads in the linked list
             }
 
             one_hit_list.add(new_hit); // at the end add the current hitPayload for further comparisons
-            if(two_hit_list.size() > 0)
+        if(two_hit_list.size() == 0)
             {
-                if(one_hit_list.getFirst().get_time() - two_hit_list.getLast().get_time() > t_max) // definetely cannot prdouce a trigger, set earliest palyoad
+            setEarliestPayloadOfInterest(one_hit_list.getFirst().get_hit());
+        }
+        else if(one_hit_list.getFirst().get_time() - two_hit_list.getLast().get_time() > t_max) // definetely cannot prdouce a trigger, set earliest palyoad
                 {
                     //LOG.warn("TMAX WAS ALREADY REACHED::------------" + "t1 " + one_hit_list.getFirst().get_time() + " t2 " + two_hit_list.getLast().get_time());
                     CheckTriggerStatus();
-
-
-                }
-            }
-            else
-            {
-                setEarliestPayloadOfInterest(one_hit_list.getFirst().get_hit());
-            }
-
         }
-        //    System.out.format("muon_time_window: %d", muon_time_window);
-        //   LOG.warn("list contains " + one_hit_list.size() +  " entries..");
-        //   LOG.warn(" TWOHIT_list contains " + two_hit_list.size() + "entries..");
-
-
     }
 
     private void CheckTriggerStatus()

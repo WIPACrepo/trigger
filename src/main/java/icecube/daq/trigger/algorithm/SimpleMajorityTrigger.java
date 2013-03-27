@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 14370 2013-03-27 16:33:37Z dglo $
  *
  * Date: August 19 2005
  *
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 14370 2013-03-27 16:33:37Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -160,47 +160,37 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         }
         IHitPayload hit = (IHitPayload) payload;
 
-        // make sure spe bit is on for this hit (must have 0x02)
-        int type = AbstractTrigger.getHitType(hit);
-        if (type != AbstractTrigger.SPE_HIT) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Hit type is " + hit.getTriggerType() +
-                          ", returning.");
-            }
-            return;
-        }
-
-        // check hit filter
-        if (!hitFilter.useHit(hit)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Hit from DOM " + hit.getDOMID() + " not in DomSet");
-            }
-            return;
-        }
+        // Check hit type and perhaps pre-screen DOMs based on channel
+        boolean usableHit =
+            getHitType(hit) == AbstractTrigger.SPE_HIT &&
+            hitFilter.useHit(hit);
 
         IUTCTime hitTimeUTC = hit.getHitTimeUTC();
+        if (hitTimeUTC == null) {
+            throw new TriggerException("Hit time was null");
+        }
 
         /*
          * Initialization for first hit
          */
-        if (numberOfHitsProcessed == 0) {
+        if (slidingTimeWindow.size() == 0) {
 
+            if (usableHit) {
             // initialize slidingTimeWindow
             slidingTimeWindow.add(hit);
-            // initialize triggerWindow
-            //addHitToTriggerWindow(hit);
-            // initialize earliest time of interest
-            setEarliestPayloadOfInterest(hit);
 
             if (LOG.isDebugEnabled()) {
                 LOG.debug("This is the first hit, initializing...");
                 LOG.debug("slidingTimeWindowStart set to " +
                           slidingTimeWindow.startTime());
             }
+            }
 
+            // initialize earliest time of interest
+            setEarliestPayloadOfInterest(hit);
         }
         /*
-         * Add another hit
+         * Try to add another hit
          */
         else {
 
@@ -212,36 +202,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
              * Check for out-of-time hits
              * hitTime < slidingTimeWindowStart
              */
-            if (hitTimeUTC == null) {
-                throw new TriggerException("hitTimeUTC was null");
-            } else if (slidingTimeWindow.startTime() == null) {
-                LOG.error("SlidingTimeWindow startTime is null!!!");
-                int i = 0;
-                Iterator it = slidingTimeWindow.hits.iterator();
-
-                while ( it.hasNext() )
-                {
-                    i++;
-                    IHitPayload h = (IHitPayload) it.next();
-                    if (h == null)
-                    {
-                        LOG.error("  Hit " + i + " is null");
-                    }
-                    else
-                    {
-                        if (h.getPayloadTimeUTC() == null)
-                        {
-                            LOG.error("  Hit " + i + " has a null time");
-                        }
-                        else
-                        {
-                            LOG.error("  Hit " + i + " has time = " +
-                                      h.getPayloadTimeUTC());
-                        }
-                    }
-                }
-            }
-
             if (hitTimeUTC.compareTo(slidingTimeWindow.startTime()) < 0)
                 throw new TimeOutOfOrderException(
                         "Hit comes before start of sliding time window:" +
@@ -254,6 +214,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
              * Hit falls within the slidingTimeWindow
              */
             if (slidingTimeWindow.inTimeWindow(hitTimeUTC)) {
+                if (usableHit) {
                 slidingTimeWindow.add(hit);
 
                 // If onTrigger, add hit to list
@@ -263,8 +224,9 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Hit falls within slidingTimeWindow" +
-                              " numberOfHitsInSlidingTimeWindow now equals "
-                              + slidingTimeWindow.size());
+                                  " numberOfHitsInSlidingTimeWindow now" +
+                                  " equals " + slidingTimeWindow.size());
+                    }
                 }
 
             }
@@ -352,7 +314,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
                 /*
                  * Does it fall in new slidingTimeWindow?
-                 *  if not, it defines the start of a new slidingTimeWindow
                  */
                 if (!slidingTimeWindow.inTimeWindow(hitTimeUTC)) {
 
@@ -367,28 +328,26 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
                         setEarliestPayloadOfInterest(oldHitPlus);
                     }
 
-                    slidingTimeWindow.add(hit);
-
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Hit still outside slidingTimeWindow," +
-                                  " start a new one " +
-                                  " numberOfHitsInSlidingTimeWindow = " +
-                                  slidingTimeWindow.size()
-                                  + " slidingTimeWindowStart = " +
-                                  slidingTimeWindow.startTime());
+                                  " start a new one");
                     }
 
                 }
-                // if so, add it to window
-                else {
+
+                if (usableHit) {
                     slidingTimeWindow.add(hit);
+                }
 
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Hit is now in slidingTimeWindow" +
-                                  " numberOfHitsInSlidingTimeWindow = "
-                                  + slidingTimeWindow.size());
+                    if (slidingTimeWindow.size() == 0) {
+                        LOG.debug("Empty sliding time window");
+                    } else {
+                        LOG.debug("NumberOfHitsInSlidingTimeWindow = " +
+                                  slidingTimeWindow.size() +
+                                  " slidingTimeWindowStart = " +
+                                  slidingTimeWindow.startTime());
                     }
-
                 }
 
                 /*
@@ -430,7 +389,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
                         hitsWithinTriggerWindow.clear();
                         numberOfHitsInTriggerWindow = 0;
 
-                    } else {
+                    } else if (usableHit) {
                         addHitToTriggerWindow(hit);
 
                         if (LOG.isDebugEnabled()) {

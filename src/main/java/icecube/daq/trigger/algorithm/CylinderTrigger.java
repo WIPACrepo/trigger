@@ -2,6 +2,8 @@ package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -167,38 +169,50 @@ public class CylinderTrigger extends AbstractTrigger
     @Override
     public void runTrigger(IPayload payload) throws TriggerException
     {
+        if (!(payload instanceof IHitPayload)) {
+            throw new TriggerException("Payload object " + payload +
+                                       " cannot be upcast to IHitPayload.");
+        }
 
-        if (!(payload instanceof IHitPayload))
-            throw new TriggerException(
-                    "Payload object " + payload + " cannot be upcast to IHitPayload."
-                    );
-        // This upcast should be safe now
         IHitPayload hitPayload = (IHitPayload) payload;
 
-        // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
-        if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
-        if (!hitFilter.useHit(hitPayload)) return;
-
+        // try to form a request
+        boolean formed = false;
         while (triggerQueue.size() > 0 &&
-                hitPayload.getHitTimeUTC().longValue() -
-                triggerQueue.element().getHitTimeUTC().longValue() > timeWindow)
-        {
-            if (triggerQueue.size() >= multiplicity && processHitQueue())
+               hitPayload.getUTCTime() - triggerQueue.element().getUTCTime() >
+               timeWindow)
             {
-                if (triggerQueue.size() > 0) formTrigger(triggerQueue, null, null);
+            if (triggerQueue.size() >= multiplicity && processHitQueue()) {
+                formTrigger(triggerQueue, null, null);
                 triggerQueue.clear();
-                setEarliestPayloadOfInterest(hitPayload);
+                formed = true;
                 break;
             }
-            else
-            {
+
                 triggerQueue.removeFirst();
-                IHitPayload firstHitInQueue = triggerQueue.peek();
-                if (firstHitInQueue == null) firstHitInQueue = hitPayload;
-                setEarliestPayloadOfInterest(firstHitInQueue);
-            }
         }
+
+        // if earliest time wasn't set by formTrigger(), set it now
+        if (!formed) {
+            IHitPayload earliest = null;
+            if (triggerQueue.size() > 0) {
+                earliest = triggerQueue.peek();
+            } else {
+                earliest = hitPayload;
+            }
+
+            // set earliest time to just before this time
+            IUTCTime earliestUTC =
+                earliest.getPayloadTimeUTC().getOffsetUTCTime(-0.1);
+            setEarliestPayloadOfInterest(new DummyPayload(earliestUTC));
+        }
+
+        // if new hit is usable, add it to the queue
+        if (getHitType(hitPayload) == AbstractTrigger.SPE_HIT &&
+            hitFilter.useHit(hitPayload))
+        {
         triggerQueue.add(hitPayload);
+    }
     }
 
     private boolean processHitQueue()

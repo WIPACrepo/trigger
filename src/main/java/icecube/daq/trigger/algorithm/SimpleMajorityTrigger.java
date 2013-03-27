@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 14370 2013-03-27 16:33:37Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 14371 2013-03-27 16:56:04Z dglo $
  *
  * Date: August 19 2005
  *
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 14370 2013-03-27 16:33:37Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 14371 2013-03-27 16:56:04Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -176,14 +176,14 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         if (slidingTimeWindow.size() == 0) {
 
             if (usableHit) {
-            // initialize slidingTimeWindow
-            slidingTimeWindow.add(hit);
+                // initialize slidingTimeWindow
+                slidingTimeWindow.add(hit);
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("This is the first hit, initializing...");
-                LOG.debug("slidingTimeWindowStart set to " +
-                          slidingTimeWindow.startTime());
-            }
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("This is the first hit, initializing...");
+                    LOG.debug("slidingTimeWindowStart set to " +
+                              slidingTimeWindow.startTime());
+                }
             }
 
             // initialize earliest time of interest
@@ -215,15 +215,15 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
              */
             if (slidingTimeWindow.inTimeWindow(hitTimeUTC)) {
                 if (usableHit) {
-                slidingTimeWindow.add(hit);
+                    slidingTimeWindow.add(hit);
 
-                // If onTrigger, add hit to list
-                if (onTrigger) {
-                    addHitToTriggerWindow(hit);
-                }
+                    // If onTrigger, add hit to list
+                    if (onTrigger) {
+                        addHitToTriggerWindow(hit);
+                    }
 
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Hit falls within slidingTimeWindow" +
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Hit falls within slidingTimeWindow" +
                                   " numberOfHitsInSlidingTimeWindow now" +
                                   " equals " + slidingTimeWindow.size());
                     }
@@ -339,7 +339,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
                     slidingTimeWindow.add(hit);
                 }
 
-                    if (LOG.isDebugEnabled()) {
+                if (LOG.isDebugEnabled()) {
                     if (slidingTimeWindow.size() == 0) {
                         LOG.debug("Empty sliding time window");
                     } else {

@@ -1,7 +1,7 @@
 /*
  * class: MinBiasTrigger
  *
- * Version $Id: MinBiasTrigger.java 14370 2013-03-27 16:33:37Z dglo $
+ * Version $Id: MinBiasTrigger.java 14371 2013-03-27 16:56:04Z dglo $
  *
  * Date: August 27 2005
  *
@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  * This class implements a simple minimum bias trigger. It simply counts hits and
  * applies a prescale for determining when a trigger should be formed.
  *
- * @version $Id: MinBiasTrigger.java 14370 2013-03-27 16:33:37Z dglo $
+ * @version $Id: MinBiasTrigger.java 14371 2013-03-27 16:56:04Z dglo $
  * @author pat
  */
 public class MinBiasTrigger
@@ -129,10 +129,10 @@ public class MinBiasTrigger
 
         boolean formedTrigger = false;
         if (hitFilter.useHit(hit)) {
-        numberProcessed++;
-        if (numberProcessed % prescale == 0) {
-            // report this as a trigger
-            formTrigger(hit, null, null);
+            numberProcessed++;
+            if (numberProcessed % prescale == 0) {
+                // report this as a trigger
+                formTrigger(hit, null, null);
                 formedTrigger = true;
             }
         }

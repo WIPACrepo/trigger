@@ -155,12 +155,12 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
         }
 
         if (!formedTrigger) {
-                // just update earliest time of interest
-                IPayload earliest =
-                    new DummyPayload(hitTime.getOffsetUTCTime(0.1));
-                setEarliestPayloadOfInterest(earliest);
-            }
+            // just update earliest time of interest
+            IPayload earliest =
+                new DummyPayload(hitTime.getOffsetUTCTime(0.1));
+            setEarliestPayloadOfInterest(earliest);
         }
+    }
 
     /**
      * Flush the trigger. Basically indicates that there will be no further

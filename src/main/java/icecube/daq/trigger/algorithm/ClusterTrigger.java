@@ -167,8 +167,8 @@ public class ClusterTrigger extends AbstractTrigger
             LogicalChannel logical = LogicalChannel.fromHitPayload(
                     hitPayload, getTriggerHandler().getDOMRegistry());
             logger.debug("Received hit at UTC " + hitPayload.getUTCTime() +
-                    " - logical channel " + logical +
-                    " queue size = " + triggerQueue.size());
+                         " - logical channel " + logical +
+                         " queue size = " + triggerQueue.size());
         }
 
         // try to form a request
@@ -176,7 +176,7 @@ public class ClusterTrigger extends AbstractTrigger
         while (triggerQueue.size() > 0 &&
                hitPayload.getUTCTime() - triggerQueue.element().getUTCTime() >
                timeWindow)
-            {
+        {
             if (triggerQueue.size() >= multiplicity && processHitQueue()) {
                 formTrigger(triggerQueue, null, null);
                 triggerQueue.clear();
@@ -184,7 +184,7 @@ public class ClusterTrigger extends AbstractTrigger
                 break;
             }
 
-                triggerQueue.removeFirst();
+            triggerQueue.removeFirst();
         }
 
         // if earliest time wasn't set by formTrigger(), set it now
@@ -206,13 +206,13 @@ public class ClusterTrigger extends AbstractTrigger
         if (getHitType(hitPayload) == AbstractTrigger.SPE_HIT &&
             hitFilter.useHit(hitPayload))
         {
-        triggerQueue.add(hitPayload);
-    }
+            triggerQueue.add(hitPayload);
+        }
     }
 
     private boolean processHitQueue()
     {
-            final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
+        final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
         final TreeMap<LogicalChannel, Integer> coherenceMap = new TreeMap<LogicalChannel, Integer>();
         boolean trigger = false;
 

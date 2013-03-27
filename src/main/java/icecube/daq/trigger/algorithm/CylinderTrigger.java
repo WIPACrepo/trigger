@@ -181,7 +181,7 @@ public class CylinderTrigger extends AbstractTrigger
         while (triggerQueue.size() > 0 &&
                hitPayload.getUTCTime() - triggerQueue.element().getUTCTime() >
                timeWindow)
-            {
+        {
             if (triggerQueue.size() >= multiplicity && processHitQueue()) {
                 formTrigger(triggerQueue, null, null);
                 triggerQueue.clear();
@@ -189,7 +189,7 @@ public class CylinderTrigger extends AbstractTrigger
                 break;
             }
 
-                triggerQueue.removeFirst();
+            triggerQueue.removeFirst();
         }
 
         // if earliest time wasn't set by formTrigger(), set it now
@@ -211,8 +211,8 @@ public class CylinderTrigger extends AbstractTrigger
         if (getHitType(hitPayload) == AbstractTrigger.SPE_HIT &&
             hitFilter.useHit(hitPayload))
         {
-        triggerQueue.add(hitPayload);
-    }
+            triggerQueue.add(hitPayload);
+        }
     }
 
     private boolean processHitQueue()

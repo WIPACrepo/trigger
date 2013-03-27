@@ -23,6 +23,13 @@ public interface PayloadSubscriber
     IPayload pop();
 
     /**
+     * Get the number of queued payloads
+     *
+     * @return size of internal queue
+     */
+    int size();
+
+    /**
      * No more payloads will be collected
      */
     void stop();

@@ -742,11 +742,12 @@ public class TriggerManager
         }
 
         int id = 0;
-        for (INewAlgorithm trig : algorithms) {
+        for (INewAlgorithm algo : algorithms) {
+            PayloadSubscriber subscriber =
+                inputList.subscribe(algo.getTriggerName());
+            algo.setSubscriber(subscriber);
             TriggerThread thread =
-                new TriggerThread(id,
-                                  inputList.subscribe(trig.getTriggerName()),
-                                  trig);
+                new TriggerThread(id, subscriber, algo);
             threadList.add(thread);
             id++;
         }

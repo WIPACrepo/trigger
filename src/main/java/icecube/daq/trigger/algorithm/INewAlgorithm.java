@@ -5,6 +5,7 @@ import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.impl.TriggerRequestFactory;
 import icecube.daq.trigger.common.ITriggerAlgorithm;
 import icecube.daq.trigger.control.Interval;
+import icecube.daq.trigger.control.PayloadSubscriber;
 import icecube.daq.trigger.control.TriggerCollector;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -82,6 +83,13 @@ public interface INewAlgorithm
      * Clear out all remaining payloads.
      */
     void sendLast();
+
+    /**
+     * Set the list subscriber client (for monitoring the input queue).
+     *
+     * @param subscriber input queue subscriber
+     */
+    void setSubscriber(PayloadSubscriber subscriber);
 
     /**
      * Set request collector.

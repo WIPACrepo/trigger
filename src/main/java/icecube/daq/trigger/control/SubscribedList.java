@@ -58,7 +58,7 @@ public class SubscribedList
     }
 
     /**
-     * Get the number of elements in the list.
+     * Get the size of the largest subscriber list.
      *
      * @return list size
      */
@@ -150,6 +150,16 @@ public class SubscribedList
 
                 return list.removeFirst();
             }
+        }
+
+        /**
+         * Get the number of queued payloads
+         *
+         * @return size of internal queue
+         */
+        public int size()
+        {
+            return list.size();
         }
 
         /**

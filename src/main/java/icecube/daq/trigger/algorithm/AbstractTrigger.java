@@ -21,6 +21,7 @@ import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.HitFilter;
 import icecube.daq.trigger.control.INewManager;
 import icecube.daq.trigger.control.Interval;
+import icecube.daq.trigger.control.PayloadSubscriber;
 import icecube.daq.trigger.control.TriggerCollector;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -40,7 +41,7 @@ import org.apache.commons.logging.LogFactory;
  * Base class for trigger algorithms.
  */
 public abstract class AbstractTrigger
-    implements INewAlgorithm
+    implements AbstractTriggerMBean, INewAlgorithm
 {
     /** Log object for this class */
     private static final Log LOG = LogFactory.getLog(AbstractTrigger.class);
@@ -76,6 +77,10 @@ public abstract class AbstractTrigger
     private ArrayList<ITriggerRequestPayload> requests =
         new ArrayList<ITriggerRequestPayload>();
     private TriggerCollector collector;
+
+    private PayloadSubscriber subscriber;
+
+    private long earliestMonitorTime = Long.MIN_VALUE;
 
     /**
      * Add a trigger parameter.
@@ -401,6 +406,29 @@ public abstract class AbstractTrigger
     }
 
     /**
+     * Get the earliest event time of interest for this algorithm.
+     *
+     * @return earliest UTC time
+     */
+    public long getEarliestTime()
+    {
+        if (earliestPayloadOfInterest == null) {
+            return 0;
+        }
+
+        final long val = earliestPayloadOfInterest.getUTCTime();
+        if (earliestMonitorTime == Long.MIN_VALUE) {
+            earliestMonitorTime = val;
+        }
+
+        if (val == Long.MAX_VALUE) {
+            return earliestMonitorTime;
+        }
+
+        return val;
+    }
+
+    /**
      * Get this hit's type.
      *
      * @param hit hit to evaluate
@@ -410,6 +438,16 @@ public abstract class AbstractTrigger
     public static int getHitType(IHitPayload hit)
     {
         return hit.getTriggerType() & 0xf;
+    }
+
+    /**
+     * Get the input queue size.
+     *
+     * @return input queue size
+     */
+    public int getInputQueueSize()
+    {
+        return subscriber.size();
     }
 
     /**
@@ -779,6 +817,16 @@ public abstract class AbstractTrigger
     public void setSourceId(int val)
     {
         srcId = val;
+    }
+
+    /**
+     * Set the list subscriber client (for monitoring the input queue).
+     *
+     * @param subscriber input queue subscriber
+     */
+    public void setSubscriber(PayloadSubscriber subscriber)
+    {
+        this.subscriber = subscriber;
     }
 
     /**

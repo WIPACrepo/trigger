@@ -221,6 +221,10 @@ public class TriggerComponent
                                        sourceId);
         }
 
+        for (ITriggerAlgorithm a : algorithms) {
+            addMBean(a.getTriggerName(), a);
+        }
+
         triggerManager.addTriggers(algorithms);
     }
 
@@ -340,7 +344,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 14366 2013-03-27 16:12:00Z dglo $";
+        return "$Id: TriggerComponent.java 14368 2013-03-27 16:19:57Z dglo $";
     }
 
     /**

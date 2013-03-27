@@ -49,6 +49,9 @@ public abstract class AbstractTrigger
     /** SPE hit type */
     public static final int SPE_HIT = 0x02;
 
+    /** Requests can be up to this number of DAQ ticks wide */
+    private static final long REQUEST_WIDTH = 100000000;
+
     protected int triggerPrescale;
     protected int domSetId = -1;
     protected HitFilter hitFilter = new HitFilter();
@@ -480,6 +483,13 @@ public abstract class AbstractTrigger
             return rtnInterval;
         }
 
+        final long earliest;
+        if (earliestPayloadOfInterest == null) {
+            earliest = 0L;
+        } else {
+            earliest = earliestPayloadOfInterest.getUTCTime();
+        }
+
         long start = interval.start;
         long end = interval.end;
 
@@ -495,9 +505,15 @@ public abstract class AbstractTrigger
                     break;
                 }
 
-                // if this request is past the end of the interval, we're done
-                if (end < firstTime) {
+                // if this request is significantly past the interval,
+                //  we're done
+                if (end + REQUEST_WIDTH < lastTime) {
                     break;
+                }
+
+                // if this request is past the end of the interval, ignore it
+                if (end < firstTime) {
+                    continue;
                 }
 
                 // if necessary, widen the interval
@@ -508,15 +524,33 @@ public abstract class AbstractTrigger
                     end = lastTime;
                 }
             }
+
+            if (srcId == SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID) {
+                if (requests.size() > 0) {
+                    final ITriggerRequestPayload lastReq =
+                        requests.get(requests.size() - 1);
+
+                    final long finalTime =
+                        lastReq.getLastTimeUTC().longValue();
+                    // wait until the interval is significantly past
+                    // the most recent request
+                    if (end + REQUEST_WIDTH > finalTime) {
+                        return null;
+                    }
+                }
+            }
+
+            // if we're past the earliest payload, give up
+            if (end > earliest) {
+                return null;
+            }
         }
 
         // if this trigger is still interested in hits within the interval,
         //  return null to signal that the current interval is invalid
         if (earliestPayloadOfInterest == null ||
-            (earliestPayloadOfInterest.getUTCTime() !=
-             FlushRequest.FLUSH_TIME &&
-             (start >= earliestPayloadOfInterest.getUTCTime() ||
-              end >= earliestPayloadOfInterest.getUTCTime())))
+            (earliest != FlushRequest.FLUSH_TIME &&
+             (start >= earliest || end >= earliest)))
         {
             return null;
         }

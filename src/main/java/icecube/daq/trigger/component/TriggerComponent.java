@@ -193,8 +193,6 @@ public class TriggerComponent
         }
 
         String tcName = readTriggerConfigName(runConfig);
-        System.err.println("Reading trigger config from " + tcName);
-
 
         File trigCfgDir = new File(configDir, "trigger");
         if (!trigCfgDir.exists()) {
@@ -342,7 +340,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 14299 2013-03-06 02:14:30Z dglo $";
+        return "$Id: TriggerComponent.java 14366 2013-03-27 16:12:00Z dglo $";
     }
 
     /**

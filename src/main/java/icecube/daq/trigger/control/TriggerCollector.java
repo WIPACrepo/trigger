@@ -208,6 +208,20 @@ class CollectorThread
         this.outThrd = outThrd;
     }
 
+    /**
+     * Add all requests within the interval to the list.
+     *
+     * @param interval time interval
+     * @param list list of requests
+     */
+    public void addRequests(Interval interval,
+                            List<ITriggerRequestPayload> list)
+    {
+        for (INewAlgorithm a : algorithms) {
+            a.release(interval, list);
+        }
+    }
+
     public Interval findInterval()
     {
         Interval interval = new Interval();
@@ -284,6 +298,9 @@ class CollectorThread
     public void run()
     {
         Interval oldInterval = null;
+        List<ITriggerRequestPayload> requestCache =
+            new ArrayList<ITriggerRequestPayload>();
+
         while (!stopping) {
             synchronized (threadLock) {
                 if (!changed) {
@@ -313,59 +330,72 @@ class CollectorThread
                     break;
                 }
 
-                if (oldInterval != null && interval.start < oldInterval.end) {
-                    LOG.error("Old interval " + oldInterval +
-                              " overlaps new interval " + interval);
-                }
-                oldInterval = interval;
+                if (oldInterval == null) {
+                    // cache the first batch of requests
+                    addRequests(interval, requestCache);
+                    oldInterval = interval;
+                } else if (interval.start >= oldInterval.end) {
+                    // send cached requests
+                    sendRequests(oldInterval, requestCache);
 
-                sendRequests(interval);
+                    // cache current requests
+                    requestCache.clear();
+                    addRequests(interval, requestCache);
+                    oldInterval = interval;
+                } else {
+                    // Darn, lost the race and got an overlapping request
+                    if (interval.end <= oldInterval.end) {
+                        LOG.error("New interval " + interval +
+                                  " appears to be a subset of old interval " +
+                                  oldInterval);
+                    } else {
+                        LOG.error("Merging old interval " + oldInterval +
+                                  " and new interval " + interval);
+                        addRequests(interval, requestCache);
+                        oldInterval.end = interval.end;
+                    }
+                }
             }
+        }
+
+        if (oldInterval != null) {
+            // send final batch of requests
+            sendRequests(oldInterval, requestCache);
         }
 
         outThrd.stop();
 
-        // recycle all unused requests still cached in the algorithms.
+        // recycle all unused requests still held by the algorithms.
         for (INewAlgorithm a : algorithms) {
             a.recycleUnusedRequests();
         }
     }
 
-    public void sendRequests(Interval interval)
+    public void sendRequests(Interval interval,
+                             List<ITriggerRequestPayload> list)
     {
-        ArrayList<ITriggerRequestPayload> released =
-            new ArrayList<ITriggerRequestPayload>();
-        for (INewAlgorithm a : algorithms) {
-            a.release(interval, released);
-        }
-
-        if (released.size() == 0) {
+        if (list.size() == 0) {
             LOG.error("No requests found for interval " + interval);
-        } else if (released.size() == 1) {
-            pushTrigger(released.get(0));
+        } else if (list.size() == 1) {
+            pushTrigger(list.get(0));
         } else {
             TriggerRequestComparator trigReqCmp =
                 new TriggerRequestComparator();
-            Collections.sort((List) released, trigReqCmp);
+            Collections.sort((List) list, trigReqCmp);
 
             mergedUID++;
 
             ReadoutRequest rReq =
                 new ReadoutRequest(interval.start, mergedUID, srcId);
             if (srcId == SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID) {
-                ElementMerger.merge(rReq, released);
+                ElementMerger.merge(rReq, list);
             }
 
-            // XXX shouldn't need to rewrite 'released' to 'outList'
-            List<IWriteablePayload> outList =
-                new ArrayList<IWriteablePayload>();
-            for (ITriggerRequestPayload req : released) {
-                outList.add(req);
-            }
-
+            ArrayList<IWriteablePayload> hack =
+                new ArrayList<IWriteablePayload>(list);
             ITriggerRequestPayload mergedReq =
                 new TriggerRequest(mergedUID, -1, -1, srcId, interval.start,
-                                   interval.end, rReq, outList);
+                                   interval.end, rReq, hack);
             pushTrigger(mergedReq);
         }
     }

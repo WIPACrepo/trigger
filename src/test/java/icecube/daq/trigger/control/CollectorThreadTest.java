@@ -442,7 +442,11 @@ public class CollectorThreadTest
                                 null);
 
         Interval ival = new Interval(10, 30);
-        ct.sendRequests(ival);
+
+        List<ITriggerRequestPayload> requests =
+            new ArrayList<ITriggerRequestPayload>();
+        ct.addRequests(ival, requests);
+        ct.sendRequests(ival, requests);
 
         assertFalse("Should not have added anything to data manager",
                     mgr.wasAdded());
@@ -480,7 +484,11 @@ public class CollectorThreadTest
         fooAlgo.addInterval(11, 15);
 
         Interval ival = new Interval(10, 30);
-        ct.sendRequests(ival);
+
+        List<ITriggerRequestPayload> requests =
+            new ArrayList<ITriggerRequestPayload>();
+        ct.addRequests(ival, requests);
+        ct.sendRequests(ival, requests);
 
         assertEquals("Should be one request queued",
                      1L, outThrd.getNumQueued());
@@ -512,7 +520,11 @@ public class CollectorThreadTest
         fooAlgo.addInterval(11, 15);
 
         Interval ival = new Interval(10, 30);
-        ct.sendRequests(ival);
+
+        List<ITriggerRequestPayload> requests =
+            new ArrayList<ITriggerRequestPayload>();
+        ct.addRequests(ival, requests);
+        ct.sendRequests(ival, requests);
 
         assertEquals("Should be one request queued",
                      1L, outThrd.getNumQueued());
@@ -546,7 +558,11 @@ public class CollectorThreadTest
         fooAlgo.addInterval(18, 25);
 
         Interval ival = new Interval(10, 30);
-        ct.sendRequests(ival);
+
+        List<ITriggerRequestPayload> requests =
+            new ArrayList<ITriggerRequestPayload>();
+        ct.addRequests(ival, requests);
+        ct.sendRequests(ival, requests);
 
         assertEquals("Should be one request queued",
                      1L, outThrd.getNumQueued());
@@ -579,7 +595,11 @@ public class CollectorThreadTest
         fooAlgo.addInterval(18, 25);
 
         Interval ival = new Interval(10, 30);
-        ct.sendRequests(ival);
+
+        List<ITriggerRequestPayload> requests =
+            new ArrayList<ITriggerRequestPayload>();
+        ct.addRequests(ival, requests);
+        ct.sendRequests(ival, requests);
 
         assertEquals("Should be one request queued",
                      1L, outThrd.getNumQueued());

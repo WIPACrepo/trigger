@@ -123,70 +123,70 @@ public final class StringMap
          */
         // Fill first row
         for (int i = 0; i <= 5; i++) {
-            Integer n = new Integer(i + 1);
+            Integer n = Integer.valueOf(i + 1);
             Coordinate c = new Coordinate(i, 0);
             string2coordMap.put(n, c);
             coord2stringMap.put(c, n);
         }
         // Fill second row
         for (int i = 0; i <= 6; i++) {
-            Integer n = new Integer(i + 7);
+            Integer n = Integer.valueOf(i + 7);
             Coordinate c = new Coordinate(i, 1);
             string2coordMap.put(n, c);
             coord2stringMap.put(c, n);
         }
         // Fill third row
         for (int i = 0; i <= 7; i++) {
-            Integer n = new Integer(i + 14);
+            Integer n = Integer.valueOf(i + 14);
             Coordinate c = new Coordinate(i, 2);
             string2coordMap.put(n, c);
             coord2stringMap.put(c, n);
         }
         // Fill fourth row
         for (int i = 0; i <= 8; i++) {
-            Integer n = new Integer(i + 22);
+            Integer n = Integer.valueOf(i + 22);
             Coordinate c = new Coordinate(i, 3);
             string2coordMap.put(n, c);
             coord2stringMap.put(c, n);
         }
         // Fill fifth row
         for (int i = 0; i <= 9; i++) {
-            Integer n = new Integer(i + 31);
+            Integer n = Integer.valueOf(i + 31);
             Coordinate c = new Coordinate(i, 4);
             string2coordMap.put(n, c);
             coord2stringMap.put(c, n);
         }
         // Fill sixth row
         for (int i = 1; i <= 10; i++) {
-            Integer n = new Integer(i + 40);
+            Integer n = Integer.valueOf(i + 40);
             Coordinate c = new Coordinate(i, 5);
             string2coordMap.put(n, c);
             coord2stringMap.put(c, n);
         }
         // Fill seventh row
         for (int i = 2; i <= 10; i++) {
-            Integer n = new Integer(i + 49);
+            Integer n = Integer.valueOf(i + 49);
             Coordinate c = new Coordinate(i, 6);
             string2coordMap.put(n, c);
             coord2stringMap.put(c, n);
         }
         // Fill eighth row
         for (int i = 3; i <= 10; i++) {
-            Integer n = new Integer(i + 57);
+            Integer n = Integer.valueOf(i + 57);
             Coordinate c = new Coordinate(i, 7);
             string2coordMap.put(n, c);
             coord2stringMap.put(c, n);
         }
         // Fill nineth row
         for (int i = 4; i <= 10; i++) {
-            Integer n = new Integer(i + 64);
+            Integer n = Integer.valueOf(i + 64);
             Coordinate c = new Coordinate(i, 8);
             string2coordMap.put(n, c);
             coord2stringMap.put(c, n);
         }
         // Fill tenth row
         for (int i = 5; i <= 10; i++) {
-            Integer n = new Integer(i + 70);
+            Integer n = Integer.valueOf(i + 70);
             Coordinate c = new Coordinate(i, 9);
             string2coordMap.put(n, c);
             coord2stringMap.put(c, n);
@@ -203,7 +203,7 @@ public final class StringMap
                 offset = -1;
             }
 
-            verticalOffsetMap.put(new Integer(n), new Integer(offset));
+            verticalOffsetMap.put(Integer.valueOf(n), Integer.valueOf(offset));
         }
 
     }
@@ -211,7 +211,7 @@ public final class StringMap
     /**
      * String coordinates.
      */
-    private class Coordinate
+    private static class Coordinate
     {
         private int i;
         private int j;

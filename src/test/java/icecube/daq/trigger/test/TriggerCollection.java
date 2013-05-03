@@ -56,7 +56,7 @@ public abstract class TriggerCollection
         }
 
         if (numAdded == 0) {
-            throw new Error("No triggers added for " + new SourceID(srcId));
+            throw new Error("No algorithms added for " + new SourceID(srcId));
         }
     }
 

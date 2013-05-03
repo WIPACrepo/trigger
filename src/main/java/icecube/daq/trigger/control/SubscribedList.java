@@ -5,6 +5,7 @@ import icecube.daq.payload.IPayload;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,7 +16,7 @@ public class SubscribedList
     /**
      * List of subscribers
      */
-    private ArrayList<ListSubscriber> subs = new ArrayList<ListSubscriber>();
+    private List<ListSubscriber> subs = new ArrayList<ListSubscriber>();
 
     /**
      * Create subscribed list managment object.
@@ -47,6 +48,10 @@ public class SubscribedList
      */
     public void push(IPayload pay)
     {
+        if (subs.size() == 0) {
+            throw new Error("No subscribers have been added");
+        }
+
         for (ListSubscriber sub : subs) {
             synchronized (sub.list) {
                 sub.list.addLast(pay);
@@ -82,7 +87,7 @@ public class SubscribedList
      *
      * @return subscriber object
      */
-    public PayloadSubscriber subscribe(String name)
+    public ListSubscriber subscribe(String name)
     {
         ListSubscriber newSub = new ListSubscriber(name);
         synchronized (subs) {
@@ -94,7 +99,7 @@ public class SubscribedList
     /**
      * Internal subscriber class which has access to the list
      */
-    class ListSubscriber
+    private static class ListSubscriber
         implements PayloadSubscriber
     {
         /**

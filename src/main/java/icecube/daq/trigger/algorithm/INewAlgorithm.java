@@ -47,6 +47,13 @@ public interface INewAlgorithm
     Interval getInterval(Interval interval);
 
     /**
+     * Get the input provider.
+     *
+     * @return input queue subscription
+     */
+    PayloadSubscriber getSubscriber();
+
+    /**
      * Get the time of the last released trigger.
      *
      * @return release time

@@ -12,7 +12,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +92,11 @@ class HashKey
     public int hashCode()
     {
         return key;
+    }
+
+    public String toString()
+    {
+        return String.format("s%d/t%d/c%d/k%d", srcId, type, cfgId, key);
     }
 }
 
@@ -215,6 +219,7 @@ class Bins
 }
 
 public class MultiplicityDataManager
+    implements IMonitoringDataManager
 {
     /** Log object for this class */
     private static final Log LOG =
@@ -224,14 +229,10 @@ public class MultiplicityDataManager
 
     private static final int NO_NUMBER = Integer.MIN_VALUE;
 
-    private static final SimpleDateFormat dateFormat =
-        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSSSS");
-
     private Alerter alerter;
     private HashMap<HashKey, Bins> map;
 
     private Calendar startTime;
-    private Calendar endTime;
     private int runNumber;
 
     private int nextRunNumber = NO_NUMBER;
@@ -373,6 +374,9 @@ public class MultiplicityDataManager
 
         Calendar endTime = Calendar.getInstance();
 
+        SimpleDateFormat dateFormat =
+            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSSSS");
+
         for (HashKey key : map.keySet()) {
             HashMap<String, Object> values = new HashMap<String, Object>();
 
@@ -406,7 +410,7 @@ public class MultiplicityDataManager
             throw new MultiplicityDataException(msg);
         }
 
-
+        nextRunNumber = runNum;
     }
 
     public void start(int runNum)

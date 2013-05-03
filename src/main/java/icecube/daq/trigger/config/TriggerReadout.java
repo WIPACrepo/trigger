@@ -1,7 +1,7 @@
 /*
  * class: TriggerReadout
  *
- * Version $Id: TriggerReadout.java 14207 2013-02-11 22:18:48Z dglo $
+ * Version $Id: TriggerReadout.java 14467 2013-05-03 16:18:13Z dglo $
  *
  * Date: November 23 2005
  *
@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class represents a trigger readout.
  *
- * @version $Id: TriggerReadout.java 14207 2013-02-11 22:18:48Z dglo $
+ * @version $Id: TriggerReadout.java 14467 2013-05-03 16:18:13Z dglo $
  * @author pat
  */
 public class TriggerReadout
@@ -32,7 +32,7 @@ public class TriggerReadout
     /**
      * Default readout type.
      */
-    private static final int DEFAULT_READOUT_TYPE =
+    public static final int DEFAULT_READOUT_TYPE =
         IReadoutRequestElement.READOUT_TYPE_GLOBAL;
 
     /**

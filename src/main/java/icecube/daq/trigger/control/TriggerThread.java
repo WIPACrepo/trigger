@@ -16,20 +16,14 @@ class TriggerThread
     private static final Log LOG = LogFactory.getLog(TriggerThread.class);
 
     private int id;
-    private PayloadSubscriber sub;
     private INewAlgorithm algorithm;
     private Thread thread;
     private boolean stopped;
 
-    TriggerThread(int id, PayloadSubscriber sub, INewAlgorithm algorithm)
+    TriggerThread(int id, INewAlgorithm algorithm)
     {
         this.id = id;
-        this.sub = sub;
         this.algorithm = algorithm;
-
-        thread = new Thread(this);
-        thread.setName(algorithm.getTriggerName() + "-Thread");
-        thread.start();
     }
 
     public boolean isStopped()
@@ -39,26 +33,41 @@ class TriggerThread
 
     public void join()
     {
-        try {
-            thread.join();
-        } catch (InterruptedException ie) {
-            // ignore interrupts
+        if (thread != null) {
+            try {
+                thread.join();
+            } catch (InterruptedException ie) {
+                // ignore interrupts
+            }
         }
+    }
+
+
+    public void start()
+    {
+        if (algorithm.getSubscriber() == null) {
+            throw new Error("Algorithm is not subscribed to any lists");
+        }
+
+        thread = new Thread(this);
+        thread.setName(algorithm.getTriggerName() + "-Thread");
+        thread.start();
     }
 
     public void stop()
     {
         stopped = true;
 
-        sub.stop();
+        algorithm.getSubscriber().stop();
     }
 
     public void run()
     {
-        while (!stopped || sub.hasData()) {
-            IPayload pay = sub.pop();
+        while (!stopped || algorithm.getSubscriber().hasData()) {
+            IPayload pay = algorithm.getSubscriber().pop();
             if (pay == null) {
-                LOG.error("Ignoring null payload for " + algorithm);
+                LOG.error("Ignoring null payload for " +
+                          algorithm.getTriggerName());
             } else if (pay == TriggerManager.FLUSH_PAYLOAD) {
                 algorithm.sendLast();
             } else {
@@ -77,6 +86,6 @@ class TriggerThread
     public String toString()
     {
         return "TriggerThread#" + id + ":" + algorithm.getTriggerName() + ":" +
-            sub + (stopped ? ":stopped" : "");
+            algorithm.getSubscriber() + (stopped ? ":stopped" : "");
     }
 }

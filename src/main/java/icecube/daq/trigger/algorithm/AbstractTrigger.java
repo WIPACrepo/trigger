@@ -594,6 +594,16 @@ public abstract class AbstractTrigger
     }
 
     /**
+     * Get the number of trigger sent to the collector.
+     *
+     * @return sent count
+     */
+    public long getSentTriggerCount()
+    {
+        return sentTriggerCounter;
+    }
+
+    /**
      * Get the source ID.
      *
      * @return source ID
@@ -601,6 +611,11 @@ public abstract class AbstractTrigger
     public int getSourceId()
     {
         return srcId;
+    }
+
+    public PayloadSubscriber getSubscriber()
+    {
+        return subscriber;
     }
 
     /**
@@ -864,6 +879,11 @@ public abstract class AbstractTrigger
      */
     public void setSubscriber(PayloadSubscriber subscriber)
     {
+        if (this.subscriber != null) {
+            throw new Error(triggerName +
+                            " is already subscribed to an input queue");
+        }
+
         this.subscriber = subscriber;
     }
 

@@ -25,6 +25,7 @@ import icecube.daq.trigger.exceptions.UnimplementedError;
 import icecube.daq.util.DOMRegistry;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -41,7 +42,7 @@ import org.apache.commons.logging.LogFactory;
  * Compare two trigger requests.
  */
 class TriggerRequestComparator
-    implements Comparator<ITriggerRequestPayload>
+    implements Comparator<ITriggerRequestPayload>, Serializable
 {
     /**
      * Create a comparator.
@@ -283,20 +284,13 @@ public class TriggerManager
                               " with time " + payload.getPayloadTimeUTC());
                 }
 
-                if (!isValidIncomingPayload(payload)) {
-                    continue;
-                }
-
-                synchronized (inputList) {
-                    if (payload != null) {
+                if (isValidIncomingPayload(payload)) {
+                    synchronized (inputList) {
                         pushInput(payload);
-                    } else {
-                        LOG.error("Sending final FLUSH_PAYLOAD");
-                        inputList.push(FLUSH_PAYLOAD);
                     }
-                }
 
-                inputCount++;
+                    inputCount++;
+                }
             }
         }
 
@@ -329,6 +323,10 @@ public class TriggerManager
      */
     public long getCount()
     {
+        if (collector == null) {
+            return 0;
+        }
+
         return getTotalProcessed();
     }
 
@@ -632,11 +630,6 @@ public class TriggerManager
         }
     }
 
-    private void resumeTriggerGeneration()
-    {
-        throw new UnimplementedError("Need to resume trigger generation");
-    }
-
     /**
      * Send per-run histograms
      *
@@ -702,23 +695,6 @@ public class TriggerManager
     }
 
     /**
-     * Stop the threads
-     */
-    public void stopThread()
-    {
-        for (TriggerThread thread : threadList) {
-            thread.stop();
-        }
-        for (TriggerThread thread : threadList) {
-            thread.join();
-        }
-
-        if (collector != null && !collector.isStopped()) {
-            collector.stop();
-        }
-    }
-
-    /**
      * Do nothing.
      *
      * @param evt ignored
@@ -741,15 +717,33 @@ public class TriggerManager
             collector.startThreads(splicer);
         }
 
+        subscribeAlgorithms();
+
         int id = 0;
         for (INewAlgorithm algo : algorithms) {
-            PayloadSubscriber subscriber =
-                inputList.subscribe(algo.getTriggerName());
-            algo.setSubscriber(subscriber);
-            TriggerThread thread =
-                new TriggerThread(id, subscriber, algo);
+            TriggerThread thread = new TriggerThread(id, algo);
+            thread.start();
+
             threadList.add(thread);
+
             id++;
+        }
+    }
+
+    /**
+     * Stop the threads
+     */
+    public void stopThread()
+    {
+        for (TriggerThread thread : threadList) {
+            thread.stop();
+        }
+        for (TriggerThread thread : threadList) {
+            thread.join();
+        }
+
+        if (collector != null && !collector.isStopped()) {
+            collector.stop();
         }
     }
 
@@ -771,6 +765,15 @@ public class TriggerManager
     public void stopping(SplicerChangedEvent evt)
     {
         // do nothing
+    }
+
+    void subscribeAlgorithms()
+    {
+        for (INewAlgorithm algo : algorithms) {
+            PayloadSubscriber subscriber =
+                inputList.subscribe(algo.getTriggerName());
+            algo.setSubscriber(subscriber);
+        }
     }
 
     /**

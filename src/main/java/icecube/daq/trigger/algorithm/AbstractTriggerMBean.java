@@ -24,6 +24,13 @@ public interface AbstractTriggerMBean
     int getNumberOfCachedRequests();
 
     /**
+     * Get the number of trigger sent to the collector.
+     *
+     * @return sent count
+     */
+    long getSentTriggerCount();
+
+    /**
      * Get the ID of the most recent trigger request.
      *
      * @return counter value

@@ -628,6 +628,7 @@ public class TriggerManager
         for (INewAlgorithm a : algorithms) {
             a.resetUID();
         }
+        collector.resetUID();
     }
 
     /**

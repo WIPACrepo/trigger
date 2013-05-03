@@ -62,6 +62,11 @@ class MockOutputThread
         pushed.add(req);
     }
 
+    public void resetUID()
+    {
+        // do nothing
+    }
+
     public void start(Splicer splicer)
     {
         throw new Error("Unimplemented");

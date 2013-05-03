@@ -800,7 +800,7 @@ public abstract class AbstractTrigger
      */
     public void resetUID()
     {
-        // do nothing
+        triggerCounter = 0;
     }
 
     /**

@@ -182,6 +182,7 @@ class CollectorThread
     private IMonitoringDataManager moniDataMgr;
 
     private int mergedUID;
+    private boolean switchMerged;
 
     private Object threadLock = new Object();
     private Thread thread;
@@ -251,6 +252,12 @@ class CollectorThread
                         LOG.error("Failed to reset multiplicity data", mde);
                     }
                 }
+
+                // if we've switching runs, reset mergedUID
+                if (switchMerged) {
+                    switchMerged = false;
+                    mergedUID = 0;
+                }
             }
 
             try {
@@ -268,7 +275,7 @@ class CollectorThread
      */
     public void resetUID()
     {
-        mergedUID = 0;
+        outThrd.resetUID();
     }
 
     /**
@@ -414,6 +421,8 @@ interface IOutputThread
     void notifyThread();
 
     void push(ITriggerRequestPayload req);
+
+    void resetUID();
 
     void start(Splicer splicer);
 
@@ -608,6 +617,11 @@ class OutputThread
         req.recycle();
     }
 
+    public void resetUID()
+    {
+        eventUID = 1;
+    }
+
     /**
      * Main output loop.
      */
@@ -725,7 +739,6 @@ class TruncateThread
                 spl = nextTrunc;
                 nextTrunc = null;
             }
-
 
             // XXX I'm not sure why, but 'spl' will occasionally be set to null
             if (spl != null) {

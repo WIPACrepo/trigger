@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
  *  makes a new TriggerRequest for each input TriggerRequest
  *  and then pass them to GlobalTrigBag.java.
  *
- * @version $Id: ThroughputTrigger.java 14299 2013-03-06 02:14:30Z dglo $
+ * @version $Id: ThroughputTrigger.java 14468 2013-05-03 16:29:42Z dglo $
  * @author shseo
  */
 public class ThroughputTrigger
@@ -77,11 +77,6 @@ public class ThroughputTrigger
     public boolean isConfigured()
     {
         return true;
-    }
-
-    public void resetUID()
-    {
-        triggerCounter = 0;
     }
 
     /**

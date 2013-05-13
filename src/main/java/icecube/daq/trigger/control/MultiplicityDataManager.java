@@ -65,6 +65,10 @@ class HashKey
 
     public int compareTo(Object obj)
     {
+        if (obj == null) {
+            return 1;
+        }
+
         HashKey other = (HashKey) obj;
         return key - other.key;
     }

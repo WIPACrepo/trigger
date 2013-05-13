@@ -204,9 +204,13 @@ public class TriggerManager
                 trig.getTriggerConfigId() == t.getTriggerConfigId() &&
                 trig.getSourceId() == t.getSourceId())
             {
-                LOG.error("Attempt to add duplicate trigger \"" +
-                          trig.getTriggerName() + "-" +
-                          trig.getTriggerConfigId() + "\" to trigger list!");
+                final String msg =
+                    String.format("Attempt to add duplicate trigger with" +
+                                  " type %d cfgId %d srcId %d" +
+                                  " (old %s, new %s)", t.getTriggerType(),
+                                  t.getTriggerConfigId(), t.getSourceId(),
+                                  trig.getTriggerName(), t.getTriggerName());
+                LOG.error(msg);
                 good = false;
                 break;
             }

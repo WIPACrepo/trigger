@@ -473,8 +473,7 @@ public class TriggerManager
                 String trigName = trigger.getTriggerName() + "-" +
                     trigger.getTriggerConfigId();
                 for (Map.Entry<String, Object> entry : moniMap.entrySet()) {
-                    map.put(trigName + "-" + entry.getKey(),
-                            moniMap.get(entry.getValue()));
+                    map.put(trigName + "-" + entry.getKey(), entry.getValue());
                 }
             }
         }
@@ -597,7 +596,7 @@ public class TriggerManager
                     return;
                 }
 
-                if (subList == null) {
+                if (subList == null || subList.size() == 0) {
                     LOG.error("No subtriggers found in " + req);
                     return;
                 }

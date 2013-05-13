@@ -543,7 +543,7 @@ class OutputThread
      *
      * @param req trigger request to possibly modify
      */
-    public boolean makeBackwardCompatible(ITriggerRequestPayload req)
+    public static boolean makeBackwardCompatible(ITriggerRequestPayload req)
     {
         // only modify merged requests
         if (req.getTriggerType() != -1 || req.getTriggerConfigID() != -1) {
@@ -598,6 +598,12 @@ class OutputThread
             }
 
             IReadoutRequest rReq = tr.getReadoutRequest();
+            if (rReq == null) {
+                LOG.error("Cannot find readout request for request " + req);
+                fixed = false;
+                continue;
+            }
+
             rReq.setSourceID(lowSrcId);
         }
 

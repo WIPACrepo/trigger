@@ -968,6 +968,18 @@ public abstract class AbstractTrigger
             elems = rReq.getReadoutRequestElements();
         }
 
+        final long rReqTime;
+        if (rReq == null) {
+            rReqTime = trigReq.getUTCTime();
+        } else {
+            rReqTime = rReq.getUTCTime();
+            if (rReqTime != trigReq.getUTCTime()) {
+                LOG.error(String.format("Readout request UTC Time %d does" +
+                                        " not match trigger request time %d",
+                                        rReqTime, trigReq.getUTCTime()));
+            }
+        }
+
         IUTCTime earliest;
         IUTCTime latest;
 
@@ -1006,7 +1018,7 @@ public abstract class AbstractTrigger
         final int uid = getNextUID();
 
         IReadoutRequest newRdoutReq =
-            new ReadoutRequest(rReq.getUTCTime(), uid, srcId, elems);
+            new ReadoutRequest(rReqTime, uid, srcId, elems);
 
         ITriggerRequestPayload newReq =
             (ITriggerRequestPayload) triggerFactory.

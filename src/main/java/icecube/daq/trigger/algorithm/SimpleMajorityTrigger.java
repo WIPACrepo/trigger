@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 14371 2013-03-27 16:56:04Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 14485 2013-05-13 20:23:34Z dglo $
  *
  * Date: August 19 2005
  *
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 14371 2013-03-27 16:56:04Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 14485 2013-05-13 20:23:34Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -50,8 +50,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      */
     private int threshold;
     private int timeWindow;
-
-    private int numberOfHitsProcessed = 0;
 
     /**
      * list of hits currently within slidingTimeWindow
@@ -401,8 +399,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
                 }
             }
         }
-
-        numberOfHitsProcessed++;
     }
 
     /**
@@ -514,7 +510,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         slidingTimeWindow = new SlidingTimeWindow();
         threshold = 0;
         timeWindow = 0;
-        numberOfHitsProcessed = 0;
         hitsWithinTriggerWindow.clear();
         numberOfHitsInTriggerWindow = 0;
         configThreshold = false;

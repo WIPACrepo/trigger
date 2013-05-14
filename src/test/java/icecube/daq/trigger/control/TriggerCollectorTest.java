@@ -2,6 +2,7 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.payload.IByteBufferCache;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.algorithm.FlushRequest;
@@ -10,7 +11,9 @@ import icecube.daq.trigger.test.MockAlgorithm;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockBufferCache;
 import icecube.daq.trigger.test.MockOutputProcess;
+import icecube.daq.trigger.test.MockReadoutRequest;
 import icecube.daq.trigger.test.MockSplicer;
+import icecube.daq.trigger.test.MockTriggerRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,8 +147,10 @@ class MyCollector
 
 public class TriggerCollectorTest
 {
-    private static final int INICE_ID = 4000;
-
+    private static final int INICE_ID =
+        SourceIdRegistry.INICE_TRIGGER_SOURCE_ID;
+    private static final int GLOBAL_ID =
+        SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID;
     private static final MockAppender appender =
         new MockAppender(/*org.apache.log4j.Level.ALL*/)/*.setVerbose(true)*/;
 
@@ -205,7 +210,7 @@ public class TriggerCollectorTest
             // expect this to fail
         }
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         TriggerCollector tc =
             new TriggerCollector(INICE_ID, algorithms, out, bufCache, null);
@@ -223,7 +228,7 @@ public class TriggerCollectorTest
             new ArrayList<INewAlgorithm>();
         algorithms.add(fooAlgo);
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockOutputProcess out = new MockOutputProcess();
 
@@ -250,7 +255,7 @@ public class TriggerCollectorTest
             new ArrayList<INewAlgorithm>();
         algorithms.add(fooAlgo);
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockOutputProcess out = new MockOutputProcess();
 
@@ -275,5 +280,166 @@ public class TriggerCollectorTest
         assertFalse("Collector thread should not be stopped", tc.wasStopped());
         tc.stop();
         assertTrue("Collector thread was not stopped", tc.wasStopped());
+    }
+
+    @Test
+    public void testMakeBackCompatNotMerged()
+    {
+        for (int i = 0; i < 3; i++) {
+            final int type;
+            if ((i & 0x1) == 0x1) {
+                type = -1;
+            } else {
+                type = 2;
+            }
+
+            final int cfgId;
+            if ((i & 0x2) == 0x2) {
+                cfgId = -1;
+            } else {
+                cfgId = 3;
+            }
+
+            MockTriggerRequest req =
+                new MockTriggerRequest(1, type, cfgId, 1L, 2L);
+            assertTrue(String.format("makeBackwardCompatible(type %d," +
+                                     " cfgId %d) failed", type, cfgId),
+                       OutputThread.makeBackwardCompatible(req));
+        }
+    }
+
+    @Test
+    public void testMakeBackCompatEmpty()
+        throws Exception
+    {
+        final long first = 123456789L;
+        final long last = 123457890L;
+
+        MockTriggerRequest glblReq =
+            new MockTriggerRequest(1, -1, -1, first, last);
+
+        assertFalse("makeBackwardCompatible should fail",
+                   OutputThread.makeBackwardCompatible(glblReq));
+    }
+
+    @Test
+    public void testMakeBackCompatIgnoredReq()
+        throws Exception
+    {
+        final long first = 123456789L;
+        final long last = 123457890L;
+
+        MockTriggerRequest glblReq =
+            new MockTriggerRequest(1, -1, -1, first, last);
+
+        final long step = (last - first) / 3;
+
+        ArrayList<String> logMsgs = new ArrayList<String>();
+
+        int uid = 0;
+        for (long t = first; t < last - step; t += step) {
+            MockTriggerRequest req =
+                new MockTriggerRequest(uid++, 1, 1, t, t + step);
+
+            if (t > first) {
+                final long substep = step / 3;
+                for (long t2 = t; t2 < (t + step) - substep; t2 += substep) {
+                    req.addPayload(new MockTriggerRequest(uid++, 1, 1, t2,
+                                                          t2 + substep));
+                }
+            }
+
+            final int num;
+            if (req.getPayloads() == null) {
+                num = 0;
+            } else {
+                num = req.getPayloads().size();
+            }
+
+            if (num != 1) {
+                logMsgs.add(String.format("Not fixing %s; found %d enclosed" +
+                                          " requests", req, num));
+            }
+
+            glblReq.addPayload(req);
+        }
+
+        assertFalse("makeBackwardCompatible should fail",
+                   OutputThread.makeBackwardCompatible(glblReq));
+
+        assertEquals("Bad number of log messages",
+                     logMsgs.size(), appender.getNumberOfMessages());
+
+        for (int i = 0; i < logMsgs.size(); i++) {
+            assertEquals("Bad log message",
+                         logMsgs.get(i), appender.getMessage(i));
+        }
+
+        appender.clear();
+    }
+
+    @Test
+    public void testMakeBackCompatNoRReq()
+        throws Exception
+    {
+        final long first = 123456789L;
+        final long last = 123457890L;
+
+        MockTriggerRequest req =
+            new MockTriggerRequest(2, 1, 1, first, last);
+        req.addPayload(new MockTriggerRequest(3, 1, 1, first + 100,
+                                              last - 100));
+
+        MockTriggerRequest glblReq =
+            new MockTriggerRequest(1, -1, -1, first, last);
+        glblReq.addPayload(req);
+
+        assertFalse("makeBackwardCompatible should fail",
+                    OutputThread.makeBackwardCompatible(glblReq));
+
+        assertEquals("Bad number of log messages",
+                     1, appender.getNumberOfMessages());
+
+        final String errMsg =
+            "Cannot find readout request for request " + glblReq;
+        assertEquals("Bad log message", errMsg, appender.getMessage(0));
+
+        appender.clear();
+    }
+
+    @Test
+    public void testMakeBackCompat()
+        throws Exception
+    {
+        final long first = 123456789L;
+        final long last = 123457890L;
+
+        MockTriggerRequest subReq =
+            new MockTriggerRequest(1, 1, 1, first + 100, last - 100);
+
+        MockTriggerRequest req =
+            new MockTriggerRequest(2, 1, 1, first, last);
+        req.addPayload(subReq);
+
+        MockTriggerRequest glblReq =
+            new MockTriggerRequest(1, -1, -1, first, last);
+        glblReq.addPayload(req);
+
+        req.setReadoutRequest(new MockReadoutRequest(1, INICE_ID));
+
+        assertNotNull("Could not fetch subrequest readout request",
+                      req.getReadoutRequest());
+        assertEquals("Bad subrequest readout srcId",
+                     INICE_ID,
+                     req.getReadoutRequest().getSourceID().getSourceID());
+
+        assertTrue("makeBackwardCompatible failed",
+                    OutputThread.makeBackwardCompatible(glblReq));
+
+        assertNotNull("Could not fetch subrequest readout request",
+                      req.getReadoutRequest());
+        assertEquals("Bad subrequest readout srcId",
+                     GLOBAL_ID,
+                     req.getReadoutRequest().getSourceID().getSourceID());
     }
 }

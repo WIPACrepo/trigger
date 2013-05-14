@@ -14,6 +14,7 @@ import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ public class MockAlgorithm
     private int srcId;
 
     private PayloadSubscriber sub;
+    private Map<String, Object> trigMoniMap;
 
     public MockAlgorithm(String name)
     {
@@ -66,6 +68,15 @@ public class MockAlgorithm
     public void addReadout(int rdoutType, int offset, int minus, int plus)
     {
         throw new Error("Unimplemented");
+    }
+
+    public void addTriggerMonitorData(String key, Object value)
+    {
+        if (trigMoniMap == null) {
+            trigMoniMap = new HashMap<String, Object>();
+        }
+
+        trigMoniMap.put(key, value);
     }
 
     public IPayload getEarliestPayloadOfInterest()
@@ -107,9 +118,9 @@ public class MockAlgorithm
         throw new Error("Unimplemented");
     }
 
-    public Map getTriggerMonitorMap()
+    public Map<String, Object> getTriggerMonitorMap()
     {
-        throw new Error("Unimplemented");
+        return trigMoniMap;
     }
 
     public String getTriggerName()
@@ -152,7 +163,7 @@ public class MockAlgorithm
 
     public void resetUID()
     {
-        throw new Error("Unimplemented");
+        nextUID = 0;
     }
 
     public void runTrigger(IPayload pay)
@@ -227,5 +238,11 @@ public class MockAlgorithm
     public void setTriggerType(int type)
     {
         throw new Error("Unimplemented");
+    }
+
+    public String toString()
+    {
+        return String.format("MockAlgorithm[%s typ %d cfg %d src %d uid %d]",
+                             name, type, cfgId, srcId, nextUID);
     }
 }

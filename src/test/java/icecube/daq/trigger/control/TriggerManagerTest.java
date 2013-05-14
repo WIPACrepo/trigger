@@ -7,18 +7,22 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.splicer.SplicerChangedEvent;
 import icecube.daq.trigger.common.ITriggerAlgorithm;
 import icecube.daq.trigger.common.ITriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.MockAlgorithm;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockBufferCache;
+import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockPayload;
 import icecube.daq.trigger.test.MockSourceID;
+import icecube.daq.trigger.test.MockSplicer;
 import icecube.daq.trigger.test.MockTriggerRequest;
 import icecube.daq.trigger.test.MockUTCTime;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -148,7 +152,7 @@ public class TriggerManagerTest
     public void testSimple()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         TriggerManager mgr = new TriggerManager(src, bufCache, null);
         assertEquals("Bad source ID", src.getSourceID(), mgr.getSourceId());
@@ -167,7 +171,7 @@ public class TriggerManagerTest
     public void testAddAlgoBad()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         TriggerManager mgr = new TriggerManager(src, bufCache, null);
 
@@ -188,7 +192,7 @@ public class TriggerManagerTest
     public void testAddAlgo1()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         TriggerManager mgr = new TriggerManager(src, bufCache, null);
 
@@ -202,7 +206,7 @@ public class TriggerManagerTest
     public void testAddAlgoMany()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         TriggerManager mgr = new TriggerManager(src, bufCache, null);
 
@@ -222,7 +226,7 @@ public class TriggerManagerTest
     public void testAddAlgoDup()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         TriggerManager mgr = new TriggerManager(src, bufCache, null);
 
@@ -237,9 +241,12 @@ public class TriggerManagerTest
         assertEquals("Bad number of log messages",
                      1, appender.getNumberOfMessages());
 
-        final String msg = "Attempt to add duplicate trigger \"" +
-            algo.getTriggerName() + "-" + algo.getTriggerConfigId() +
-            "\" to trigger list!";
+        final String msg =
+            String.format("Attempt to add duplicate trigger with type %d" +
+                          " cfgId %d srcId %d (old %s, new %s)",
+                          algo.getTriggerType(), algo.getTriggerConfigId(),
+                          algo.getSourceId(), algo.getTriggerName(),
+                          algo.getTriggerName());
         assertEquals("Bad log message", msg, appender.getMessage(0));
 
         appender.clear();
@@ -249,7 +256,7 @@ public class TriggerManagerTest
     public void testExecuteEmpty()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         TriggerManager mgr = new TriggerManager(src, bufCache, null);
 
@@ -260,7 +267,7 @@ public class TriggerManagerTest
     public void testExecuteNoSub()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         TriggerManager mgr = new TriggerManager(src, bufCache, null);
 
@@ -282,7 +289,7 @@ public class TriggerManagerTest
     public void testExecuteBad()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         TriggerManager mgr = new TriggerManager(src, bufCache, null);
 
@@ -308,7 +315,7 @@ public class TriggerManagerTest
     public void testExecuteHitOutOfOrder()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         TriggerManager mgr = new TriggerManager(src, bufCache, null);
 
@@ -344,7 +351,7 @@ public class TriggerManagerTest
     public void testExecuteHits()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         TriggerManager mgr = new TriggerManager(src, bufCache, null);
 
@@ -366,7 +373,7 @@ public class TriggerManagerTest
     public void testExecuteTrigReqBadComp()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         TriggerManager mgr = new TriggerManager(src, bufCache, null);
 
@@ -389,10 +396,10 @@ public class TriggerManagerTest
     }
 
     @Test
-    public void testExecuteTrigReqs()
+    public void testExecuteTrigReqsNoMerged()
     {
         MockSourceID src = new MockSourceID(GLOBAL_ID);
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         TriggerManager mgr = new TriggerManager(src, bufCache, null);
 
@@ -408,6 +415,245 @@ public class TriggerManagerTest
         splObjs.add(new MockTriggerRequest(4, 1, 7, 14, 16));
 
         mgr.execute(splObjs, 0);
+    }
+
+    @Test
+    public void testExecuteTrigReqsNoSublist()
+    {
+        MockSourceID src = new MockSourceID(GLOBAL_ID);
+        MockBufferCache bufCache = new MockBufferCache("foo");
+
+        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+
+        mgr.addTrigger(new MockAlgorithm("foo"));
+        mgr.subscribeAlgorithms();
+
+        List splObjs = new ArrayList();
+        splObjs.add(new MockTriggerRequest(1, 2, 3, 4, 5));
+
+        mgr.execute(splObjs, 0);
+
+        splObjs.add(new MockTriggerRequest(2, 2, 2, 6, 7));
+
+        MockTriggerRequest merged = new MockTriggerRequest(4, 1, 7, 14, 16);
+        merged.setMerged();
+        splObjs.add(merged);
+
+        mgr.execute(splObjs, 0);
+
+        assertEquals("Bad number of log messages",
+                     1, appender.getNumberOfMessages());
+
+        final String msg = "No subtriggers found in " + merged;
+        assertEquals("Bad log message", msg, appender.getMessage(0));
+
+        appender.clear();
+    }
+
+    @Test
+    public void testExecuteTrigReqs()
+    {
+        MockSourceID src = new MockSourceID(GLOBAL_ID);
+        MockBufferCache bufCache = new MockBufferCache("foo");
+
+        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+
+        mgr.addTrigger(new MockAlgorithm("foo"));
+        mgr.subscribeAlgorithms();
+
+        List splObjs = new ArrayList();
+        splObjs.add(new MockTriggerRequest(1, 2, 3, 4, 5));
+
+        mgr.execute(splObjs, 0);
+
+        splObjs.add(new MockTriggerRequest(2, 2, 2, 6, 7));
+
+        MockTriggerRequest merged = new MockTriggerRequest(4, 1, 7, 14, 16);
+        merged.setMerged();
+        merged.addPayload(new MockTriggerRequest(6, 2, 2, 14, 16));
+
+        splObjs.add(merged);
+
+        mgr.execute(splObjs, 0);
+    }
+
+    @Test
+    public void testMoniCountsUnstarted()
+    {
+        MockSourceID src = new MockSourceID(GLOBAL_ID);
+        MockBufferCache bufCache = new MockBufferCache("foo");
+
+        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+
+        List list = mgr.getMoniCounts();
+
+        assertEquals("Bad number of log messages",
+                     1, appender.getNumberOfMessages());
+
+        final String msg = "Cannot get trigger counts for monitoring";
+        assertEquals("Bad log message", msg, appender.getMessage(0));
+
+        appender.clear();
+    }
+
+    @Test
+    public void testMoniCounts()
+    {
+        MockSourceID src = new MockSourceID(GLOBAL_ID);
+        MockBufferCache bufCache = new MockBufferCache("foo");
+
+        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        mgr.setRunNumber(123);
+
+        List list = mgr.getMoniCounts();
+        assertNotNull("List should not be null", list);
+        assertEquals("Unexpected list entries", 0, list.size());
+    }
+
+    @Test
+    public void testSendHistoUnstarted()
+    {
+        MockSourceID src = new MockSourceID(GLOBAL_ID);
+        MockBufferCache bufCache = new MockBufferCache("foo");
+
+        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+
+        mgr.sendHistograms();
+
+        assertEquals("Bad number of log messages",
+                     1, appender.getNumberOfMessages());
+
+        final String msg = "Cannot send multiplicity data";
+        assertEquals("Bad log message", msg, appender.getMessage(0));
+
+        appender.clear();
+    }
+
+    @Test
+    public void testSendHisto()
+    {
+        MockSourceID src = new MockSourceID(GLOBAL_ID);
+        MockBufferCache bufCache = new MockBufferCache("foo");
+
+        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        mgr.setRunNumber(123);
+
+        mgr.sendHistograms();
+    }
+
+    @Test
+    public void testNoSwitchRun()
+    {
+        MockSourceID src = new MockSourceID(INICE_ID);
+        MockBufferCache bufCache = new MockBufferCache("foo");
+
+        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        mgr.setRunNumber(123);
+
+        mgr.switchToNewRun(null, 456);
+    }
+
+    @Test
+    public void testSwitchRun()
+    {
+        MockSourceID src = new MockSourceID(GLOBAL_ID);
+        MockBufferCache bufCache = new MockBufferCache("foo");
+
+        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        mgr.addTrigger(new MockAlgorithm("dummy"));
+
+        MockOutputProcess out = new MockOutputProcess();
+        mgr.setOutputEngine(out);
+
+        MockSplicer spl = new MockSplicer();
+        mgr.setSplicer(spl);
+
+        SplicerChangedEvent evt = new SplicerChangedEvent(mgr, 0, null,
+                                                          new ArrayList());
+        mgr.starting(evt);
+
+        mgr.switchToNewRun(null, 456);
+    }
+
+    @Test
+    public void testSwitchRunTooMany()
+    {
+        MockSourceID src = new MockSourceID(GLOBAL_ID);
+        MockBufferCache bufCache = new MockBufferCache("foo");
+
+        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        mgr.addTrigger(new MockAlgorithm("dummy"));
+
+        MockOutputProcess out = new MockOutputProcess();
+        mgr.setOutputEngine(out);
+
+        MockSplicer spl = new MockSplicer();
+        mgr.setSplicer(spl);
+
+        SplicerChangedEvent evt = new SplicerChangedEvent(mgr, 0, null,
+                                                          new ArrayList());
+        mgr.starting(evt);
+
+        mgr.switchToNewRun(null, 456);
+
+        assertEquals("Bad number of log messages",
+                     0, appender.getNumberOfMessages());
+
+        mgr.switchToNewRun(null, 789);
+
+        assertEquals("Bad number of log messages",
+                     1, appender.getNumberOfMessages());
+
+        final String msg = "Cannot set next run number";
+        assertEquals("Bad log message", msg, appender.getMessage(0));
+
+        appender.clear();
+    }
+
+    @Test
+    public void testGetTrigMoniMap()
+    {
+        MockSourceID src = new MockSourceID(INICE_ID);
+        MockBufferCache bufCache = new MockBufferCache("foo");
+
+        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+
+        HashMap<String, Object> expMap = new HashMap<String, Object>();
+        for (int i = 0; i < 3; i++) {
+            final String name;
+            if (i == 0) {
+                name = "foo";
+            } else if (i == 1) {
+                name = "bar";
+            } else {
+                name = "empty";
+            }
+
+            final int type = 1 + i;
+            final int cfgId = 3 - i;
+
+            MockAlgorithm a = new MockAlgorithm(name, type, cfgId, INICE_ID);
+
+            if (i > 1) {
+                final String key = "k" + i;
+                final String val = "v" + i;
+                a.addTriggerMonitorData(key, val);
+
+                expMap.put(name + "-" + cfgId + "-" + key, val);
+            }
+
+            mgr.addTrigger(a);
+        }
+
+        Map<String, Object> map = mgr.getTriggerMonitorMap();
+        assertNotNull("Trigger monitor map should not be null", map);
+        assertEquals("Bad trigger monitor map length",
+                     expMap.size(), map.size());
+
+        for (String k : map.keySet()) {
+            assertTrue("Unknown key " + k, expMap.containsKey(k));
+            assertEquals("Bad value for key " + k, expMap.get(k), map.get(k));
+        }
     }
 
     class MyHit

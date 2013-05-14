@@ -37,7 +37,7 @@ public class MockTriggerRequest
     {
         if (startVal > endVal) {
             throw new Error("Starting time " + startVal +
-                            " cannot be less than ending time " + endVal);
+                            " cannot be greater than ending time " + endVal);
         }
 
         this.uid = uid;
@@ -248,5 +248,19 @@ public class MockTriggerRequest
         throws IOException
     {
         throw new Error("Unimplemented");
+    }
+
+    public String toString()
+    {
+        final int plen;
+        if (payloads == null) {
+            plen = 0;
+        } else {
+            plen = payloads.size();
+        }
+
+        return String.format("MockTrigReq[%d typ %d cfg %d [%d-%d] pay %d]",
+                             uid, type, cfgId, startTime.longValue(),
+                             endTime.longValue(), plen);
     }
 }

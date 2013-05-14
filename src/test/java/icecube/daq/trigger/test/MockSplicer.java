@@ -22,7 +22,7 @@ public class MockSplicer
 
     public void addSplicerListener(SplicerListener x0)
     {
-        throw new Error("Unimplemented");
+        // do nothing
     }
 
     public void analyze()

@@ -196,7 +196,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         CollectorThread ct =
             new CollectorThread("cre", INICE_ID, algorithms, null, null);
@@ -213,7 +213,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockOutputThread outThrd = new MockOutputThread();
 
@@ -233,7 +233,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         CollectorThread ct =
             new CollectorThread("find", INICE_ID, algorithms, null, null);
@@ -260,7 +260,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockOutputThread outThrd = new MockOutputThread();
 
@@ -280,7 +280,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockDataManager mgr = new MockDataManager();
         mgr.throwAddException();
@@ -314,7 +314,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockDataManager mgr = new MockDataManager();
 
@@ -339,7 +339,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockDataManager mgr = new MockDataManager();
         mgr.throwSendException();
@@ -373,7 +373,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockDataManager mgr = new MockDataManager();
 
@@ -398,7 +398,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockDataManager mgr = new MockDataManager();
         mgr.setDoReset();
@@ -433,7 +433,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockDataManager mgr = new MockDataManager();
 
@@ -471,7 +471,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockDataManager mgr = new MockDataManager();
 
@@ -507,7 +507,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockDataManager mgr = new MockDataManager();
 
@@ -544,7 +544,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockDataManager mgr = new MockDataManager();
 
@@ -581,7 +581,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockDataManager mgr = new MockDataManager();
 
@@ -616,7 +616,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockDataManager mgr = new MockDataManager();
 
@@ -638,7 +638,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockDataManager mgr = new MockDataManager();
 
@@ -660,7 +660,7 @@ public class CollectorThreadTest
 
         MockOutputProcess out = new MockOutputProcess();
 
-        MockBufferCache bufCache = new MockBufferCache();
+        MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockDataManager mgr = new MockDataManager();
 

@@ -7,13 +7,29 @@ import java.nio.ByteBuffer;
 public class MockBufferCache
     implements IByteBufferCache
 {
-    public MockBufferCache()
+private static final boolean DEBUG = false;
+    private String name;
+    private long maxBytesAlloc;
+    private int bufsAlloc;
+    private long bytesAlloc;
+
+    public MockBufferCache(String name)
     {
+        this(name, Long.MIN_VALUE);
     }
 
-    public ByteBuffer acquireBuffer(int bytes)
+    public MockBufferCache(String name, long maxBytesAlloc)
     {
-        throw new Error("Unimplemented");
+        this.name = name;
+        this.maxBytesAlloc = maxBytesAlloc;
+    }
+
+    public synchronized ByteBuffer acquireBuffer(int bytes)
+    {
+        bufsAlloc++;
+        bytesAlloc += bytes;
+if(DEBUG)System.err.println("ALO*"+bytes+"(#"+bufsAlloc+"*"+bytesAlloc+")");
+        return ByteBuffer.allocate(bytes);
     }
 
     public void destinationClosed()
@@ -28,23 +44,22 @@ public class MockBufferCache
 
     public int getCurrentAquiredBuffers()
     {
-        throw new Error("Unimplemented");
+        return bufsAlloc;
     }
 
     public long getCurrentAquiredBytes()
     {
-        throw new Error("Unimplemented");
+        return bytesAlloc;
     }
-
 
     public boolean getIsCacheBounded()
     {
-        throw new Error("Unimplemented");
+        return maxBytesAlloc > 0;
     }
 
     public long getMaxAquiredBytes()
     {
-        throw new Error("Unimplemented");
+        return maxBytesAlloc;
     }
 
     public String getName()
@@ -74,7 +89,7 @@ public class MockBufferCache
 
     public boolean isBalanced()
     {
-        throw new Error("Unimplemented");
+        return bufsAlloc == 0;
     }
 
     public void receiveByteBuffer(ByteBuffer buf)
@@ -84,11 +99,19 @@ public class MockBufferCache
 
     public void returnBuffer(ByteBuffer buf)
     {
-        throw new Error("Unimplemented");
+        returnBuffer(buf.capacity());
     }
 
-    public void returnBuffer(int bytes)
+    public synchronized void returnBuffer(int bytes)
     {
-        throw new Error("Unimplemented");
+        bufsAlloc--;
+        bytesAlloc -= bytes;
+if(DEBUG)System.err.println("RTN*"+bytes+"(#"+bufsAlloc+"*"+bytesAlloc+")");
+    }
+
+    public String toString()
+    {
+        return "MockBufferCache(" + name + ")[bufs " + bufsAlloc + " bytes " +
+            bytesAlloc + "(max " + maxBytesAlloc + ")]";
     }
 }

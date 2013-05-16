@@ -138,12 +138,17 @@ public class TriggerComponent
     }
 
     /**
-     * Close all files.
+     * Close all open files, sockets, etc.
+     *
+     * @throws IOException if there is a problem
      */
     public void closeAll()
+        throws IOException
     {
         inputEngine.destroyProcessor();
         outputEngine.destroyProcessor();
+
+        super.closeAll();
     }
 
     /**
@@ -344,7 +349,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 14368 2013-03-27 16:19:57Z dglo $";
+        return "$Id: TriggerComponent.java 14506 2013-05-16 19:23:08Z dglo $";
     }
 
     /**

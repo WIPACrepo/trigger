@@ -140,7 +140,8 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager(alerter);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        mgr.setAlerter(alerter);
 
         try {
             mgr.add(new MockTriggerRequest(1, 2, 3, 4, 5));
@@ -159,7 +160,8 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager(alerter);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        mgr.setAlerter(alerter);
 
         mgr.start(123);
 
@@ -175,7 +177,8 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager(alerter);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        mgr.setAlerter(alerter);
 
         mgr.start(123);
 
@@ -203,7 +206,8 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager(alerter);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        mgr.setAlerter(alerter);
 
         mgr.start(123);
 
@@ -231,7 +235,8 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager(alerter);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        mgr.setAlerter(alerter);
 
         mgr.start(123);
 
@@ -263,7 +268,8 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager(alerter);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        mgr.setAlerter(alerter);
 
         try {
             mgr.getCounts();
@@ -282,7 +288,8 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager(alerter);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        mgr.setAlerter(alerter);
 
         mgr.start(123);
 
@@ -291,36 +298,12 @@ public class MultiplicityDataManagerTest
     }
 
     @Test
-    public void testGetCountsInactive()
-        throws MultiplicityDataException
-    {
-        MockAlerter alerter = new MockAlerter();
-
-        MultiplicityDataManager mgr = new MultiplicityDataManager(alerter);
-
-        mgr.start(123);
-
-        alerter.deactivate();
-
-        mgr.add(new MockTriggerRequest(1, 2, 3, 4, 5));
-
-        try {
-            mgr.getCounts();
-            fail("Should not succeed");
-        } catch (MultiplicityDataException mde) {
-            assertNotNull("Message should not be null", mde.getMessage());
-
-            final String msg = "Alerter " + alerter + " is not active";
-            assertEquals("Unexpected exception", msg, mde.getMessage());
-        }
-    }
-
-    @Test
     public void testResetNoStart()
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager(alerter);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        mgr.setAlerter(alerter);
 
         try {
             mgr.reset();
@@ -339,7 +322,8 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager(alerter);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        mgr.setAlerter(alerter);
 
         mgr.setNextRunNumber(123);
 
@@ -351,7 +335,8 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager(alerter);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        mgr.setAlerter(alerter);
 
         try {
             mgr.send();
@@ -370,7 +355,8 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager(alerter);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        mgr.setAlerter(alerter);
         mgr.start(123);
 
         boolean sent = mgr.send();
@@ -384,7 +370,8 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager(alerter);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        mgr.setAlerter(alerter);
         mgr.start(123);
 
 
@@ -415,7 +402,8 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager(alerter);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        mgr.setAlerter(alerter);
 
         mgr.setNextRunNumber(123);
 

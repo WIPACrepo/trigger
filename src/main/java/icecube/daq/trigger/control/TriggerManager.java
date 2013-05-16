@@ -172,14 +172,13 @@ public class TriggerManager
      * @param srcObj source ID object
      * @param outCache output buffer cache
      */
-    public TriggerManager(ISourceID srcObj, IByteBufferCache outCache,
-                          Alerter alerter)
+    public TriggerManager(ISourceID srcObj, IByteBufferCache outCache)
     {
         this.srcId = srcObj.getSourceID();
         this.outCache = outCache;
 
         trFactory = new TriggerRequestFactory(outCache);
-        multiDataMgr = new MultiplicityDataManager(alerter);
+        multiDataMgr = new MultiplicityDataManager();
 
         init();
     }
@@ -636,8 +635,6 @@ public class TriggerManager
 
     /**
      * Send per-run histograms
-     *
-     * @param alerter used to send per-run histograms
      */
     public void sendHistograms()
     {
@@ -646,6 +643,16 @@ public class TriggerManager
         } catch (MultiplicityDataException mde) {
             LOG.error("Cannot send multiplicity data", mde);
         }
+    }
+
+    /**
+     * Set the object which sends I3Live alerts
+     *
+     * @param alerter alerter object
+     */
+    public void setAlerter(Alerter alerter)
+    {
+        multiDataMgr.setAlerter(alerter);
     }
 
     /**
@@ -783,7 +790,7 @@ public class TriggerManager
     /**
      * Switch to a new run.
      *
-     * @param alerter used to send per-run histograms
+     * @param alerter unused
      * @param runNumber new run number
      */
     public void switchToNewRun(Alerter alerter, int runNumber)

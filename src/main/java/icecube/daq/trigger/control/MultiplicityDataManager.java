@@ -241,9 +241,8 @@ public class MultiplicityDataManager
 
     private int nextRunNumber = NO_NUMBER;
 
-    public MultiplicityDataManager(Alerter alerter)
+    public MultiplicityDataManager()
     {
-        this.alerter = alerter;
     }
 
     public void add(ITriggerRequestPayload req)
@@ -328,9 +327,6 @@ public class MultiplicityDataManager
         } else if (map.size() == 0) {
             // don't bother sending empty list
             return null;
-        } else if (!alerter.isActive()) {
-            final String msg = "Alerter " + alerter + " is not active";
-            throw new MultiplicityDataException(msg);
         }
 
         List<Map> list = new ArrayList<Map>();
@@ -371,6 +367,8 @@ public class MultiplicityDataManager
         } else if (map.size() == 0) {
             // don't bother sending empty list
             return false;
+        } else if (alerter == null) {
+            throw new MultiplicityDataException("Alerter has not been set");
         } else if (!alerter.isActive()) {
             final String msg = "Alerter " + alerter + " is not active";
             throw new MultiplicityDataException(msg);
@@ -404,6 +402,11 @@ public class MultiplicityDataManager
         }
 
         return true;
+    }
+
+    public void setAlerter(Alerter alerter)
+    {
+        this.alerter = alerter;
     }
 
     public void setNextRunNumber(int runNum)

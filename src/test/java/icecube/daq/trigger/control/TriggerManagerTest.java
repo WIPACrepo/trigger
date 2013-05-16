@@ -154,7 +154,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
         assertEquals("Bad source ID", src.getSourceID(), mgr.getSourceId());
 
         assertNull("Registry should be null", mgr.getDOMRegistry());
@@ -173,7 +173,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         MockOldAlgorithm bad = new MockOldAlgorithm("addAlgoBad");
         try {
@@ -194,7 +194,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         List<ITriggerAlgorithm> list = new ArrayList<ITriggerAlgorithm>();
         list.add(new MockAlgorithm("addAlgo1"));
@@ -208,7 +208,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         List<ITriggerAlgorithm> list = new ArrayList<ITriggerAlgorithm>();
         for (int t = 10; t < 40; t += 10) {
@@ -228,7 +228,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         MockAlgorithm algo = new MockAlgorithm("dup", 1, 2, 3);
 
@@ -258,7 +258,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.execute(new ArrayList(), 0);
     }
@@ -269,7 +269,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         List splObjs = new ArrayList();
         splObjs.add(new MyHit(123, 456));
@@ -291,7 +291,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.addTrigger(new MockAlgorithm("foo"));
         mgr.subscribeAlgorithms();
@@ -317,7 +317,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.addTrigger(new MockAlgorithm("foo"));
         mgr.subscribeAlgorithms();
@@ -353,7 +353,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.addTrigger(new MockAlgorithm("foo"));
         mgr.subscribeAlgorithms();
@@ -375,7 +375,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.addTrigger(new MockAlgorithm("foo"));
         mgr.subscribeAlgorithms();
@@ -401,7 +401,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(GLOBAL_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.addTrigger(new MockAlgorithm("foo"));
         mgr.subscribeAlgorithms();
@@ -423,7 +423,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(GLOBAL_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.addTrigger(new MockAlgorithm("foo"));
         mgr.subscribeAlgorithms();
@@ -456,7 +456,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(GLOBAL_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.addTrigger(new MockAlgorithm("foo"));
         mgr.subscribeAlgorithms();
@@ -483,7 +483,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(GLOBAL_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         List list = mgr.getMoniCounts();
 
@@ -502,7 +502,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(GLOBAL_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
         mgr.setRunNumber(123);
 
         List list = mgr.getMoniCounts();
@@ -516,7 +516,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(GLOBAL_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.sendHistograms();
 
@@ -535,7 +535,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(GLOBAL_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
         mgr.setRunNumber(123);
 
         mgr.sendHistograms();
@@ -547,7 +547,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
         mgr.setRunNumber(123);
 
         mgr.switchToNewRun(null, 456);
@@ -559,7 +559,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(GLOBAL_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
         mgr.addTrigger(new MockAlgorithm("dummy"));
 
         MockOutputProcess out = new MockOutputProcess();
@@ -581,7 +581,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(GLOBAL_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
         mgr.addTrigger(new MockAlgorithm("dummy"));
 
         MockOutputProcess out = new MockOutputProcess();
@@ -616,7 +616,7 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
-        TriggerManager mgr = new TriggerManager(src, bufCache, null);
+        TriggerManager mgr = new TriggerManager(src, bufCache);
 
         HashMap<String, Object> expMap = new HashMap<String, Object>();
         for (int i = 0; i < 3; i++) {

@@ -94,7 +94,7 @@ public class InIceTriggerEndToEndTest
         // set up in-ice trigger
         VitreousBufferCache cache = new VitreousBufferCache("IITrig");
 
-        TriggerManager trigMgr = new TriggerManager(srcId, cache, null);
+        TriggerManager trigMgr = new TriggerManager(srcId, cache);
 
         String configDir =
             getClass().getResource("/config/").getPath();

@@ -113,7 +113,7 @@ public class TriggerComponent
 
         SpliceableFactory factory = new PayloadFactory(inCache);
 
-        triggerManager = new TriggerManager(sourceId, outCache, getAlerter());
+        triggerManager = new TriggerManager(sourceId, outCache);
         addMBean("manager", triggerManager);
 
         // Create splicer and introduce it to the trigger manager
@@ -230,6 +230,7 @@ public class TriggerComponent
             addMBean(a.getTriggerName(), a);
         }
 
+        triggerManager.setAlerter(getAlerter());
         triggerManager.addTriggers(algorithms);
     }
 
@@ -349,7 +350,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 14506 2013-05-16 19:23:08Z dglo $";
+        return "$Id: TriggerComponent.java 14511 2013-05-16 21:27:53Z dglo $";
     }
 
     /**
@@ -504,7 +505,7 @@ public class TriggerComponent
     {
         if (isGlobalTrigger) {
             // histograms are sent inside switchToNewRun()
-            triggerManager.switchToNewRun(getAlerter(), runNumber);
+            triggerManager.switchToNewRun(null, runNumber);
         }
     }
 }

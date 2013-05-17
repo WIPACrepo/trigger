@@ -155,15 +155,6 @@ public class TriggerThreadTest
         assertFalse("Thread is stopped", thrd.isStopped());
         thrd.run();
         assertTrue("Thread is not stopped", thrd.isStopped());
-
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
-        final String nullMsg = "Ignoring null payload for " +
-            algo.getTriggerName();
-        assertEquals("Bad log message", nullMsg, appender.getMessage(0));
-
-        appender.clear();
     }
 
     @Test

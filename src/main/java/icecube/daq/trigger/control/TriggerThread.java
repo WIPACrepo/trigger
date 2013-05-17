@@ -66,6 +66,10 @@ class TriggerThread
         while (!stopped || algorithm.getSubscriber().hasData()) {
             IPayload pay = algorithm.getSubscriber().pop();
             if (pay == null) {
+                if (stopped && !algorithm.getSubscriber().hasData()) {
+                    break;
+                }
+
                 LOG.error("Ignoring null payload for " +
                           algorithm.getTriggerName());
             } else if (pay == TriggerManager.FLUSH_PAYLOAD) {

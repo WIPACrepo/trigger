@@ -161,6 +161,7 @@ public class InIceTriggerEndToEndTest
         trigCfg.sendInIceData(tails, numObjs);
         trigCfg.sendInIceStops(tails);
 
+        waitUntilProcessed(rdr, trigMgr);
         waitUntilStopped(rdr, splicer, "StopMsg");
 
         assertEquals("Bad number of payloads written",
@@ -176,6 +177,34 @@ public class InIceTriggerEndToEndTest
 
     private static final int REPS = 100;
     private static final int SLEEP_TIME = 100;
+
+    public static final void waitUntilProcessed(SpliceablePayloadReader rdr,
+                                                TriggerManager mgr)
+    {
+        for (int i = 0; i < REPS &&
+                 (rdr.getTotalRecordsReceived() == 0 ||
+                  mgr.getTotalProcessed() < rdr.getTotalRecordsReceived());
+             i++)
+        {
+            try {
+                Thread.sleep(SLEEP_TIME);
+            } catch (InterruptedException ie) {
+                // ignore interrupts
+            }
+        }
+
+        for (int i = 0; i < REPS &&
+                 (mgr.getNumInputsQueued() > 0 ||
+                  mgr.getNumOutputsQueued() > 0);
+             i++)
+        {
+            try {
+                Thread.sleep(SLEEP_TIME);
+            } catch (InterruptedException ie) {
+                // ignore interrupts
+            }
+        }
+    }
 
     public static final void waitUntilRunning(DAQComponentIOProcess proc)
     {

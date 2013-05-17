@@ -11,9 +11,12 @@ class TriggerMonitor
     private String prefix;
 
     private long received;
+    private long queuedIn;
     private long processed;
+    private long queuedOut;
     private long sent;
     private boolean stopped;
+    private boolean forcedStop;
     private boolean summarized;
 
     TriggerMonitor(TriggerComponent comp, String prefix)
@@ -38,8 +41,16 @@ class TriggerMonitor
                 received = comp.getPayloadsReceived();
                 changed = true;
             }
-            if (processed != comp.getPayloadsProcessed()) {
-                processed = comp.getPayloadsProcessed();
+            if (queuedIn != comp.getTriggerManager().getNumInputsQueued()) {
+                queuedIn = comp.getTriggerManager().getNumInputsQueued();
+                changed = true;
+            }
+            if (processed != comp.getTriggerManager().getTotalProcessed()) {
+                processed = comp.getTriggerManager().getTotalProcessed();
+                changed = true;
+            }
+            if (queuedOut != comp.getTriggerManager().getNumOutputsQueued()) {
+                queuedOut = comp.getTriggerManager().getNumOutputsQueued();
                 changed = true;
             }
             if (sent != comp.getPayloadsSent()) {

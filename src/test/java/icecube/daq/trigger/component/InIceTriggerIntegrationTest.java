@@ -164,7 +164,8 @@ public class InIceTriggerIntegrationTest
     }
 
     public void testIntegration()
-        throws DAQCompException, IOException, SplicerException, TriggerException
+        throws DAQCompException, IOException, SplicerException,
+               TriggerException
     {
         final boolean dumpActivity = false;
         final boolean dumpSplicers = false;

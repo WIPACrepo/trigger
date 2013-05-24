@@ -38,6 +38,13 @@ public interface INewAlgorithm
     void addReadout(int rdoutType, int offset, int minus, int plus);
 
     /**
+     * Get the input queue size.
+     *
+     * @return input queue size
+     */
+    int getInputQueueSize();
+
+    /**
      * Get the next interval.
      *
      * @param interval interval being considered
@@ -45,6 +52,13 @@ public interface INewAlgorithm
      * @return next interval
      */
     Interval getInterval(Interval interval);
+
+    /**
+     * Get number of cached requests.
+     *
+     * @return number of cached requests
+     */
+    int getNumberOfCachedRequests();
 
     /**
      * Get the input provider.

@@ -84,6 +84,16 @@ public class MockAlgorithm
         throw new Error("Unimplemented");
     }
 
+    /**
+     * Get the input queue size.
+     *
+     * @return input queue size
+     */
+    public int getInputQueueSize()
+    {
+        throw new Error("Unimplemented");
+    }
+
     public Interval getInterval(Interval interval)
     {
         if (intervals.size() == 0) {
@@ -91,6 +101,16 @@ public class MockAlgorithm
         }
 
         return intervals.get(0);
+    }
+
+    /**
+     * Get number of cached requests.
+     *
+     * @return number of cached requests
+     */
+    public int getNumberOfCachedRequests()
+    {
+        throw new Error("Unimplemented");
     }
 
     public IPayload getReleaseTime()

@@ -80,13 +80,6 @@ public interface INewAlgorithm
     void resetUID();
 
     /**
-     * Have we seen a flush request?
-     *
-     * @return <tt>true</tt> if all hits have been seen
-     */
-    boolean sawFlush();
-
-    /**
      * Clear out all remaining payloads.
      */
     void sendLast();

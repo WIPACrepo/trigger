@@ -405,20 +405,8 @@ class CollectorThread
      */
     public void setChanged()
     {
-        // if all algorithms have finished, 'sawFlush' is set to true
-        boolean sawFlush = true;
-        for (INewAlgorithm a : algorithms) {
-            sawFlush &= a.sawFlush();
-            if (!sawFlush) {
-                break;
-            }
-        }
-
         synchronized (threadLock) {
             changed = true;
-            if (sawFlush) {
-                stopping = true;
-            }
             threadLock.notify();
         }
     }

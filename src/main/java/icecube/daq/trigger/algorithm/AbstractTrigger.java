@@ -73,7 +73,6 @@ public abstract class AbstractTrigger
     private int printMod = 1000;
 
     private IPayload earliestPayloadOfInterest;
-    private boolean sawFlush;
 
     private IPayload releaseTime;
 
@@ -812,16 +811,6 @@ public abstract class AbstractTrigger
      */
     public abstract void runTrigger(IPayload payload)
         throws TriggerException;
-
-    /**
-     * Have we seen a flush request?
-     *
-     * @return <tt>true</tt> if all hits have been seen
-     */
-    public boolean sawFlush()
-    {
-        return sawFlush;
-    }
 
     /**
      * Clear out all remaining payloads.

@@ -6,7 +6,9 @@ import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockTriggerRequest;
+import icecube.daq.util.Leapseconds;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
@@ -233,6 +235,15 @@ public class MultiplicityDataManagerTest
     public void testAddMulti()
         throws MultiplicityDataException
     {
+        // set the Leapseconds config directory to UTCTime.toDateString() works
+        File configDir = new File(getClass().getResource("/config").getPath());
+        if (!configDir.exists()) {
+            throw new IllegalArgumentException("Cannot find config" +
+                                               " directory under " +
+                                               getClass().getResource("/"));
+        }
+        Leapseconds.setConfigDirectory(configDir);
+
         MockAlerter alerter = new MockAlerter();
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();

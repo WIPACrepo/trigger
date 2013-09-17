@@ -514,6 +514,16 @@ class OutputThread
         return outputQueue.size();
     }
 
+    /**
+     * Is the thread alive?
+     *
+     * @return <tt>true</tt> if the thread is running
+     */
+    public boolean isAlive()
+    {
+        return thread.isAlive();
+    }
+
     public boolean isStopped()
     {
         return stopped;

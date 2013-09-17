@@ -17,8 +17,10 @@ public class MockReadoutRequest
     implements ILoadablePayload, IReadoutRequest
 {
     private int uid;
-    private ISourceID srcId;
-    private List elemList;
+    private int srcId;
+    private List<IReadoutRequestElement> elemList;
+
+    private ISourceID srcObj;
 
     public MockReadoutRequest()
     {
@@ -27,21 +29,17 @@ public class MockReadoutRequest
 
     public MockReadoutRequest(IReadoutRequest rReq)
     {
-        this(rReq.getUID(), rReq.getSourceID(),
+        this(rReq.getUID(), rReq.getSourceID().getSourceID(),
              rReq.getReadoutRequestElements());
     }
 
     public MockReadoutRequest(int uid, int srcId)
     {
-        this(uid, new MockSourceID(srcId), null);
+        this(uid, srcId, null);
     }
 
-    public MockReadoutRequest(int uid, int srcId, List elemList)
-    {
-        this(uid, new MockSourceID(srcId), elemList);
-    }
-
-    public MockReadoutRequest(int uid, ISourceID srcId, List elemList)
+    public MockReadoutRequest(int uid, int srcId,
+                              List<IReadoutRequestElement> elemList)
     {
         this.uid = uid;
         this.srcId = srcId;
@@ -51,17 +49,10 @@ public class MockReadoutRequest
     public void addElement(IReadoutRequestElement elem)
     {
         if (elemList == null) {
-            elemList = new ArrayList();
+            elemList = new ArrayList<IReadoutRequestElement>();
         }
 
         elemList.add(elem);
-    }
-
-    public void addElement(int type, long firstTime, long lastTime, long domId,
-                           int srcId)
-    {
-        addElement(new MockReadoutRequestElement(type, firstTime, lastTime,
-                                                 domId, srcId));
     }
 
     public void addElement(int type, int srcId, long firstTime, long lastTime,
@@ -117,7 +108,11 @@ public class MockReadoutRequest
 
     public ISourceID getSourceID()
     {
-        return srcId;
+        if (srcObj == null && srcId != IReadoutRequestElement.NO_STRING) {
+            srcObj = new MockSourceID(srcId);
+        }
+
+        return srcObj;
     }
 
     public int getUID()
@@ -168,7 +163,10 @@ public class MockReadoutRequest
             throw new Error("Source ID cannot be null");
         }
 
-        this.srcId = srcId;
+        this.srcId = srcId.getSourceID();
+
+        // clear cached ISourceID
+        srcObj = null;
     }
 
     /**
@@ -183,7 +181,8 @@ public class MockReadoutRequest
 
     public String toString()
     {
-        return "MockRdoutReq[" + uid + " src " + srcId + " elem*" +
-            elemList.size() + "]";
+        return "MockRdoutReq[" + uid +
+            " src " + MockSourceID.toString(srcId) +
+            " elem*" + elemList.size() + "]";
     }
 }

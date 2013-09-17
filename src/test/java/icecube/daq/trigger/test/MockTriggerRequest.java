@@ -235,7 +235,7 @@ public class MockTriggerRequest
      */
     public void setUID(int uid)
     {
-        throw new Error("Unimplemented");
+        this.uid = uid;
     }
 
     public int writePayload(boolean b0, IPayloadDestination x1)
@@ -247,7 +247,8 @@ public class MockTriggerRequest
     public int writePayload(boolean b0, int i1, ByteBuffer x2)
         throws IOException
     {
-        throw new Error("Unimplemented");
+        // do nothing
+        return 0;
     }
 
     public String toString()

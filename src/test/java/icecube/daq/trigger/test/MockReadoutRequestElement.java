@@ -15,27 +15,72 @@ public class MockReadoutRequestElement
     implements IReadoutRequestElement, IWriteablePayloadRecord
 {
     private int type;
-    private IUTCTime firstTime;
-    private IUTCTime lastTime;
-    private IDOMID domId;
-    private ISourceID srcId;
+    private long firstTime;
+    private long lastTime;
+    private long domId;
+    private int srcId;
+
+    private IDOMID domObj;
+    private ISourceID srcObj;
+    private IUTCTime firstObj;
+    private IUTCTime lastObj;
 
     public MockReadoutRequestElement(int type, long firstTime, long lastTime,
                                      long domId, int srcId)
     {
-        this(type, new MockUTCTime(firstTime), new MockUTCTime(lastTime),
-             new MockDOMID(domId), new MockSourceID(srcId));
-    }
+        if (type == READOUT_TYPE_GLOBAL ||
+            type == READOUT_TYPE_II_GLOBAL ||
+            type == READOUT_TYPE_IT_GLOBAL)
+        {
+            if (srcId != NO_STRING) {
+                final String errStr =
+                    String.format("Cannot specify source #%d" +
+                                  " with global element type #%d",
+                                  srcId, type);
+                throw new Error(errStr);
+            }
+            if (domId != NO_DOM) {
+                final String errStr =
+                    String.format("Cannot specify DOM %012x" +
+                                  " with global element type #%d",
+                                  domId, type);
+                throw new Error(errStr);
+            }
+        }
 
-    public MockReadoutRequestElement(int type, IUTCTime firstTime,
-                                     IUTCTime lastTime, IDOMID domId,
-                                     ISourceID srcId)
-    {
         this.type = type;
         this.firstTime = firstTime;
         this.lastTime = lastTime;
         this.domId = domId;
         this.srcId = srcId;
+    }
+
+    public MockReadoutRequestElement(IReadoutRequestElement elem)
+    {
+        if (elem == null) {
+            throw new Error("Cannot copy null readout request element");
+        }
+
+        type = elem.getReadoutType();
+        firstTime = elem.getFirstTime();
+        lastTime = elem.getLastTime();
+
+        final boolean isGlobal =
+            type == READOUT_TYPE_GLOBAL ||
+            type == READOUT_TYPE_II_GLOBAL ||
+            type == READOUT_TYPE_IT_GLOBAL;
+
+        if (isGlobal || elem.getSourceID() == null) {
+            srcId = IReadoutRequestElement.NO_STRING;
+        } else {
+            srcId = elem.getSourceID().getSourceID();
+        }
+
+        if (isGlobal || elem.getDomID() == null) {
+            domId = IReadoutRequestElement.NO_DOM;
+        } else {
+            domId = elem.getDomID().longValue();
+        }
     }
 
     public Object deepCopy()
@@ -50,35 +95,39 @@ public class MockReadoutRequestElement
 
     public IDOMID getDomID()
     {
-        return domId;
+        if (domObj == null && domId != IReadoutRequestElement.NO_DOM) {
+            domObj = new MockDOMID(domId);
+        }
+
+        return domObj;
     }
 
     public long getFirstTime()
     {
-        if (firstTime == null) {
-            return 0L;
-        }
-
-        return firstTime.longValue();
+        return firstTime;
     }
 
     public IUTCTime getFirstTimeUTC()
     {
-        return firstTime;
+        if (firstObj == null && firstTime != 0) {
+            firstObj = new MockUTCTime(firstTime);
+        }
+
+        return firstObj;
     }
 
     public long getLastTime()
     {
-        if (lastTime == null) {
-            return 0L;
-        }
-
-        return lastTime.longValue();
+        return lastTime;
     }
 
     public IUTCTime getLastTimeUTC()
     {
-        return lastTime;
+        if (lastObj == null && lastTime != 0) {
+            lastObj = new MockUTCTime(lastTime);
+        }
+
+        return lastObj;
     }
 
     public int getReadoutType()
@@ -88,7 +137,11 @@ public class MockReadoutRequestElement
 
     public ISourceID getSourceID()
     {
-        return srcId;
+        if (srcObj == null && srcId != IReadoutRequestElement.NO_STRING) {
+            srcObj = new MockSourceID(srcId);
+        }
+
+        return srcObj;
     }
 
     /**
@@ -122,6 +175,16 @@ public class MockReadoutRequestElement
     public void put(ByteBuffer buf, int offset)
     {
         throw new Error("Unimplemented");
+    }
+
+    /**
+     * Set readout type
+     *
+     * @param type new readout type
+     */
+    public void setReadoutType(int type)
+    {
+        this.type = type;
     }
 
     /**
@@ -178,7 +241,11 @@ public class MockReadoutRequestElement
             break;
         }
 
-        return "MockReadoutRequestElement[" + typeStr + " [" + firstTime +
-            "-" + lastTime + "] dom " + domId + " src " + srcId + "]";
+        return "MockReadoutRequestElement[" + typeStr +
+            " [" + firstTime + "-" + lastTime + "]" +
+            " dom " + (domId == IReadoutRequestElement.NO_DOM ? "NO_DOM" :
+                       String.format("%012x", domId)) +
+            " src " + MockSourceID.toString(srcId) +
+            "]";
     }
 }

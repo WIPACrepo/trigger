@@ -606,6 +606,16 @@ public class CollectorThreadTest
         assertTrue("Should have added request to data manager",
                    mgr.wasAdded());
         assertFalse("Should not have sent data", mgr.wasSent());
+
+        assertEquals("Bad number of log messages",
+                     2, appender.getNumberOfMessages());
+        for (int i = 0; i < 2; i++) {
+            final String msg = (String) appender.getMessage(i);
+            assertTrue("Bad log message \"" + msg + "\"",
+                       msg.startsWith("No readout requests found in "));
+        }
+        appender.clear();
+
     }
 
     @Test

@@ -7,12 +7,17 @@ import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.impl.ReadoutRequestElement;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Container for accumulated request element data.
  */
 class ElementData
+    implements Comparable<ElementData>
 {
     private int type;
     private long firstTime;
@@ -33,8 +38,8 @@ class ElementData
     ElementData(IReadoutRequestElement rre)
     {
         this.type = rre.getReadoutType();
-        this.firstTime = Long.MAX_VALUE;
-        this.lastTime = Long.MIN_VALUE;
+        this.firstTime = getTime(rre.getFirstTimeUTC(), Long.MAX_VALUE);
+        this.lastTime = getTime(rre.getLastTimeUTC(), Long.MIN_VALUE);
 
         if (rre.getSourceID() == null) {
             srcId = IReadoutRequestElement.NO_STRING;
@@ -49,26 +54,26 @@ class ElementData
         }
     }
 
-    void addTo(IReadoutRequest rReq)
+    private static long getTime(IUTCTime utcTime, long defaultTime)
     {
-        rReq.addElement(type, srcId, firstTime, lastTime, domId);
+        if (utcTime == null) {
+            return defaultTime;
+        }
+
+        return utcTime.longValue();
     }
 
-    void addToRange(ElementData data)
+    boolean addToRange(ElementData data)
     {
-        addToRange(data.firstTime, data.lastTime);
+        return addToRange(data.firstTime, data.lastTime);
     }
 
-    void addToRange(IReadoutRequestElement rre)
+    private boolean addToRange(long firstNew, long lastNew)
     {
-        IUTCTime firstUTC = rre.getFirstTimeUTC();
-        IUTCTime lastUTC = rre.getLastTimeUTC();
-        addToRange((firstUTC == null ? firstTime : firstUTC.longValue()),
-                   (lastUTC == null ? lastTime : lastUTC.longValue()));
-    }
+        if (lastNew < firstTime || firstNew > lastTime) {
+            return false;
+        }
 
-    private void addToRange(long firstNew, long lastNew)
-    {
         if (firstNew < firstTime) {
             firstTime = firstNew;
         }
@@ -76,6 +81,50 @@ class ElementData
         if (lastNew > lastTime) {
             lastTime = lastNew;
         }
+
+        return true;
+    }
+
+    public int compareTo(ElementData ed)
+    {
+        int val = type - ed.type;
+        if (val == 0) {
+            val = srcId - ed.srcId;
+            if (val == 0) {
+                long lval = domId - ed.domId;
+                if (lval == 0) {
+                    lval = firstTime - ed.firstTime;
+                    if (lval == 0) {
+                        lval = lastTime - ed.lastTime;
+                    }
+                }
+
+                if (lval == 0) {
+                    val = 0;
+                } else if (lval < 0) {
+                    val = -1;
+                } else {
+                    val = 1;
+                }
+            }
+        }
+
+        return val;
+    }
+
+    void convertToElement(IReadoutRequest rReq)
+    {
+        rReq.addElement(type, srcId, firstTime, lastTime, domId);
+    }
+
+    /**
+     * Is the specified object equal to this object?
+     * @param obj object being compared
+     * @return <tt>true</tt> if the objects are equal
+     */
+    public boolean equals(ElementData ed)
+    {
+        return compareTo(ed) == 0;
     }
 
     public long getFirstTime()
@@ -93,39 +142,26 @@ class ElementData
         return type;
     }
 
-    boolean matches(IReadoutRequestElement rre)
+    /**
+     * Return this object's hash code
+     * @return hash code
+     */
+    public int hashCode()
     {
-        // if types don't match we're done
-        if (type != rre.getReadoutType()) {
-            return false;
+        int high = type;
+        if (srcId >= 0) {
+            high += srcId;
+        }
+        if (domId >= 0) {
+            high += (int)(domId & 0x3fffffff);
         }
 
-        // if sources don't match, we're done
-        if (srcId < 0) {
-            if (rre.getSourceID() != null &&
-                rre.getSourceID().getSourceID() >= 0)
-            {
-                return false;
-            }
-        } else if (rre.getSourceID() == null) {
-            return false;
-        } else if (srcId != rre.getSourceID().getSourceID()) {
-            return false;
-        }
+        return ((high & 0xffff) << 16) + (int)(firstTime & 0xffff);
+    }
 
-        // if DOMs don't match, we're done
-        if (domId == IReadoutRequestElement.NO_DOM) {
-            if (rre.getDomID() != null && rre.getDomID().longValue() >= 0) {
-                return false;
-            }
-        } else if (rre.getDomID() == null) {
-            return false;
-        } else if (domId != rre.getDomID().longValue()) {
-            return false;
-        }
-
-        // this is the correct element data
-        return true;
+    boolean matches(ElementData ed)
+    {
+        return type == ed.type && srcId == ed.srcId && domId == ed.domId;
     }
 
     public String toString()
@@ -137,7 +173,7 @@ class ElementData
             buf.append(" src ").append(srcId);
         }
 
-        buf.append('[').append(firstTime).append('-').append(lastTime).
+        buf.append(" [").append(firstTime).append('-').append(lastTime).
             append(']');
 
         if (domId >= 0) {
@@ -153,72 +189,105 @@ class ElementData
  */
 public abstract class ElementMerger
 {
-    private static void addData(IReadoutRequestElement rre,
-                         List<ElementData> dataList)
+    private static final Log LOG = LogFactory.getLog(ElementMerger.class);
+
+    private static void mergeData(ElementData ed, List<ElementData> dataList)
     {
-        ElementData data = null;
-        for (ElementData ed : dataList) {
-            if (ed.matches(rre)) {
-                data = ed;
-                break;
+        throw new Error("Unimplemented");
+    }
+
+    private static List<ElementData> addToList(List<ElementData> list,
+                                               int type,
+                                               ElementData glbl)
+    {
+        final int noString = IReadoutRequestElement.NO_STRING;
+        final long noDOM = IReadoutRequestElement.NO_DOM;
+
+        boolean added = false;
+        if (list != null) {
+            for (ElementData ed : list) {
+                if (ed.addToRange(glbl)) {
+                    added = true;
+                    break;
+                }
             }
         }
 
-        if (data == null) {
-            data = new ElementData(rre);
-            dataList.add(data);
+        if (!added) {
+            if (list == null) {
+                list = new ArrayList<ElementData>();
+            }
+
+            list.add(new ElementData(type, glbl.getFirstTime(),
+                                     glbl.getLastTime(), noString,
+                                     noDOM));
         }
 
-        data.addToRange(rre);
+        return list;
     }
 
     private static void collapseGlobal(List<ElementData> dataList)
     {
-        ElementData global = null;
-        ElementData iiGlobal = null;
-        ElementData itGlobal = null;
+        List<ElementData> global = null;
+        List<ElementData> iiGlobal = null;
+        List<ElementData> itGlobal = null;
+        List<ElementData> other = null;
 
         for (ElementData d : dataList) {
             switch (d.getType()) {
             case IReadoutRequestElement.READOUT_TYPE_GLOBAL:
-                global = d;
+                if (global == null) {
+                    global = new ArrayList<ElementData>();
+                }
+                global.add(d);
                 break;
             case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL:
-                iiGlobal = d;
+                if (iiGlobal == null) {
+                    iiGlobal = new ArrayList<ElementData>();
+                }
+                iiGlobal.add(d);
                 break;
             case IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL:
-                itGlobal = d;
+                if (itGlobal == null) {
+                    itGlobal = new ArrayList<ElementData>();
+                }
+                itGlobal.add(d);
                 break;
             default:
+                if (other == null) {
+                    other = new ArrayList<ElementData>();
+                }
+
+                final String errMsg =
+                    String.format("Not merging ReadoutRequestElement type#%d" +
+                                  " (range [%d-%d])", d.getType(),
+                                  d.getFirstTime(), d.getLastTime());
+                LOG.error(errMsg);
+
+                other.add(d);
                 break;
             }
         }
 
         if (global != null) {
-            final int noString = IReadoutRequestElement.NO_STRING;
-            final long noDOM = IReadoutRequestElement.NO_DOM;
+            final int iiType = IReadoutRequestElement.READOUT_TYPE_II_GLOBAL;
+            final int itType = IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL;
 
-            if (itGlobal != null) {
-                itGlobal.addToRange(global);
-            } else {
-                final int type =
-                    IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL;
-                dataList.add(new ElementData(type, global.getFirstTime(),
-                                             global.getLastTime(), noString,
-                                             noDOM));
+            for (ElementData ed : global) {
+                iiGlobal = addToList(iiGlobal, iiType, ed);
+                itGlobal = addToList(itGlobal, itType, ed);
             }
 
+            dataList.clear();
             if (iiGlobal != null) {
-                iiGlobal.addToRange(global);
-            } else {
-                final int type =
-                    IReadoutRequestElement.READOUT_TYPE_II_GLOBAL;
-                dataList.add(new ElementData(type, global.getFirstTime(),
-                                             global.getLastTime(), noString,
-                                             noDOM));
+                dataList.addAll(iiGlobal);
             }
-
-            dataList.remove(global);
+            if (itGlobal != null) {
+                dataList.addAll(itGlobal);
+            }
+            if (other != null) {
+                dataList.addAll(other);
+            }
         }
     }
 
@@ -232,23 +301,46 @@ public abstract class ElementMerger
     public static void merge(IReadoutRequest rReq,
                              List<ITriggerRequestPayload> reqList)
     {
-        ArrayList<ElementData> dataList = new ArrayList<ElementData>();
+        ArrayList<ElementData> initialList = new ArrayList<ElementData>();
 
         for (ITriggerRequestPayload tr : reqList) {
             IReadoutRequest rr = tr.getReadoutRequest();
-            if (rr != null) {
+            if (rr == null) {
+                LOG.warn("No readout requests found in " + tr);
+            } else {
                 for (Object obj : rr.getReadoutRequestElements()) {
                     IReadoutRequestElement rre = (IReadoutRequestElement) obj;
 
-                    addData(rre, dataList);
+                    initialList.add(new ElementData(rre));
                 }
+            }
+        }
+
+        Collections.sort(initialList);
+
+        ArrayList<ElementData> dataList = new ArrayList<ElementData>();
+
+        for (ElementData ed : initialList) {
+            boolean merged = false;
+            for (ElementData data : dataList) {
+                if (data.matches(ed)) {
+                    if (data.addToRange(ed)) {
+                        merged = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!merged) {
+                dataList.add(ed);
             }
         }
 
         collapseGlobal(dataList);
 
+        // add all ranges to the ReadoutRequest as ReadoutRequestElements
         for (ElementData ed : dataList) {
-            ed.addTo(rReq);
+            ed.convertToElement(rReq);
         }
     }
 }

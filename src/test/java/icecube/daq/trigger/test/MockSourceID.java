@@ -78,9 +78,23 @@ public class MockSourceID
      *
      * @return DAQName#DAQId
      */
-    public String toString()
+    public static String toString(int id)
     {
+        if (id == -1) {
+            return "NO_COMPONENT";
+        }
+
         return SourceIdRegistry.getDAQNameFromSourceID(id) + "#" +
             SourceIdRegistry.getDAQIdFromSourceID(id);
+    }
+
+    /**
+     * Get the string representation of this source ID.
+     *
+     * @return DAQName#DAQId
+     */
+    public String toString()
+    {
+        return toString(id);
     }
 }

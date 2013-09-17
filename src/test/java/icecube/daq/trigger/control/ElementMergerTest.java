@@ -7,178 +7,53 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadException;
+import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockDOMID;
+import icecube.daq.trigger.test.MockReadoutRequest;
+import icecube.daq.trigger.test.MockReadoutRequestElement;
 import icecube.daq.trigger.test.MockSourceID;
 import icecube.daq.trigger.test.MockTriggerRequest;
 import icecube.daq.trigger.test.MockUTCTime;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.BasicConfigurator;
 
 import org.junit.*;
 import static org.junit.Assert.*;
 
-class MockReadoutRequestElement
-    implements IReadoutRequestElement
+class RdoutReqElemComparator
+    implements Comparator<IReadoutRequestElement>
 {
-    private int type;
-    private int srcId;
-    private long firstTime;
-    private long lastTime;
-    private long domId;
-
-    private IDOMID domObj;
-    private ISourceID srcObj;
-    private IUTCTime firstObj;
-    private IUTCTime lastObj;
-
-    public MockReadoutRequestElement(int type, int srcId, long firstTime,
-                                     long lastTime, long domId)
+    public int compare(IReadoutRequestElement e1, IReadoutRequestElement e2)
     {
-        this.type = type;
-        this.srcId = srcId;
-        this.firstTime = firstTime;
-        this.lastTime = lastTime;
-        this.domId = domId;
-    }
-
-    public Object deepCopy()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public IDOMID getDomID()
-    {
-        if (domObj == null && domId != 0) {
-            domObj = new MockDOMID(domId);
+        int val = e2.getReadoutType() - e1.getReadoutType();
+        if (val == 0) {
+            long tmp = e1.getFirstTime() - e2.getFirstTime();
+            if (tmp < 0) {
+                val = -1;
+            } else if (tmp > 0) {
+                val = 1;
+            } else {
+                tmp = e1.getLastTime() - e2.getLastTime();
+                if (tmp < 0) {
+                    val = -1;
+                } else if (tmp > 0) {
+                    val = 1;
+                } else {
+                    val = 0;
+                }
+            }
         }
 
-        return domObj;
-    }
-
-    public long getFirstTime()
-    {
-        return firstTime;
-    }
-
-    public IUTCTime getFirstTimeUTC()
-    {
-        if (firstObj == null && firstTime != 0) {
-            firstObj = new MockUTCTime(firstTime);
-        }
-
-        return firstObj;
-    }
-
-    public long getLastTime()
-    {
-        return lastTime;
-    }
-
-    public IUTCTime getLastTimeUTC()
-    {
-        if (lastObj == null && lastTime != 0) {
-            lastObj = new MockUTCTime(lastTime);
-        }
-
-        return lastObj;
-    }
-
-    public int getReadoutType()
-    {
-        return type;
-    }
-
-    public ISourceID getSourceID()
-    {
-        if (srcObj == null && srcId != 0) {
-            srcObj = new MockSourceID(srcId);
-        }
-
-        return srcObj;
-    }
-
-    public void put(ByteBuffer x0, int i1)
-        throws PayloadException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public String toString()
-    {
-        return String.format("Elem[%d/%d/%d-%d/%d]", type, srcId, firstTime,
-                             lastTime, domId);
-    }
-}
-
-class MockReadoutRequest
-    implements IReadoutRequest
-{
-    private List<IReadoutRequestElement> elems =
-        new ArrayList<IReadoutRequestElement>();
-
-    public void addElement(int type, int srcId, long firstTime, long lastTime,
-                           long domId)
-    {
-        elems.add(new MockReadoutRequestElement(type, srcId, firstTime,
-                                                lastTime, domId));
-    }
-
-    public int getEmbeddedLength()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public List<IReadoutRequestElement> getReadoutRequestElements()
-    {
-        return elems;
-    }
-
-    public ISourceID getSourceID()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public int getUID()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public long getUTCTime()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public int length()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public int putBody(ByteBuffer buf, int offset)
-        throws PayloadException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void recycle()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void setSourceID(ISourceID srcId)
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void setUID(int uid)
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public String toString()
-    {
-        return "RReq*" + elems.size() + ": " + elems;
+        return val;
     }
 }
 
@@ -192,16 +67,65 @@ public class ElementMergerTest
         IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL;
     private static final int OTHER = 100;
 
+    private static final int NO_STRING = IReadoutRequestElement.NO_STRING;
+    private static final long NO_DOM = IReadoutRequestElement.NO_DOM;
+
+    private static final MockAppender appender =
+        new MockAppender(/*org.apache.log4j.Level.ALL*/)/*.setVerbose(true)*/;
+
+    @Before
+    public void setUp()
+        throws Exception
+    {
+        appender.clear();
+
+        BasicConfigurator.resetConfiguration();
+        BasicConfigurator.configure(appender);
+    }
+
+    @After
+    public void tearDown()
+        throws Exception
+    {
+        assertEquals("Bad number of log messages",
+                     0, appender.getNumberOfMessages());
+    }
+
+    private static final void assertDOMId(long domId, IDOMID domObj)
+    {
+        if (domObj == null) {
+            if (domId != NO_DOM) {
+                fail(String.format("Got null DOM ID, expected #%012x", domId));
+            }
+        } else {
+            assertEquals("Bad DOM", domId, domObj.longValue());
+        }
+    }
+
+    private static final void assertSourceId(int srcId, ISourceID srcObj)
+    {
+        if (srcObj == null) {
+            if (srcId != NO_STRING) {
+                fail("Got null source ID, expected #" + srcId);
+            }
+        } else {
+            assertEquals("Bad source", srcId, srcObj.getSourceID());
+        }
+    }
+
     @Test
     public void testMergeMany()
     {
         MockReadoutRequest srcReq = new MockReadoutRequest();
-        srcReq.addElement(GLOBAL, 2, 3, 4, 5);
-        srcReq.addElement(OTHER, 0, 3, 4, 0);
-        srcReq.addElement(GLOBAL, 2, 7, 8, 5);
-        srcReq.addElement(II_GLOBAL, 2, 7, 8, 5);
-        srcReq.addElement(GLOBAL, 2, 5, 6, 5);
-        srcReq.addElement(IT_GLOBAL, 2, 5, 6, 5);
+        srcReq.addElement(GLOBAL, NO_STRING, 3, 4, NO_DOM);
+        srcReq.addElement(OTHER, NO_STRING, 3, 4, NO_DOM);
+        srcReq.addElement(GLOBAL, NO_STRING, 7, 8, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, 7, 8, NO_DOM);
+        srcReq.addElement(GLOBAL, NO_STRING, 5, 6, NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, 5, 6, NO_DOM);
+
+        final List<IReadoutRequestElement> expElems =
+            collapseAndMerge(srcReq.getReadoutRequestElements());
 
         MockTriggerRequest req = new MockTriggerRequest(1, 2, 3, 4, 5);
         req.setReadoutRequest(srcReq);
@@ -213,6 +137,190 @@ public class ElementMergerTest
         list.add(req);
 
         ElementMerger.merge(tgtReq, list);
+
+        List<IReadoutRequestElement> elems =
+            tgtReq.getReadoutRequestElements();
+        assertNotNull("Element list should not be null", elems);
+        assertEquals("Bad number of elements", expElems.size(), elems.size());
+
+        compareElements("MergeMany", expElems, elems);
+
+        assertEquals("Bad number of log messages",
+                     1, appender.getNumberOfMessages());
+        assertEquals("Bad log message",
+                     "Not merging ReadoutRequestElement type#" + OTHER +
+                     " (range [3-4])", appender.getMessage(0));
+        appender.clear();
+    }
+
+    private List<IReadoutRequestElement>
+        collapseAndMerge(List<IReadoutRequestElement> origList)
+    {
+        final int typeGlobal =
+            IReadoutRequestElement.READOUT_TYPE_GLOBAL;
+        final int typeInice =
+            IReadoutRequestElement.READOUT_TYPE_II_GLOBAL;
+        final int typeIcetop =
+            IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL;
+        boolean foundGlobal = false;
+        boolean foundLocal = false;
+        for (IReadoutRequestElement elem : origList) {
+            if (elem.getReadoutType() == typeGlobal) {
+                foundGlobal = true;
+                if (foundLocal) {
+                    break;
+                }
+            } else if (elem.getReadoutType() == typeInice ||
+                       elem.getReadoutType() == typeIcetop)
+            {
+                foundLocal = true;
+                if (foundGlobal) {
+                    break;
+                }
+            }
+        }
+
+        List<IReadoutRequestElement> sorted;
+        if (!foundGlobal || !foundLocal) {
+            sorted = new ArrayList<IReadoutRequestElement>(origList);
+        } else {
+            sorted = collapseGlobal(origList);
+        }
+        Collections.sort(sorted, new RdoutReqElemComparator());
+
+        List<IReadoutRequestElement> elems =
+            new ArrayList<IReadoutRequestElement>();
+
+        IReadoutRequestElement prevElem = null;
+        for (IReadoutRequestElement elem : sorted) {
+            if (prevElem != null) {
+                if (prevElem.getReadoutType() != elem.getReadoutType()) {
+                    // cannot merge new element with different type
+                    elems.add(prevElem);
+                } else if (!isSameSource(prevElem.getSourceID(),
+                                        elem.getSourceID()))
+                {
+                    // cannot merge new element with different source
+                    elems.add(prevElem);
+                } else if (!isSameDOM(prevElem.getDomID(), elem.getDomID())) {
+                    // cannot merge new element with different DOM
+                    elems.add(prevElem);
+                } else if (prevElem.getLastTime() < elem.getFirstTime()) {
+                    // cannot merge new element with non-overlapping time
+                    elems.add(prevElem);
+                } else {
+                    long lastTime;
+                    if (prevElem.getLastTime() < elem.getLastTime()) {
+                        lastTime = elem.getLastTime();
+                    } else {
+                        lastTime = prevElem.getLastTime();
+                    }
+
+                    // merge overlapping elements
+                    elem =
+                        new MockReadoutRequestElement(elem.getReadoutType(),
+                                                      prevElem.getFirstTime(),
+                                                      lastTime, NO_DOM,
+                                                      NO_STRING);
+                }
+            }
+
+            prevElem = elem;
+        }
+
+        if (prevElem != null) {
+            // add final element
+            elems.add(prevElem);
+        }
+
+        return elems;
+    }
+
+    private List<IReadoutRequestElement>
+        collapseGlobal(List<IReadoutRequestElement> origList)
+    {
+        final int typeGlobal =
+            IReadoutRequestElement.READOUT_TYPE_GLOBAL;
+
+        List<IReadoutRequestElement> newList =
+            new ArrayList<IReadoutRequestElement>();
+        for (IReadoutRequestElement elem : origList) {
+            if (elem.getReadoutType() != typeGlobal) {
+                newList.add(elem);
+                continue;
+            }
+
+            for (int i = 0; i < 2; i++) {
+                MockReadoutRequestElement newElem =
+                    new MockReadoutRequestElement(elem);
+
+                int newType;
+                if (i == 0) {
+                    newType = IReadoutRequestElement.READOUT_TYPE_II_GLOBAL;
+                } else {
+                    newType = IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL;
+                }
+                newElem.setReadoutType(newType);
+
+                newList.add(newElem);
+            }
+        }
+
+        return newList;
+    }
+
+    private void compareElements(String name,
+                                 List<IReadoutRequestElement> expList,
+                                 List<IReadoutRequestElement> gotList)
+    {
+        List<IReadoutRequestElement> tmpList =
+            new ArrayList<IReadoutRequestElement>(expList);
+        for (IReadoutRequestElement elem : gotList) {
+//System.out.println("CMP " + elem);
+            IReadoutRequestElement foundElem = null;
+            for (IReadoutRequestElement chkElem : tmpList) {
+//System.out.println("    CHK " + chkElem);
+                if (elem.getReadoutType() == chkElem.getReadoutType() &&
+                    elem.getFirstTime() == chkElem.getFirstTime() &&
+                    elem.getLastTime() == chkElem.getLastTime() &&
+                    isSameDOM(elem.getDomID(), chkElem.getDomID()) &&
+                    isSameSource(elem.getSourceID(), chkElem.getSourceID()))
+                {
+                    foundElem = chkElem;
+                    break;
+                }
+            }
+
+            if (foundElem == null) {
+                fail(String.format("Found unknown %s element %s", name, elem));
+            }
+
+            tmpList.remove(foundElem);
+        }
+
+        assertEquals("Expected extra elements", 0, tmpList.size());
+    }
+
+    private boolean isSameDOM(IDOMID dom1, IDOMID dom2)
+    {
+        if (dom1 == null) {
+            return dom2 == null;
+        } else if (dom2 == null) {
+            return false;
+        }
+
+        return dom1.equals(dom2);
+    }
+
+    private boolean isSameSource(ISourceID src1, ISourceID src2)
+    {
+        if (src1 == null) {
+            return src2 == null;
+        } else if (src2 == null) {
+            return false;
+        }
+
+        return src1.equals(src2);
     }
 
     private void permute(int i0, int i1, int i2, int i3, int i4, int i5,
@@ -222,23 +330,29 @@ public class ElementMergerTest
 
         for (int j = 0; j < 8; j++) {
             if (j == i0) {
-                srcReq.addElement(GLOBAL, 2, 5, 6, 5);
+                srcReq.addElement(GLOBAL, NO_STRING, 5, 6, NO_DOM);
             } else if (j == i1) {
-                srcReq.addElement(GLOBAL, 2, 7, 8, 5);
+                srcReq.addElement(GLOBAL, NO_STRING, 7, 8, NO_DOM);
             } else if (j == i2) {
-                srcReq.addElement(II_GLOBAL, 2, 3, 7, 5);
+                srcReq.addElement(II_GLOBAL, NO_STRING, 3, 7, NO_DOM);
             } else if (j == i3) {
-                srcReq.addElement(II_GLOBAL, 2, 6, 12, 5);
+                srcReq.addElement(II_GLOBAL, NO_STRING, 6, 12, NO_DOM);
             } else if (j == i4) {
-                srcReq.addElement(IT_GLOBAL, 2, 3, 4, 5);
+                srcReq.addElement(IT_GLOBAL, NO_STRING, 3, 4, NO_DOM);
             } else if (j == i5) {
-                srcReq.addElement(IT_GLOBAL, 2, 5, 6, 5);
+                srcReq.addElement(IT_GLOBAL, NO_STRING, 5, 6, NO_DOM);
             } else if (j == i6) {
                 srcReq.addElement(OTHER, 0, 2, 6, 0);
             } else if (j == i7) {
                 srcReq.addElement(OTHER, 0, 8, 9, 0);
             }
         }
+
+        final String permName = String.format("Perm[%d/%d/%d/%d/%d/%d/%d/%d]",
+                                              i0, i1, i2, i3, i4, i5, i6, i7);
+
+        final List<IReadoutRequestElement> expElems =
+            collapseAndMerge(srcReq.getReadoutRequestElements());
 
         MockTriggerRequest req = new MockTriggerRequest(1, 2, 3, 4, 5);
         req.setReadoutRequest(srcReq);
@@ -251,53 +365,34 @@ public class ElementMergerTest
 
         ElementMerger.merge(tgtReq, list);
 
-        String permName = String.format("Perm[%d/%d/%d/%d/%d/%d/%d/%d]",
-                                        i0, i1, i2, i3, i4, i5, i6, i7);
-
         List<IReadoutRequestElement> elems =
             tgtReq.getReadoutRequestElements();
         assertNotNull(permName + " element list should not be null", elems);
-        assertEquals(permName + " bad number of elements", 3, elems.size());
+        assertEquals(permName + " bad number of elements",
+                     expElems.size(), elems.size());
 
-        for (IReadoutRequestElement elem : elems) {
-            String type;
-            int srcId;
-            long domId;
-            long firstTime;
-            long lastTime;
+        compareElements(permName, expElems, elems);
 
-            if (elem.getReadoutType() == OTHER) {
-                type = "OTHER";
-                srcId = -1;
-                domId = -1;
-                firstTime = 2;
-                lastTime = 9;
-            } else if (elem.getReadoutType() == II_GLOBAL) {
-                type = "II_GLOBAL";
-                srcId = 2;
-                domId = 5;
-                firstTime = 3;
-                lastTime = 12;
-            } else if (elem.getReadoutType() == IT_GLOBAL) {
-                type = "IT_GLOBAL";
-                srcId = 2;
-                domId = 5;
-                firstTime = 3;
-                lastTime = 8;
-            } else {
-                throw new Error(permName + " bad type " +
-                                elem.getReadoutType());
-            }
 
-            assertEquals(permName + " bad " + type + " source",
-                         srcId, elem.getSourceID().getSourceID());
-            assertEquals(permName + " bad " + type + " DOM",
-                         domId, elem.getDomID().longValue());
-            assertEquals(permName + " bad " + type + " first time",
-                         firstTime, elem.getFirstTimeUTC().longValue());
-            assertEquals(permName + " bad " + type + " last time",
-                         lastTime, elem.getLastTimeUTC().longValue());
-        }
+        assertEquals("Bad number of log messages",
+                     2, appender.getNumberOfMessages());
+        assertEquals("Bad log message",
+                     "Not merging ReadoutRequestElement type#" + OTHER +
+                     " (range [2-6])", appender.getMessage(0));
+        assertEquals("Bad log message",
+                     "Not merging ReadoutRequestElement type#" + OTHER +
+                     " (range [8-9])", appender.getMessage(1));
+        appender.clear();
+    }
+
+    @Test
+    public void testCompare()
+    {
+        ElementData ed1 = new ElementData(GLOBAL, 5L, 6L, NO_STRING, NO_DOM);
+        ElementData ed2 =
+            new ElementData(IT_GLOBAL, 3L, 4L, NO_STRING, NO_DOM);
+        ElementData ed3 =
+            new ElementData(GLOBAL, 7L, 8L, NO_STRING, NO_DOM);
     }
 
     @Test
@@ -344,15 +439,15 @@ public class ElementMergerTest
     @Test
     public void testMergeII()
     {
-        final int srcId = 2;
-        final long domId = 5;
         final long firstTime = 100L;
         final long inc = 50L;
         final long lastTime = 200L;
 
         MockReadoutRequest srcReq = new MockReadoutRequest();
-        srcReq.addElement(II_GLOBAL, srcId, firstTime, firstTime + inc, domId);
-        srcReq.addElement(II_GLOBAL, srcId, lastTime - inc, lastTime, domId);
+        srcReq.addElement(II_GLOBAL, NO_STRING, firstTime, firstTime + inc,
+                          NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, lastTime - inc, lastTime,
+                          NO_DOM);
 
         MockTriggerRequest req = new MockTriggerRequest(1, 2, 3, 4, 5);
         req.setReadoutRequest(srcReq);
@@ -372,26 +467,26 @@ public class ElementMergerTest
 
         IReadoutRequestElement elem = elems.get(0);
         assertEquals("Bad type", II_GLOBAL, elem.getReadoutType());
-        assertEquals("Bad source", srcId, elem.getSourceID().getSourceID());
-        assertEquals("Bad DOM", domId, elem.getDomID().longValue());
+        assertSourceId(NO_STRING, elem.getSourceID());
+        assertDOMId(NO_DOM, elem.getDomID());
         assertEquals("Bad first time",
-                     firstTime, elem.getFirstTimeUTC().longValue());
+                     firstTime, elem.getFirstTime());
         assertEquals("Bad last time",
-                     lastTime, elem.getLastTimeUTC().longValue());
+                     lastTime, elem.getLastTime());
     }
 
     @Test
-    public void testMergeIT()
+    public void testMergeGI()
     {
-        final int srcId = 1234;
-        final long domId = 54321;
-        final long firstTime = 10000L;
-        final long inc = 500L;
-        final long lastTime = 20000L;
+        final long firstTime = 100L;
+        final long inc = 50L;
+        final long lastTime = 200L;
 
         MockReadoutRequest srcReq = new MockReadoutRequest();
-        srcReq.addElement(IT_GLOBAL, srcId, firstTime, firstTime + inc, domId);
-        srcReq.addElement(IT_GLOBAL, srcId, lastTime - inc, lastTime, domId);
+        srcReq.addElement(GLOBAL, NO_STRING, firstTime, firstTime + inc,
+                          NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, lastTime - inc, lastTime,
+                          NO_DOM);
 
         MockTriggerRequest req = new MockTriggerRequest(1, 2, 3, 4, 5);
         req.setReadoutRequest(srcReq);
@@ -407,15 +502,326 @@ public class ElementMergerTest
         List<IReadoutRequestElement> elems =
             tgtReq.getReadoutRequestElements();
         assertNotNull("Element list should not be null", elems);
-        assertEquals("Bad number of elements", 1, elems.size());
+        assertEquals("Bad number of elements", 2, elems.size());
 
-        IReadoutRequestElement elem = elems.get(0);
-        assertEquals("Bad type", IT_GLOBAL, elem.getReadoutType());
-        assertEquals("Bad source", srcId, elem.getSourceID().getSourceID());
-        assertEquals("Bad DOM", domId, elem.getDomID().longValue());
-        assertEquals("Bad first time",
-                     firstTime, elem.getFirstTimeUTC().longValue());
-        assertEquals("Bad last time",
-                     lastTime, elem.getLastTimeUTC().longValue());
+        boolean sawOne = false;
+        boolean sawTwo = false;
+
+        for (IReadoutRequestElement elem : elems) {
+            long expFirst;
+            long expLast;
+            if (elem.getReadoutType() == II_GLOBAL) {
+                expFirst = firstTime;
+                expLast = lastTime;
+                sawOne = true;
+            } else if (elem.getReadoutType() == IT_GLOBAL) {
+                expFirst = firstTime;
+                expLast = lastTime - inc;
+                sawTwo = true;
+            } else {
+                fail("Unknown readout type #" + elem.getReadoutType() +
+                     "in " + elem);
+                break;
+            }
+
+            assertSourceId(NO_STRING, elem.getSourceID());
+            assertDOMId(NO_DOM, elem.getDomID());
+
+            assertEquals("Bad first time for " + elem,
+                         expFirst, elem.getFirstTime());
+            assertEquals("Bad last time for " + elem,
+                         expLast, elem.getLastTime());
+        }
+
+        assertTrue("Didn't see first request", sawOne);
+        assertTrue("Didn't see second request", sawTwo);
+    }
+
+    @Test
+    public void testMergeIT()
+    {
+        final long inc = 500L;
+        final long firstOne = 10000L;
+        final long lastOne = firstOne + inc;
+        final long firstTwo = 20000L;
+        final long lastTwo = firstTwo + inc;
+
+        final int uid = 1;
+        final int type = 2;
+        final int cfgId = 3;
+
+        MockTriggerRequest req = new MockTriggerRequest(uid, type, cfgId,
+                                                        firstOne, lastTwo);
+
+        MockReadoutRequest srcReq = new MockReadoutRequest();
+        srcReq.addElement(IT_GLOBAL, NO_STRING, firstOne, lastOne, NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, firstTwo, lastTwo, NO_DOM);
+
+        req.setReadoutRequest(srcReq);
+
+        MockReadoutRequest tgtReq = new MockReadoutRequest();
+
+        ArrayList<ITriggerRequestPayload> list =
+            new ArrayList<ITriggerRequestPayload>();
+        list.add(req);
+
+        ElementMerger.merge(tgtReq, list);
+
+        List<IReadoutRequestElement> elems =
+            tgtReq.getReadoutRequestElements();
+        assertNotNull("Element list should not be null", elems);
+        assertEquals("Bad number of elements", 2, elems.size());
+
+        boolean sawOne = false;
+        boolean sawTwo = false;
+
+        for (IReadoutRequestElement elem : elems) {
+            assertEquals("Bad type", IT_GLOBAL, elem.getReadoutType());
+            assertSourceId(NO_STRING, elem.getSourceID());
+            assertDOMId(NO_DOM, elem.getDomID());
+
+            if (!sawOne && elem.getFirstTime() == firstOne) {
+                sawOne = true;
+                assertEquals("Bad last time for time 1 " + firstOne,
+                             lastOne, elem.getLastTime());
+            } else if (!sawTwo &&
+                       elem.getFirstTime() == firstTwo)
+            {
+                sawTwo = true;
+                assertEquals("Bad last time for time 2 " + firstTwo,
+                             lastTwo, elem.getLastTime());
+            } else {
+                fail("Bad first time " + elem.getFirstTime());
+            }
+        }
+
+        assertTrue("Didn't see first request", sawOne);
+        assertTrue("Didn't see second request", sawTwo);
+    }
+
+    @Test
+    public void testMergeGT()
+    {
+        final long inc = 500L;
+        final long firstOne = 10000L;
+        final long lastOne = firstOne + inc;
+        final long firstTwo = 20000L;
+        final long lastTwo = firstTwo + inc;
+
+        final int uid = 1;
+        final int type = 2;
+        final int cfgId = 3;
+
+        MockTriggerRequest req = new MockTriggerRequest(uid, type, cfgId,
+                                                        firstOne, lastTwo);
+
+        MockReadoutRequest srcReq = new MockReadoutRequest();
+        srcReq.addElement(GLOBAL, NO_STRING, firstOne, firstTwo, NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, firstTwo, lastTwo, NO_DOM);
+
+        req.setReadoutRequest(srcReq);
+
+        MockReadoutRequest tgtReq = new MockReadoutRequest();
+
+        ArrayList<ITriggerRequestPayload> list =
+            new ArrayList<ITriggerRequestPayload>();
+        list.add(req);
+
+        ElementMerger.merge(tgtReq, list);
+
+        List<IReadoutRequestElement> elems =
+            tgtReq.getReadoutRequestElements();
+        assertNotNull("Element list should not be null", elems);
+        assertEquals("Bad number of elements", 2, elems.size());
+
+        boolean sawOne = false;
+        boolean sawTwo = false;
+
+        for (IReadoutRequestElement elem : elems) {
+            long expFirst;
+            long expLast;
+            if (elem.getReadoutType() == II_GLOBAL) {
+                expFirst = firstOne;
+                expLast = firstTwo;
+                sawOne = true;
+            } else if (elem.getReadoutType() == IT_GLOBAL) {
+                expFirst = firstOne;
+                expLast = lastTwo;
+                sawTwo = true;
+            } else {
+                fail("Unknown readout type #" + elem.getReadoutType() +
+                     "in " + elem);
+                break;
+            }
+
+            assertSourceId(NO_STRING, elem.getSourceID());
+            assertDOMId(NO_DOM, elem.getDomID());
+
+            assertEquals("Bad first time for " + elem,
+                         expFirst, elem.getFirstTime());
+            assertEquals("Bad last time for " + elem,
+                         expLast, elem.getLastTime());
+        }
+
+        assertTrue("Didn't see first request", sawOne);
+        assertTrue("Didn't see second request", sawTwo);
+    }
+
+    @Test
+    public void testMergeWithNonoverlap()
+    {
+        final long firstOne = 250000;
+        final long lastOne = firstOne + 100000;
+        final long firstTwo = lastOne + 15000;
+        final long lastTwo = firstTwo + 100000;
+
+        final int uid = 1;
+        final int type = 2;
+        final int cfgId = 3;
+
+        MockTriggerRequest req = new MockTriggerRequest(uid, type, cfgId,
+                                                        firstOne, lastTwo);
+
+        MockReadoutRequest srcReq = new MockReadoutRequest();
+        srcReq.addElement(II_GLOBAL, NO_STRING, firstOne + 1000, lastOne,
+                          NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, firstOne, lastOne - 5555,
+                          NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, firstOne, lastOne - 8765,
+                          NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, firstTwo, lastTwo, NO_DOM);
+
+        req.setReadoutRequest(srcReq);
+
+        MockReadoutRequest tgtReq = new MockReadoutRequest();
+
+        ArrayList<ITriggerRequestPayload> list =
+            new ArrayList<ITriggerRequestPayload>();
+        list.add(req);
+
+        ElementMerger.merge(tgtReq, list);
+
+        List<IReadoutRequestElement> elems =
+            tgtReq.getReadoutRequestElements();
+        assertNotNull("Element list should not be null", elems);
+        assertEquals("Bad number of elements", 2, elems.size());
+
+        boolean sawOne = false;
+        boolean sawTwo = false;
+
+        for (IReadoutRequestElement elem : elems) {
+            assertEquals("Bad type", II_GLOBAL, elem.getReadoutType());
+            assertSourceId(NO_STRING, elem.getSourceID());
+            assertDOMId(NO_DOM, elem.getDomID());
+
+            if (!sawOne && elem.getFirstTime() == firstOne) {
+                sawOne = true;
+                assertEquals("Bad last time for time 1 " + firstOne,
+                             lastOne, elem.getLastTime());
+            } else if (!sawTwo &&
+                       elem.getFirstTime() == firstTwo)
+            {
+                sawTwo = true;
+                assertEquals("Bad last time for time 2 " + firstTwo,
+                             lastTwo, elem.getLastTime());
+            } else {
+                fail("Bad first time " + elem.getFirstTime());
+            }
+        }
+
+        assertTrue("Didn't see first request", sawOne);
+        assertTrue("Didn't see second request", sawTwo);
+    }
+
+    @Test
+    public void testMergeMultiSource()
+    {
+        final long firstZero = 200000;
+        final long lastZero = firstZero + 15000;
+        final long firstOne = lastZero + 15000;
+        final long lastOne = firstOne + 100000;
+        final long firstTwo = lastOne + 15000;
+        final long lastTwo = firstTwo + 100000;
+        final long firstThree = lastTwo + 15000;
+        final long lastThree = lastTwo + 100000;
+
+        final int uid = 1;
+        final int type = 2;
+        final int cfgId = 3;
+
+        MockTriggerRequest req = new MockTriggerRequest(uid, type, cfgId,
+                                                        firstOne, lastTwo);
+
+        MockReadoutRequest srcReq = new MockReadoutRequest();
+        srcReq.addElement(GLOBAL, NO_STRING, firstZero, lastZero, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, firstOne, lastOne, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, firstOne, lastOne - 5555,
+                          NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, firstOne, firstTwo + 1234,
+                          NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, firstTwo, lastTwo, NO_DOM);
+        srcReq.addElement(GLOBAL, NO_STRING, firstThree, lastThree, NO_DOM);
+
+        req.setReadoutRequest(srcReq);
+
+        MockReadoutRequest tgtReq = new MockReadoutRequest();
+
+        ArrayList<ITriggerRequestPayload> list =
+            new ArrayList<ITriggerRequestPayload>();
+        list.add(req);
+
+        ElementMerger.merge(tgtReq, list);
+
+        List<IReadoutRequestElement> elems =
+            tgtReq.getReadoutRequestElements();
+        assertNotNull("Element list should not be null", elems);
+        assertEquals("Bad number of elements", 6, elems.size());
+
+        int numII = 0;
+        int numIT = 0;
+
+        for (IReadoutRequestElement elem : elems) {
+            assertSourceId(NO_STRING, elem.getSourceID());
+            assertDOMId(NO_DOM, elem.getDomID());
+
+            if (elem.getReadoutType() == II_GLOBAL) {
+                numII++;
+
+                if (elem.getFirstTime() == firstZero) {
+                    assertEquals("Bad last II time",
+                                 lastZero, elem.getLastTime());
+                } else if (elem.getFirstTime() == firstOne) {
+                    assertEquals("Bad last II time",
+                                 lastOne, elem.getLastTime());
+                } else if (elem.getFirstTime() == firstThree) {
+                    assertEquals("Bad last II time",
+                                 lastThree, elem.getLastTime());
+                } else {
+                    assertEquals("Bad first II time",
+                                 firstOne, elem.getFirstTime());
+                }
+            } else if (elem.getReadoutType() == IT_GLOBAL) {
+                numIT++;
+
+                if (elem.getFirstTime() == firstZero) {
+                    assertEquals("Bad last IT time",
+                                 lastZero, elem.getLastTime());
+                } else if (elem.getFirstTime() == firstOne) {
+                    assertEquals("Bad last IT time",
+                                 lastTwo, elem.getLastTime());
+                } else if (elem.getFirstTime() == firstThree) {
+                    assertEquals("Bad last IT time",
+                                 lastThree, elem.getLastTime());
+                } else {
+                    assertEquals("Bad first IT time",
+                                 firstOne, elem.getFirstTime());
+                }
+            } else {
+                fail("Unknown type for " + elem);
+            }
+        }
+
+        assertEquals("Bad number of II_GLOBAL elements", 3, numII);
+        assertEquals("Bad number of IT_GLOBAL elements", 3, numIT);
     }
 }

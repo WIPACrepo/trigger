@@ -57,6 +57,11 @@ class MockReadoutRequestElement
         return domObj;
     }
 
+    public long getFirstTime()
+    {
+        return firstTime;
+    }
+
     public IUTCTime getFirstTimeUTC()
     {
         if (firstObj == null && firstTime != 0) {
@@ -64,6 +69,11 @@ class MockReadoutRequestElement
         }
 
         return firstObj;
+    }
+
+    public long getLastTime()
+    {
+        return lastTime;
     }
 
     public IUTCTime getLastTimeUTC()

@@ -485,6 +485,7 @@ public class OutputThreadTest
         assertEquals("Found unexpected output payloads",
                      0, outProc.getNumberWritten());
 
+        System.err.println("*** Expect output channel error ***");
         MockTriggerRequest req = new MockTriggerRequest(1, 2, 3, 4, 5);
         thrd.push(req);
 

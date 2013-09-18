@@ -12,11 +12,18 @@ import java.nio.channels.WritableByteChannel;
 public class MockOutputProcess
     implements DAQComponentOutputProcess
 {
+    private String name;
     private MockOutputChannel outChan;
     private BaseValidator validator;
 
     public MockOutputProcess()
     {
+        this(null);
+    }
+
+    public MockOutputProcess(String name)
+    {
+        this.name = name;
     }
 
     public QueuedOutputChannel addDataChannel(WritableByteChannel chan,
@@ -148,5 +155,14 @@ public class MockOutputProcess
     public void startProcessing()
     {
         throw new Error("Unimplemented");
+    }
+
+    public String toString()
+    {
+        if (name == null) {
+            return "MockOutProc=>" + outChan;
+        }
+
+        return "MockOutProc[" + name + "]=>" + outChan;
     }
 }

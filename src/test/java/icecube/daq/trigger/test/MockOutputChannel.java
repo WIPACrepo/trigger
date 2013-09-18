@@ -63,4 +63,10 @@ public class MockOutputChannel
     {
         this.validator = validator;
     }
+
+    public String toString()
+    {
+        return String.format("MockOutChan[wrote %d%s]", numWritten,
+                             (stopped ? ",stopped" : ""));
+    }
 }

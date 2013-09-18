@@ -351,7 +351,7 @@ public class OutputThreadTest
         MockTriggerRequest req = new MockTriggerRequest(1, 2, 3, 4, 5);
         thrd.push(req);
 
-        for (int i = 0; outProc.getNumberWritten() == 1 && i < 10; i++) {
+        for (int i = 0; outProc.getNumberWritten() == 0 && i < 10; i++) {
             try {
                 Thread.sleep(1);
             } catch (InterruptedException ex) {

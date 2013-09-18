@@ -243,7 +243,7 @@ public class OutputThreadTest
     @Test
     public void testRun()
     {
-        MockOutputProcess outProc = new MockOutputProcess();
+        MockOutputProcess outProc = new MockOutputProcess("Run");
         MockBufferCache bufCache = new MockBufferCache("foo");
         MockTruncateThread trunc = new MockTruncateThread();
         OutputThread thrd =
@@ -312,7 +312,7 @@ public class OutputThreadTest
     @Test
     public void testRunGT()
     {
-        MockOutputProcess outProc = new MockOutputProcess();
+        MockOutputProcess outProc = new MockOutputProcess("RunGT");
         MockBufferCache bufCache = new MockBufferCache("foo");
         MockTruncateThread trunc = new MockTruncateThread();
         OutputThread thrd =
@@ -381,7 +381,7 @@ public class OutputThreadTest
     @Test
     public void testRunNoOutput()
     {
-        MockOutputProcess outProc = new MockOutputProcess();
+        MockOutputProcess outProc = new MockOutputProcess("RunNoOutput");
         MockBufferCache bufCache = new MockBufferCache("foo");
         MockTruncateThread trunc = new MockTruncateThread();
         OutputThread thrd =
@@ -452,7 +452,7 @@ public class OutputThreadTest
     @Test
     public void testRunNoChannel()
     {
-        MockOutputProcess outProc = new MockOutputProcess();
+        MockOutputProcess outProc = new MockOutputProcess("RunNoChannel");
         MockBufferCache bufCache = new MockBufferCache("foo");
         MockTruncateThread trunc = new MockTruncateThread();
         OutputThread thrd =

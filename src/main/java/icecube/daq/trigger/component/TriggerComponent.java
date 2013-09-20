@@ -27,7 +27,6 @@ import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.util.DOMRegistry;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -37,9 +36,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.dom4j.Branch;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
 
 /**
  * Base class for trigger handlers.
@@ -64,7 +61,7 @@ public class TriggerComponent
 
     private boolean isGlobalTrigger;
 
-    private String configDir;
+    private File configDir;
 
     private List<ITriggerAlgorithm> algorithms;
 
@@ -179,25 +176,22 @@ public class TriggerComponent
 
         // Inform DomSetFactory of the configuration directory location
         try {
-            DomSetFactory.setConfigurationDirectory(configDir);
+            DomSetFactory.setConfigurationDirectory(configDir.getPath());
         } catch (TriggerException ex) {
             throw new DAQCompException("Bad trigger configuration directory",
                                        ex);
         }
 
-        File runConfig;
-        if (configName.endsWith(".xml")) {
-            runConfig = new File(configDir, configName);
-        } else {
-            runConfig = new File(configDir, configName + ".xml");
+        Document doc = loadXMLDocument(configDir, configName);
+
+        Node tcNode = doc.selectSingleNode("runConfig/triggerConfig");
+        if (tcNode == null) {
+            throw new DAQCompException("Run configuration file \"" +
+                                       configName + "\" does not contain" +
+                                       " <triggerConfig>");
         }
 
-        if (!runConfig.exists()) {
-            throw new DAQCompException("Cannot find run configuration file \"" +
-                                       runConfig + "\"");
-        }
-
-        String tcName = readTriggerConfigName(runConfig);
+        String tcName = TriggerCreator.getNodeText((Branch) tcNode);
 
         File trigCfgDir = new File(configDir, "trigger");
         if (!trigCfgDir.exists()) {
@@ -206,24 +200,20 @@ public class TriggerComponent
                                        trigCfgDir + "\"");
         }
 
-        File trigConfig;
-        if (tcName.endsWith(".xml")) {
-            trigConfig = new File(trigCfgDir, tcName);
-        } else {
-            trigConfig = new File(trigCfgDir, tcName + ".xml");
+        if (sourceId == null) {
+            throw new DAQCompException("Source ID has not been set");
         }
 
-        if (!trigConfig.exists()) {
-            throw new DAQCompException("Cannot find trigger configuration" +
-                                       " file \"" + trigConfig + "\"");
+        Document tcDoc = loadXMLDocument(trigCfgDir, tcName);
+        try {
+            algorithms = TriggerCreator.buildTriggers(tcDoc, sourceId);
+        } catch (TriggerException te) {
+            throw new DAQCompException("Cannot build triggers", te);
         }
-
-        algorithms = readTriggers(trigConfig, sourceId);
 
         if (algorithms.size()  == 0) {
             throw new DAQCompException("No triggers specified in \"" +
-                                       trigConfig + "\" for " +
-                                       sourceId);
+                                       tcName + "\" for " + sourceId);
         }
 
         for (ITriggerAlgorithm a : algorithms) {
@@ -350,7 +340,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 14511 2013-05-16 21:27:53Z dglo $";
+        return "$Id: TriggerComponent.java 14617 2013-09-20 20:48:42Z dglo $";
     }
 
     /**
@@ -364,110 +354,18 @@ public class TriggerComponent
     }
 
     /**
-     * Extract the name of the trigger configuration file from the
-     * run configuration file.
-     *
-     * @param runConfig run configuration file
-     *
-     * @return name of trigger configuration file
-     *
-     * @throws DAQCompException if there was a problem
-     */
-    private static String readTriggerConfigName(File runConfig)
-        throws DAQCompException
-    {
-        FileInputStream in;
-        try {
-            in = new FileInputStream(runConfig);
-        } catch (IOException ioe) {
-            throw new DAQCompException("Cannot open run configuration" +
-                                       " file \"" + runConfig + "\"", ioe);
-        }
-
-        try {
-            SAXReader rdr = new SAXReader();
-            Document doc;
-            try {
-                doc = rdr.read(in);
-            } catch (DocumentException de) {
-                throw new DAQCompException("Cannot read run configuration" +
-                                           " file \"" + runConfig + "\"", de);
-            }
-
-            Node tcNode = doc.selectSingleNode("runConfig/triggerConfig");
-            if (tcNode == null) {
-                throw new DAQCompException("Run configuration file \"" +
-                                           runConfig + " does not contain" +
-                                           " <triggerConfig>");
-            }
-
-            return TriggerCreator.getNodeText((Branch) tcNode);
-        } finally {
-            try {
-                in.close();
-            } catch (IOException ioe) {
-                // ignore errors on close
-            }
-        }
-    }
-
-    /**
-     * Read all the trigger algorithm specifications.
-     *
-     * @param triggerConfig trigger configuration XML file
-     * @param srcId source ID of trigger handler being configured
-     *
-     * @return list of trigger algorithms
-     */
-    private static List<ITriggerAlgorithm> readTriggers(File triggerConfig,
-                                                        ISourceID srcId)
-        throws DAQCompException
-    {
-        if (srcId == null) {
-            throw new DAQCompException("Source ID has not been set");
-        }
-
-        FileInputStream in;
-        try {
-            in = new FileInputStream(triggerConfig);
-        } catch (IOException ioe) {
-            throw new DAQCompException("Cannot open trigger configuration" +
-                                       " file \"" + triggerConfig + "\"", ioe);
-        }
-
-        try {
-            SAXReader rdr = new SAXReader();
-            Document doc;
-            try {
-                doc = rdr.read(in);
-            } catch (DocumentException de) {
-                throw new DAQCompException("Cannot read run configuration" +
-                                           " file \"" + triggerConfig + "\"",
-                                           de);
-            }
-
-            try {
-                return TriggerCreator.buildTriggers(doc, srcId);
-            } catch (TriggerException te) {
-                throw new DAQCompException("Cannot build triggers", te);
-            }
-        } finally {
-            try {
-                in.close();
-            } catch (IOException ioe) {
-                // ignore errors on close
-            }
-        }
-    }
-
-    /**
      * Set the location of the global configuration directory.
      *
      * @param dirName absolute path of configuration directory
      */
     public void setGlobalConfigurationDir(String dirName)
     {
-        configDir = dirName;
+        configDir = new File(dirName);
+
+        if (!configDir.exists()) {
+            throw new Error("Configuration directory \"" + configDir +
+                            "\" does not exist");
+        }
     }
 
     /**

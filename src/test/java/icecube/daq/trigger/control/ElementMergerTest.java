@@ -373,15 +373,27 @@ public class ElementMergerTest
 
         compareElements(permName, expElems, elems);
 
-
         assertEquals("Bad number of log messages",
                      2, appender.getNumberOfMessages());
-        assertEquals("Bad log message",
-                     "Not merging ReadoutRequestElement type#" + OTHER +
-                     " (range [2-6])", appender.getMessage(0));
-        assertEquals("Bad log message",
-                     "Not merging ReadoutRequestElement type#" + OTHER +
-                     " (range [8-9])", appender.getMessage(1));
+        for (int i = 0; i < 2; i++) {
+            final String msg = (String) appender.getMessage(i);
+
+            final String front =
+                "Not merging ReadoutRequestElement type#" + OTHER + " (range ";
+            assertTrue("Bad log message " + msg, msg.startsWith(front));
+
+            boolean found = false;
+
+            String[] back = new String[] { "[2-6])", "[8-9])" };
+            for (int r = 0; r < back.length; r++) {
+                if (msg.endsWith(back[r])) {
+                    found = true;
+                    break;
+                }
+            }
+
+            assertTrue("Bad log message " + msg, found);
+        }
         appender.clear();
     }
 
@@ -823,5 +835,136 @@ public class ElementMergerTest
 
         assertEquals("Bad number of II_GLOBAL elements", 3, numII);
         assertEquals("Bad number of IT_GLOBAL elements", 3, numIT);
+    }
+
+    @Test
+    public void testMergeSpecific1()
+    {
+        final int uid = 1;
+        final int type = 2;
+        final int cfgId = 3;
+
+        final long firstIIOne = 116198449402970174L;
+        final long lastIIOne = 116198449403103228L;
+
+        final long firstIITwo = 116198449403109929L;
+        final long lastIITwo = 116198449403365004L;
+
+        final long firstITOne = 116198449402910174L;
+        final long lastITOne = 116198449403391861L;
+
+        MockTriggerRequest req =
+            new MockTriggerRequest(uid, type, cfgId, firstIIOne, lastITOne);
+
+        MockReadoutRequest srcReq = new MockReadoutRequest();
+
+        srcReq.addElement(GLOBAL, NO_STRING, firstIITwo,
+                          116198449403310410L, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, firstIIOne,
+                          116198449403076695L, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, firstIIOne,
+                          116198449403078654L, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, firstIIOne,
+                          lastIIOne, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, 116198449402985271L,
+                          116198449403094811L, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, 116198449402985271L,
+                          116198449403098003L, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, 116198449403221057L,
+                          116198449403330649L, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, 116198449403221057L,
+                          116198449403335005L, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, 116198449403221057L,
+                          lastIITwo, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, 116198449403231119L,
+                          116198449403340203L, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, 116198449403236945L,
+                          116198449403342492L, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, 116198449403241580L,
+                          116198449403351333L, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, 116198449403251861L,
+                          116198449403360749L, NO_DOM);
+
+        srcReq.addElement(IT_GLOBAL, NO_STRING, firstITOne,
+                          116198449403110174L, NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, firstITOne,
+                          116198449403110174L, NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, firstITOne,
+                          116198449403110174L, NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, 116198449402925271L,
+                          116198449403125271L, NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, 116198449402925271L,
+                          116198449403125271L, NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, 116198449403161057L,
+                          116198449403361057L, NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, 116198449403161057L,
+                          116198449403361057L, NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, 116198449403161057L,
+                          116198449403361057L, NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, 116198449403171119L,
+                          116198449403371119L, NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, 116198449403176945L,
+                          116198449403376945L, NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, 116198449403181580L,
+                          116198449403381580L, NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, 116198449403191861L,
+                          lastITOne, NO_DOM);
+        srcReq.addElement(II_GLOBAL, NO_STRING, 116198449403228099L,
+                          116198449403362691L, NO_DOM);
+        srcReq.addElement(IT_GLOBAL, NO_STRING, 116198449403188099L,
+                          116198449403388099L, NO_DOM);
+
+        req.setReadoutRequest(srcReq);
+
+        MockReadoutRequest tgtReq = new MockReadoutRequest();
+
+        ArrayList<ITriggerRequestPayload> list =
+            new ArrayList<ITriggerRequestPayload>();
+        list.add(req);
+
+        ElementMerger.merge(tgtReq, list);
+
+        List<IReadoutRequestElement> elems =
+            tgtReq.getReadoutRequestElements();
+        assertNotNull("Element list should not be null", elems);
+        assertEquals("Bad number of elements", 3, elems.size());
+
+        int numII = 0;
+        int numIT = 0;
+
+        for (IReadoutRequestElement elem : elems) {
+            assertSourceId(NO_STRING, elem.getSourceID());
+            assertDOMId(NO_DOM, elem.getDomID());
+
+            if (elem.getReadoutType() == II_GLOBAL) {
+                numII++;
+
+                if (elem.getFirstTime() == firstIIOne) {
+                    assertEquals("Bad last II time",
+                                 lastIIOne, elem.getLastTime());
+                } else if (elem.getFirstTime() == firstIITwo) {
+                    assertEquals("Bad last II time",
+                                 lastIITwo, elem.getLastTime());
+                } else {
+                    fail("Bad II first time " + elem.getFirstTime() +
+                         " (last time " + elem.getLastTime() + ")");
+                }
+            } else if (elem.getReadoutType() == IT_GLOBAL) {
+                numIT++;
+
+                if (elem.getFirstTime() == firstITOne) {
+                    assertEquals("Bad last IT time",
+                                 lastITOne, elem.getLastTime());
+                } else {
+                    fail("Bad IT first time " + elem.getFirstTime() +
+                         " (last time " + elem.getLastTime() + ")");
+                }
+            } else {
+                fail("Unknown type for " + elem);
+            }
+        }
+
+        assertEquals("Bad number of II_GLOBAL elements", 2, numII);
+        assertEquals("Bad number of IT_GLOBAL elements", 1, numIT);
     }
 }

@@ -269,6 +269,7 @@ public abstract class ElementMerger
             }
         }
 
+        // always split GLOBAL requests into localized GLOBAL requests
         if (global != null) {
             final int iiType = IReadoutRequestElement.READOUT_TYPE_II_GLOBAL;
             final int itType = IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL;
@@ -316,6 +317,8 @@ public abstract class ElementMerger
             }
         }
 
+        collapseGlobal(initialList);
+
         Collections.sort(initialList);
 
         ArrayList<ElementData> dataList = new ArrayList<ElementData>();
@@ -335,8 +338,6 @@ public abstract class ElementMerger
                 dataList.add(ed);
             }
         }
-
-        collapseGlobal(dataList);
 
         // add all ranges to the ReadoutRequest as ReadoutRequestElements
         for (ElementData ed : dataList) {

@@ -498,7 +498,7 @@ public class TriggerManager
             IHitPayload hit = (IHitPayload) payload;
             if (hit.getHitTimeUTC() == null) {
                 LOG.error("Bad hit buf " + payload.getPayloadBacking() +
-                          " len " + payload.getPayloadLength() +
+                          " len " + payload.length() +
                           " type " + payload.getPayloadType() +
                           " utc " + payload.getPayloadTimeUTC());
                 return false;
@@ -545,14 +545,14 @@ public class TriggerManager
                 (ITriggerRequestPayload) payload;
 
             if (tPayload.getSourceID() == null) {
-                if (tPayload.getPayloadLength() == 0 &&
+                if (tPayload.length() == 0 &&
                     tPayload.getPayloadTimeUTC() == null &&
                     ((IPayload) tPayload).getPayloadBacking() == null)
                 {
                     LOG.error("Ignoring recycled payload");
                 } else {
                     LOG.error("Unexpected null SourceID in payload (len=" +
-                              tPayload.getPayloadLength() + ", time=" +
+                              tPayload.length() + ", time=" +
                               (tPayload.getPayloadTimeUTC() == null ?
                                "null" : "" + tPayload.getPayloadTimeUTC()) +
                               ", buf=" + payload.getPayloadBacking() + ")");

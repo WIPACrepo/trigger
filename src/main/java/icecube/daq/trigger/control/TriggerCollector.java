@@ -625,7 +625,7 @@ class OutputThread
             makeBackwardCompatible(req);
         }
 
-        int bufLen = req.getPayloadLength();
+        int bufLen = req.length();
 
         // write trigger to allocated ByteBuffer
         ByteBuffer trigBuf = outCache.acquireBuffer(bufLen);

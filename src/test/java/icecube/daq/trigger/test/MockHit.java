@@ -103,7 +103,7 @@ public class MockHit
 
     public int getPayloadLength()
     {
-        return LENGTH;
+        return length();
     }
 
     public int getPayloadType()
@@ -128,6 +128,11 @@ public class MockHit
     public int getTriggerType()
     {
         throw new Error("Unimplemented");
+    }
+
+    public int length()
+    {
+        return LENGTH;
     }
 
     public void setCache(IByteBufferCache cache)

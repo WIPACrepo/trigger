@@ -61,7 +61,7 @@ public abstract class MockPayload
 
     public int getPayloadLength()
     {
-        throw new Error("Unimplemented");
+        return length();
     }
 
     public IUTCTime getPayloadTimeUTC()
@@ -91,6 +91,11 @@ public abstract class MockPayload
 
         return (int) (topTwo / modValue) + (int) (topTwo % modValue) +
             (int) (time % modValue);
+    }
+
+    public int length()
+    {
+        throw new Error("Unimplemented");
     }
 
     public void loadPayload()

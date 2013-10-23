@@ -77,9 +77,9 @@ class TriggerThread
             } else {
                 try {
                     algorithm.runTrigger(pay);
-                } catch (Exception ex) {
+                } catch (Throwable thr) {
                     LOG.error("Trigger " + algorithm + " failed for " + pay,
-                              ex);
+                              thr);
                 }
             }
 

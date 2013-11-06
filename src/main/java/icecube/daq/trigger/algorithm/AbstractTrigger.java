@@ -787,6 +787,14 @@ public abstract class AbstractTrigger
         } else {
             synchronized (requests) {
                 requests.add(trigReq);
+                if (releaseTime != null &&
+                    trigReq.getFirstTimeUTC().longValue() <
+                    releaseTime.getUTCTime())
+                {
+                    LOG.error(triggerName + " added " + trigReq +
+                              " preceding release time " +
+                              releaseTime.getUTCTime());
+                }
                 sentTriggerCounter++;
             }
 

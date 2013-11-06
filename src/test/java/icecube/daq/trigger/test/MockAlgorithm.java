@@ -36,6 +36,8 @@ public class MockAlgorithm
     private PayloadSubscriber sub;
     private Map<String, Object> trigMoniMap;
 
+    private boolean fetchAll = true;
+
     public MockAlgorithm(String name)
     {
         this.name = name;
@@ -113,6 +115,11 @@ public class MockAlgorithm
         throw new Error("Unimplemented");
     }
 
+    public int getNumberOfIntervals()
+    {
+        return intervals.size();
+    }
+
     public IPayload getReleaseTime()
     {
         throw new Error("Unimplemented");
@@ -177,6 +184,9 @@ public class MockAlgorithm
                                            iv.end);
                 released.add(req);
                 intervals.remove(i);
+                if (!fetchAll) {
+                    break;
+                }
             }
         }
     }
@@ -208,6 +218,11 @@ public class MockAlgorithm
     public void sendLast()
     {
         sentLast = true;
+    }
+
+    public void setFetchAll(boolean val)
+    {
+        fetchAll = val;
     }
 
     public void setRunException(TriggerException ex)

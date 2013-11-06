@@ -334,7 +334,7 @@ class CollectorThread
                     // cache the first batch of requests
                     addRequests(interval, requestCache);
                     oldInterval = interval;
-                } else if (interval.start >= oldInterval.end) {
+                } else if (interval.start > oldInterval.end) {
                     // send cached requests
                     sendRequests(oldInterval, requestCache);
 
@@ -343,16 +343,21 @@ class CollectorThread
                     addRequests(interval, requestCache);
                     oldInterval = interval;
                 } else {
-                    // Darn, lost the race and got an overlapping request
-                    if (interval.end <= oldInterval.end) {
+                    // Deal with overlapping request
+                    if (interval.end < oldInterval.start) {
                         LOG.error("New interval " + interval +
-                                  " appears to be a subset of old interval " +
-                                  oldInterval);
+                                  " precedes old interval " + oldInterval);
+                        oldInterval = null;
+                        stopping = true;
+                        break;
                     } else {
-                        LOG.error("Merging old interval " + oldInterval +
-                                  " and new interval " + interval);
                         addRequests(interval, requestCache);
-                        oldInterval.end = interval.end;
+                        if (interval.start < oldInterval.start) {
+                            oldInterval.start = interval.start;
+                        }
+                        if (interval.end > oldInterval.end) {
+                            oldInterval.end = interval.end;
+                        }
                     }
                 }
             }

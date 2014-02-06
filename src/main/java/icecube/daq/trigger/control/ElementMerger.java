@@ -293,7 +293,7 @@ public abstract class ElementMerger
     }
 
     /**
-     * Merge all ReadoutRequestElement ranges into one or two global elements
+     * Merge all ReadoutRequestElement ranges into non-overlapping elements
      * and add the new elements to the IReadoutRequest.
      *
      * @param rReq ReadoutRequest which holds the new elements

@@ -110,6 +110,8 @@ class CountData
     public static final long DAQ_SECOND = 10000000000L;
     public static final long DAQ_BIN_WIDTH = DAQ_SECOND * SECONDS_PER_BIN;
 
+    public static final long RATE_VERSION = 0;
+
     private long endTime;
     private int count;
 
@@ -127,10 +129,11 @@ class CountData
         values.put("trigid", Integer.valueOf(type));
         values.put("configid", Integer.valueOf(cfgId));
 
-        values.put("count", Integer.valueOf(count));
+        values.put("value", Integer.valueOf(count));
         values.put("recordingStartTime",
                    UTCTime.toDateString(endTime - DAQ_BIN_WIDTH + 1));
         values.put("recordingEndTime", UTCTime.toDateString(endTime));
+        values.put("version", RATE_VERSION);
 
         return values;
     }
@@ -225,6 +228,8 @@ class Bins
 public class MultiplicityDataManager
     implements IMonitoringDataManager
 {
+    public static final long MUTIPLICITY_VERSION = 0;
+
     /** Log object for this class */
     private static final Log LOG =
         LogFactory.getLog(MultiplicityDataManager.class);
@@ -238,6 +243,8 @@ public class MultiplicityDataManager
 
     private Calendar startTime;
     private int runNumber;
+    private long firstGoodTime;
+    private long lastGoodTime;
 
     private int nextRunNumber = NO_NUMBER;
 
@@ -253,38 +260,7 @@ public class MultiplicityDataManager
             throw new MultiplicityDataException(msg);
         }
 
-        if (!req.isMerged() && req.getTriggerConfigID() != -1) {
-            // this is a real request
-
-            HashKey key;
-            try {
-                key = new HashKey(req);
-            } catch (MultiplicityDataException mde) {
-                throw new MultiplicityDataException("Cannot build key for " +
-                                                    req, mde);
-            }
-
-            if (!map.containsKey(key)) {
-                // add new algorithm
-                map.put(key, new Bins(NUM_BINS));
-            }
-
-            List payloads;
-            try {
-                payloads = req.getPayloads();
-            } catch (Exception ex) {
-                final String msg = "Cannot get payloads for " + req;
-                throw new MultiplicityDataException(msg);
-            }
-
-            int bin;
-            if (payloads == null) {
-                bin = 0;
-            } else {
-                bin = payloads.size();
-            }
-            map.get(key).inc(req.getFirstTimeUTC(), req.getLastTimeUTC(), bin);
-        } else {
+        if (req.isMerged() || req.getTriggerConfigID() == -1) {
             // extract list of merged triggers
             List subList;
             try {
@@ -315,7 +291,58 @@ public class MultiplicityDataManager
 
                 add(sub);
             }
+            return;
         }
+
+        // this is a real request
+
+        if (firstGoodTime == 0) {
+            final String msg =
+                String.format("Saw request #%d before first good time" +
+                              " is set", req.getUID());
+            LOG.error(msg);
+            return;
+        }
+
+        final long reqFirst = req.getFirstTimeUTC().longValue();
+        final long reqLast = req.getLastTimeUTC().longValue();
+
+        if (reqFirst < firstGoodTime) {
+            // don't count requests starting before the first good time
+            return;
+        } else if (lastGoodTime > 0 && reqLast > lastGoodTime) {
+            // don't count requests ending after the last good time
+            return;
+        }
+
+        HashKey key;
+        try {
+            key = new HashKey(req);
+        } catch (MultiplicityDataException mde) {
+            throw new MultiplicityDataException("Cannot build key for " +
+                                                req, mde);
+        }
+
+        if (!map.containsKey(key)) {
+            // add new algorithm
+            map.put(key, new Bins(NUM_BINS));
+        }
+
+        List payloads;
+        try {
+            payloads = req.getPayloads();
+        } catch (Exception ex) {
+            final String msg = "Cannot get payloads for " + req;
+            throw new MultiplicityDataException(msg);
+        }
+
+        int bin;
+        if (payloads == null) {
+            bin = 0;
+        } else {
+            bin = payloads.size();
+        }
+        map.get(key).inc(req.getFirstTimeUTC(), req.getLastTimeUTC(), bin);
     }
 
     public List<Map> getCounts()
@@ -339,6 +366,9 @@ public class MultiplicityDataManager
                 if (values == null) {
                     break;
                 }
+                // add run number
+                values.put("runNumber", runNumber);
+
                 list.add(values);
             }
         }
@@ -392,6 +422,7 @@ public class MultiplicityDataManager
             values.put("timeOfLastEntry",
                        dateFormat.format(endTime.getTime()));
             values.put("runNumber", runNumber);
+            values.put("version", MULTIPLICITY_VERSION);
 
             try {
                 alerter.send("trigger_multiplicity", Alerter.Priority.SCP,
@@ -407,6 +438,26 @@ public class MultiplicityDataManager
     public void setAlerter(Alerter alerter)
     {
         this.alerter = alerter;
+    }
+
+    /**
+     * Set the first "good" time for the current run.
+     *
+     * @param firstTime first "good" time
+     */
+    public void setFirstGoodTime(long firstTime)
+    {
+        this.firstGoodTime = firstTime;
+    }
+
+    /**
+     * Set the last "good" time for the current run.
+     *
+     * @param lastTime last "good" time
+     */
+    public void setLastGoodTime(long lastTime)
+    {
+        this.lastGoodTime = lastTime;
     }
 
     public void setNextRunNumber(int runNum)

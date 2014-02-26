@@ -340,7 +340,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 14617 2013-09-20 20:48:42Z dglo $";
+        return "$Id: TriggerComponent.java 14864 2014-02-26 22:07:00Z dglo $";
     }
 
     /**
@@ -351,6 +351,16 @@ public class TriggerComponent
     public DAQComponentOutputProcess getWriter()
     {
         return outputEngine;
+    }
+
+    /**
+     * Set the first "good" time for the current run.
+     *
+     * @param firstTime first "good" time
+     */
+    public void setFirstGoodTime(long firstTime)
+    {
+        triggerManager.setFirstGoodTime(firstTime);
     }
 
     /**
@@ -366,6 +376,16 @@ public class TriggerComponent
             throw new Error("Configuration directory \"" + configDir +
                             "\" does not exist");
         }
+    }
+
+    /**
+     * Set the last "good" time for the current run.
+     *
+     * @param lastTime last "good" time
+     */
+    public void setLastGoodTime(long lastTime)
+    {
+        triggerManager.setLastGoodTime(lastTime);
     }
 
     /**

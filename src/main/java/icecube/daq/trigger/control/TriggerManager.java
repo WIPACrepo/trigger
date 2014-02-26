@@ -676,6 +676,26 @@ public class TriggerManager
     }
 
     /**
+     * Set the first "good" time for the current run.
+     *
+     * @param firstTime first "good" time
+     */
+    public void setFirstGoodTime(long firstTime)
+    {
+        multiDataMgr.setFirstGoodTime(firstTime);
+    }
+
+    /**
+     * Set the last "good" time for the current run.
+     *
+     * @param lastTime last "good" time
+     */
+    public void setLastGoodTime(long lastTime)
+    {
+        multiDataMgr.setLastGoodTime(lastTime);
+    }
+
+    /**
      * Set the output engine.
      *
      * @param outputEngine output engine

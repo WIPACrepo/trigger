@@ -228,7 +228,7 @@ class Bins
 public class MultiplicityDataManager
     implements IMonitoringDataManager
 {
-    public static final long MUTIPLICITY_VERSION = 0;
+    public static final long MULTIPLICITY_VERSION = 0;
 
     /** Log object for this class */
     private static final Log LOG =

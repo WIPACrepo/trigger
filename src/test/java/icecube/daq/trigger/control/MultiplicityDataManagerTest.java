@@ -164,12 +164,14 @@ public class MultiplicityDataManagerTest
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
+        mgr.setFirstGoodTime(1);
 
         mgr.start(123);
 
         mgr.add(new MockTriggerRequest(1, 2, 3, 4, 5));
 
         List<Map> histo = mgr.getCounts();
+        assertNotNull("Histogram should not be null", histo);
         assertEquals("Unexpected histogram list " + histo, 0, histo.size());
     }
 
@@ -181,6 +183,7 @@ public class MultiplicityDataManagerTest
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
+        mgr.setFirstGoodTime(1);
 
         mgr.start(123);
 
@@ -210,6 +213,7 @@ public class MultiplicityDataManagerTest
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
+        mgr.setFirstGoodTime(1);
 
         mgr.start(123);
 
@@ -248,6 +252,7 @@ public class MultiplicityDataManagerTest
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
+        mgr.setFirstGoodTime(1);
 
         mgr.start(123);
 
@@ -265,13 +270,14 @@ public class MultiplicityDataManagerTest
                                        nextBin + 4, nextBin + 5));
 
         List<Map> histo = mgr.getCounts();
+        assertNotNull("Histogram should not be null", histo);
         assertEquals("Unexpected histogram list " + histo, 1, histo.size());
 
         Map<String, Object> map = histo.get(0);
         assertEquals("Bad type", type, map.get("trigid"));
         assertEquals("Bad config ID", cfgId, map.get("configid"));
         assertEquals("Bad source ID", GLOBAL_ID, map.get("sourceid"));
-        assertEquals("Bad count", 1, map.get("count"));
+        assertEquals("Bad count", 1, map.get("value"));
     }
 
     @Test
@@ -383,8 +389,9 @@ public class MultiplicityDataManagerTest
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
-        mgr.start(123);
+        mgr.setFirstGoodTime(1);
 
+        mgr.start(123);
 
         final int type = 2;
         final int cfgId = 3;

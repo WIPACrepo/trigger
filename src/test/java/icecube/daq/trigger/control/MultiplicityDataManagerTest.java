@@ -94,6 +94,12 @@ class MockAlerter
         throw new Error("Unimplemented");
     }
 
+    public void sendObject(Object obj)
+        throws AlertException
+    {
+        throw new Error("Unimplemented");
+    }
+
     public void setAddress(String host, int port)
         throws AlertException
     {

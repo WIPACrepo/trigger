@@ -19,6 +19,8 @@ import org.apache.commons.logging.LogFactory;
 
 public class SNDAQAlerter
 {
+    public static final String PROPERTY = "icecube.sndaq.zmq.address";
+
     private static final Log LOG = LogFactory.getLog(SNDAQAlerter.class);
 
     private ZMQAlerter zmq;
@@ -29,9 +31,35 @@ public class SNDAQAlerter
 
     private AlertThread thread;
 
-    public SNDAQAlerter(String host, int port)
+    public SNDAQAlerter()
         throws AlertException
     {
+        String address = System.getProperty(PROPERTY, null);
+        if (address == null) {
+            throw new AlertException("No " + PROPERTY + " property");
+        }
+
+        final int ic = address.indexOf(':');
+        if (ic < 0) {
+            throw new AlertException("Bad SNDAQ address \"" + address + "\"");
+        }
+
+        String host;
+        if (ic == 0) {
+            host = "localhost";
+        } else {
+            host = address.substring(0, ic);
+        }
+
+        int port;
+        String pstr = address.substring(ic + 1);
+        try {
+            port = Integer.parseInt(pstr);
+        } catch (NumberFormatException nfe) {
+            throw new AlertException("Bad port in SNDAQ address \"" + address +
+                                     "\"");
+        }
+
         zmq = new ZMQAlerter();
         zmq.setAddress(host, port);
     }
@@ -86,13 +114,16 @@ public class SNDAQAlerter
             smt8init = true;
         }
 
-        thread = new AlertThread();
+        if (smt8init) {
+            thread = new AlertThread();
+            thread.start();
+        }
     }
 
     public void process(ITriggerRequestPayload req)
         throws AlertException
     {
-        if (req.getTriggerConfigID() != smt8cfgId ||
+        if (!smt8init || req.getTriggerConfigID() != smt8cfgId ||
             req.getTriggerType() != smt8type)
         {
             return;
@@ -131,9 +162,16 @@ public class SNDAQAlerter
     class AlertThread
         implements Runnable
     {
+        private Thread thread;
         private Deque queue = new ArrayDeque();
         private boolean stopping;
         private boolean stopped;
+
+        AlertThread()
+        {
+            thread = new Thread(this);
+            thread.setName("AlertThread");
+        }
 
         public void queue(Object obj)
         {

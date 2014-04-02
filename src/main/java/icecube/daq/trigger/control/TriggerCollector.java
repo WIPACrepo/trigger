@@ -211,7 +211,10 @@ class CollectorThread
 
         this.outThrd = outThrd;
 
-        initializeSNDAQAlerter(algorithms);
+        // in-ice trigger should try to send SMT8 alerts to SNDAQ
+        if (srcId / 1000 == SourceIdRegistry.INICE_TRIGGER_SOURCE_ID / 1000) {
+            initializeSNDAQAlerter(algorithms);
+        }
     }
 
     /**
@@ -255,45 +258,12 @@ class CollectorThread
 
     private void initializeSNDAQAlerter(List<INewAlgorithm> algorithms)
     {
-        final String sndaqProperty = "icecube.sndaq.zmq.address";
-
-        String address = System.getProperty(sndaqProperty,
-                                            null);
-        if (address == null) {
-            LOG.error("No " + sndaqProperty +
-                      " property; no SNDAQ alerts will be sent");
-            return;
-        }
-
-        final int ic = address.indexOf(':');
-        if (ic < 0) {
-            LOG.error("Bad SNDAQ address \"" + address +
-                      "\"; no SNDAQ alerts will be sent");
-            return;
-        }
-
-        String host;
-        if (ic == 0) {
-            host = "localhost";
-        } else {
-            host = address.substring(0, ic);
-        }
-
-        int port;
-        String pstr = address.substring(ic + 1);
         try {
-            port = Integer.parseInt(pstr);
-        } catch (NumberFormatException nfe) {
-            LOG.error("Bad port in SNDAQ address \"" + address +
-                      "\"; no SNDAQ alerts will be sent");
-            return;
-        }
-
-        try {
-            alerter = new SNDAQAlerter(host, port);
+            alerter = new SNDAQAlerter();
         } catch (AlertException ae) {
             LOG.error("Cannot create SNDAQ alerter;" +
                       " no SNDAQ alerts will be sent", ae);
+            alerter = null;
             return;
         }
 
@@ -302,10 +272,9 @@ class CollectorThread
 
     private void notifySNDAQ(List<ITriggerRequestPayload> list)
     {
-        if (alerter == null) {
-            throw new Error("Alerter has not been set");
-        } else if (!alerter.isActive()) {
-            throw new Error("Alerter " + alerter + " is not active");
+        if (!alerter.isActive()) {
+            LOG.error("Alerter " + alerter + " is not active");
+            return;
         }
 
         for (ITriggerRequestPayload req : list) {
@@ -440,7 +409,9 @@ class CollectorThread
 
         outThrd.stop();
 
-        alerter.close();
+        if (alerter != null) {
+            alerter.close();
+        }
 
         // recycle all unused requests still held by the algorithms.
         for (INewAlgorithm a : algorithms) {
@@ -451,6 +422,11 @@ class CollectorThread
     public void sendRequests(Interval interval,
                              List<ITriggerRequestPayload> list)
     {
+        // if there's an active SNDAQ alerter, hand off the list of requests
+        if (alerter != null) {
+            notifySNDAQ(list);
+        }
+
         if (list.size() == 0) {
             LOG.error("No requests found for interval " + interval);
         } else if (list.size() == 1) {
@@ -474,11 +450,6 @@ class CollectorThread
                 new TriggerRequest(mergedUID, -1, -1, srcId, interval.start,
                                    interval.end, rReq, hack);
             pushTrigger(mergedReq);
-        }
-
-        // if there's an active SNDAQ alerter, hand off the list of requests
-        if (alerter != null) {
-            notifySNDAQ(list);
         }
     }
 

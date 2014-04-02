@@ -2,6 +2,7 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.OutputChannel;
+import icecube.daq.juggler.alert.AlertException;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ISourceID;
@@ -181,6 +182,9 @@ class CollectorThread
     /** Multiplicity data manager */
     private IMonitoringDataManager moniDataMgr;
 
+    /** SNDAQ alerter */
+    private SNDAQAlerter alerter;
+
     private int mergedUID;
     private boolean switchMerged;
 
@@ -206,6 +210,8 @@ class CollectorThread
         this.moniDataMgr = moniDataMgr;
 
         this.outThrd = outThrd;
+
+        initializeSNDAQAlerter(algorithms);
     }
 
     /**
@@ -245,6 +251,70 @@ class CollectorThread
         }
 
         return interval;
+    }
+
+    private void initializeSNDAQAlerter(List<INewAlgorithm> algorithms)
+    {
+        final String sndaqProperty = "icecube.sndaq.zmq.address";
+
+        String address = System.getProperty(sndaqProperty,
+                                            null);
+        if (address == null) {
+            LOG.error("No " + sndaqProperty +
+                      " property; no SNDAQ alerts will be sent");
+            return;
+        }
+
+        final int ic = address.indexOf(':');
+        if (ic < 0) {
+            LOG.error("Bad SNDAQ address \"" + address +
+                      "\"; no SNDAQ alerts will be sent");
+            return;
+        }
+
+        String host;
+        if (ic == 0) {
+            host = "localhost";
+        } else {
+            host = address.substring(0, ic);
+        }
+
+        int port;
+        String pstr = address.substring(ic + 1);
+        try {
+            port = Integer.parseInt(pstr);
+        } catch (NumberFormatException nfe) {
+            LOG.error("Bad port in SNDAQ address \"" + address +
+                      "\"; no SNDAQ alerts will be sent");
+            return;
+        }
+
+        try {
+            alerter = new SNDAQAlerter(host, port);
+        } catch (AlertException ae) {
+            LOG.error("Cannot create SNDAQ alerter;" +
+                      " no SNDAQ alerts will be sent", ae);
+            return;
+        }
+
+        alerter.loadAlgorithms(algorithms);
+    }
+
+    private void notifySNDAQ(List<ITriggerRequestPayload> list)
+    {
+        if (alerter == null) {
+            throw new Error("Alerter has not been set");
+        } else if (!alerter.isActive()) {
+            throw new Error("Alerter " + alerter + " is not active");
+        }
+
+        for (ITriggerRequestPayload req : list) {
+            try {
+                alerter.process(req);
+            } catch (AlertException ae) {
+                LOG.error("SNDAQ alerter cannot process " + req, ae);
+            }
+        }
     }
 
     public void pushTrigger(ITriggerRequestPayload req)
@@ -370,6 +440,8 @@ class CollectorThread
 
         outThrd.stop();
 
+        alerter.close();
+
         // recycle all unused requests still held by the algorithms.
         for (INewAlgorithm a : algorithms) {
             a.recycleUnusedRequests();
@@ -402,6 +474,11 @@ class CollectorThread
                 new TriggerRequest(mergedUID, -1, -1, srcId, interval.start,
                                    interval.end, rReq, hack);
             pushTrigger(mergedReq);
+        }
+
+        // if there's an active SNDAQ alerter, hand off the list of requests
+        if (alerter != null) {
+            notifySNDAQ(list);
         }
     }
 

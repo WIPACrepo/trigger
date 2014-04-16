@@ -11,6 +11,7 @@ import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.trigger.config.DomSetFactory;
+import icecube.daq.trigger.control.SNDAQAlerter;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.util.DOMRegistry;
@@ -69,6 +70,9 @@ public class InIceTriggerEndToEndTest
 
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
+
+        // initialize SNDAQ ZMQ address to nonsense
+        System.getProperties().setProperty(SNDAQAlerter.PROPERTY, ":12345");
     }
 
     public static Test suite()
@@ -79,6 +83,9 @@ public class InIceTriggerEndToEndTest
     protected void tearDown()
         throws Exception
     {
+        // remove SNDAQ ZMQ address
+        System.clearProperty(SNDAQAlerter.PROPERTY);
+
         assertEquals("Bad number of log messages",
                      0, appender.getNumberOfMessages());
 

@@ -197,12 +197,18 @@ public class CollectorThreadTest
 
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
+
+        // initialize SNDAQ ZMQ address to nonsense
+        System.getProperties().setProperty(SNDAQAlerter.PROPERTY, ":12345");
     }
 
     @After
     public void tearDown()
         throws Exception
     {
+        // remove SNDAQ ZMQ address
+        System.clearProperty(SNDAQAlerter.PROPERTY);
+
         assertEquals("Bad number of log messages",
                      0, appender.getNumberOfMessages());
 

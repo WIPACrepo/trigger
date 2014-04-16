@@ -69,7 +69,9 @@ public class SNDAQAlerter
      */
     public void close()
     {
-        thread.stop();
+        if (thread != null) {
+            thread.stop();
+        }
     }
 
     /**

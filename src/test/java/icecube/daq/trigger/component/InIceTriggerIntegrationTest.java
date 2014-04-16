@@ -4,6 +4,7 @@ import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.trigger.algorithm.AbstractTrigger;
+import icecube.daq.trigger.control.SNDAQAlerter;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.ActivityMonitor;
@@ -141,6 +142,9 @@ public class InIceTriggerIntegrationTest
 
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
+
+        // initialize SNDAQ ZMQ address to nonsense
+        System.getProperties().setProperty(SNDAQAlerter.PROPERTY, ":12345");
     }
 
     public static Test suite()
@@ -151,14 +155,17 @@ public class InIceTriggerIntegrationTest
     protected void tearDown()
         throws Exception
     {
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        // remove SNDAQ ZMQ address
+        System.clearProperty(SNDAQAlerter.PROPERTY);
 
         if (comp != null) comp.closeAll();
 
         if (tails != null) {
             DAQTestUtil.closePipeList(tails);
         }
+
+        assertEquals("Bad number of log messages",
+                     0, appender.getNumberOfMessages());
 
         super.tearDown();
     }

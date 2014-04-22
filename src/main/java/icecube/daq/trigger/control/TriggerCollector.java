@@ -8,6 +8,7 @@ import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IWriteablePayload;
+import icecube.daq.payload.PayloadFormatException;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.ReadoutRequest;
 import icecube.daq.payload.impl.TriggerRequest;
@@ -24,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
-import java.util.zip.DataFormatException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -604,8 +604,8 @@ class OutputThread
         List payList;
         try {
             payList = req.getPayloads();
-        } catch (DataFormatException dfe) {
-            LOG.error("Cannot get list of payloads from " + req, dfe);
+        } catch (PayloadFormatException pfe) {
+            LOG.error("Cannot get list of payloads from " + req, pfe);
             return false;
         }
 
@@ -623,9 +623,9 @@ class OutputThread
             List subList;
             try {
                 subList = tr.getPayloads();
-            } catch (DataFormatException dfe) {
+            } catch (PayloadFormatException pfe) {
                 LOG.error("Cannot get list of subpayloads from " + tr,
-                          dfe);
+                          pfe);
                 fixed = false;
                 continue;
             }

@@ -4,6 +4,7 @@ import icecube.daq.juggler.alert.AlertException;
 import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadFormatException;
 import icecube.daq.payload.impl.UTCTime;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 
@@ -15,7 +16,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.DataFormatException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -265,8 +265,8 @@ public class MultiplicityDataManager
             List subList;
             try {
                 subList = req.getPayloads();
-            } catch (DataFormatException dfe) {
-                LOG.error("Cannot fetch triggers from " + req, dfe);
+            } catch (PayloadFormatException pfe) {
+                LOG.error("Cannot fetch triggers from " + req, pfe);
                 return;
             }
 
@@ -284,8 +284,8 @@ public class MultiplicityDataManager
                 } catch (IOException ioe) {
                     LOG.error("Cannot load subtrigger " + sub, ioe);
                     continue;
-                } catch (DataFormatException dfe) {
-                    LOG.error("Cannot load subtrigger " + sub, dfe);
+                } catch (PayloadFormatException pfe) {
+                    LOG.error("Cannot load subtrigger " + sub, pfe);
                     continue;
                 }
 

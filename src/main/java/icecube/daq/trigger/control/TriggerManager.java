@@ -9,6 +9,7 @@ import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadFormatException;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.TriggerRequestFactory;
@@ -33,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.zip.DataFormatException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -536,7 +536,7 @@ public class TriggerManager
             } catch (IOException e) {
                 LOG.error("Couldn't load payload", e);
                 return false;
-            } catch (DataFormatException e) {
+            } catch (PayloadFormatException e) {
                 LOG.error("Couldn't load payload", e);
                 return false;
             }
@@ -579,8 +579,8 @@ public class TriggerManager
             } catch (IOException ioe) {
                 LOG.error("Cannot load new payload " + payload, ioe);
                 return;
-            } catch (DataFormatException dfe) {
-                LOG.error("Cannot load new payload " + payload, dfe);
+            } catch (PayloadFormatException pfe) {
+                LOG.error("Cannot load new payload " + payload, pfe);
                 return;
             }
 
@@ -590,8 +590,8 @@ public class TriggerManager
                 List subList;
                 try {
                     subList = req.getPayloads();
-                } catch (DataFormatException dfe) {
-                    LOG.error("Cannot fetch triggers from " + req, dfe);
+                } catch (PayloadFormatException pfe) {
+                    LOG.error("Cannot fetch triggers from " + req, pfe);
                     return;
                 }
 
@@ -609,8 +609,8 @@ public class TriggerManager
                     } catch (IOException ioe) {
                         LOG.error("Cannot load subtrigger " + sub, ioe);
                         continue;
-                    } catch (DataFormatException dfe) {
-                        LOG.error("Cannot load subtrigger " + sub, dfe);
+                    } catch (PayloadFormatException pfe) {
+                        LOG.error("Cannot load subtrigger " + sub, pfe);
                         continue;
                     }
 

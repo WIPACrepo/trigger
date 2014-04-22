@@ -1,7 +1,6 @@
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.oldpayload.impl.MasterPayloadFactory;
-import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
+import icecube.daq.payload.impl.PayloadFactory;
 import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.payload.PayloadRegistry;
@@ -68,16 +67,6 @@ public class CylinderTriggerTest
         appender.clear();
     }
 
-    private static TriggerRequestPayloadFactory
-        getTriggerRequestFactory(MasterPayloadFactory factory)
-    {
-        final int payloadId =
-            PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST;
-
-        return (TriggerRequestPayloadFactory)
-            factory.getPayloadFactory(payloadId);
-    }
-
     protected void setUp()
         throws Exception
     {
@@ -118,7 +107,7 @@ public class CylinderTriggerTest
         // set up in-ice trigger
         VitreousBufferCache cache = new VitreousBufferCache("IITrig");
 
-        MasterPayloadFactory factory = new MasterPayloadFactory(cache);
+        PayloadFactory factory = new PayloadFactory(cache);
 
         TriggerManager trigMgr =
             new TriggerManager(srcId, cache);

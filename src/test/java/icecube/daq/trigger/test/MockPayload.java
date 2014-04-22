@@ -6,16 +6,16 @@ import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayloadDestination;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
+import icecube.daq.payload.PayloadFormatException;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.zip.DataFormatException;
 
 public abstract class MockPayload
     implements Comparable, ILoadablePayload, IWriteablePayload
 {
     private long time;
-    private DataFormatException loadDFException;
+    private PayloadFormatException loadPFException;
     private IOException loadIOException;
 
     private IUTCTime timeObj;
@@ -99,10 +99,10 @@ public abstract class MockPayload
     }
 
     public void loadPayload()
-        throws IOException, DataFormatException
+        throws IOException, PayloadFormatException
     {
-        if (loadDFException != null) {
-            throw loadDFException;
+        if (loadPFException != null) {
+            throw loadPFException;
         } else if (loadIOException != null) {
             throw loadIOException;
         }
@@ -122,8 +122,8 @@ public abstract class MockPayload
 
     public void setLoadPayloadException(Exception ex)
     {
-        if (ex instanceof DataFormatException) {
-            loadDFException = (DataFormatException) ex;
+        if (ex instanceof PayloadFormatException) {
+            loadPFException = (PayloadFormatException) ex;
         } else if (ex instanceof IOException) {
             loadIOException = (IOException) ex;
         } else {

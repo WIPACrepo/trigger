@@ -3,6 +3,7 @@ package icecube.daq.trigger.control;
 import icecube.daq.juggler.alert.AlertException;
 import icecube.daq.juggler.alert.ZMQAlerter;
 import icecube.daq.payload.ITriggerRequestPayload;
+import icecube.daq.payload.PayloadFormatException;
 import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.algorithm.SimpleMajorityTrigger;
 
@@ -12,7 +13,6 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.DataFormatException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -134,8 +134,8 @@ public class SNDAQAlerter
         int numHits;
         try {
             numHits = req.getPayloads().size();
-        } catch (DataFormatException dfe) {
-            LOG.error("Cannot get number of SMT8 hits", dfe);
+        } catch (PayloadFormatException pfe) {
+            LOG.error("Cannot get number of SMT8 hits", pfe);
             return;
         }
 

@@ -2,6 +2,7 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.juggler.alert.AlertException;
 import icecube.daq.juggler.alert.Alerter;
+import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 import icecube.daq.trigger.test.MockAppender;
@@ -65,6 +66,13 @@ class MockAlerter
         throw new Error("Unimplemented");
     }
 
+    public void send(String varname, Priority prio, IUTCTime utcTime,
+                     Map<String, Object> values)
+        throws AlertException
+    {
+        throw new Error("Unimplemented");
+    }
+
     public void send(String varname, Priority prio, Map<String, Object> values)
         throws AlertException
     {
@@ -88,6 +96,13 @@ class MockAlerter
     }
 
     public void sendAlert(Calendar dateTime, Priority prio, String condition,
+                          String notify, Map<String, Object> vars)
+        throws AlertException
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public void sendAlert(IUTCTime utcTime, Priority prio, String condition,
                           String notify, Map<String, Object> vars)
         throws AlertException
     {

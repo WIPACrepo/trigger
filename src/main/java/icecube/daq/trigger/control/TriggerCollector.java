@@ -137,18 +137,23 @@ public class TriggerCollector
         collThrd.setChanged();
     }
 
+    public void setRunNumber(int runNumber)
+    {
+        collThrd.setRunNumber(runNumber);
+    }
+
     /**
      * Start collector and output threads.
      *
      * @param splicer object to which requests are sent
      */
-    public void startThreads(Splicer splicer)
+    public void startThreads(Splicer splicer, int runNum)
     {
         if (splicer == null) {
             LOG.error("Splicer cannot be null");
         }
 
-        collThrd.start(splicer);
+        collThrd.start(splicer, runNum);
     }
 
     /**
@@ -166,7 +171,9 @@ interface ICollectorThread
 
     void setChanged();
 
-    void start(Splicer splicer);
+    void setRunNumber(int runNumber);
+
+    void start(Splicer splicer, int runNumber);
 
     void stop();
 }
@@ -196,6 +203,8 @@ class CollectorThread
     private IOutputThread outThrd;
 
     private boolean stopping;
+
+    private int runNumber = Integer.MIN_VALUE;
 
     public CollectorThread(String name, int srcId,
                            List<INewAlgorithm> algorithms,
@@ -340,6 +349,17 @@ class CollectorThread
         List<ITriggerRequestPayload> requestCache =
             new ArrayList<ITriggerRequestPayload>();
 
+        // let SNDAQ know a run is starting
+        if (runNumber == Integer.MIN_VALUE) {
+            LOG.error("Run number has not been set for CollectorThread.run()");
+        } else if (alerter != null) {
+            if (!alerter.isActive()) {
+                LOG.error("Alerter " + alerter + " is not active");
+            } else {
+                alerter.sendAction("start", runNumber);
+            }
+        }
+
         while (!stopping) {
             synchronized (threadLock) {
                 if (!changed) {
@@ -410,6 +430,10 @@ class CollectorThread
         outThrd.stop();
 
         if (alerter != null) {
+            if (runNumber != Integer.MIN_VALUE) {
+                alerter.sendAction("stop", runNumber);
+            }
+
             alerter.close();
         }
 
@@ -464,8 +488,15 @@ class CollectorThread
         }
     }
 
-    public void start(Splicer splicer)
+    public void setRunNumber(int runNumber)
     {
+        this.runNumber = runNumber;
+    }
+
+    public void start(Splicer splicer, int runNumber)
+    {
+        setRunNumber(runNumber);
+
         thread.start();
 
         outThrd.start(splicer);

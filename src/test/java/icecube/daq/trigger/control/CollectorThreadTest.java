@@ -832,6 +832,7 @@ public class CollectorThreadTest
 
         CollectorThread ct =
             new CollectorThread(name, INICE_ID, algorithms, mgr, outThrd);
+        ct.setRunNumber(1234);
 
         fooAlgo.setSawFlush();
 

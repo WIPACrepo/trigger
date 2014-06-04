@@ -68,7 +68,12 @@ class MockCollectorThread
         changed = true;
     }
 
-    public void start(Splicer splicer)
+    public void setRunNumber(int runNumber)
+    {
+        // do nothing
+    }
+
+    public void start(Splicer splicer, int runNumber)
     {
         started = true;
     }
@@ -240,7 +245,7 @@ public class TriggerCollectorTest
         MyCollector tc =
             new MyCollector(INICE_ID, algorithms, out, bufCache, null);
 
-        tc.startThreads(null);
+        tc.startThreads(null, 0);
 
         assertEquals("Bad number of log messages",
                      1, appender.getNumberOfMessages());
@@ -279,7 +284,7 @@ public class TriggerCollectorTest
 
         MockSplicer spl = new MockSplicer();
         assertFalse("Collector thread should not be started", tc.wasStarted());
-        tc.startThreads(spl);
+        tc.startThreads(spl, 0);
         assertTrue("Collector thread was not started", tc.wasStarted());
 
         assertFalse("Collector thread should not be stopped", tc.wasStopped());

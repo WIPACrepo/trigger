@@ -166,6 +166,9 @@ public class TriggerManager
      */
     private IUTCTime timeOfLastHit;
 
+    /** Current run number */
+    private int runNumber;
+
     /**
      * Create a trigger manager.
      *
@@ -712,7 +715,13 @@ public class TriggerManager
      */
     public void setRunNumber(int runNum)
     {
+        this.runNumber = runNum;
+
         multiDataMgr.start(runNum);
+
+        if (collector != null) {
+            collector.setRunNumber(runNum);
+        }
     }
 
     /**
@@ -745,7 +754,7 @@ public class TriggerManager
         if (collector == null || collector.isStopped()) {
             collector = new TriggerCollector(srcId, algorithms, outputEngine,
                                              outCache, multiDataMgr);
-            collector.startThreads(splicer);
+            collector.startThreads(splicer, runNumber);
         }
 
         subscribeAlgorithms();

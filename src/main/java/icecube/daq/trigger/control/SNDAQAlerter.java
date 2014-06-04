@@ -7,12 +7,15 @@ import icecube.daq.payload.PayloadFormatException;
 import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.algorithm.SimpleMajorityTrigger;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.Calendar;
 import java.util.Deque;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,6 +25,9 @@ public class SNDAQAlerter
     public static final String PROPERTY = "icecube.sndaq.zmq.address";
 
     private static final Log LOG = LogFactory.getLog(SNDAQAlerter.class);
+
+    /** Time formatter */
+    private static SimpleDateFormat format;
 
     private ZMQAlerter zmq;
 
@@ -159,6 +165,26 @@ public class SNDAQAlerter
         throws AlertException
     {
         zmq.setAddress(host, port);
+    }
+
+    public void sendAction(String action, int runNumber)
+    {
+        if (!smt8init) {
+            return;
+        }
+
+        if (format == null) {
+            format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            format.setTimeZone(TimeZone.getTimeZone("Zulu"));
+        }
+
+        GregorianCalendar cal = new GregorianCalendar();
+
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put(action, runNumber);
+        map.put("t", format.format(cal.getTime()) + ".0000000000");
+
+        thread.queue(map);
     }
 
     class AlertThread

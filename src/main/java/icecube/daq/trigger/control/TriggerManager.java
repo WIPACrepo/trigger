@@ -754,7 +754,12 @@ public class TriggerManager
         if (collector == null || collector.isStopped()) {
             collector = new TriggerCollector(srcId, algorithms, outputEngine,
                                              outCache, multiDataMgr);
-            collector.startThreads(splicer, runNumber);
+
+            if (runNumber != Integer.MIN_VALUE) {
+                collector.setRunNumber(runNumber);
+            }
+
+            collector.startThreads(splicer);
         }
 
         subscribeAlgorithms();
@@ -822,7 +827,7 @@ public class TriggerManager
      * @param alerter unused
      * @param runNumber new run number
      */
-    public void switchToNewRun(Alerter alerter, int runNumber)
+    public void switchToNewRun(int runNumber)
     {
         if (srcId == SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID) {
             try {
@@ -831,6 +836,12 @@ public class TriggerManager
                 LOG.error("Cannot set next run number", mde);
             }
             resetUIDs();
+        }
+
+        if (collector == null) {
+            LOG.error("Collector has not been created before run switch");
+        } else {
+            collector.setRunNumber(runNumber);
         }
     }
 

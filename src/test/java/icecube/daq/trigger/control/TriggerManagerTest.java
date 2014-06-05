@@ -550,7 +550,15 @@ public class TriggerManagerTest
         TriggerManager mgr = new TriggerManager(src, bufCache);
         mgr.setRunNumber(123);
 
-        mgr.switchToNewRun(null, 456);
+        mgr.switchToNewRun(456);
+
+        assertEquals("Bad number of log messages",
+                     1, appender.getNumberOfMessages());
+
+        final String msg = "Collector has not been created before run switch";
+        assertEquals("Bad log message", msg, appender.getMessage(0));
+
+        appender.clear();
     }
 
     @Test
@@ -572,7 +580,7 @@ public class TriggerManagerTest
                                                           new ArrayList());
         mgr.starting(evt);
 
-        mgr.switchToNewRun(null, 456);
+        mgr.switchToNewRun(456);
     }
 
     @Test
@@ -594,12 +602,12 @@ public class TriggerManagerTest
                                                           new ArrayList());
         mgr.starting(evt);
 
-        mgr.switchToNewRun(null, 456);
+        mgr.switchToNewRun(456);
 
         assertEquals("Bad number of log messages",
                      0, appender.getNumberOfMessages());
 
-        mgr.switchToNewRun(null, 789);
+        mgr.switchToNewRun(789);
 
         assertEquals("Bad number of log messages",
                      1, appender.getNumberOfMessages());

@@ -7,7 +7,6 @@ import icecube.daq.payload.PayloadFormatException;
 import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.algorithm.SimpleMajorityTrigger;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.Calendar;
 import java.util.Deque;
@@ -15,7 +14,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,9 +24,6 @@ public class SNDAQAlerter
 
     private static final Log LOG = LogFactory.getLog(SNDAQAlerter.class);
 
-    /** Time formatter */
-    private static SimpleDateFormat format;
-
     private ZMQAlerter zmq;
 
     private int smt8cfgId;
@@ -36,6 +31,8 @@ public class SNDAQAlerter
     private boolean smt8init;
 
     private AlertThread thread;
+
+    private int runNumber = Integer.MIN_VALUE;
 
     public SNDAQAlerter()
         throws AlertException
@@ -128,8 +125,12 @@ public class SNDAQAlerter
         }
     }
 
+    /**
+     * Process a single trigger request
+     *
+     * @param req trigger request
+     */
     public void process(ITriggerRequestPayload req)
-        throws AlertException
     {
         if (!smt8init || req.getTriggerConfigID() != smt8cfgId ||
             req.getTriggerType() != smt8type)
@@ -167,31 +168,30 @@ public class SNDAQAlerter
         zmq.setAddress(host, port);
     }
 
-    public void sendAction(String action, int runNumber)
+    /**
+     * Set the current run number
+     *
+     * @param runNumber run number
+     */
+    public void setRunNumber(int num)
     {
-        if (!smt8init) {
-            return;
-        }
-
-        if (format == null) {
-            format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            format.setTimeZone(TimeZone.getTimeZone("Zulu"));
-        }
-
-        GregorianCalendar cal = new GregorianCalendar();
-
-        HashMap<String, Object> map = new HashMap<String, Object>();
-        map.put(action, runNumber);
-        map.put("t", format.format(cal.getTime()) + ".0000000000");
-
-        thread.queue(map);
+        runNumber = num;
     }
 
+    /**
+     * Thread which sends alerts to SNDAQ
+     */
     class AlertThread
         implements Runnable
     {
         private Thread thread;
-        private Deque queue = new ArrayDeque();
+        private Deque<HashMap<String, Object>> queue =
+            new ArrayDeque<HashMap<String, Object>>();
+
+        private Object lastTime;
+
+        private boolean sentStart;
+
         private boolean stopping;
         private boolean stopped;
 
@@ -201,10 +201,10 @@ public class SNDAQAlerter
             thread.setName("AlertThread");
         }
 
-        public void queue(Object obj)
+        public void queue(HashMap<String, Object> map)
         {
             synchronized (queue) {
-                queue.addLast(obj);
+                queue.addLast(map);
                 queue.notify();
             }
         }
@@ -212,7 +212,7 @@ public class SNDAQAlerter
         public void run()
         {
             while (!stopping || queue.size() > 0) {
-                Object obj;
+                HashMap<String, Object> map;
                 synchronized (queue) {
                     if (queue.size() == 0) {
                         try {
@@ -224,28 +224,54 @@ public class SNDAQAlerter
                     }
 
                     if (queue.size() == 0) {
-                        obj = null;
+                        map = null;
                     } else {
-                        obj = queue.removeFirst();
+                        map = queue.removeFirst();
                     }
                 }
 
-                if (obj == null) {
+                if (map == null) {
                     continue;
                 }
 
+                if (map.containsKey("t")) {
+                    lastTime = map.get("t");
+                } else {
+                    LOG.error("SNDAQ message does not contain 't' field");
+                }
+
+                if (!sentStart) {
+                    sendAction("start", lastTime, runNumber);
+                    sentStart = true;
+                }
+
                 try {
-                    zmq.sendObject(obj);
+                    zmq.sendObject(map);
                 } catch (AlertException ae) {
-                    LOG.error("Cannot send " + obj, ae);
+                    LOG.error("Cannot send " + map, ae);
                 }
             }
+
+            sendAction("stop", lastTime, runNumber);
 
             if (zmq.isActive()) {
                 zmq.close();
             }
 
             stopped = true;
+        }
+
+        public void sendAction(String action, Object time, int runNumber)
+        {
+            HashMap<String, Object> map = new HashMap<String, Object>();
+            map.put(action, runNumber);
+            map.put("t", time);
+
+            try {
+                zmq.sendObject(map);
+            } catch (AlertException ae) {
+                LOG.error("Cannot send " + map, ae);
+            }
         }
 
         public void start()

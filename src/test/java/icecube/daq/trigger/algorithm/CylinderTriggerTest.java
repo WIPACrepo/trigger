@@ -142,6 +142,7 @@ public class CylinderTriggerTest
 
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
         trigMgr.setSplicer(splicer);
+        trigMgr.setRunNumber(1);
 
         ComponentObserver observer = new ComponentObserver();
 

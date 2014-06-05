@@ -147,13 +147,13 @@ public class TriggerCollector
      *
      * @param splicer object to which requests are sent
      */
-    public void startThreads(Splicer splicer, int runNum)
+    public void startThreads(Splicer splicer)
     {
         if (splicer == null) {
             LOG.error("Splicer cannot be null");
         }
 
-        collThrd.start(splicer, runNum);
+        collThrd.start(splicer);
     }
 
     /**
@@ -173,7 +173,7 @@ interface ICollectorThread
 
     void setRunNumber(int runNumber);
 
-    void start(Splicer splicer, int runNumber);
+    void start(Splicer splicer);
 
     void stop();
 }
@@ -287,11 +287,7 @@ class CollectorThread
         }
 
         for (ITriggerRequestPayload req : list) {
-            try {
-                alerter.process(req);
-            } catch (AlertException ae) {
-                LOG.error("SNDAQ alerter cannot process " + req, ae);
-            }
+            alerter.process(req);
         }
     }
 
@@ -356,7 +352,7 @@ class CollectorThread
             if (!alerter.isActive()) {
                 LOG.error("Alerter " + alerter + " is not active");
             } else {
-                alerter.sendAction("start", runNumber);
+                alerter.setRunNumber(runNumber);
             }
         }
 
@@ -430,10 +426,6 @@ class CollectorThread
         outThrd.stop();
 
         if (alerter != null) {
-            if (runNumber != Integer.MIN_VALUE) {
-                alerter.sendAction("stop", runNumber);
-            }
-
             alerter.close();
         }
 
@@ -493,10 +485,8 @@ class CollectorThread
         this.runNumber = runNumber;
     }
 
-    public void start(Splicer splicer, int runNumber)
+    public void start(Splicer splicer)
     {
-        setRunNumber(runNumber);
-
         thread.start();
 
         outThrd.start(splicer);

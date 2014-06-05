@@ -340,7 +340,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 14864 2014-02-26 22:07:00Z dglo $";
+        return "$Id: TriggerComponent.java 15028 2014-06-05 16:21:33Z dglo $";
     }
 
     /**
@@ -423,7 +423,7 @@ public class TriggerComponent
     {
         if (isGlobalTrigger) {
             // histograms are sent inside switchToNewRun()
-            triggerManager.switchToNewRun(null, runNumber);
+            triggerManager.switchToNewRun(runNumber);
         }
     }
 }

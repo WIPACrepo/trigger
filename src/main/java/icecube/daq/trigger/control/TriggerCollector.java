@@ -764,7 +764,7 @@ class OutputThread
         ByteBuffer trigBuf;
         while (!stopping || outputQueue.size() > 0) {
             synchronized (outputQueue) {
-                if (outputQueue.size() == 0) {
+                if (!stopping && outputQueue.size() == 0) {
                     try {
                         waiting = true;
                         outputQueue.wait();
@@ -883,7 +883,7 @@ class TruncateThread
         while (!stopping) {
             Spliceable spl;
             synchronized (threadLock) {
-                if (nextTrunc == null) {
+                if (!stopping && nextTrunc == null) {
                     try {
                         threadLock.wait();
                     } catch (InterruptedException ie) {
@@ -896,7 +896,7 @@ class TruncateThread
                 nextTrunc = null;
             }
 
-            // XXX I'm not sure why, but 'spl' will occasionally be set to null
+            // 'spl' will be set to null when thread is stopped
             if (spl != null) {
                 // let the splicer know it's safe to recycle
                 // everything before the end of this request

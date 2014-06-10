@@ -163,6 +163,11 @@ public class TriggerCollector
     {
         collThrd.stop();
     }
+
+    public String toString()
+    {
+        return "TrigColl[" + collThrd + "," + truncThrd + "," + outThrd + "]";
+    }
 }
 
 interface ICollectorThread
@@ -203,6 +208,7 @@ class CollectorThread
     private IOutputThread outThrd;
 
     private boolean stopping;
+    private boolean stopped;
 
     private int runNumber = Integer.MIN_VALUE;
 
@@ -433,6 +439,8 @@ class CollectorThread
         for (INewAlgorithm a : algorithms) {
             a.recycleUnusedRequests();
         }
+
+        stopped = true;
     }
 
     public void sendRequests(Interval interval,
@@ -501,6 +509,24 @@ class CollectorThread
         }
 
         outThrd.notifyThread();
+    }
+
+    public String toString()
+    {
+        String stateStr;
+        if (thread == null) {
+            stateStr = "noThread";
+        } else if (!thread.isAlive()) {
+            stateStr = "dead";
+        } else if (stopped) {
+            stateStr = "stopped";
+        } else if (stopping) {
+            stateStr = "stopping";
+        } else {
+            stateStr = "running";
+        }
+
+        return "CollThrd[" + stateStr + ",uid=" + mergedUID + "]";
     }
 }
 
@@ -796,6 +822,27 @@ class OutputThread
 
         truncThrd.stop();
     }
+
+    public String toString()
+    {
+        String stateStr;
+        if (thread == null) {
+            stateStr = "noThread";
+        } else if (!thread.isAlive()) {
+            stateStr = "dead";
+        } else if (stopped) {
+            stateStr = "stopped";
+        } else if (stopping) {
+            stateStr = "stopping";
+        } else if (waiting) {
+            stateStr = "waiting";
+        } else {
+            stateStr = "running";
+        }
+
+        return "OutThrd[" + stateStr + ",outQ#" + outputQueue.size() +
+            ",uid=" + eventUID + "]";
+    }
 }
 
 interface ITruncateThread
@@ -818,6 +865,7 @@ class TruncateThread
     private Object threadLock = new Object();
     private Spliceable nextTrunc;
     private boolean stopping;
+    private boolean stopped;
 
     TruncateThread(String name)
     {
@@ -859,6 +907,8 @@ class TruncateThread
                 }
             }
         }
+
+        stopped = true;
     }
 
     public void start(Splicer splicer)
@@ -886,5 +936,23 @@ class TruncateThread
                 threadLock.notify();
             }
         }
+    }
+
+    public String toString()
+    {
+        String stateStr;
+        if (thread == null) {
+            stateStr = "noThread";
+        } else if (!thread.isAlive()) {
+            stateStr = "dead";
+        } else if (stopped) {
+            stateStr = "stopped";
+        } else if (stopping) {
+            stateStr = "stopping";
+        } else {
+            stateStr = "running";
+        }
+
+        return "TruncThrd[" + stateStr + "]";
     }
 }

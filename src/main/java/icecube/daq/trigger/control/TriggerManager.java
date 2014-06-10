@@ -880,4 +880,9 @@ public class TriggerManager
             recycleCount++;
         }
     }
+
+    public String toString()
+    {
+        return "TrigMgr[in#" + inputList.size() + "," + collector + "]";
+    }
 }

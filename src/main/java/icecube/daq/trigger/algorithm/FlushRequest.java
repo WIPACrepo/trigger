@@ -2,7 +2,6 @@ package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IByteBufferCache;
-import icecube.daq.payload.IPayloadDestination;
 import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
@@ -258,12 +257,6 @@ public class FlushRequest
      * @param uid new UID
      */
     public void setUID(int uid)
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public int writePayload(boolean writeLoaded, IPayloadDestination pDest)
-        throws IOException
     {
         throw new Error("Unimplemented");
     }

@@ -2,7 +2,6 @@ package icecube.daq.trigger.test;
 
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.IPayloadDestination;
 import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
@@ -238,12 +237,6 @@ public class MockTriggerRequest
     public void setUID(int uid)
     {
         this.uid = uid;
-    }
-
-    public int writePayload(boolean b0, IPayloadDestination x1)
-        throws IOException
-    {
-        throw new Error("Unimplemented");
     }
 
     public int writePayload(boolean b0, int i1, ByteBuffer x2)

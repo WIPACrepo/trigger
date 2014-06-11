@@ -4,7 +4,6 @@ import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.IHitPayload;
-import icecube.daq.payload.IPayloadDestination;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadRegistry;
@@ -144,12 +143,6 @@ public class MockHit
     {
         this.srcId = srcId;
         srcObj = null;
-    }
-
-    public int writePayload(boolean writeLoaded, IPayloadDestination dest)
-        throws IOException
-    {
-        throw new Error("Unimplemented");
     }
 
     public int writePayload(boolean writeLoaded, int offset, ByteBuffer buf)

@@ -137,9 +137,9 @@ public class TriggerCollector
         collThrd.setChanged();
     }
 
-    public void setRunNumber(int runNumber)
+    public void setRunNumber(int runNumber, boolean isSwitched)
     {
-        collThrd.setRunNumber(runNumber);
+        collThrd.setRunNumber(runNumber, isSwitched);
     }
 
     /**
@@ -176,7 +176,7 @@ interface ICollectorThread
 
     void setChanged();
 
-    void setRunNumber(int runNumber);
+    void setRunNumber(int runNumber, boolean isSwitched);
 
     void start(Splicer splicer);
 
@@ -317,7 +317,7 @@ class CollectorThread
                     }
                 }
 
-                // if we've switching runs, reset mergedUID
+                // if we're switching runs, reset mergedUID
                 if (switchMerged) {
                     switchMerged = false;
                     mergedUID = 0;
@@ -488,8 +488,12 @@ class CollectorThread
         }
     }
 
-    public void setRunNumber(int runNumber)
+    public void setRunNumber(int runNumber, boolean isSwitched)
     {
+        if (isSwitched) {
+            switchMerged = true;
+        }
+
         this.runNumber = runNumber;
     }
 

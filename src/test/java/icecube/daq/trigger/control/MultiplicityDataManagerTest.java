@@ -191,7 +191,7 @@ public class MultiplicityDataManagerTest
 
         mgr.add(new MockTriggerRequest(1, 2, 3, 4, 5));
 
-        List<Map> histo = mgr.getCounts();
+        List<Map<String, Object>> histo = mgr.getCounts();
         assertNotNull("Histogram should not be null", histo);
         assertEquals("Unexpected histogram list " + histo, 0, histo.size());
     }
@@ -290,7 +290,7 @@ public class MultiplicityDataManagerTest
         mgr.add(new MockTriggerRequest(uid++, type, cfgId,
                                        nextBin + 4, nextBin + 5));
 
-        List<Map> histo = mgr.getCounts();
+        List<Map<String, Object>> histo = mgr.getCounts();
         assertNotNull("Histogram should not be null", histo);
         assertEquals("Unexpected histogram list " + histo, 1, histo.size());
 
@@ -331,7 +331,7 @@ public class MultiplicityDataManagerTest
 
         mgr.start(123);
 
-        List<Map> histo = mgr.getCounts();
+        List<Map<String, Object>> histo = mgr.getCounts();
         assertNull("Unexpected histogram list " + histo, histo);
     }
 
@@ -363,7 +363,9 @@ public class MultiplicityDataManagerTest
         MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
 
-        mgr.setNextRunNumber(123);
+        mgr.start(123);
+
+        mgr.setNextRunNumber(456);
 
         mgr.reset();
     }

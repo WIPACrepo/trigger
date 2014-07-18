@@ -258,7 +258,7 @@ public class TriggerComponent
      *
      * @return list of trigger count data.
      */
-    public List<Map> getMoniCounts()
+    public List<Map<String, Object>> getMoniCounts()
     {
         return triggerManager.getMoniCounts();
     }
@@ -340,7 +340,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 15028 2014-06-05 16:21:33Z dglo $";
+        return "$Id: TriggerComponent.java 15095 2014-07-18 20:51:47Z dglo $";
     }
 
     /**
@@ -421,9 +421,7 @@ public class TriggerComponent
     public void switching(int runNumber)
         throws DAQCompException
     {
-        if (isGlobalTrigger) {
-            // histograms are sent inside switchToNewRun()
-            triggerManager.switchToNewRun(runNumber);
-        }
+        // histograms are sent inside switchToNewRun()
+        triggerManager.switchToNewRun(runNumber);
     }
 }

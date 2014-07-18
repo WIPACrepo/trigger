@@ -68,7 +68,7 @@ class MockCollectorThread
         changed = true;
     }
 
-    public void setRunNumber(int runNumber)
+    public void setRunNumber(int runNumber, boolean isSwitched)
     {
         // do nothing
     }

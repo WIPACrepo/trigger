@@ -113,6 +113,6 @@ public class MockSplicer
 
     public void truncate(Spliceable x0)
     {
-        throw new Error("Unimplemented");
+        // do nothing
     }
 }

@@ -2,6 +2,7 @@ package icecube.daq.trigger.test;
 
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ITriggerRequestPayload;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.TriggerRequestFactory;
 import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.common.ITriggerManager;
@@ -38,9 +39,11 @@ public class MockAlgorithm
 
     private boolean fetchAll = true;
 
+    private TriggerCollector coll;
+
     public MockAlgorithm(String name)
     {
-        this.name = name;
+        this(name, 1, 1, SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
     }
 
     public MockAlgorithm(String name, int type, int cfgId, int srcId)
@@ -53,12 +56,16 @@ public class MockAlgorithm
 
     public void addInterval(long start, long end)
     {
-        intervals.add(new Interval(start, end));
+        addInterval(new Interval(start, end));
     }
 
     public void addInterval(Interval interval)
     {
         intervals.add(interval);
+
+        if (coll != null) {
+            coll.setChanged();
+        }
     }
 
     public void addParameter(String name, String value)
@@ -179,9 +186,20 @@ public class MockAlgorithm
             if (iv.start < interval.start || iv.end > interval.end) {
                 i++;
             } else {
+                final int uid = nextUID++;
                 MockTriggerRequest req =
-                    new MockTriggerRequest(nextUID++, type, cfgId, iv.start,
+                    new MockTriggerRequest(uid, type, cfgId, iv.start,
                                            iv.end);
+                req.setReadoutRequest(new MockReadoutRequest(uid, srcId));
+                if (srcId == SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID) {
+                    final int guid = nextUID++;
+                    MockTriggerRequest gReq =
+                        new MockTriggerRequest(guid, type, -1, iv.start,
+                                               iv.end);
+                    gReq.setReadoutRequest(new MockReadoutRequest(guid, srcId));
+                    gReq.addPayload(req);
+                    req = gReq;
+                }
                 released.add(req);
                 intervals.remove(i);
                 if (!fetchAll) {
@@ -247,7 +265,7 @@ public class MockAlgorithm
 
     public void setTriggerCollector(TriggerCollector coll)
     {
-        // do nothing
+        this.coll = coll;
     }
 
     public void setTriggerConfigId(int cfgId)

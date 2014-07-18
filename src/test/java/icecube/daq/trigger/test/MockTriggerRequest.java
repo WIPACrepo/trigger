@@ -243,7 +243,7 @@ public class MockTriggerRequest
         throws IOException
     {
         // do nothing
-        return 0;
+        return LENGTH;
     }
 
     public String toString()

@@ -352,9 +352,9 @@ public class TriggerManager
      *
      * @return list of trigger count data.
      */
-    public List<Map> getMoniCounts()
+    public List<Map<String, Object>> getMoniCounts()
     {
-        List<Map> mapList;
+        List<Map<String, Object>> mapList;
         try {
             mapList = multiDataMgr.getCounts();
         } catch (MultiplicityDataException mde) {
@@ -363,7 +363,7 @@ public class TriggerManager
         }
 
         if (mapList == null) {
-            return new ArrayList<Map>();
+            return new ArrayList<Map<String, Object>>();
         }
 
         return mapList;
@@ -720,7 +720,7 @@ public class TriggerManager
         multiDataMgr.start(runNum);
 
         if (collector != null) {
-            collector.setRunNumber(runNum);
+            collector.setRunNumber(runNum, false);
         }
     }
 
@@ -756,7 +756,7 @@ public class TriggerManager
                                              outCache, multiDataMgr);
 
             if (runNumber != Integer.MIN_VALUE) {
-                collector.setRunNumber(runNumber);
+                collector.setRunNumber(runNumber, false);
             }
 
             collector.startThreads(splicer);
@@ -836,12 +836,14 @@ public class TriggerManager
                 LOG.error("Cannot set next run number", mde);
             }
             resetUIDs();
+        } else {
+            multiDataMgr.start(runNumber);
         }
 
         if (collector == null) {
             LOG.error("Collector has not been created before run switch");
         } else {
-            collector.setRunNumber(runNumber);
+            collector.setRunNumber(runNumber, true);
         }
     }
 

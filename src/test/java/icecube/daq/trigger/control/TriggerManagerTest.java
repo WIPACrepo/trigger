@@ -14,6 +14,7 @@ import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.MockAlgorithm;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockBufferCache;
+import icecube.daq.trigger.test.MockOutputChannel;
 import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockPayload;
 import icecube.daq.trigger.test.MockSourceID;
@@ -661,6 +662,198 @@ public class TriggerManagerTest
         for (String k : map.keySet()) {
             assertTrue("Unknown key " + k, expMap.containsKey(k));
             assertEquals("Bad value for key " + k, expMap.get(k), map.get(k));
+        }
+    }
+
+    @Test
+    public void testCountsGTSwitchRun()
+    {
+        final int srcId = GLOBAL_ID;
+
+        MockSourceID src = new MockSourceID(srcId);
+        MockBufferCache bufCache = new MockBufferCache("foo");
+
+        TriggerManager mgr = new TriggerManager(src, bufCache);
+
+        ArrayList<MockAlgorithm> algo = new ArrayList<MockAlgorithm>();
+        for (int i = 0; i < 3; i++) {
+            final String name;
+            if (i == 0) {
+                name = "foo";
+            } else if (i == 1) {
+                name = "bar";
+            } else {
+                name = "empty";
+            }
+
+            final int type = 1 + i;
+            final int cfgId = 3 - i;
+
+            MockAlgorithm a = new MockAlgorithm(name, type, cfgId, srcId);
+            algo.add(a);
+
+            mgr.addTrigger(a);
+        }
+
+        MockOutputProcess out = new MockOutputProcess();
+        mgr.setOutputEngine(out);
+
+        MockOutputChannel outChan = new MockOutputChannel();
+        out.setOutputChannel(outChan);
+
+        MockSplicer spl = new MockSplicer();
+        mgr.setSplicer(spl);
+
+        System.setProperty("icecube.sndaq.zmq.address", "localhost:0");
+
+        SplicerChangedEvent evt = new SplicerChangedEvent(mgr, 0, null,
+                                                          new ArrayList());
+        mgr.starting(evt);
+
+        final int runNum = 123;
+
+        mgr.setRunNumber(runNum);
+        mgr.setFirstGoodTime(0);
+
+        final long intvl = 400000000000L;
+
+        for (int i = 0; i < 6; i++) {
+            for (MockAlgorithm a : algo) {
+                a.addInterval(i * intvl, (i + 1) * intvl - 10);
+            }
+            try { Thread.sleep(100); } catch (Exception ex) { }
+        }
+
+        List<Map<String, Object>> counts;
+
+        counts = mgr.getMoniCounts();
+        for (Map<String, Object> map : counts) {
+            if (!map.containsKey("runNumber")) {
+                fail("Count map " + map + " does not contain run number");
+            } else if (((Integer) map.get("runNumber")) != runNum) {
+                fail("Expected run#" + runNum + " in " + map);
+            }
+        }
+
+        final int newNum = 456;
+
+        mgr.switchToNewRun(newNum);
+
+        for (int i = 10; i < 16; i++) {
+            for (MockAlgorithm a : algo) {
+                a.addInterval(i * intvl, (i + 1) * intvl - 10);
+            }
+            try { Thread.sleep(100); } catch (Exception ex) { }
+        }
+
+        boolean pastOldNum = false;
+        counts = mgr.getMoniCounts();
+        for (Map<String, Object> map : counts) {
+            if (!map.containsKey("runNumber")) {
+                fail("Count map " + map + " does not contain run number");
+            } else if (((Integer) map.get("runNumber")) == newNum) {
+                pastOldNum = true;
+            } else if (((Integer) map.get("runNumber")) == runNum) {
+                if (pastOldNum) {
+                    fail("Expected run#" + newNum + " in " + map);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testCountsIISwitchRun()
+    {
+        final int srcId = INICE_ID;
+
+        MockSourceID src = new MockSourceID(srcId);
+        MockBufferCache bufCache = new MockBufferCache("foo");
+
+        TriggerManager mgr = new TriggerManager(src, bufCache);
+
+        ArrayList<MockAlgorithm> algo = new ArrayList<MockAlgorithm>();
+        for (int i = 0; i < 3; i++) {
+            final String name;
+            if (i == 0) {
+                name = "foo";
+            } else if (i == 1) {
+                name = "bar";
+            } else {
+                name = "empty";
+            }
+
+            final int type = 1 + i;
+            final int cfgId = 3 - i;
+
+            MockAlgorithm a = new MockAlgorithm(name, type, cfgId, srcId);
+            algo.add(a);
+
+            mgr.addTrigger(a);
+        }
+
+        MockOutputProcess out = new MockOutputProcess();
+        mgr.setOutputEngine(out);
+
+        MockOutputChannel outChan = new MockOutputChannel();
+        out.setOutputChannel(outChan);
+
+        MockSplicer spl = new MockSplicer();
+        mgr.setSplicer(spl);
+
+        System.setProperty("icecube.sndaq.zmq.address", "localhost:0");
+
+        SplicerChangedEvent evt = new SplicerChangedEvent(mgr, 0, null,
+                                                          new ArrayList());
+        mgr.starting(evt);
+
+        final int runNum = 123;
+
+        mgr.setRunNumber(runNum);
+        mgr.setFirstGoodTime(0);
+
+        final long intvl = 400000000000L;
+
+        for (int i = 0; i < 6; i++) {
+            for (MockAlgorithm a : algo) {
+                a.addInterval(i * intvl, (i + 1) * intvl - 10);
+            }
+            try { Thread.sleep(100); } catch (Exception ex) { }
+        }
+
+        List<Map<String, Object>> counts;
+
+        counts = mgr.getMoniCounts();
+        for (Map<String, Object> map : counts) {
+            if (!map.containsKey("runNumber")) {
+                fail("Count map " + map + " does not contain run number");
+            } else if (((Integer) map.get("runNumber")) != runNum) {
+                fail("Expected run#" + runNum + " in " + map);
+            }
+        }
+
+        final int newNum = 456;
+
+        mgr.switchToNewRun(newNum);
+
+        for (int i = 10; i < 16; i++) {
+            for (MockAlgorithm a : algo) {
+                a.addInterval(i * intvl, (i + 1) * intvl - 10);
+            }
+            try { Thread.sleep(100); } catch (Exception ex) { }
+        }
+
+        boolean pastOldNum = false;
+        counts = mgr.getMoniCounts();
+        for (Map<String, Object> map : counts) {
+            if (!map.containsKey("runNumber")) {
+                fail("Count map " + map + " does not contain run number");
+            } else if (((Integer) map.get("runNumber")) == newNum) {
+                pastOldNum = true;
+            } else if (((Integer) map.get("runNumber")) == runNum) {
+                if (pastOldNum) {
+                    fail("Expected run#" + newNum + " in " + map);
+                }
+            }
         }
     }
 

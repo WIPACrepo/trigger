@@ -112,11 +112,13 @@ class CountData
 
     public static final long RATE_VERSION = 0;
 
+    private int runNumber;
     private long endTime;
     private int count;
 
-    CountData(long endTime, int count)
+    CountData(int runNumber, long endTime, int count)
     {
+        this.runNumber = runNumber;
         this.endTime = endTime;
         this.count = count;
     }
@@ -124,6 +126,8 @@ class CountData
     Map<String, Object> getValuesMap(int srcId, int type, int cfgId)
     {
         HashMap<String, Object> values = new HashMap<String, Object>();
+
+        values.put("runNumber", Integer.valueOf(runNumber));
 
         values.put("sourceid", Integer.valueOf(srcId));
         values.put("trigid", Integer.valueOf(type));
@@ -195,7 +199,8 @@ class Bins
         return counts.remove(0).getValuesMap(srcId, type, cfgId);
     }
 
-    synchronized void inc(IUTCTime firstTime, IUTCTime lastTime, int bin)
+    synchronized void inc(IUTCTime firstTime, IUTCTime lastTime, int runNumber,
+                          int bin)
     {
         if (bin >= maxLen) {
             maxLen = bin + 1;
@@ -211,7 +216,7 @@ class Bins
         }
 
         while (lastTime.longValue() > endTime) {
-            counts.add(new CountData(endTime, count));
+            counts.add(new CountData(runNumber, endTime, count));
             endTime += CountData.DAQ_BIN_WIDTH;
             count = 0;
         }
@@ -221,7 +226,8 @@ class Bins
 
     public String toString()
     {
-        return "Bins[max=" + maxLen + ",ovflo=" + overflow + "]";
+        return "Bins[max=" + maxLen + ",ovflo=" + overflow +
+            ",end=" + endTime + ",cnt=" + count + "]";
     }
 }
 
@@ -239,12 +245,12 @@ public class MultiplicityDataManager
     private static final int NO_NUMBER = Integer.MIN_VALUE;
 
     private Alerter alerter;
-    private HashMap<HashKey, Bins> map;
+    private HashMap<HashKey, Bins> binmap;
 
     private Calendar startTime;
-    private int runNumber;
-    private long firstGoodTime;
-    private long lastGoodTime;
+    private int runNumber = NO_NUMBER;
+    private long firstGoodTime = Integer.MIN_VALUE;
+    private long lastGoodTime = Integer.MIN_VALUE;
 
     private int nextRunNumber = NO_NUMBER;
 
@@ -255,7 +261,7 @@ public class MultiplicityDataManager
     public void add(ITriggerRequestPayload req)
         throws MultiplicityDataException
     {
-        if (map == null) {
+        if (binmap == null) {
             final String msg = "MultiplicityDataManager has not been started";
             throw new MultiplicityDataException(msg);
         }
@@ -296,7 +302,7 @@ public class MultiplicityDataManager
 
         // this is a real request
 
-        if (firstGoodTime == 0) {
+        if (firstGoodTime == Integer.MIN_VALUE) {
             final String msg =
                 String.format("Saw request #%d before first good time" +
                               " is set", req.getUID());
@@ -323,11 +329,6 @@ public class MultiplicityDataManager
                                                 req, mde);
         }
 
-        if (!map.containsKey(key)) {
-            // add new algorithm
-            map.put(key, new Bins(NUM_BINS));
-        }
-
         List payloads;
         try {
             payloads = req.getPayloads();
@@ -342,34 +343,46 @@ public class MultiplicityDataManager
         } else {
             bin = payloads.size();
         }
-        map.get(key).inc(req.getFirstTimeUTC(), req.getLastTimeUTC(), bin);
+
+        synchronized (binmap) {
+            if (!binmap.containsKey(key)) {
+                // add new algorithm
+                binmap.put(key, new Bins(NUM_BINS));
+            }
+            binmap.get(key).inc(req.getFirstTimeUTC(), req.getLastTimeUTC(),
+                                runNumber, bin);
+        }
     }
 
-    public List<Map> getCounts()
+    public List<Map<String, Object>> getCounts()
         throws MultiplicityDataException
     {
-        if (map == null) {
-            final String msg = "MultiplicityDataManager has not been started";
+        if (binmap == null) {
+            final String msg =
+                "MultiplicityDataManager has not been started";
             throw new MultiplicityDataException(msg);
-        } else if (map.size() == 0) {
-            // don't bother sending empty list
-            return null;
         }
 
-        List<Map> list = new ArrayList<Map>();
-        for (HashKey key : map.keySet()) {
-            Bins bins = map.get(key);
-            while (true) {
-                Map<String, Object> values =
-                    bins.getCountData(key.getSourceID(), key.getType(),
-                                      key.getConfigID());
-                if (values == null) {
-                    break;
-                }
-                // add run number
-                values.put("runNumber", runNumber);
+        List<Map<String, Object>> list = null;
+        synchronized (binmap) {
+            if (binmap.size() == 0) {
+                // don't bother sending empty list
+                list = null;
+            } else {
+                list = new ArrayList<Map<String, Object>>();
+                for (HashKey key : binmap.keySet()) {
+                    Bins bins = binmap.get(key);
+                    while (true) {
+                        Map<String, Object> values =
+                            bins.getCountData(key.getSourceID(), key.getType(),
+                                              key.getConfigID());
+                        if (values == null) {
+                            break;
+                        }
 
-                list.add(values);
+                        list.add(values);
+                    }
+                }
             }
         }
 
@@ -382,48 +395,73 @@ public class MultiplicityDataManager
         if (nextRunNumber == NO_NUMBER) {
             final String msg = "Next run number has not been set";
             throw new MultiplicityDataException(msg);
+        } else if (binmap == null) {
+            final String msg =
+                "MultiplicityDataManager has not been started";
+            throw new MultiplicityDataException(msg);
         }
 
-        start(nextRunNumber);
+        synchronized (binmap) {
+            start(nextRunNumber);
+            binmap.clear();
+        }
+
         nextRunNumber = NO_NUMBER;
     }
 
     public boolean send()
         throws MultiplicityDataException
     {
-        if (map == null) {
-            final String msg = "MultiplicityDataManager has not been started";
-            throw new MultiplicityDataException(msg);
-        } else if (map.size() == 0) {
-            // don't bother sending empty list
-            return false;
-        } else if (alerter == null) {
-            throw new MultiplicityDataException("Alerter has not been set");
-        } else if (!alerter.isActive()) {
-            final String msg = "Alerter " + alerter + " is not active";
+        if (binmap == null) {
+            final String msg =
+                "MultiplicityDataManager has not been started";
             throw new MultiplicityDataException(msg);
         }
 
-        Calendar endTime = Calendar.getInstance();
+        ArrayList<Map<String, Object>> valueList =
+            new ArrayList<Map<String, Object>>();
 
-        SimpleDateFormat dateFormat =
-            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSSSS");
+        synchronized (binmap) {
+            if (runNumber == NO_NUMBER) {
+                final String msg = "Run number has not been set";
+                throw new MultiplicityDataException(msg);
+            } else if (binmap.size() == 0) {
+                // don't bother sending empty list
+                return false;
+            } else if (alerter == null) {
+                throw new MultiplicityDataException("Alerter has not been set");
+            } else if (!alerter.isActive()) {
+                final String msg = "Alerter " + alerter + " is not active";
+                throw new MultiplicityDataException(msg);
+            }
 
-        for (HashKey key : map.keySet()) {
-            HashMap<String, Object> values = new HashMap<String, Object>();
+            Calendar endTime = Calendar.getInstance();
 
-            values.put("sourceid", key.getSourceID());
-            values.put("trigid", key.getType());
-            values.put("configid", key.getConfigID());
+            SimpleDateFormat dateFormat =
+                new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSSSS");
 
-            values.put("hist", map.get(key).getBinData());
-            values.put("timeOfFirstEntry",
-                       dateFormat.format(startTime.getTime()));
-            values.put("timeOfLastEntry",
-                       dateFormat.format(endTime.getTime()));
-            values.put("runNumber", runNumber);
-            values.put("version", MULTIPLICITY_VERSION);
+            for (HashKey key : binmap.keySet()) {
+                HashMap<String, Object> values = new HashMap<String, Object>();
 
+                values.put("sourceid", key.getSourceID());
+                values.put("trigid", key.getType());
+                values.put("configid", key.getConfigID());
+
+                values.put("hist", binmap.get(key).getBinData());
+                values.put("timeOfFirstEntry",
+                           dateFormat.format(startTime.getTime()));
+                values.put("timeOfLastEntry",
+                           dateFormat.format(endTime.getTime()));
+                values.put("runNumber", runNumber);
+                values.put("version", MULTIPLICITY_VERSION);
+
+                valueList.add(values);
+            }
+
+            startTime = Calendar.getInstance();
+        }
+
+        for (Map<String, Object> values : valueList) {
             try {
                 alerter.send("trigger_multiplicity", Alerter.Priority.SCP,
                              values);
@@ -473,9 +511,14 @@ public class MultiplicityDataManager
 
     public void start(int runNum)
     {
-        startTime = Calendar.getInstance();
         runNumber = runNum;
 
-        map = new HashMap<HashKey, Bins>();
+        if (startTime == null) {
+            startTime = Calendar.getInstance();
+        }
+
+        if (binmap == null) {
+            binmap = new HashMap<HashKey, Bins>();
+        }
     }
 }

@@ -733,15 +733,6 @@ public class CollectorThreadTest
             fail("Bad " + req + " from " + ival0);
         }
         outThrd.clear();
-
-        assertEquals("Bad number of log messages",
-                     2, appender.getNumberOfMessages());
-        for (int i = 0; i < 2; i++) {
-            final String msg = (String) appender.getMessage(i);
-            assertTrue("Bad log message \"" + msg + "\"",
-                       msg.startsWith("No readout requests found in "));
-        }
-        appender.clear();
     }
 
     @Test
@@ -832,7 +823,7 @@ public class CollectorThreadTest
 
         CollectorThread ct =
             new CollectorThread(name, INICE_ID, algorithms, mgr, outThrd);
-        ct.setRunNumber(1234);
+        ct.setRunNumber(1234, false);
 
         fooAlgo.setSawFlush();
 

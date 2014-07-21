@@ -502,7 +502,8 @@ public class MultiplicityDataManager
         throws MultiplicityDataException
     {
         if (nextRunNumber != NO_NUMBER) {
-            final String msg = "Next run number has already been set";
+            final String msg = "Cannot set next run number to " +
+                runNum + "; already set to " + nextRunNumber;
             throw new MultiplicityDataException(msg);
         }
 

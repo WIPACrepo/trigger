@@ -300,28 +300,22 @@ class CollectorThread
     public void pushTrigger(ITriggerRequestPayload req)
     {
         if (srcId == SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID) {
-            if (req.getUID() == 0) {
-                boolean doReset;
+            // if we're switching runs, reset mergedUID
+            if (switchMerged) {
                 try {
-                    doReset = moniDataMgr.send();
+                    boolean doReset = moniDataMgr.send();
                 } catch (MultiplicityDataException mde) {
                     LOG.error("Failed to send multiplicity data", mde);
-                    doReset = true;
                 }
 
-                if (doReset) {
-                    try {
-                        moniDataMgr.reset();
-                    } catch (MultiplicityDataException mde) {
-                        LOG.error("Failed to reset multiplicity data", mde);
-                    }
+                try {
+                    moniDataMgr.reset();
+                } catch (MultiplicityDataException mde) {
+                    LOG.error("Failed to reset multiplicity data", mde);
                 }
 
-                // if we're switching runs, reset mergedUID
-                if (switchMerged) {
-                    switchMerged = false;
-                    mergedUID = 0;
-                }
+                switchMerged = false;
+                mergedUID = 0;
             }
 
             try {

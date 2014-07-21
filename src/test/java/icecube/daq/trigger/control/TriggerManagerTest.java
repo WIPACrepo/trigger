@@ -1,5 +1,6 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.juggler.alert.Alerter.Priority;
 import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
@@ -673,7 +674,12 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(srcId);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
+        MockAlerter alerter = new MockAlerter();
+        alerter.setExpectedVarName("trigger_multiplicity");
+        alerter.setExpectedPriority(Priority.SCP);
+
         TriggerManager mgr = new TriggerManager(src, bufCache);
+        mgr.setAlerter(alerter);
 
         ArrayList<MockAlgorithm> algo = new ArrayList<MockAlgorithm>();
         for (int i = 0; i < 3; i++) {

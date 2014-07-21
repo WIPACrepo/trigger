@@ -187,6 +187,24 @@ public class CollectorThreadTest
 
     private MockOutputThread outThrd = new MockOutputThread();
 
+    private void checkDataMgr(MockDataManager mgr, boolean added, boolean sent,
+                              boolean reset)
+    {
+        checkDMValue("added", added, mgr.wasAdded());
+        checkDMValue("sent", sent, mgr.wasSent());
+        checkDMValue("reset", reset, mgr.wasReset());
+    }
+
+    private void checkDMValue(String name, boolean expVal, boolean val)
+    {
+        final String prefix = "MonitoringData was ";
+        if (expVal) {
+            assertTrue(prefix + "not " + name, val);
+        } else {
+            assertFalse(prefix + name, val);
+        }
+    }
+
     @Before
     public void setUp()
         throws Exception
@@ -329,9 +347,7 @@ public class CollectorThreadTest
         CollectorThread ct =
             new CollectorThread("pushG", GLOBAL_ID, algorithms, mgr, outThrd);
         ct.pushTrigger(new MockTriggerRequest(1, 2, 3, ival.start, ival.end));
-        assertFalse("Request was not added", mgr.wasAdded());
-        assertFalse("Request was not sent", mgr.wasSent());
-        assertFalse("Request was not reset", mgr.wasReset());
+        checkDataMgr(mgr, false, false, false);
 
         assertEquals("Should be one request queued",
                      1L, outThrd.getNumQueued());
@@ -372,9 +388,7 @@ public class CollectorThreadTest
         CollectorThread ct =
             new CollectorThread("pushG", GLOBAL_ID, algorithms, mgr, outThrd);
         ct.pushTrigger(new MockTriggerRequest(1, 2, 3, ival.start, ival.end));
-        assertTrue("Request was added", mgr.wasAdded());
-        assertFalse("Request was not sent", mgr.wasSent());
-        assertFalse("Request was not reset", mgr.wasReset());
+        checkDataMgr(mgr, true, false, false);
 
         assertEquals("Should be one request queued",
                      1L, outThrd.getNumQueued());
@@ -388,7 +402,7 @@ public class CollectorThreadTest
     }
 
     @Test
-    public void testPushGTriggerSendBad()
+    public void testPushGTriggerSendFirst()
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("pushGAlgo");
 
@@ -408,9 +422,7 @@ public class CollectorThreadTest
         CollectorThread ct =
             new CollectorThread("pushG", GLOBAL_ID, algorithms, mgr, outThrd);
         ct.pushTrigger(new MockTriggerRequest(0, 2, 3, ival.start, ival.end));
-        assertTrue("Request was added", mgr.wasAdded());
-        assertFalse("Request was not sent", mgr.wasSent());
-        assertTrue("Request was reset", mgr.wasReset());
+        checkDataMgr(mgr, true, false, false);
 
         assertEquals("Should be one request queued",
                      1L, outThrd.getNumQueued());
@@ -421,12 +433,6 @@ public class CollectorThreadTest
             fail("Bad " + req + " from " + ival);
         }
         outThrd.clear();
-
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
-        final String msg = "Failed to send multiplicity data";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
 
         appender.clear();
     }
@@ -450,10 +456,10 @@ public class CollectorThreadTest
 
         CollectorThread ct =
             new CollectorThread("pushG", GLOBAL_ID, algorithms, mgr, outThrd);
+        ct.setRunNumber(12345, true);
+
         ct.pushTrigger(new MockTriggerRequest(0, 2, 3, ival.start, ival.end));
-        assertTrue("Request was added", mgr.wasAdded());
-        assertTrue("Request was sent", mgr.wasSent());
-        assertFalse("Request was not reset", mgr.wasReset());
+        checkDataMgr(mgr, true, true, true);
 
         assertEquals("Should be one request queued",
                      1L, outThrd.getNumQueued());
@@ -487,10 +493,10 @@ public class CollectorThreadTest
 
         CollectorThread ct =
             new CollectorThread("pushG", GLOBAL_ID, algorithms, mgr, outThrd);
+        ct.setRunNumber(12345, true);
+
         ct.pushTrigger(new MockTriggerRequest(0, 2, 3, ival.start, ival.end));
-        assertTrue("Request was added", mgr.wasAdded());
-        assertTrue("Request was sent", mgr.wasSent());
-        assertFalse("Request was not reset", mgr.wasReset());
+        checkDataMgr(mgr, true, true, false);
 
         assertEquals("Should be one request queued",
                      1L, outThrd.getNumQueued());
@@ -620,12 +626,10 @@ public class CollectorThreadTest
             new ArrayList<ITriggerRequestPayload>();
         ct.addRequests(rval, requests);
         ct.sendRequests(rval, requests);
+        checkDataMgr(mgr, true, false, false);
 
         assertEquals("Should be one request queued",
                      1L, outThrd.getNumQueued());
-        assertTrue("Should have added request to data manager",
-                   mgr.wasAdded());
-        assertTrue("Should have sent data", mgr.wasSent());
 
         assertEquals("Should be one request queued",
                      1L, outThrd.getNumQueued());

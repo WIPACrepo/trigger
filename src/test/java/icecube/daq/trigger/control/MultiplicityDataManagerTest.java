@@ -1,8 +1,6 @@
 package icecube.daq.trigger.control;
 
-import icecube.daq.juggler.alert.AlertException;
 import icecube.daq.juggler.alert.Alerter;
-import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 import icecube.daq.trigger.test.MockAppender;
@@ -10,7 +8,6 @@ import icecube.daq.trigger.test.MockTriggerRequest;
 import icecube.daq.util.Leapseconds;
 
 import java.io.File;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -20,117 +17,6 @@ import static org.junit.Assert.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
-
-class MockAlerter
-    implements Alerter
-{
-    private boolean inactive;
-
-    private int numSent;
-    private String expVarName;
-    private Priority expPrio;
-
-    public MockAlerter()
-    {
-    }
-
-    public void close()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void deactivate()
-    {
-        inactive = true;
-    }
-
-    public int getNumSent()
-    {
-        return numSent;
-    }
-
-    public String getService()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public boolean isActive()
-    {
-        return !inactive;
-    }
-
-    public void send(String varname, Priority prio, Calendar dateTime,
-                     Map<String, Object> values)
-        throws AlertException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void send(String varname, Priority prio, IUTCTime utcTime,
-                     Map<String, Object> values)
-        throws AlertException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void send(String varname, Priority prio, Map<String, Object> values)
-        throws AlertException
-    {
-        assertEquals("Unexpected varname", varname, expVarName);
-        assertEquals("Unexpected priority", prio, expPrio);
-
-        numSent++;
-    }
-
-    public void sendAlert(Priority prio, String condition, Map x2)
-        throws AlertException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void sendAlert(Priority prio, String condition, String notify,
-                          Map<String, Object> vars)
-        throws AlertException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void sendAlert(Calendar dateTime, Priority prio, String condition,
-                          String notify, Map<String, Object> vars)
-        throws AlertException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void sendAlert(IUTCTime utcTime, Priority prio, String condition,
-                          String notify, Map<String, Object> vars)
-        throws AlertException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void sendObject(Object obj)
-        throws AlertException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void setAddress(String host, int port)
-        throws AlertException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void setExpectedPriority(Priority prio)
-    {
-        expPrio = prio;
-    }
-
-    public void setExpectedVarName(String name)
-    {
-        expVarName = name;
-    }
-}
 
 public class MultiplicityDataManagerTest
 {
@@ -446,15 +332,19 @@ public class MultiplicityDataManagerTest
         MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
 
-        mgr.setNextRunNumber(123);
+        final int runNum = 12345;
 
+        mgr.setNextRunNumber(runNum);
+
+        final int nextNum = 67890;
         try {
-            mgr.setNextRunNumber(123);
+            mgr.setNextRunNumber(nextNum);
             fail("Should not succeed");
         } catch (MultiplicityDataException mde) {
             assertNotNull("Null message", mde.getMessage());
 
-            final String msg = "Next run number has already been set";
+            final String msg = "Cannot set next run number to " + nextNum +
+                "; already set to " + runNum;
             assertEquals("Unexpected exception", msg, mde.getMessage());
         }
     }

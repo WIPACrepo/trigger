@@ -1,7 +1,7 @@
 /*
  * class: DummyPayload
  *
- * Version $Id: DummyPayload.java 14993 2014-04-22 21:45:14Z dglo $
+ * Version $Id: DummyPayload.java 15128 2014-08-20 16:37:50Z dglo $
  *
  * Date: October 7 2005
  *
@@ -18,14 +18,13 @@ import icecube.daq.payload.impl.UTCTime;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.trigger.exceptions.UnimplementedError;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
  * This class is a dummy payload that only has a UTC time associated with it.
  * Its main purpose is for truncating the Splicer.
  *
- * @version $Id: DummyPayload.java 14993 2014-04-22 21:45:14Z dglo $
+ * @version $Id: DummyPayload.java 15128 2014-08-20 16:37:50Z dglo $
  * @author pat
  */
 public class DummyPayload

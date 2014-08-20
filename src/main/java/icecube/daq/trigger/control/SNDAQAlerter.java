@@ -8,12 +8,9 @@ import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.algorithm.SimpleMajorityTrigger;
 
 import java.util.ArrayDeque;
-import java.util.Calendar;
 import java.util.Deque;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

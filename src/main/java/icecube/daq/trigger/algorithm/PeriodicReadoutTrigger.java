@@ -125,7 +125,7 @@ public class PeriodicReadoutTrigger extends AbstractTrigger
 	IUTCTime sample_hit_time=hitPayload.getHitTimeUTC();
 
 	//trigger_window_set is only false after initialization
-	if(trigger_window_set==false){
+	if(!trigger_window_set){
 	    current_trigger_start=sample_hit_time.getOffsetUTCTime(5000000); // go 5 ms after the hit and start the trigger algorithm from here
 	    //LOG.warn("trigger started: sample_hit_time is " + sample_hit_time + " newtriggerstart is " + current_trigger_start);
 	    current_trigger_end=current_trigger_start.getOffsetUTCTime(readout_length);

@@ -1,7 +1,7 @@
 /*
  * class: TwoVetoTrigger
  *
- * Version $Id: TwoVetoTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * Version $Id: TwoVetoTrigger.java 15131 2014-08-21 19:16:22Z dglo $
  *
  * Date: January 25 2006
  *
@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is accept all incoming triggers but to veto two configured triggers.
  *
- * @version $Id: TwoVetoTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * @version $Id: TwoVetoTrigger.java 15131 2014-08-21 19:16:22Z dglo $
  * @author shseo
  */
 public class TwoVetoTrigger
@@ -70,8 +70,8 @@ public class TwoVetoTrigger
     public List getConfiguredTriggerIDs()
     {
         List listConfiguredTriggerIDs = new ArrayList();
-        listConfiguredTriggerIDs.add(new Integer(miConfiguredTrigId_1));
-        listConfiguredTriggerIDs.add(new Integer(miConfiguredTrigId_2));
+        listConfiguredTriggerIDs.add(Integer.valueOf(miConfiguredTrigId_1));
+        listConfiguredTriggerIDs.add(Integer.valueOf(miConfiguredTrigId_2));
 
         return listConfiguredTriggerIDs;
     }
@@ -147,27 +147,27 @@ public class TwoVetoTrigger
 
         if (paramName.compareTo("getTriggerType()1") == 0) {
             miConfiguredTriggerType_1 = Integer.parseInt(paramValue);
-            //mlistConfiguredTriggerType.add(new Integer(Integer.parseInt(paramValue)));
+            //mlistConfiguredTriggerType.add(Integer.valueOf(Integer.parseInt(paramValue)));
             mbConfigTriggerType_1 = true;
         } else if (paramName.compareTo("getTriggerConfigId()1") == 0) {
             miConfiguredTriggerConfigId_1 = Integer.parseInt(paramValue);
-            //mlistConfiguredTriggerConfigId.add(new Integer(Integer.parseInt(paramValue)));
+            //mlistConfiguredTriggerConfigId.add(Integer.valueOf(Integer.parseInt(paramValue)));
             mbConfigTriggerConfigId_1 = true;
         } else if (paramName.compareTo("getSourceId()1") == 0) {
             miConfiguredSourceId_1 = Integer.parseInt(paramValue);
-            //mlistConfiguredSourceId.add(new Integer(Integer.parseInt(paramValue)));
+            //mlistConfiguredSourceId.add(Integer.valueOf(Integer.parseInt(paramValue)));
             mbConfigSourceId_1 = true;
         } else if (paramName.compareTo("getTriggerType()2") == 0) {
             miConfiguredTriggerType_2 = Integer.parseInt(paramValue);
-            //mlistConfiguredTriggerType.add(new Integer(Integer.parseInt(paramValue)));
+            //mlistConfiguredTriggerType.add(Integer.valueOf(Integer.parseInt(paramValue)));
             mbConfigTriggerType_2 = true;
         } else if (paramName.compareTo("getTriggerConfigId()2") == 0) {
             miConfiguredTriggerConfigId_2 = Integer.parseInt(paramValue);
-            //mlistConfiguredTriggerConfigId.add(new Integer(Integer.parseInt(paramValue)));
+            //mlistConfiguredTriggerConfigId.add(Integer.valueOf(Integer.parseInt(paramValue)));
             mbConfigTriggerConfigId_2 = true;
         } else if (paramName.compareTo("getSourceId()2") == 0) {
             miConfiguredSourceId_2 = Integer.parseInt(paramValue);
-            //mlistConfiguredSourceId.add(new Integer(Integer.parseInt(paramValue)));
+            //mlistConfiguredSourceId.add(Integer.valueOf(Integer.parseInt(paramValue)));
             mbConfigSourceId_2 = true;
         } else {
             throw new UnknownParameterException("Unknown parameter: " + paramName);

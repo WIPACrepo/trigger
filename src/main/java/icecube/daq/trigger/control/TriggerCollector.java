@@ -303,7 +303,7 @@ class CollectorThread
             // if we're switching runs, reset mergedUID
             if (switchMerged) {
                 try {
-                    boolean doReset = moniDataMgr.send();
+                    moniDataMgr.send();
                 } catch (MultiplicityDataException mde) {
                     LOG.error("Failed to send multiplicity data", mde);
                 }

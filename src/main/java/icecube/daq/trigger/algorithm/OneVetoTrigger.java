@@ -1,7 +1,7 @@
 /*
  * class: OneVetoTrigger
  *
- * Version $Id: OneVetoTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * Version $Id: OneVetoTrigger.java 15131 2014-08-21 19:16:22Z dglo $
  *
  * Date: January 25 2006
  *
@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is accept all incoming triggers but to veto one configured triggers.
  *
- * @version $Id: OneVetoTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * @version $Id: OneVetoTrigger.java 15131 2014-08-21 19:16:22Z dglo $
  * @author shseo
  */
 public class OneVetoTrigger
@@ -90,7 +90,7 @@ public class OneVetoTrigger
     public List getConfiguredTriggerIDs()
     {
         List listConfiguredTriggerIDs = new ArrayList();
-        listConfiguredTriggerIDs.add(new Integer(miConfiguredTrigId_1));
+        listConfiguredTriggerIDs.add(Integer.valueOf(miConfiguredTrigId_1));
 
         return listConfiguredTriggerIDs;
     }
@@ -133,15 +133,15 @@ public class OneVetoTrigger
 
         if (paramName.compareTo("getTriggerType()1") == 0) {
             miConfiguredTriggerType_1 = Integer.parseInt(paramValue);
-            //mlistConfiguredTriggerType.add(new Integer(Integer.parseInt(paramValue)));
+            //mlistConfiguredTriggerType.add(Integer.valueOf(Integer.parseInt(paramValue)));
             mbConfigTriggerType_1 = true;
         } else if (paramName.compareTo("getTriggerConfigId()1") == 0) {
             miConfiguredTriggerConfigId_1 = Integer.parseInt(paramValue);
-            //mlistConfiguredTriggerConfigId.add(new Integer(Integer.parseInt(paramValue)));
+            //mlistConfiguredTriggerConfigId.add(Integer.valueOf(Integer.parseInt(paramValue)));
             mbConfigTriggerConfigId_1 = true;
         } else if (paramName.compareTo("getSourceId()1") == 0) {
             miConfiguredSourceId_1 = Integer.parseInt(paramValue);
-            //mlistConfiguredSourceId.add(new Integer(Integer.parseInt(paramValue)));
+            //mlistConfiguredSourceId.add(Integer.valueOf(Integer.parseInt(paramValue)));
             mbConfigSourceId_1 = true;
         } else {
             throw new UnknownParameterException("Unknown parameter: " + paramName);

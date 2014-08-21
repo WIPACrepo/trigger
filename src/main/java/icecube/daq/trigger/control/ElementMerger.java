@@ -191,11 +191,6 @@ public abstract class ElementMerger
 {
     private static final Log LOG = LogFactory.getLog(ElementMerger.class);
 
-    private static void mergeData(ElementData ed, List<ElementData> dataList)
-    {
-        throw new Error("Unimplemented");
-    }
-
     private static List<ElementData> addToList(List<ElementData> list,
                                                int type,
                                                ElementData glbl)

@@ -190,7 +190,6 @@ public class SNDAQAlerter
         private boolean sentStart;
 
         private boolean stopping;
-        private boolean stopped;
 
         AlertThread()
         {
@@ -254,8 +253,6 @@ public class SNDAQAlerter
             if (zmq.isActive()) {
                 zmq.close();
             }
-
-            stopped = true;
         }
 
         public void sendAction(String action, Object time, int runNumber)

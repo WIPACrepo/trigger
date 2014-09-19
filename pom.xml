@@ -115,11 +115,6 @@
       <groupId>edu.wisc.icecube</groupId>
       <artifactId>trigger-common</artifactId>
     </dependency>
-
-    <dependency>
-      <groupId>jaxen</groupId>
-      <artifactId>jaxen</artifactId>
-    </dependency>
   </dependencies>
 
 </project>

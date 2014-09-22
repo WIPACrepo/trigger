@@ -1,7 +1,7 @@
 /*
  * class: ThreeVetoTrigger
  *
- * Version $Id: ThreeVetoTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * Version $Id: ThreeVetoTrigger.java 15155 2014-09-22 15:41:57Z dglo $
  *
  * Date: January 25 2006
  *
@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is accept all incoming triggers but to veto three configured triggers.
  *
- * @version $Id: ThreeVetoTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * @version $Id: ThreeVetoTrigger.java 15155 2014-09-22 15:41:57Z dglo $
  * @author shseo
  */
 public class ThreeVetoTrigger
@@ -80,9 +80,9 @@ public class ThreeVetoTrigger
     public List getConfiguredTriggerIDs()
     {
         List listConfiguredTriggerIDs = new ArrayList();
-        listConfiguredTriggerIDs.add(new Integer(miConfiguredTrigId_1));
-        listConfiguredTriggerIDs.add(new Integer(miConfiguredTrigId_2));
-        listConfiguredTriggerIDs.add(new Integer(miConfiguredTrigId_3));
+        listConfiguredTriggerIDs.add(Integer.valueOf(miConfiguredTrigId_1));
+        listConfiguredTriggerIDs.add(Integer.valueOf(miConfiguredTrigId_2));
+        listConfiguredTriggerIDs.add(Integer.valueOf(miConfiguredTrigId_3));
 
         return listConfiguredTriggerIDs;
     }

@@ -98,6 +98,11 @@
   <dependencies>
     <dependency>
       <groupId>edu.wisc.icecube</groupId>
+      <artifactId>daq-common</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.wisc.icecube</groupId>
       <artifactId>daq-io</artifactId>
     </dependency>
 
@@ -113,18 +118,22 @@
 
     <dependency>
       <groupId>edu.wisc.icecube</groupId>
+      <artifactId>splicer</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.wisc.icecube</groupId>
       <artifactId>trigger-common</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>dom4j</groupId>
-      <artifactId>dom4j</artifactId>
+      <groupId>javax.xml.parsers</groupId>
+      <artifactId>jaxp-api</artifactId>
     </dependency>
 
-    <!-- required by dom4j -->
     <dependency>
-      <groupId>jaxen</groupId>
-      <artifactId>jaxen</artifactId>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
     </dependency>
   </dependencies>
 

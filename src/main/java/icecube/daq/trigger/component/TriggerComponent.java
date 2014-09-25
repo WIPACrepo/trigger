@@ -25,6 +25,8 @@ import icecube.daq.trigger.config.TriggerCreator;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.JAXPUtil;
+import icecube.daq.util.JAXPUtilException;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,9 +36,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.dom4j.Branch;
-import org.dom4j.Document;
-import org.dom4j.Node;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 /**
  * Base class for trigger handlers.
@@ -182,16 +183,27 @@ public class TriggerComponent
                                        ex);
         }
 
-        Document doc = loadXMLDocument(configDir, configName);
+        Document doc;
+        try {
+            doc = JAXPUtil.loadXMLDocument(configDir, configName);
+        } catch (JAXPUtilException jux) {
+            throw new DAQCompException(jux);
+        }
 
-        Node tcNode = doc.selectSingleNode("runConfig/triggerConfig");
+        Node tcNode;
+        try {
+            tcNode = JAXPUtil.extractNode(doc, "runConfig/triggerConfig");
+        } catch (JAXPUtilException jux) {
+            throw new DAQCompException(jux);
+        }
+
         if (tcNode == null) {
             throw new DAQCompException("Run configuration file \"" +
                                        configName + "\" does not contain" +
                                        " <triggerConfig>");
         }
 
-        String tcName = TriggerCreator.getNodeText((Branch) tcNode);
+        String tcName = tcNode.getTextContent();
 
         File trigCfgDir = new File(configDir, "trigger");
         if (!trigCfgDir.exists()) {
@@ -204,7 +216,13 @@ public class TriggerComponent
             throw new DAQCompException("Source ID has not been set");
         }
 
-        Document tcDoc = loadXMLDocument(trigCfgDir, tcName);
+        Document tcDoc;
+        try {
+            tcDoc = JAXPUtil.loadXMLDocument(trigCfgDir, tcName);
+        } catch (JAXPUtilException jux) {
+            throw new DAQCompException(jux);
+        }
+
         try {
             algorithms = TriggerCreator.buildTriggers(tcDoc, sourceId);
         } catch (TriggerException te) {
@@ -340,7 +358,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 15095 2014-07-18 20:51:47Z dglo $";
+        return "$Id: TriggerComponent.java 15165 2014-09-25 18:43:15Z dglo $";
     }
 
     /**

@@ -5,14 +5,16 @@ import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.common.ITriggerAlgorithm;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.util.JAXPUtil;
+import icecube.daq.util.JAXPUtilException;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.dom4j.Branch;
-import org.dom4j.Document;
-import org.dom4j.Node;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Create and configure all trigger algorithm objects.
@@ -36,14 +38,23 @@ public abstract class TriggerCreator
         ArrayList<ITriggerAlgorithm> trigList =
             new ArrayList<ITriggerAlgorithm>();
 
-        List<Node> nodeList = doc.selectNodes("activeTriggers/triggerConfig");
-        for (Node n : nodeList) {
-            int srcId = Integer.parseInt(n.valueOf("sourceId"));
+        NodeList nodeList;
+        try {
+            nodeList =
+                JAXPUtil.extractNodeList(doc, "activeTriggers/triggerConfig");
+        } catch (JAXPUtilException jux) {
+            throw new TriggerException(jux);
+        }
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node n = nodeList.item(i);
+
+            int srcId = Integer.parseInt(getElementText(n, "sourceId"));
             if (compId != null && compId.getSourceID() != srcId) {
                 continue;
             }
 
-            String name = n.valueOf("triggerName");
+            String name = getElementText(n, "triggerName");
 
             INewAlgorithm trig;
             try {
@@ -57,27 +68,47 @@ public abstract class TriggerCreator
 
             trig.setTriggerName(name);
 
-            int cfgId = Integer.parseInt(n.valueOf("triggerConfigId"));
+            int cfgId = Integer.parseInt(getElementText(n, "triggerConfigId"));
             trig.setTriggerConfigId(cfgId);
 
-            int trigType = Integer.parseInt(n.valueOf("triggerType"));
+            int trigType = Integer.parseInt(getElementText(n, "triggerType"));
             trig.setTriggerType(trigType);
 
             trig.setSourceId(srcId);
 
-            List<Node> paramList = n.selectNodes("parameterConfig");
-            for (Node pnode : paramList) {
-                String pname = pnode.valueOf("parameterName");
-                String pval = pnode.valueOf("parameterValue");
+            NodeList paramList;
+            try {
+                paramList = JAXPUtil.extractNodeList(n, "parameterConfig");
+            } catch (JAXPUtilException jux) {
+                throw new TriggerException(jux);
+            }
+
+            for (int j = 0; j < paramList.getLength(); j++) {
+                Node pnode = paramList.item(j);
+
+                String pname = getElementText(pnode, "parameterName");
+                String pval = getElementText(pnode, "parameterValue");
                 trig.addParameter(pname, pval);
             }
 
-            List<Node> rdoutList = n.selectNodes("readoutConfig");
-            for (Node rnode : rdoutList) {
-                int rtype = Integer.parseInt(rnode.valueOf("readoutType"));
-                int roff = Integer.parseInt(rnode.valueOf("timeOffset"));
-                int rminus = Integer.parseInt(rnode.valueOf("timeMinus"));
-                int rplus = Integer.parseInt(rnode.valueOf("timePlus"));
+            NodeList rdoutList;
+            try {
+                rdoutList = JAXPUtil.extractNodeList(n, "readoutConfig");
+            } catch (JAXPUtilException jux) {
+                throw new TriggerException(jux);
+            }
+
+            for (int j = 0; j < rdoutList.getLength(); j++) {
+                Node rnode = rdoutList.item(j);
+
+                int rtype = Integer.parseInt(getElementText(rnode,
+                                                            "readoutType"));
+                int roff = Integer.parseInt(getElementText(rnode,
+                                                           "timeOffset"));
+                int rminus = Integer.parseInt(getElementText(rnode,
+                                                             "timeMinus"));
+                int rplus = Integer.parseInt(getElementText(rnode,
+                                                            "timePlus"));
                 trig.addReadout(rtype, roff, rminus, rplus);
             }
 
@@ -92,27 +123,22 @@ public abstract class TriggerCreator
         return trigList;
     }
 
-    /**
-     * Build a text string from all the text nodes in <tt>branch</tt>.
-     *
-     * @param branch XML document branch containing a text string
-     *
-     * @return trimmed text string
-     */
-    public static String getNodeText(Branch branch)
+    private static String getElementText(Node n, String tag)
     {
-        StringBuilder str = new StringBuilder();
-
-        for (Iterator iter = branch.nodeIterator(); iter.hasNext(); ) {
-            Node node = (Node) iter.next();
-
-            if (node.getNodeType() != Node.TEXT_NODE) {
-                continue;
-            }
-
-            str.append(node.getText());
+        if (n.getNodeType() != Node.ELEMENT_NODE) {
+            return null;
         }
 
-        return str.toString().trim();
+        NodeList list = ((Element) n).getElementsByTagName(tag);
+        if (list.getLength() == 0) {
+            return null;
+        }
+
+        String val = "";
+        for (int i = 0; i < list.getLength(); i++) {
+            val += list.item(i).getTextContent();
+        }
+
+        return val;
     }
 }

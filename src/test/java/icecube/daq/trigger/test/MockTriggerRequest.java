@@ -128,11 +128,6 @@ public class MockTriggerRequest
         return PayloadInterfaceRegistry.I_TRIGGER_REQUEST;
     }
 
-    public int getPayloadLength()
-    {
-        return length();
-    }
-
     public IUTCTime getPayloadTimeUTC()
     {
         return startTime;

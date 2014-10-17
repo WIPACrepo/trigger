@@ -100,11 +100,6 @@ public class MockHit
         return PayloadInterfaceRegistry.I_HIT_PAYLOAD;
     }
 
-    public int getPayloadLength()
-    {
-        return length();
-    }
-
     public int getPayloadType()
     {
         return PayloadRegistry.PAYLOAD_ID_SIMPLE_HIT;

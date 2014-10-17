@@ -42,11 +42,6 @@ class MyPayload
         throw new Error("Unimplemented");
     }
 
-    public int getPayloadLength()
-    {
-        return length();
-    }
-
     public IUTCTime getPayloadTimeUTC()
     {
         throw new Error("Unimplemented");

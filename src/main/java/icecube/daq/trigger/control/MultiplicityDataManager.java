@@ -136,7 +136,7 @@ class CountData
         values.put("value", Integer.valueOf(count));
         values.put("recordingStartTime",
                    UTCTime.toDateString(endTime - DAQ_BIN_WIDTH + 1));
-        values.put("recordingEndTime", UTCTime.toDateString(endTime));
+        values.put("recordingStopTime", UTCTime.toDateString(endTime));
         values.put("version", RATE_VERSION);
 
         return values;

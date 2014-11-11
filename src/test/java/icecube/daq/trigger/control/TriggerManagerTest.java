@@ -12,6 +12,7 @@ import icecube.daq.splicer.SplicerChangedEvent;
 import icecube.daq.trigger.common.ITriggerAlgorithm;
 import icecube.daq.trigger.common.ITriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.test.MockAlerter;
 import icecube.daq.trigger.test.MockAlgorithm;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockBufferCache;
@@ -578,6 +579,9 @@ public class TriggerManagerTest
         MockSplicer spl = new MockSplicer();
         mgr.setSplicer(spl);
 
+        final int runNum = 123;
+        mgr.setRunNumber(runNum);
+
         SplicerChangedEvent evt = new SplicerChangedEvent(mgr, 0, null,
                                                           new ArrayList());
         mgr.starting(evt);
@@ -599,6 +603,8 @@ public class TriggerManagerTest
 
         MockSplicer spl = new MockSplicer();
         mgr.setSplicer(spl);
+
+        mgr.setRunNumber(123);
 
         SplicerChangedEvent evt = new SplicerChangedEvent(mgr, 0, null,
                                                           new ArrayList());
@@ -712,13 +718,13 @@ public class TriggerManagerTest
 
         System.setProperty("icecube.sndaq.zmq.address", "localhost:0");
 
+        final int runNum = 123;
+        mgr.setRunNumber(runNum);
+
         SplicerChangedEvent evt = new SplicerChangedEvent(mgr, 0, null,
                                                           new ArrayList());
         mgr.starting(evt);
 
-        final int runNum = 123;
-
-        mgr.setRunNumber(runNum);
         mgr.setFirstGoodTime(0);
 
         final long intvl = 400000000000L;
@@ -808,13 +814,13 @@ public class TriggerManagerTest
 
         System.setProperty("icecube.sndaq.zmq.address", "localhost:0");
 
+        final int runNum = 123;
+        mgr.setRunNumber(runNum);
+
         SplicerChangedEvent evt = new SplicerChangedEvent(mgr, 0, null,
                                                           new ArrayList());
         mgr.starting(evt);
 
-        final int runNum = 123;
-
-        mgr.setRunNumber(runNum);
         mgr.setFirstGoodTime(0);
 
         final long intvl = 400000000000L;

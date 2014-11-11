@@ -3,6 +3,7 @@ package icecube.daq.trigger.control;
 import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
+import icecube.daq.trigger.test.MockAlerter;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockTriggerRequest;
 import icecube.daq.util.Leapseconds;

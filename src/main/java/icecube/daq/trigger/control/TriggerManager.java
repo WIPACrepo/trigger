@@ -167,7 +167,7 @@ public class TriggerManager
     private IUTCTime timeOfLastHit;
 
     /** Current run number */
-    private int runNumber;
+    private int runNumber = Integer.MIN_VALUE;
 
     /**
      * Create a trigger manager.

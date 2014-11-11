@@ -1,4 +1,4 @@
-package icecube.daq.trigger.control;
+package icecube.daq.trigger.test;
 
 import icecube.daq.juggler.alert.AlertException;
 import icecube.daq.juggler.alert.Alerter;
@@ -9,10 +9,11 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-class MockAlerter
+public class MockAlerter
     implements Alerter
 {
     private boolean inactive;
+    private boolean closed;
 
     private int numSent;
     private String expVarName;
@@ -24,7 +25,7 @@ class MockAlerter
 
     public void close()
     {
-        throw new Error("Unimplemented");
+        closed = true;
     }
 
     public void deactivate()
@@ -47,6 +48,11 @@ class MockAlerter
         return !inactive;
     }
 
+    public boolean isClosed()
+    {
+        return closed;
+    }
+
     public void send(String varname, Priority prio, Calendar dateTime,
                      Map<String, Object> values)
         throws AlertException
@@ -64,6 +70,10 @@ class MockAlerter
     public void send(String varname, Priority prio, Map<String, Object> values)
         throws AlertException
     {
+        if (closed) {
+            throw new Error("Alerter has been closed");
+        }
+
         assertEquals("Unexpected varname", varname, expVarName);
         assertEquals("Unexpected priority", prio, expPrio);
 

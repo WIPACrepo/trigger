@@ -274,15 +274,13 @@ class CollectorThread
     private void initializeSNDAQAlerter(List<INewAlgorithm> algorithms)
     {
         try {
-            alerter = new SNDAQAlerter();
+            alerter = new SNDAQAlerter(algorithms);
         } catch (AlertException ae) {
             LOG.error("Cannot create SNDAQ alerter;" +
                       " no SNDAQ alerts will be sent", ae);
             alerter = null;
             return;
         }
-
-        alerter.loadAlgorithms(algorithms);
     }
 
     private void notifySNDAQ(List<ITriggerRequestPayload> list)
@@ -290,6 +288,10 @@ class CollectorThread
         if (!alerter.isActive()) {
             LOG.error("Alerter " + alerter + " is not active");
             return;
+        }
+
+        if (runNumber != alerter.getRunNumber()) {
+            alerter.setRunNumber(runNumber);
         }
 
         for (ITriggerRequestPayload req : list) {

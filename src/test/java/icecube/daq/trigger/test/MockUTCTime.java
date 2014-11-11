@@ -2,6 +2,7 @@ package icecube.daq.trigger.test;
 
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.Poolable;
+import icecube.daq.payload.impl.UTCTime;
 
 public class MockUTCTime
     implements IUTCTime, Poolable
@@ -105,7 +106,7 @@ public class MockUTCTime
      */
     public String toDateString()
     {
-        throw new Error("Unimplemented");
+        return UTCTime.toDateString(time);
     }
 
     public String toString()

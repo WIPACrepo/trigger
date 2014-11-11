@@ -1,6 +1,7 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.juggler.alert.AlertException;
+import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.juggler.alert.ZMQAlerter;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.PayloadFormatException;
@@ -21,7 +22,7 @@ public class SNDAQAlerter
 
     private static final Log LOG = LogFactory.getLog(SNDAQAlerter.class);
 
-    private ZMQAlerter zmq;
+    private Alerter zmq;
 
     private int smt8cfgId;
     private int smt8type;
@@ -31,7 +32,14 @@ public class SNDAQAlerter
 
     private int runNumber = Integer.MIN_VALUE;
 
-    public SNDAQAlerter()
+    /**
+     * Create a supernova DAQ alerter.
+     *
+     * @param algorithms trigger algorithms
+     *
+     * @throws AlertException if there is a problem
+     */
+    public SNDAQAlerter(List<INewAlgorithm> algorithms)
         throws AlertException
     {
         String address = System.getProperty(PROPERTY, null);
@@ -60,8 +68,9 @@ public class SNDAQAlerter
                                      "\"");
         }
 
-        zmq = new ZMQAlerter();
-        zmq.setAddress(host, port);
+        zmq = createZMQAlerter(host, port);
+
+        loadAlgorithms(algorithms);
     }
 
     /**
@@ -75,6 +84,16 @@ public class SNDAQAlerter
     }
 
     /**
+     * Get the current run number
+     *
+     * @return run number
+     */
+    public int getRunNumber()
+    {
+        return runNumber;
+    }
+
+    /**
      * Get the service name
      *
      * @return service name
@@ -82,6 +101,25 @@ public class SNDAQAlerter
     public String getService()
     {
         throw new Error("SNDAQAlerter does not use the service name");
+    }
+
+    /**
+     * Create the ZMQ alerter.  This method exists mainly to allow unit tests
+     * to inject a mock alerter.
+     *
+     * @param host host name
+     * @param port port number
+     *
+     * @return alerter
+     *
+     * @throws AlertException if the ZMQ connection cannot be made
+     */
+    public Alerter createZMQAlerter(String host, int port)
+        throws AlertException
+    {
+        ZMQAlerter z = new ZMQAlerter();
+        z.setAddress(host, port);
+        return z;
     }
 
     /**
@@ -99,7 +137,7 @@ public class SNDAQAlerter
      *
      * @param algorithms trigger algorithms
      */
-    public void loadAlgorithms(List<INewAlgorithm> algorithms)
+    private void loadAlgorithms(List<INewAlgorithm> algorithms)
     {
         for (INewAlgorithm a : algorithms) {
             if (!a.getTriggerName().startsWith("SimpleMajorityTrigger")) {
@@ -172,7 +210,11 @@ public class SNDAQAlerter
      */
     public void setRunNumber(int num)
     {
-        runNumber = num;
+        if (runNumber == Integer.MIN_VALUE || thread == null) {
+            runNumber = num;
+        } else {
+            thread.switchToNewRun(num);
+        }
     }
 
     /**
@@ -190,11 +232,17 @@ public class SNDAQAlerter
         private boolean sentStart;
 
         private boolean stopping;
+        private boolean stopped;
 
         AlertThread()
         {
             thread = new Thread(this);
             thread.setName("AlertThread");
+        }
+
+        public boolean isStopped()
+        {
+            return stopped;
         }
 
         public void queue(HashMap<String, Object> map)
@@ -253,9 +301,11 @@ public class SNDAQAlerter
             if (zmq.isActive()) {
                 zmq.close();
             }
+
+            stopped = true;
         }
 
-        public void sendAction(String action, Object time, int runNumber)
+        private void sendAction(String action, Object time, int runNumber)
         {
             HashMap<String, Object> map = new HashMap<String, Object>();
             map.put(action, runNumber);
@@ -268,8 +318,16 @@ public class SNDAQAlerter
             }
         }
 
+        private void sendStop()
+        {
+            sendAction("stop", lastTime, runNumber);
+        }
+
         public void start()
         {
+            stopping = false;
+            stopped = false;
+
             thread.start();
         }
 
@@ -278,6 +336,15 @@ public class SNDAQAlerter
             synchronized (queue) {
                 stopping = true;
                 queue.notify();
+            }
+        }
+
+        public void switchToNewRun(int newNum)
+        {
+            synchronized (queue) {
+                sendStop();
+                sentStart = false;
+                runNumber = newNum;
             }
         }
     }

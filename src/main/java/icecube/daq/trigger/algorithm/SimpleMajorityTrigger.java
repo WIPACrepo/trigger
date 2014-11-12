@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 14485 2013-05-13 20:23:34Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 15246 2014-11-12 18:54:01Z dglo $
  *
  * Date: August 19 2005
  *
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 14485 2013-05-13 20:23:34Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 15246 2014-11-12 18:54:01Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -591,5 +591,15 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
             return "Window[" + startTime() + "-" + endTime() + "]*" +
                 hits.size();
         }
+    }
+
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "SIMPLE_MULTIPLICITY";
     }
 }

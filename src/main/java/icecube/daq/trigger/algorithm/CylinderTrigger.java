@@ -267,6 +267,15 @@ public class CylinderTrigger extends AbstractTrigger
         return true;
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "VOLUME";
+    }
 }
 
 class HitComparator

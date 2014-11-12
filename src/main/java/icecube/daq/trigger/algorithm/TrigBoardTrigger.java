@@ -158,4 +158,13 @@ public class TrigBoardTrigger extends AbstractTrigger
         this.prescale = prescale;
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "TRIG_BOARD";
+    }
 }

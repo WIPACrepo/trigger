@@ -54,6 +54,13 @@ public interface INewAlgorithm
     Interval getInterval(Interval interval);
 
     /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    String getMonitoringName();
+
+    /**
      * Get number of cached requests.
      *
      * @return number of cached requests

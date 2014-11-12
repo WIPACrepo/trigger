@@ -1,7 +1,7 @@
 /*
  * class: VetoTrigger
  *
- * Version $Id: VetoTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * Version $Id: VetoTrigger.java 15246 2014-11-12 18:54:01Z dglo $
  *
  * Date: January 25 2006
  *
@@ -22,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is to provide commond methods for any N-VetoTrigger.
  *
- * @version $Id: VetoTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * @version $Id: VetoTrigger.java 15246 2014-11-12 18:54:01Z dglo $
  * @author shseo
  */
 public abstract class VetoTrigger
@@ -78,4 +78,13 @@ public abstract class VetoTrigger
         //--nothing needs to be done in this VetoTrigger algorithm!
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "VETO";
+    }
 }

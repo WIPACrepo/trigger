@@ -190,4 +190,14 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
     {
         this.deadtime = deadtime;
     }
+
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "MIN_BIAS";
+    }
 }

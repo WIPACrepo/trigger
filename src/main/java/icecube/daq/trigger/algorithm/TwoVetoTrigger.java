@@ -1,7 +1,7 @@
 /*
  * class: TwoVetoTrigger
  *
- * Version $Id: TwoVetoTrigger.java 15131 2014-08-21 19:16:22Z dglo $
+ * Version $Id: TwoVetoTrigger.java 15246 2014-11-12 18:54:01Z dglo $
  *
  * Date: January 25 2006
  *
@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is accept all incoming triggers but to veto two configured triggers.
  *
- * @version $Id: TwoVetoTrigger.java 15131 2014-08-21 19:16:22Z dglo $
+ * @version $Id: TwoVetoTrigger.java 15246 2014-11-12 18:54:01Z dglo $
  * @author shseo
  */
 public class TwoVetoTrigger
@@ -186,4 +186,13 @@ public class TwoVetoTrigger
 
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "TWO_VETO";
+    }
 }

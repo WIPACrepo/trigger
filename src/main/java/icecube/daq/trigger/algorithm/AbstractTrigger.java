@@ -562,6 +562,13 @@ public abstract class AbstractTrigger
     }
 
     /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public abstract String getMonitoringName();
+
+    /**
      * Get the next request UID.
      * NOTE: this increments the trigger-wide UID counter
      *

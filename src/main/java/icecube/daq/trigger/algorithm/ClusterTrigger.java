@@ -153,6 +153,16 @@ public class ClusterTrigger extends AbstractTrigger
         triggerQueue.clear();
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "CLUSTER";
+    }
+
     @Override
     public void runTrigger(IPayload payload) throws TriggerException
     {
@@ -267,7 +277,6 @@ public class ClusterTrigger extends AbstractTrigger
     {
         return configTimeWindow && configMultiplicity && configCoherence;
     }
-
 }
 
 class LogicalChannel implements Comparable<LogicalChannel>

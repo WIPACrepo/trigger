@@ -1,7 +1,7 @@
 /*
  * class: OneVetoTrigger
  *
- * Version $Id: OneVetoTrigger.java 15131 2014-08-21 19:16:22Z dglo $
+ * Version $Id: OneVetoTrigger.java 15246 2014-11-12 18:54:01Z dglo $
  *
  * Date: January 25 2006
  *
@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is accept all incoming triggers but to veto one configured triggers.
  *
- * @version $Id: OneVetoTrigger.java 15131 2014-08-21 19:16:22Z dglo $
+ * @version $Id: OneVetoTrigger.java 15246 2014-11-12 18:54:01Z dglo $
  * @author shseo
  */
 public class OneVetoTrigger
@@ -158,5 +158,15 @@ public class OneVetoTrigger
             }
         }
 
+    }
+
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "ONE_VETO";
     }
 }

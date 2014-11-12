@@ -112,6 +112,11 @@ public class MockAlgorithm
         return intervals.get(0);
     }
 
+    public String getMonitoringName()
+    {
+        return "MOCK";
+    }
+
     /**
      * Get number of cached requests.
      *

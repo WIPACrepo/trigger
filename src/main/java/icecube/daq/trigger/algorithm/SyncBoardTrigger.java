@@ -158,4 +158,13 @@ public class SyncBoardTrigger extends AbstractTrigger
         this.prescale = prescale;
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "SYNC_BOARD";
+    }
 }

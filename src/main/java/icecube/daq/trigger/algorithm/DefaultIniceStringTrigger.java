@@ -139,6 +139,14 @@ public class DefaultIniceStringTrigger extends AbstractTrigger
 	// nothing to flush
     }
 
-
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "DEFAULT_II_STRING";
+    }
 }
 

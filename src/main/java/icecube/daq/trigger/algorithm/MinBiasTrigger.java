@@ -1,7 +1,7 @@
 /*
  * class: MinBiasTrigger
  *
- * Version $Id: MinBiasTrigger.java 14371 2013-03-27 16:56:04Z dglo $
+ * Version $Id: MinBiasTrigger.java 15246 2014-11-12 18:54:01Z dglo $
  *
  * Date: August 27 2005
  *
@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  * This class implements a simple minimum bias trigger. It simply counts hits and
  * applies a prescale for determining when a trigger should be formed.
  *
- * @version $Id: MinBiasTrigger.java 14371 2013-03-27 16:56:04Z dglo $
+ * @version $Id: MinBiasTrigger.java 15246 2014-11-12 18:54:01Z dglo $
  * @author pat
  */
 public class MinBiasTrigger
@@ -156,5 +156,15 @@ public class MinBiasTrigger
         if (LOG.isInfoEnabled()) {
             LOG.info("TriggerName set to " + super.triggerName);
         }
+    }
+
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "MIN_BIAS";
     }
 }

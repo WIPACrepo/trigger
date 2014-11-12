@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
  *  makes a new TriggerRequest for each input TriggerRequest
  *  and then pass them to GlobalTrigBag.java.
  *
- * @version $Id: ThroughputTrigger.java 14468 2013-05-03 16:29:42Z dglo $
+ * @version $Id: ThroughputTrigger.java 15246 2014-11-12 18:54:01Z dglo $
  * @author shseo
  */
 public class ThroughputTrigger
@@ -91,5 +91,15 @@ public class ThroughputTrigger
         throws UnknownParameterException
     {
         throw new UnknownParameterException("This trigger needs no parameter");
+    }
+
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "THROUGHPUT";
     }
 }

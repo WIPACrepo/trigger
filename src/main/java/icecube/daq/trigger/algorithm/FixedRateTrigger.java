@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * Version $Id: FixedRateTrigger.java 15246 2014-11-12 18:54:01Z dglo $
  *
  * Date: May 1 2006
  *
@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 14207 2013-02-11 22:18:48Z dglo $
+ * @version $Id: FixedRateTrigger.java 15246 2014-11-12 18:54:01Z dglo $
  * @author pat
  */
 public class FixedRateTrigger extends AbstractTrigger
@@ -190,4 +190,13 @@ public class FixedRateTrigger extends AbstractTrigger
         numberOfHitsProcessed++;
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "UNBIASED";
+    }
 }

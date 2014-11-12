@@ -826,4 +826,13 @@ public class SlowMPTrigger extends AbstractTrigger
         return null;
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "SLOW_PARTICLE";
+    }
 }

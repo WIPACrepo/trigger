@@ -762,4 +762,13 @@ public class IniceVolumeTrigger extends AbstractTrigger {
         }
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "II_VOLUME";
+    }
 }

@@ -1,7 +1,7 @@
 /*
  * class: ThreeVetoTrigger
  *
- * Version $Id: ThreeVetoTrigger.java 15155 2014-09-22 15:41:57Z dglo $
+ * Version $Id: ThreeVetoTrigger.java 15246 2014-11-12 18:54:01Z dglo $
  *
  * Date: January 25 2006
  *
@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is accept all incoming triggers but to veto three configured triggers.
  *
- * @version $Id: ThreeVetoTrigger.java 15155 2014-09-22 15:41:57Z dglo $
+ * @version $Id: ThreeVetoTrigger.java 15246 2014-11-12 18:54:01Z dglo $
  * @author shseo
  */
 public class ThreeVetoTrigger
@@ -201,5 +201,15 @@ public class ThreeVetoTrigger
             }
         }
 
+    }
+
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "THREE_VETO";
     }
 }

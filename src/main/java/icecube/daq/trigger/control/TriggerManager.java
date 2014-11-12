@@ -658,6 +658,14 @@ public class TriggerManager
             throw new TriggerException(msg);
         }
 
+        if (runNumber == Integer.MIN_VALUE) {
+            runNumber = this.runNumber;
+        }
+        if (runNumber < 0) {
+            throw new TriggerException("Cannot send triplets alert;" +
+                                       " bad run number " + runNumber);
+        }
+
         ArrayList<Object[]> triplets = new ArrayList<Object[]>();
         for (INewAlgorithm a : algorithms) {
             Object[] data = new Object[4];

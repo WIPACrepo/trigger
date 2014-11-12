@@ -358,7 +358,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 15247 2014-11-12 18:55:32Z dglo $";
+        return "$Id: TriggerComponent.java 15250 2014-11-12 22:00:01Z dglo $";
     }
 
     /**
@@ -422,9 +422,9 @@ public class TriggerComponent
     public void starting()
     {
         try {
-            triggerManager.sendTriplets(getAlerter(), getRunNumber());
+            triggerManager.sendTriplets(getAlerter(), Integer.MIN_VALUE);
         } catch (TriggerException te) {
-            LOG.error("Cannot send triplets for run " + getRunNumber(), te);
+            LOG.error("Cannot send triplets", te);
         }
     }
 

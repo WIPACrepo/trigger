@@ -358,7 +358,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 15165 2014-09-25 18:43:15Z dglo $";
+        return "$Id: TriggerComponent.java 15247 2014-11-12 18:55:32Z dglo $";
     }
 
     /**
@@ -417,6 +417,18 @@ public class TriggerComponent
     }
 
     /**
+     * Send trigger triplets before starting.
+     */
+    public void starting()
+    {
+        try {
+            triggerManager.sendTriplets(getAlerter(), getRunNumber());
+        } catch (TriggerException te) {
+            LOG.error("Cannot send triplets for run " + getRunNumber(), te);
+        }
+    }
+
+    /**
      * Send histograms after run has stopped.
      *
      * @throws DAQCompException if there is a problem sending histograms
@@ -441,5 +453,12 @@ public class TriggerComponent
     {
         // histograms are sent inside switchToNewRun()
         triggerManager.switchToNewRun(runNumber);
+
+        // send triplets after switching
+        try {
+            triggerManager.sendTriplets(getAlerter(), runNumber);
+        } catch (TriggerException te) {
+            LOG.error("Cannot send triplets for run " + runNumber, te);
+        }
     }
 }

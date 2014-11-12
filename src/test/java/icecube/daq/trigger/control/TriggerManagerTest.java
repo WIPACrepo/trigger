@@ -869,6 +869,35 @@ public class TriggerManagerTest
         }
     }
 
+    @Test
+    public void testSendTriplets()
+        throws TriggerException
+    {
+        final int srcId = INICE_ID;
+
+        MockSourceID src = new MockSourceID(srcId);
+        MockBufferCache bufCache = new MockBufferCache("foo");
+
+        TriggerManager mgr = new TriggerManager(src, bufCache);
+
+        List<ITriggerAlgorithm> list = new ArrayList<ITriggerAlgorithm>();
+        for (int i = 0; i < 10; i++) {
+            list.add(new MockAlgorithm("algo" + i, 10 + i, 20 + i, 30 + i));
+        }
+        mgr.addTriggers(list);
+
+        final int runNum = 12543;
+
+        MockAlerter alerter = new MockAlerter();
+        alerter.setExpectedVarName("trigger_triplets");
+        alerter.setExpectedPriority(Priority.SCP);
+
+        mgr.sendTriplets(alerter, runNum);
+
+        // XXX this doesn't validate the body of the alert
+        assertEquals("Unexpected number of alerts", 1, alerter.getNumSent());
+    }
+
     class MyHit
         extends MockPayload
         implements IHitPayload

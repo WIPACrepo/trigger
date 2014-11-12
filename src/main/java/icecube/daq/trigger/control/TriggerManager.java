@@ -1,6 +1,7 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.io.DAQComponentOutputProcess;
+import icecube.daq.juggler.alert.AlertException;
 import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IHitPayload;
@@ -22,6 +23,7 @@ import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.common.ITriggerAlgorithm;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
+import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnimplementedError;
 import icecube.daq.util.DOMRegistry;
 
@@ -648,6 +650,36 @@ public class TriggerManager
         }
     }
 
+    public void sendTriplets(Alerter alerter, int runNumber)
+        throws TriggerException
+    {
+        if (!alerter.isActive()) {
+            final String msg = "Alerter " + alerter + " is not active";
+            throw new TriggerException(msg);
+        }
+
+        ArrayList<Object[]> triplets = new ArrayList<Object[]>();
+        for (INewAlgorithm a : algorithms) {
+            Object[] data = new Object[4];
+            data[0] = Integer.valueOf(a.getTriggerConfigId());
+            data[1] = Integer.valueOf(a.getTriggerType());
+            data[2] = Integer.valueOf(a.getSourceId());
+            data[3] = a.getMonitoringName();
+            triplets.add(data);
+        }
+
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("sourceid", srcId);
+        values.put("runNumber", runNumber);
+        values.put("triplets", triplets);
+
+        try {
+            alerter.send("trigger_triplets", Alerter.Priority.SCP, values);
+        } catch (AlertException ae) {
+            throw new TriggerException("Cannot send alert", ae);
+        }
+    }
+
     /**
      * Set the object which sends I3Live alerts
      *
@@ -845,6 +877,9 @@ public class TriggerManager
         } else {
             collector.setRunNumber(runNumber, true);
         }
+
+        // update private copy of run number
+        this.runNumber = runNumber;
     }
 
     /**

@@ -67,15 +67,19 @@ public class MockAlerter
         throw new Error("Unimplemented");
     }
 
-    public void send(String varname, Priority prio, Map<String, Object> values)
+    public void send(String varName, Priority prio, Map<String, Object> values)
         throws AlertException
     {
         if (closed) {
             throw new Error("Alerter has been closed");
         }
 
-        assertEquals("Unexpected varname", varname, expVarName);
-        assertEquals("Unexpected priority", prio, expPrio);
+        if (expVarName == null || expPrio == null) {
+            fail("Received unexpected " + varName + " alert, prio " + prio);
+        }
+
+        assertEquals("Unexpected varname", expVarName, varName);
+        assertEquals("Unexpected priority", expPrio, prio);
 
         numSent++;
     }

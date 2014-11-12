@@ -199,6 +199,8 @@ public class InIceTriggerIntegrationTest
 
         comp.configuring(cfgFile.getName());
 
+        comp.setRunNumber(12345);
+
         tails = DAQTestUtil.connectToReader(comp.getReader(),
                                             comp.getInputCache(), numTails);
 

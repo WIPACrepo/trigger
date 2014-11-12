@@ -78,6 +78,22 @@ class MyMockAlerter
         }
     }
 
+    void dumpExpected()
+    {
+        int num = 0;
+        for (Map<String, Object> map : expected) {
+            System.err.println("Expected #" + num++);
+            for (String key : map.keySet()) {
+                System.err.println(key + " => " + map.get(key));
+            }
+        }
+    }
+
+    int getNumberExpected()
+    {
+        return expected.size();
+    }
+
     boolean isEmpty()
     {
         return expected.size() == 0;
@@ -267,7 +283,19 @@ public class SNDAQAlerterTest
 
         alerter.close();
 
-        assertFalse("ZMQ alerter expects more messages", mockZMQ.isEmpty());
+        for (int i = 0; !mockZMQ.isEmpty() && i < 500; i++) {
+            try {
+                Thread.sleep(2);
+            } catch (Exception ex) {
+                // ignore interrupts
+            }
+        }
+
+        if (!mockZMQ.isEmpty()) {
+            mockZMQ.dumpExpected();
+            fail("ZMQ alerter expects " + mockZMQ.getNumberExpected() +
+                 " more messages");
+        }
         assertFalse("ZMQ alerter saw one or more errors", mockZMQ.sawError());
     }
 }

@@ -133,6 +133,8 @@ public class InIceTriggerEndToEndTest
 
         trigMgr.setOutputEngine(outProc);
 
+        trigMgr.setRunNumber(12345);
+
         HKN1Splicer splicer = new HKN1Splicer(trigMgr);
         trigMgr.setSplicer(splicer);
 

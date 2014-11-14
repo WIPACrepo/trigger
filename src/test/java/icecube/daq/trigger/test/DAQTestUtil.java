@@ -162,31 +162,17 @@ public final class DAQTestUtil
                                          int numTails)
         throws IOException
     {
-        return connectToReader(rdr, cache, numTails, true);
-    }
-
-    public static Pipe[] connectToReader(PayloadReader rdr,
-                                         IByteBufferCache cache,
-                                         int numTails,
-                                         boolean startReader)
-        throws IOException
-    {
         Pipe[] chanList = new Pipe[numTails];
 
         for (int i = 0; i < chanList.length; i++) {
-            chanList[i] = connectToReader(rdr, cache, false);
-        }
-
-        if (startReader) {
-            startIOProcess(rdr);
+            chanList[i] = connectToReader(rdr, cache);
         }
 
         return chanList;
     }
 
     public static Pipe connectToReader(PayloadReader rdr,
-                                       IByteBufferCache cache,
-                                       boolean startReader)
+                                       IByteBufferCache cache)
         throws IOException
     {
         Pipe testPipe = Pipe.open();
@@ -200,10 +186,6 @@ public final class DAQTestUtil
         sourceChannel.configureBlocking(false);
 
         rdr.addDataChannel(sourceChannel, "rdrSink", cache, 1024);
-
-        if (startReader) {
-            startIOProcess(rdr);
-        }
 
         return testPipe;
     }

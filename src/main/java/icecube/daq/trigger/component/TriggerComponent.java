@@ -358,7 +358,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 15250 2014-11-12 22:00:01Z dglo $";
+        return "$Id: TriggerComponent.java 15256 2014-11-14 14:43:43Z dglo $";
     }
 
     /**
@@ -407,24 +407,16 @@ public class TriggerComponent
     }
 
     /**
-     * Set the initial run number for a "conventional" run.
-     *
-     * @param runNumber run number
-     */
-    public void setRunNumber(int runNumber)
-    {
-        triggerManager.setRunNumber(runNumber);
-    }
-
-    /**
      * Send trigger triplets before starting.
      */
-    public void starting()
+    public void starting(int runNumber)
     {
+        triggerManager.setRunNumber(runNumber);
+
         try {
-            triggerManager.sendTriplets(getAlerter(), Integer.MIN_VALUE);
+            triggerManager.sendTriplets(getAlerter(), runNumber);
         } catch (TriggerException te) {
-            LOG.error("Cannot send triplets", te);
+            LOG.error("Cannot send triplets for run " + runNumber, te);
         }
     }
 

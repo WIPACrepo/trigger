@@ -3,6 +3,7 @@ package icecube.daq.trigger.component;
 import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.juggler.component.DAQCompException;
+import icecube.daq.juggler.alert.Alerter.Priority;
 import icecube.daq.trigger.algorithm.AbstractTrigger;
 import icecube.daq.trigger.control.SNDAQAlerter;
 import icecube.daq.trigger.control.TriggerManager;
@@ -10,6 +11,7 @@ import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.ActivityMonitor;
 import icecube.daq.trigger.test.BaseValidator;
 import icecube.daq.trigger.test.DAQTestUtil;
+import icecube.daq.trigger.test.MockAlerter;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockSourceID;
 import icecube.daq.payload.IByteBufferCache;
@@ -192,14 +194,17 @@ public class InIceTriggerIntegrationTest
             throw new Error("Cannot load DOM registry", ex);
         }
 
+        MockAlerter alerter = new MockAlerter();
+        alerter.setExpectedVarName("trigger_triplets");
+        alerter.setExpectedPriority(Priority.SCP);
+
         // set up in-ice trigger
         comp = new IniceTriggerComponent();
         comp.setGlobalConfigurationDir(cfgFile.getParent());
+        comp.setAlerter(alerter);
         comp.start(false);
 
         comp.configuring(cfgFile.getName());
-
-        comp.setRunNumber(12345);
 
         tails = DAQTestUtil.connectToReader(comp.getReader(),
                                             comp.getInputCache(), numTails);
@@ -207,6 +212,8 @@ public class InIceTriggerIntegrationTest
         InIceValidator validator = new InIceValidator();
         DAQTestUtil.connectToSink("iiOut", comp.getWriter(),
                                   comp.getOutputCache(), validator);
+
+        comp.starting(12345);
 
         DAQTestUtil.startComponentIO(comp);
 

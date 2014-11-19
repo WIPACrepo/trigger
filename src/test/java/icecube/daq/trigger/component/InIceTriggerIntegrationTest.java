@@ -196,7 +196,7 @@ public class InIceTriggerIntegrationTest
 
         MockAlerter alerter = new MockAlerter();
         alerter.setExpectedVarName("trigger_triplets");
-        alerter.setExpectedPriority(Priority.SCP);
+        alerter.setExpectedPriority(Priority.EMAIL);
 
         // set up in-ice trigger
         comp = new IniceTriggerComponent();

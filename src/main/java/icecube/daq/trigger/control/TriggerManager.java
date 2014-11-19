@@ -666,23 +666,40 @@ public class TriggerManager
                                        " bad run number " + runNumber);
         }
 
+        String prefix;
+        if (srcId >= SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID &&
+            srcId < SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID + 1000)
+        {
+            prefix = "GLOBAL_";
+        } else if (srcId >= SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID &&
+            srcId < SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID + 1000)
+        {
+            prefix = "ICETOP_";
+        } else if (srcId >= SourceIdRegistry.INICE_TRIGGER_SOURCE_ID &&
+            srcId < SourceIdRegistry.INICE_TRIGGER_SOURCE_ID + 1000)
+        {
+            prefix = "INICE_";
+        } else {
+            LOG.error("Unknown trigger source ID " + srcId);
+            prefix = "UNKNOWN_";
+        }
+
         ArrayList<Object[]> triplets = new ArrayList<Object[]>();
         for (INewAlgorithm a : algorithms) {
             Object[] data = new Object[4];
             data[0] = Integer.valueOf(a.getTriggerConfigId());
             data[1] = Integer.valueOf(a.getTriggerType());
             data[2] = Integer.valueOf(a.getSourceId());
-            data[3] = a.getMonitoringName();
+            data[3] = prefix  + a.getMonitoringName();
             triplets.add(data);
         }
 
         HashMap<String, Object> values = new HashMap<String, Object>();
-        values.put("sourceid", srcId);
         values.put("runNumber", runNumber);
         values.put("triplets", triplets);
 
         try {
-            alerter.send("trigger_triplets", Alerter.Priority.SCP, values);
+            alerter.send("trigger_triplets", Alerter.Priority.EMAIL, values);
         } catch (AlertException ae) {
             throw new TriggerException("Cannot send alert", ae);
         }

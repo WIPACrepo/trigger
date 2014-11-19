@@ -890,7 +890,7 @@ public class TriggerManagerTest
 
         MockAlerter alerter = new MockAlerter();
         alerter.setExpectedVarName("trigger_triplets");
-        alerter.setExpectedPriority(Priority.SCP);
+        alerter.setExpectedPriority(Priority.EMAIL);
 
         mgr.sendTriplets(alerter, runNum);
 

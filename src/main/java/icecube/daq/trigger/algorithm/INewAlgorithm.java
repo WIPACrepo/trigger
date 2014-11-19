@@ -82,6 +82,14 @@ public interface INewAlgorithm
     IPayload getReleaseTime();
 
     /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    boolean hasValidMultiplicity();
+
+    /**
      * Recycle all unused requests still cached in the algorithms.
      */
     void recycleUnusedRequests();

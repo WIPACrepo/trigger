@@ -276,6 +276,17 @@ public class CylinderTrigger extends AbstractTrigger
     {
         return "VOLUME";
     }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    public boolean hasValidMultiplicity()
+    {
+        return true;
+    }
 }
 
 class HitComparator

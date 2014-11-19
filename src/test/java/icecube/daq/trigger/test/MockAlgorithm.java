@@ -33,6 +33,7 @@ public class MockAlgorithm
     private int type;
     private int cfgId;
     private int srcId;
+    private boolean validMultiplicity;
 
     private PayloadSubscriber sub;
     private Map<String, Object> trigMoniMap;
@@ -43,15 +44,22 @@ public class MockAlgorithm
 
     public MockAlgorithm(String name)
     {
-        this(name, 1, 1, SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
+        this(name, 1, 1, SourceIdRegistry.INICE_TRIGGER_SOURCE_ID, true);
     }
 
     public MockAlgorithm(String name, int type, int cfgId, int srcId)
+    {
+        this(name, type, cfgId, srcId, true);
+    }
+
+    public MockAlgorithm(String name, int type, int cfgId, int srcId,
+                         boolean validMultiplicity)
     {
         this.name = name;
         this.type = type;
         this.cfgId = cfgId;
         this.srcId = srcId;
+        this.validMultiplicity = validMultiplicity;
     }
 
     public void addInterval(long start, long end)
@@ -170,6 +178,11 @@ public class MockAlgorithm
     public int getTriggerType()
     {
         return type;
+    }
+
+    public boolean hasValidMultiplicity()
+    {
+        return validMultiplicity;
     }
 
     public boolean isConfigured()

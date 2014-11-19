@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
  *  makes a new TriggerRequest for each input TriggerRequest
  *  and then pass them to GlobalTrigBag.java.
  *
- * @version $Id: ThroughputTrigger.java 15246 2014-11-12 18:54:01Z dglo $
+ * @version $Id: ThroughputTrigger.java 15271 2014-11-19 18:46:22Z dglo $
  * @author shseo
  */
 public class ThroughputTrigger
@@ -101,5 +101,16 @@ public class ThroughputTrigger
     public String getMonitoringName()
     {
         return "THROUGHPUT";
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    public boolean hasValidMultiplicity()
+    {
+        return true;
     }
 }

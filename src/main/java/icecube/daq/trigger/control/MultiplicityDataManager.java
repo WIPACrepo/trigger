@@ -6,6 +6,7 @@ import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadFormatException;
 import icecube.daq.payload.impl.UTCTime;
+import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 
 import java.io.IOException;
@@ -244,6 +245,9 @@ public class MultiplicityDataManager
 
     private static final int NO_NUMBER = Integer.MIN_VALUE;
 
+    /** List of algorithms managed by TriggerManager */
+    private List<INewAlgorithm> algorithms;
+
     private Alerter alerter;
     private HashMap<HashKey, Bins> binmap;
 
@@ -254,8 +258,9 @@ public class MultiplicityDataManager
 
     private int nextRunNumber = NO_NUMBER;
 
-    public MultiplicityDataManager()
+    public MultiplicityDataManager(List<INewAlgorithm> algorithms)
     {
+        this.algorithms = algorithms;
     }
 
     public void add(ITriggerRequestPayload req)
@@ -301,6 +306,11 @@ public class MultiplicityDataManager
         }
 
         // this is a real request
+
+        // ignore algorithms with invalid multiplicities (SlowMP, FixedRate)
+        if (!hasValidMultiplicity(req)) {
+            return;
+        }
 
         if (firstGoodTime == Integer.MIN_VALUE) {
             final String msg =
@@ -387,6 +397,27 @@ public class MultiplicityDataManager
         }
 
         return list;
+    }
+
+    /**
+     * Is this request from an algorithm which includes all the relevant hits?
+     *
+     * SlowMPTrigger and FixedRateTrigger only save the first and last hits.
+     *
+     * @return <tt>true</tt> if this request should have a valid multiplicity
+     */
+    private boolean hasValidMultiplicity(ITriggerRequestPayload req)
+    {
+        for (INewAlgorithm a : algorithms) {
+            if (req.getTriggerConfigID() == a.getTriggerConfigId() &&
+                req.getTriggerType() == a.getTriggerType() &&
+                req.getSourceID().getSourceID() == a.getSourceId())
+            {
+                return a.hasValidMultiplicity();
+            }
+        }
+
+        return false;
     }
 
     public void reset()

@@ -33,14 +33,23 @@ public class MockTriggerRequest
     public MockTriggerRequest(int uid, int type, int cfgId, long startVal,
                               long endVal)
     {
+        this(uid, SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID, type, cfgId,
+             startVal, endVal);
+    }
+
+    public MockTriggerRequest(int uid, int srcId, int type, int cfgId,
+                              long startVal, long endVal)
+    {
         if (startVal > endVal) {
             throw new Error("Starting time " + startVal +
                             " cannot be greater than ending time " + endVal);
         }
 
         this.uid = uid;
+        this.srcId = srcId;
         this.type = type;
         this.cfgId = cfgId;
+
         startTime = new MockUTCTime(startVal);
         endTime = new MockUTCTime(endVal);
     }

@@ -183,7 +183,7 @@ public class TriggerManager
         this.outCache = outCache;
 
         trFactory = new TriggerRequestFactory(outCache);
-        multiDataMgr = new MultiplicityDataManager();
+        multiDataMgr = new MultiplicityDataManager(algorithms);
 
         init();
     }

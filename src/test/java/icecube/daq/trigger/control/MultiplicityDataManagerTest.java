@@ -2,13 +2,16 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 import icecube.daq.trigger.test.MockAlerter;
+import icecube.daq.trigger.test.MockAlgorithm;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockTriggerRequest;
 import icecube.daq.util.Leapseconds;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +53,9 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
+
+        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
         mgr.setAlerter(alerter);
 
         try {
@@ -70,13 +75,20 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        final int srcId = SourceIdRegistry.INICE_TRIGGER_SOURCE_ID;
+        final int cfgId = 2;
+        final int type = 3;
+
+        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
+        algorithms.add(new MockAlgorithm("TstAddOne", type, cfgId, srcId));
+
+        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
         mgr.setAlerter(alerter);
         mgr.setFirstGoodTime(1);
 
         mgr.start(123);
 
-        mgr.add(new MockTriggerRequest(1, 2, 3, 4, 5));
+        mgr.add(new MockTriggerRequest(1, srcId, type, cfgId, 4, 5));
 
         List<Map<String, Object>> histo = mgr.getCounts();
         assertNotNull("Histogram should not be null", histo);
@@ -89,17 +101,21 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
+
+        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
         mgr.setAlerter(alerter);
         mgr.setFirstGoodTime(1);
 
         mgr.start(123);
 
-        final int type = 2;
+        final int srcId = SourceIdRegistry.INICE_TRIGGER_SOURCE_ID;
+        final int type = 3;
 
         int uid = 1;
 
-        MockTriggerRequest req = new MockTriggerRequest(uid++, type, -1, 4, 5);
+        MockTriggerRequest req = new MockTriggerRequest(uid++, srcId, type, -1,
+                                                        4, 5);
         req.setMerged();
 
         mgr.add(req);
@@ -119,24 +135,29 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
+
+        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
         mgr.setAlerter(alerter);
         mgr.setFirstGoodTime(1);
 
         mgr.start(123);
 
+        final int srcId = SourceIdRegistry.INICE_TRIGGER_SOURCE_ID;
+
         final long startTime = 1000;
         final long endTime = 1500;
 
         MockTriggerRequest sub =
-            new MockTriggerRequest(17, 17, 17, startTime, endTime);
+            new MockTriggerRequest(17, srcId, 17, 17, startTime, endTime);
 
         final int type = 2;
 
         int uid = 1;
 
         MockTriggerRequest req =
-            new MockTriggerRequest(uid++, type, -1, startTime, endTime);
+            new MockTriggerRequest(uid++, GLOBAL_ID, type, -1, startTime,
+                                   endTime);
         req.setMerged();
         req.addPayload(sub);
 
@@ -156,25 +177,29 @@ public class MultiplicityDataManagerTest
         }
         Leapseconds.setConfigDirectory(configDir);
 
+        final int srcId = SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID;
+        final int cfgId = 2;
+        final int type = 3;
+
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
+        algorithms.add(new MockAlgorithm("TstAddMulti", type, cfgId, srcId));
+
+        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
         mgr.setAlerter(alerter);
         mgr.setFirstGoodTime(1);
 
         mgr.start(123);
 
-        final int type = 2;
-        final int cfgId = 3;
-
         int uid = 1;
 
         final long firstBin = 100000;
-        mgr.add(new MockTriggerRequest(uid++, type, cfgId,
+        mgr.add(new MockTriggerRequest(uid++, srcId, type, cfgId,
                                        firstBin + 4, firstBin + 5));
 
         final long nextBin = firstBin + CountData.DAQ_BIN_WIDTH;
-        mgr.add(new MockTriggerRequest(uid++, type, cfgId,
+        mgr.add(new MockTriggerRequest(uid++, srcId, type, cfgId,
                                        nextBin + 4, nextBin + 5));
 
         List<Map<String, Object>> histo = mgr.getCounts();
@@ -184,7 +209,7 @@ public class MultiplicityDataManagerTest
         Map<String, Object> map = histo.get(0);
         assertEquals("Bad type", type, map.get("trigid"));
         assertEquals("Bad config ID", cfgId, map.get("configid"));
-        assertEquals("Bad source ID", GLOBAL_ID, map.get("sourceid"));
+        assertEquals("Bad source ID", srcId, map.get("sourceid"));
         assertEquals("Bad count", 1, map.get("value"));
     }
 
@@ -193,7 +218,9 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
+
+        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
         mgr.setAlerter(alerter);
 
         try {
@@ -213,7 +240,9 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
+
+        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
         mgr.setAlerter(alerter);
 
         mgr.start(123);
@@ -227,7 +256,9 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
+
+        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
         mgr.setAlerter(alerter);
 
         try {
@@ -247,7 +278,9 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
+
+        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
         mgr.setAlerter(alerter);
 
         mgr.start(123);
@@ -262,7 +295,9 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
+
+        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
         mgr.setAlerter(alerter);
 
         try {
@@ -282,7 +317,9 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
+
+        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
         mgr.setAlerter(alerter);
         mgr.start(123);
 
@@ -297,23 +334,27 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        final int srcId = SourceIdRegistry.INICE_TRIGGER_SOURCE_ID;
+        final int cfgId = 2;
+        final int type = 3;
+
+        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
+        algorithms.add(new MockAlgorithm("TstSend", type, cfgId, srcId));
+
+        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
         mgr.setAlerter(alerter);
         mgr.setFirstGoodTime(1);
 
         mgr.start(123);
 
-        final int type = 2;
-        final int cfgId = 3;
-
         int uid = 1;
 
         final long firstBin = 100000;
-        mgr.add(new MockTriggerRequest(uid++, type, cfgId,
+        mgr.add(new MockTriggerRequest(uid++, srcId, type, cfgId,
                                        firstBin + 4, firstBin + 5));
 
         final long nextBin = firstBin + CountData.DAQ_BIN_WIDTH;
-        mgr.add(new MockTriggerRequest(uid++, type, cfgId,
+        mgr.add(new MockTriggerRequest(uid++, srcId, type, cfgId,
                                        nextBin + 4, nextBin + 5));
 
         alerter.setExpectedVarName("trigger_multiplicity");
@@ -330,7 +371,9 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
+
+        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
         mgr.setAlerter(alerter);
 
         final int runNum = 12345;

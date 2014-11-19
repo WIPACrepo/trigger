@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 15246 2014-11-12 18:54:01Z dglo $
+ * Version $Id: FixedRateTrigger.java 15271 2014-11-19 18:46:22Z dglo $
  *
  * Date: May 1 2006
  *
@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 15246 2014-11-12 18:54:01Z dglo $
+ * @version $Id: FixedRateTrigger.java 15271 2014-11-19 18:46:22Z dglo $
  * @author pat
  */
 public class FixedRateTrigger extends AbstractTrigger
@@ -198,5 +198,16 @@ public class FixedRateTrigger extends AbstractTrigger
     public String getMonitoringName()
     {
         return "UNBIASED";
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    public boolean hasValidMultiplicity()
+    {
+        return false;
     }
 }

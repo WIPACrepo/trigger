@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 15246 2014-11-12 18:54:01Z dglo $
+ * Version $Id: CalibrationTrigger.java 15271 2014-11-19 18:46:22Z dglo $
  *
  * Date: August 27 2005
  *
@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 15246 2014-11-12 18:54:01Z dglo $
+ * @version $Id: CalibrationTrigger.java 15271 2014-11-19 18:46:22Z dglo $
  * @author pat
  */
 public class CalibrationTrigger extends AbstractTrigger
@@ -163,5 +163,16 @@ public class CalibrationTrigger extends AbstractTrigger
     public String getMonitoringName()
     {
         return "CALIBRATION";
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    public boolean hasValidMultiplicity()
+    {
+        return true;
     }
 }

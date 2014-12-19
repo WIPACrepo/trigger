@@ -1,6 +1,7 @@
 package icecube.daq.trigger.config;
 
 import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.common.ITriggerAlgorithm;
 import icecube.daq.trigger.exceptions.ConfigException;
@@ -31,13 +32,11 @@ public abstract class TriggerCreator
      *
      * @throws TriggerException if there is a problem
      */
-    public static List<ITriggerAlgorithm> buildTriggers(Document doc,
-                                                        ISourceID compId)
+    public static void buildTriggers(Document doc, int compId,
+                                     List<ITriggerAlgorithm> trigList,
+                                     List<INewAlgorithm> extraList)
         throws TriggerException
     {
-        ArrayList<ITriggerAlgorithm> trigList =
-            new ArrayList<ITriggerAlgorithm>();
-
         NodeList nodeList;
         try {
             nodeList =
@@ -50,7 +49,9 @@ public abstract class TriggerCreator
             Node n = nodeList.item(i);
 
             int srcId = Integer.parseInt(getElementText(n, "sourceId"));
-            if (compId != null && compId.getSourceID() != srcId) {
+            if (compId != srcId && extraList == null) {
+                // this algorithm is for a different trigger handler;
+                //  if we don't want to save all configured algorithms, skip it
                 continue;
             }
 
@@ -117,10 +118,12 @@ public abstract class TriggerCreator
                                           " is not fully configured");
             }
 
-            trigList.add(trig);
+            if (compId == srcId) {
+                trigList.add(trig);
+            } else if (extraList != null) {
+                extraList.add(trig);
+            }
         }
-
-        return trigList;
     }
 
     private static String getElementText(Node n, String tag)

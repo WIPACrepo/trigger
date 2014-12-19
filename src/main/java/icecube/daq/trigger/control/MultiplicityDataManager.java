@@ -245,7 +245,7 @@ public class MultiplicityDataManager
 
     private static final int NO_NUMBER = Integer.MIN_VALUE;
 
-    /** List of algorithms managed by TriggerManager */
+    /** Complete list of all configured algorithms for <b>all</b> handlers */
     private List<INewAlgorithm> algorithms;
 
     private Alerter alerter;
@@ -258,9 +258,9 @@ public class MultiplicityDataManager
 
     private int nextRunNumber = NO_NUMBER;
 
-    public MultiplicityDataManager(List<INewAlgorithm> algorithms)
+    public MultiplicityDataManager()
     {
-        this.algorithms = algorithms;
+        algorithms = new ArrayList<INewAlgorithm>();
     }
 
     public void add(ITriggerRequestPayload req)
@@ -305,17 +305,16 @@ public class MultiplicityDataManager
             return;
         }
 
-        // this is a real request
-
         // ignore algorithms with invalid multiplicities (SlowMP, FixedRate)
         if (!hasValidMultiplicity(req)) {
             return;
         }
 
+        // ignore requests seen before the first good time
         if (firstGoodTime == Integer.MIN_VALUE) {
             final String msg =
-                String.format("Saw request #%d before first good time" +
-                              " is set", req.getUID());
+                String.format("Not monitoring request #%d seen before" +
+                              " first good time is set", req.getUID());
             LOG.error(msg);
             return;
         }
@@ -323,6 +322,7 @@ public class MultiplicityDataManager
         final long reqFirst = req.getFirstTimeUTC().longValue();
         final long reqLast = req.getLastTimeUTC().longValue();
 
+        // ignore non-good requests
         if (reqFirst < firstGoodTime) {
             // don't count requests starting before the first good time
             return;
@@ -330,6 +330,8 @@ public class MultiplicityDataManager
             // don't count requests ending after the last good time
             return;
         }
+
+        // and we've finally got something we can monitor!
 
         HashKey key;
         try {
@@ -400,6 +402,16 @@ public class MultiplicityDataManager
     }
 
     /**
+     * Add an algorithm to the list.
+     *
+     * @param algorithm trigger algorithm
+     */
+    public void addAlgorithm(INewAlgorithm algorithm)
+    {
+        algorithms.add(algorithm);
+    }
+
+    /**
      * Is this request from an algorithm which includes all the relevant hits?
      *
      * SlowMPTrigger and FixedRateTrigger only save the first and last hits.
@@ -417,6 +429,9 @@ public class MultiplicityDataManager
             }
         }
 
+        LOG.error("Found request from unknown algorithm with source ID " +
+                  req.getSourceID().getSourceID() + " configID " +
+                  req.getTriggerConfigID() + " type " + req.getTriggerType());
         return false;
     }
 

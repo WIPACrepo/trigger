@@ -20,6 +20,7 @@ import icecube.daq.splicer.Splicer;
 import icecube.daq.trigger.common.DAQTriggerComponent;
 import icecube.daq.trigger.common.ITriggerAlgorithm;
 import icecube.daq.trigger.common.ITriggerManager;
+import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.config.TriggerCreator;
 import icecube.daq.trigger.control.TriggerManager;
@@ -30,6 +31,7 @@ import icecube.daq.util.JAXPUtilException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -223,8 +225,23 @@ public class TriggerComponent
             throw new DAQCompException(jux);
         }
 
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
+
+        // the global trigger needs to know about all configured algorithms
+        //  so it can monitor individual algorithm rates
+        ArrayList<INewAlgorithm> extraAlgorithms;
+        if (sourceId.getSourceID() ==
+            SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID)
+        {
+            extraAlgorithms = new ArrayList<INewAlgorithm>();
+        } else {
+            extraAlgorithms = null;
+        }
+
         try {
-            algorithms = TriggerCreator.buildTriggers(tcDoc, sourceId);
+            TriggerCreator.buildTriggers(tcDoc, sourceId.getSourceID(),
+                                         algorithms, extraAlgorithms);
         } catch (TriggerException te) {
             throw new DAQCompException("Cannot build triggers", te);
         }
@@ -240,6 +257,9 @@ public class TriggerComponent
 
         triggerManager.setAlerter(getAlerter());
         triggerManager.addTriggers(algorithms);
+        if (extraAlgorithms != null) {
+            triggerManager.addExtraAlgorithms(extraAlgorithms);
+        }
     }
 
     /**
@@ -358,7 +378,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 15256 2014-11-14 14:43:43Z dglo $";
+        return "$Id: TriggerComponent.java 15307 2014-12-19 21:18:34Z dglo $";
     }
 
     /**

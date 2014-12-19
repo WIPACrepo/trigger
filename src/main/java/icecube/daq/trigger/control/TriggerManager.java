@@ -183,7 +183,7 @@ public class TriggerManager
         this.outCache = outCache;
 
         trFactory = new TriggerRequestFactory(outCache);
-        multiDataMgr = new MultiplicityDataManager(algorithms);
+        multiDataMgr = new MultiplicityDataManager();
 
         init();
     }
@@ -221,9 +221,11 @@ public class TriggerManager
         }
 
         if (good) {
-            algorithms.add((INewAlgorithm) trig);
+            algorithms.add(trig);
             trig.setTriggerManager(this);
             trig.setTriggerFactory(trFactory);
+
+            multiDataMgr.addAlgorithm(trig);
 
             if (collector != null && !collector.isStopped()) {
                 collector.stop();
@@ -242,7 +244,7 @@ public class TriggerManager
     }
 
     /**
-     * Add a list of algorithms.
+     * Add a list of algorithms for this handler
      *
      * @param list list of trigger algorithms to add
      */
@@ -250,6 +252,21 @@ public class TriggerManager
     {
         for (ITriggerAlgorithm trig: list) {
             addTrigger(trig);
+        }
+    }
+
+    /**
+     * Add a list of algorithms for this handler and optionally include
+     * a list of algorithms configured for all other handlers.  The
+     * <tt>otherList<tt> is to help the global trigger monitoring code
+     *
+     * @param list list of trigger algorithms to add
+     * @param otherList list of algorithms configured for other handlers
+     */
+    public void addExtraAlgorithms(List<INewAlgorithm> extra)
+    {
+        for (INewAlgorithm trig: extra) {
+            multiDataMgr.addAlgorithm(trig);
         }
     }
 

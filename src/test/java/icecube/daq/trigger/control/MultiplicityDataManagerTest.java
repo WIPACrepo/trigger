@@ -53,9 +53,7 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
-
-        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
 
         try {
@@ -79,12 +77,13 @@ public class MultiplicityDataManagerTest
         final int cfgId = 2;
         final int type = 3;
 
-        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
-        algorithms.add(new MockAlgorithm("TstAddOne", type, cfgId, srcId));
+        //List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
 
-        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
         mgr.setFirstGoodTime(1);
+
+        mgr.addAlgorithm(new MockAlgorithm("TstAddOne", type, cfgId, srcId));
 
         mgr.start(123);
 
@@ -101,9 +100,7 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
-
-        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
         mgr.setFirstGoodTime(1);
 
@@ -135,9 +132,7 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
-
-        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
         mgr.setFirstGoodTime(1);
 
@@ -183,12 +178,11 @@ public class MultiplicityDataManagerTest
 
         MockAlerter alerter = new MockAlerter();
 
-        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
-        algorithms.add(new MockAlgorithm("TstAddMulti", type, cfgId, srcId));
-
-        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
         mgr.setFirstGoodTime(1);
+
+        mgr.addAlgorithm(new MockAlgorithm("TstAddMulti", type, cfgId, srcId));
 
         mgr.start(123);
 
@@ -218,9 +212,7 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
-
-        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
 
         try {
@@ -240,9 +232,7 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
-
-        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
 
         mgr.start(123);
@@ -256,9 +246,7 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
-
-        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
 
         try {
@@ -278,9 +266,7 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
-
-        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
 
         mgr.start(123);
@@ -295,9 +281,7 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
-
-        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
 
         try {
@@ -317,9 +301,7 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
-
-        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
         mgr.start(123);
 
@@ -338,12 +320,11 @@ public class MultiplicityDataManagerTest
         final int cfgId = 2;
         final int type = 3;
 
-        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
-        algorithms.add(new MockAlgorithm("TstSend", type, cfgId, srcId));
-
-        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
         mgr.setFirstGoodTime(1);
+
+        mgr.addAlgorithm(new MockAlgorithm("TstSend", type, cfgId, srcId));
 
         mgr.start(123);
 
@@ -371,9 +352,7 @@ public class MultiplicityDataManagerTest
     {
         MockAlerter alerter = new MockAlerter();
 
-        List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
-
-        MultiplicityDataManager mgr = new MultiplicityDataManager(algorithms);
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlerter(alerter);
 
         final int runNum = 12345;

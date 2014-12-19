@@ -136,22 +136,27 @@ public class MultiplicityDataManagerTest
         mgr.setAlerter(alerter);
         mgr.setFirstGoodTime(1);
 
-        mgr.start(123);
-
         final int srcId = SourceIdRegistry.INICE_TRIGGER_SOURCE_ID;
+
+        final int type = 16;
+        final int cfg = 17;
+
+        mgr.addAlgorithm(new MockAlgorithm("TstAddOne", type, cfg, srcId));
+
+        mgr.start(123);
 
         final long startTime = 1000;
         final long endTime = 1500;
 
         MockTriggerRequest sub =
-            new MockTriggerRequest(17, srcId, 17, 17, startTime, endTime);
+            new MockTriggerRequest(17, srcId, type, cfg, startTime, endTime);
 
-        final int type = 2;
+        final int gtype = 2;
 
         int uid = 1;
 
         MockTriggerRequest req =
-            new MockTriggerRequest(uid++, GLOBAL_ID, type, -1, startTime,
+            new MockTriggerRequest(uid++, GLOBAL_ID, gtype, -1, startTime,
                                    endTime);
         req.setMerged();
         req.addPayload(sub);

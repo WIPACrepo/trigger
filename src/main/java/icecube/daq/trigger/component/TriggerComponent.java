@@ -225,8 +225,8 @@ public class TriggerComponent
             throw new DAQCompException(jux);
         }
 
-        ArrayList<ITriggerAlgorithm> algorithms =
-            new ArrayList<ITriggerAlgorithm>();
+        // initialize algorithm list
+        algorithms = new ArrayList<ITriggerAlgorithm>();
 
         // the global trigger needs to know about all configured algorithms
         //  so it can monitor individual algorithm rates
@@ -243,7 +243,8 @@ public class TriggerComponent
             TriggerCreator.buildTriggers(tcDoc, sourceId.getSourceID(),
                                          algorithms, extraAlgorithms);
         } catch (TriggerException te) {
-            throw new DAQCompException("Cannot build triggers", te);
+            throw new DAQCompException("Cannot build triggers in " +
+                                       trigCfgDir + "/" + tcName, te);
         }
 
         if (algorithms.size()  == 0) {
@@ -378,7 +379,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 15307 2014-12-19 21:18:34Z dglo $";
+        return "$Id: TriggerComponent.java 15323 2014-12-22 20:48:23Z dglo $";
     }
 
     /**

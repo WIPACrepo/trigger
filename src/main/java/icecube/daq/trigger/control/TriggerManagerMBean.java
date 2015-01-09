@@ -8,6 +8,27 @@ import java.util.Map;
 public interface TriggerManagerMBean
 {
     /**
+     * Get the number of dropped SNDAQ alerts
+     *
+     * @return number of dropped SNDAQ alerts
+     */
+    long getSNDAQAlertsDropped();
+
+    /**
+     * Get the number of SNDAQ alerts queued for writing
+     *
+     * @return number of queued SNDAQ alerts
+     */
+    int getSNDAQAlertsQueued();
+
+    /**
+     * Get the number of SNDAQ alerts sent to SNDAQ
+     *
+     * @return number of SNDAQ alerts
+     */
+    long getSNDAQAlertsSent();
+
+    /**
      * Get the number of requests queued for writing
      *
      * @return size of output queue

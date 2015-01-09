@@ -1,6 +1,7 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.juggler.alert.AlertException;
+import icecube.daq.juggler.alert.AlertQueue;
 import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
@@ -248,7 +249,7 @@ public class MultiplicityDataManager
     /** Complete list of all configured algorithms for <b>all</b> handlers */
     private List<INewAlgorithm> algorithms;
 
-    private Alerter alerter;
+    private AlertQueue alertQueue;
     private HashMap<HashKey, Bins> binmap;
 
     private Calendar startTime;
@@ -474,10 +475,11 @@ public class MultiplicityDataManager
             } else if (binmap.size() == 0) {
                 // don't bother sending empty list
                 return false;
-            } else if (alerter == null) {
-                throw new MultiplicityDataException("Alerter has not been set");
-            } else if (!alerter.isActive()) {
-                final String msg = "Alerter " + alerter + " is not active";
+            } else if (alertQueue == null) {
+                throw new MultiplicityDataException("AlertQueue has not" +
+                                                    " been set");
+            } else if (alertQueue.isStopped()) {
+                final String msg = "AlertQueue " + alertQueue + " is stopped";
                 throw new MultiplicityDataException(msg);
             }
 
@@ -509,8 +511,8 @@ public class MultiplicityDataManager
 
         for (Map<String, Object> values : valueList) {
             try {
-                alerter.send("trigger_multiplicity", Alerter.Priority.SCP,
-                             values);
+                alertQueue.push("trigger_multiplicity", Alerter.Priority.SCP,
+                                values);
             } catch (AlertException ae) {
                 throw new MultiplicityDataException("Cannot send alert", ae);
             }
@@ -519,9 +521,13 @@ public class MultiplicityDataManager
         return true;
     }
 
-    public void setAlerter(Alerter alerter)
+    public void setAlertQueue(AlertQueue alertQueue)
     {
-        this.alerter = alerter;
+        this.alertQueue = alertQueue;
+
+        if (alertQueue != null && alertQueue.isStopped()) {
+            alertQueue.start();
+        }
     }
 
     /**

@@ -256,7 +256,7 @@ public class TriggerComponent
             addMBean(a.getTriggerName(), a);
         }
 
-        triggerManager.setAlerter(getAlerter());
+        triggerManager.setAlertQueue(getAlertQueue());
         triggerManager.addTriggers(algorithms);
         if (extraAlgorithms != null) {
             triggerManager.addExtraAlgorithms(extraAlgorithms);
@@ -379,7 +379,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 15323 2014-12-22 20:48:23Z dglo $";
+        return "$Id: TriggerComponent.java 15333 2015-01-09 22:08:50Z dglo $";
     }
 
     /**
@@ -435,7 +435,7 @@ public class TriggerComponent
         triggerManager.setRunNumber(runNumber);
 
         try {
-            triggerManager.sendTriplets(getAlerter(), runNumber);
+            triggerManager.sendTriplets(runNumber);
         } catch (TriggerException te) {
             LOG.error("Cannot send triplets for run " + runNumber, te);
         }
@@ -469,7 +469,7 @@ public class TriggerComponent
 
         // send triplets after switching
         try {
-            triggerManager.sendTriplets(getAlerter(), runNumber);
+            triggerManager.sendTriplets(runNumber);
         } catch (TriggerException te) {
             LOG.error("Cannot send triplets for run " + runNumber, te);
         }

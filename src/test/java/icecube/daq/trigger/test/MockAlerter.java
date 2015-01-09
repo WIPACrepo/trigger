@@ -1,10 +1,13 @@
 package icecube.daq.trigger.test;
 
+import com.google.gson.Gson;
+
 import icecube.daq.juggler.alert.AlertException;
 import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.payload.IUTCTime;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -40,7 +43,7 @@ public class MockAlerter
 
     public String getService()
     {
-        throw new Error("Unimplemented");
+        return DEFAULT_SERVICE;
     }
 
     public boolean isActive()
@@ -53,68 +56,71 @@ public class MockAlerter
         return closed;
     }
 
-    public void send(String varname, Priority prio, Calendar dateTime,
-                     Map<String, Object> values)
-        throws AlertException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void send(String varname, Priority prio, IUTCTime utcTime,
-                     Map<String, Object> values)
-        throws AlertException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void send(String varName, Priority prio, Map<String, Object> values)
+    public void sendObject(Object obj)
         throws AlertException
     {
         if (closed) {
             throw new Error("Alerter has been closed");
         }
 
-        if (expVarName == null || expPrio == null) {
-            fail("Received unexpected " + varName + " alert, prio " + prio);
+        if (obj == null) {
+            throw new Error("Cannot send null object");
+        } else if (!(obj instanceof Map)) {
+            throw new Error("Unexpected object type " +
+                            obj.getClass().getName());
         }
 
-        assertEquals("Unexpected varname", expVarName, varName);
+        Map<String, Object> map = (Map<String, Object>) obj;
+
+        String varname;
+        if (!map.containsKey("varname")) {
+            varname = null;
+        } else {
+            varname = (String) map.get("varname");
+        }
+
+        Alerter.Priority prio = Alerter.Priority.DEBUG;
+        if (map.containsKey("prio")) {
+            int tmpVal = (Integer) map.get("prio");
+            for (Alerter.Priority p : Alerter.Priority.values()) {
+                if (p.value() == tmpVal) {
+                    prio = p;
+                    break;
+                }
+            }
+        }
+
+        String dateStr;
+        if (!map.containsKey("t")) {
+            dateStr = null;
+        } else {
+            dateStr = (String) map.get("t");
+        }
+
+        Map<String, Object> values;
+        if (!map.containsKey("value")) {
+            values = null;
+        } else {
+            values = new HashMap<String, Object>();
+
+            Map<String, Object> tmpVals =
+                (Map<String, Object>) map.get("value");
+            for (String key : tmpVals.keySet()) {
+                values.put(key, tmpVals.get(key));
+            }
+        }
+
+        if (expVarName == null || expPrio == null) {
+            fail("Received unexpected " + varname + " alert, prio " + prio);
+        }
+
+        assertEquals("Unexpected varname", expVarName, varname);
         assertEquals("Unexpected priority", expPrio, prio);
 
+        Gson gson = new Gson();
+        gson.toJson(obj);
+
         numSent++;
-    }
-
-    public void sendAlert(Priority prio, String condition, Map x2)
-        throws AlertException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void sendAlert(Priority prio, String condition, String notify,
-                          Map<String, Object> vars)
-        throws AlertException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void sendAlert(Calendar dateTime, Priority prio, String condition,
-                          String notify, Map<String, Object> vars)
-        throws AlertException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void sendAlert(IUTCTime utcTime, Priority prio, String condition,
-                          String notify, Map<String, Object> vars)
-        throws AlertException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void sendObject(Object obj)
-        throws AlertException
-    {
-        throw new Error("Unimplemented");
     }
 
     public void setAddress(String host, int port)

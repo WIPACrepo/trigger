@@ -102,6 +102,36 @@ public class TriggerCollector
     }
 
     /**
+     * Return the number of dropped SNDAQ alerts
+     *
+     * @return number of dropped alerts
+     */
+    public long getSNDAQAlertsDropped()
+    {
+        return collThrd.getSNDAQAlertsDropped();
+    }
+
+    /**
+     * Return the number of alerts queued for writing.
+     *
+     * @return alerter queue size
+     */
+    public int getSNDAQAlertsQueued()
+    {
+        return collThrd.getSNDAQAlertsQueued();
+    }
+
+    /**
+     * Return the number of alerts sent to SNDAQ
+     *
+     * @return number of alerts
+     */
+    public long getSNDAQAlertsSent()
+    {
+        return collThrd.getSNDAQAlertsSent();
+    }
+
+    /**
      * Return the number of requests queued for writing.
      *
      * @return output queue size
@@ -172,6 +202,12 @@ public class TriggerCollector
 
 interface ICollectorThread
 {
+    long getSNDAQAlertsDropped();
+
+    int getSNDAQAlertsQueued();
+
+    long getSNDAQAlertsSent();
+
     void resetUID();
 
     void setChanged();
@@ -269,6 +305,21 @@ class CollectorThread
         }
 
         return interval;
+    }
+
+    public long getSNDAQAlertsDropped()
+    {
+        return alerter.getNumDropped();
+    }
+
+    public int getSNDAQAlertsQueued()
+    {
+        return alerter.getNumQueued();
+    }
+
+    public long getSNDAQAlertsSent()
+    {
+        return alerter.getNumSent();
     }
 
     private void initializeSNDAQAlerter(List<INewAlgorithm> algorithms)

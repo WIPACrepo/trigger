@@ -1,5 +1,6 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.juggler.alert.AlertQueue;
 import icecube.daq.juggler.alert.Alerter.Priority;
 import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.IHitPayload;
@@ -132,6 +133,27 @@ public class TriggerManagerTest
 
     private static final MockAppender appender =
         new MockAppender(/*org.apache.log4j.Level.ALL*/)/*.setVerbose(true)*/;
+
+    private void flushQueue(AlertQueue aq)
+    {
+        if (!aq.isStopped()) {
+            for (int i = 0; i < 1000; i++) {
+                if (aq.isIdle() && aq.getNumQueued() == 0) {
+                    break;
+                }
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException ie) {
+                    break;
+                }
+            }
+
+            if (aq.getNumQueued() > 0) {
+                throw new Error("Cannot flush " + aq + "; " +
+                                aq.getNumQueued() + " alerts queued");
+            }
+        }
+    }
 
     @Before
     public void setUp()
@@ -685,7 +707,7 @@ public class TriggerManagerTest
         alerter.setExpectedPriority(Priority.SCP);
 
         TriggerManager mgr = new TriggerManager(src, bufCache);
-        mgr.setAlerter(alerter);
+        mgr.setAlertQueue(new AlertQueue(alerter));
 
         ArrayList<MockAlgorithm> algo = new ArrayList<MockAlgorithm>();
         for (int i = 0; i < 3; i++) {
@@ -891,8 +913,11 @@ public class TriggerManagerTest
         MockAlerter alerter = new MockAlerter();
         alerter.setExpectedVarName("trigger_triplets");
         alerter.setExpectedPriority(Priority.EMAIL);
+        mgr.setAlertQueue(new AlertQueue(alerter));
 
-        mgr.sendTriplets(alerter, runNum);
+        mgr.sendTriplets(runNum);
+
+        flushQueue(mgr.getAlertQueue());
 
         // XXX this doesn't validate the body of the alert
         assertEquals("Unexpected number of alerts", 1, alerter.getNumSent());

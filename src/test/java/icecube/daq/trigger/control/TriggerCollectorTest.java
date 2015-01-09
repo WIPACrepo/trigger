@@ -48,6 +48,21 @@ class MockCollectorThread
         throw new Error("Unimplemented");
     }
 
+    public long getSNDAQAlertsDropped()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public int getSNDAQAlertsQueued()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public long getSNDAQAlertsSent()
+    {
+        throw new Error("Unimplemented");
+    }
+
     public long getNumQueued()
     {
         throw new Error("Unimplemented");

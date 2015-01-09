@@ -1,5 +1,6 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.juggler.alert.AlertQueue;
 import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.trigger.algorithm.INewAlgorithm;
@@ -30,6 +31,27 @@ public class MultiplicityDataManagerTest
     private static final MockAppender appender =
         new MockAppender(/*org.apache.log4j.Level.ALL*/)/*.setVerbose(true)*/;
 
+    private void flushQueue(AlertQueue aq)
+    {
+        if (!aq.isStopped()) {
+            for (int i = 0; i < 1000; i++) {
+                if (aq.isIdle() && aq.getNumQueued() == 0) {
+                    break;
+                }
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException ie) {
+                    break;
+                }
+            }
+
+            if (aq.getNumQueued() > 0) {
+                throw new Error("Cannot flush " + aq + "; " +
+                                aq.getNumQueued() + " alerts queued");
+            }
+        }
+    }
+
     @Before
     public void setUp()
         throws Exception
@@ -54,7 +76,7 @@ public class MultiplicityDataManagerTest
         MockAlerter alerter = new MockAlerter();
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
-        mgr.setAlerter(alerter);
+        mgr.setAlertQueue(new AlertQueue(alerter));
 
         try {
             mgr.add(new MockTriggerRequest(1, 2, 3, 4, 5));
@@ -80,7 +102,7 @@ public class MultiplicityDataManagerTest
         //List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
-        mgr.setAlerter(alerter);
+        mgr.setAlertQueue(new AlertQueue(alerter));
         mgr.setFirstGoodTime(1);
 
         mgr.addAlgorithm(new MockAlgorithm("TstAddOne", type, cfgId, srcId));
@@ -101,7 +123,7 @@ public class MultiplicityDataManagerTest
         MockAlerter alerter = new MockAlerter();
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
-        mgr.setAlerter(alerter);
+        mgr.setAlertQueue(new AlertQueue(alerter));
         mgr.setFirstGoodTime(1);
 
         mgr.start(123);
@@ -133,7 +155,7 @@ public class MultiplicityDataManagerTest
         MockAlerter alerter = new MockAlerter();
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
-        mgr.setAlerter(alerter);
+        mgr.setAlertQueue(new AlertQueue(alerter));
         mgr.setFirstGoodTime(1);
 
         final int srcId = SourceIdRegistry.INICE_TRIGGER_SOURCE_ID;
@@ -184,7 +206,7 @@ public class MultiplicityDataManagerTest
         MockAlerter alerter = new MockAlerter();
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
-        mgr.setAlerter(alerter);
+        mgr.setAlertQueue(new AlertQueue(alerter));
         mgr.setFirstGoodTime(1);
 
         mgr.addAlgorithm(new MockAlgorithm("TstAddMulti", type, cfgId, srcId));
@@ -218,7 +240,7 @@ public class MultiplicityDataManagerTest
         MockAlerter alerter = new MockAlerter();
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
-        mgr.setAlerter(alerter);
+        mgr.setAlertQueue(new AlertQueue(alerter));
 
         try {
             mgr.getCounts();
@@ -238,7 +260,7 @@ public class MultiplicityDataManagerTest
         MockAlerter alerter = new MockAlerter();
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
-        mgr.setAlerter(alerter);
+        mgr.setAlertQueue(new AlertQueue(alerter));
 
         mgr.start(123);
 
@@ -252,7 +274,7 @@ public class MultiplicityDataManagerTest
         MockAlerter alerter = new MockAlerter();
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
-        mgr.setAlerter(alerter);
+        mgr.setAlertQueue(new AlertQueue(alerter));
 
         try {
             mgr.reset();
@@ -272,7 +294,7 @@ public class MultiplicityDataManagerTest
         MockAlerter alerter = new MockAlerter();
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
-        mgr.setAlerter(alerter);
+        mgr.setAlertQueue(new AlertQueue(alerter));
 
         mgr.start(123);
 
@@ -287,7 +309,7 @@ public class MultiplicityDataManagerTest
         MockAlerter alerter = new MockAlerter();
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
-        mgr.setAlerter(alerter);
+        mgr.setAlertQueue(new AlertQueue(alerter));
 
         try {
             mgr.send();
@@ -307,7 +329,7 @@ public class MultiplicityDataManagerTest
         MockAlerter alerter = new MockAlerter();
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
-        mgr.setAlerter(alerter);
+        mgr.setAlertQueue(new AlertQueue(alerter));
         mgr.start(123);
 
         boolean sent = mgr.send();
@@ -325,8 +347,10 @@ public class MultiplicityDataManagerTest
         final int cfgId = 2;
         final int type = 3;
 
+        AlertQueue aq = new AlertQueue(alerter);
+
         MultiplicityDataManager mgr = new MultiplicityDataManager();
-        mgr.setAlerter(alerter);
+        mgr.setAlertQueue(aq);
         mgr.setFirstGoodTime(1);
 
         mgr.addAlgorithm(new MockAlgorithm("TstSend", type, cfgId, srcId));
@@ -348,6 +372,9 @@ public class MultiplicityDataManagerTest
 
         boolean sent = mgr.send();
         assertTrue("Unexpected return value", sent);
+
+        flushQueue(aq);
+
         assertEquals("Unexpected send", 1, alerter.getNumSent());
     }
 
@@ -358,7 +385,7 @@ public class MultiplicityDataManagerTest
         MockAlerter alerter = new MockAlerter();
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
-        mgr.setAlerter(alerter);
+        mgr.setAlertQueue(new AlertQueue(alerter));
 
         final int runNum = 12345;
 

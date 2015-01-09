@@ -1,6 +1,7 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.juggler.alert.AlertException;
+import icecube.daq.juggler.alert.AlertQueue;
 import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.juggler.alert.ZMQAlerter;
 import icecube.daq.payload.ITriggerRequestPayload;
@@ -8,8 +9,6 @@ import icecube.daq.payload.PayloadFormatException;
 import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.algorithm.SimpleMajorityTrigger;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 
@@ -22,13 +21,16 @@ public class SNDAQAlerter
 
     private static final Log LOG = LogFactory.getLog(SNDAQAlerter.class);
 
-    private Alerter zmq;
+    private Alerter alerter;
 
     private int smt8cfgId;
     private int smt8type;
     private boolean smt8init;
 
-    private AlertThread thread;
+    private String lastTime;
+    private boolean sentStart;
+
+    private AlertQueue alertQueue;
 
     private int runNumber = Integer.MIN_VALUE;
 
@@ -68,7 +70,7 @@ public class SNDAQAlerter
                                      "\"");
         }
 
-        zmq = createZMQAlerter(host, port);
+        alerter = createZMQAlerter(host, port);
 
         loadAlgorithms(algorithms);
     }
@@ -78,9 +80,60 @@ public class SNDAQAlerter
      */
     public void close()
     {
-        if (thread != null) {
-            thread.stop();
+        if (alertQueue != null) {
+            sendStop();
+
+            alertQueue.stop();
         }
+    }
+
+    /**
+     * Create the ZMQ alerter.  This method exists mainly to allow unit tests
+     * to inject a mock alerter.
+     *
+     * @param host host name
+     * @param port port number
+     *
+     * @return alerter
+     *
+     * @throws AlertException if the ZMQ connection cannot be made
+     */
+    public Alerter createZMQAlerter(String host, int port)
+        throws AlertException
+    {
+        ZMQAlerter z = new ZMQAlerter();
+        z.setAddress(host, port);
+        return z;
+    }
+
+    /**
+     * Get number of alerts dropped
+     *
+     * @return number of alerts dropped
+     */
+    public long getNumDropped()
+    {
+        return alertQueue.getNumDropped();
+    }
+
+    /**
+     * Get number of alerts queued
+     *
+     * @return number of alerts queued
+     */
+    public int getNumQueued()
+    {
+        return alertQueue.getNumQueued();
+    }
+
+    /**
+     * Get number of alerts sent
+     *
+     * @return number of alerts sent
+     */
+    public long getNumSent()
+    {
+        return alertQueue.getNumSent();
     }
 
     /**
@@ -104,32 +157,13 @@ public class SNDAQAlerter
     }
 
     /**
-     * Create the ZMQ alerter.  This method exists mainly to allow unit tests
-     * to inject a mock alerter.
-     *
-     * @param host host name
-     * @param port port number
-     *
-     * @return alerter
-     *
-     * @throws AlertException if the ZMQ connection cannot be made
-     */
-    public Alerter createZMQAlerter(String host, int port)
-        throws AlertException
-    {
-        ZMQAlerter z = new ZMQAlerter();
-        z.setAddress(host, port);
-        return z;
-    }
-
-    /**
      * If <tt>true</tt>, alerts will be sent to one or more recipients.
      *
      * @return <tt>true</tt> if this alerter will send messages
      */
     public boolean isActive()
     {
-        return zmq.isActive();
+        return alerter.isActive();
     }
 
     /**
@@ -155,8 +189,8 @@ public class SNDAQAlerter
         }
 
         if (smt8init) {
-            thread = new AlertThread();
-            thread.start();
+            alertQueue = new AlertQueue(alerter);
+            alertQueue.start();
         }
     }
 
@@ -181,12 +215,48 @@ public class SNDAQAlerter
             return;
         }
 
+        final String timeStr = req.getLastTimeUTC().toDateString();
+
+        if (!sentStart) {
+            // send 'start' message
+            HashMap<String, Object> startMap = new HashMap<String, Object>();
+            startMap.put("start", runNumber);
+            startMap.put("t", timeStr);
+
+            try {
+                alertQueue.push(startMap);
+            } catch (AlertException ae) {
+                LOG.error("Cannot send initial SNDAQ message", ae);
+            }
+
+            sentStart = true;
+        }
+
         HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("trigger", "SMT8");
-        map.put("t", req.getLastTimeUTC().toDateString());
+        map.put("t", timeStr);
         map.put("num", numHits);
 
-        thread.queue(map);
+        try {
+            alertQueue.push(map);
+        } catch (AlertException ae) {
+            LOG.error("Cannot send SNDAQ message", ae);
+        }
+
+        lastTime = timeStr;
+    }
+
+    private void sendStop()
+    {
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("stop", runNumber);
+        map.put("t", lastTime);
+
+        try {
+            alertQueue.push(map);
+        } catch (AlertException ae) {
+            LOG.error("Cannot send final SNDAQ message", ae);
+        }
     }
 
     /**
@@ -200,7 +270,7 @@ public class SNDAQAlerter
     public void setAddress(String host, int port)
         throws AlertException
     {
-        zmq.setAddress(host, port);
+        alerter.setAddress(host, port);
     }
 
     /**
@@ -210,142 +280,15 @@ public class SNDAQAlerter
      */
     public void setRunNumber(int num)
     {
-        if (runNumber == Integer.MIN_VALUE || thread == null) {
-            runNumber = num;
-        } else {
-            thread.switchToNewRun(num);
-        }
-    }
-
-    /**
-     * Thread which sends alerts to SNDAQ
-     */
-    class AlertThread
-        implements Runnable
-    {
-        private Thread thread;
-        private Deque<HashMap<String, Object>> queue =
-            new ArrayDeque<HashMap<String, Object>>();
-
-        private Object lastTime;
-
-        private boolean sentStart;
-
-        private boolean stopping;
-        private boolean stopped;
-
-        AlertThread()
+        if (runNumber != Integer.MIN_VALUE && runNumber != num &&
+            alertQueue != null)
         {
-            thread = new Thread(this);
-            thread.setName("AlertThread");
+            // if a run is in progress, we must be switching to a new run
+            sendStop();
+            sentStart = false;
         }
 
-        public boolean isStopped()
-        {
-            return stopped;
-        }
-
-        public void queue(HashMap<String, Object> map)
-        {
-            synchronized (queue) {
-                queue.addLast(map);
-                queue.notify();
-            }
-        }
-
-        public void run()
-        {
-            while (!stopping || queue.size() > 0) {
-                HashMap<String, Object> map;
-                synchronized (queue) {
-                    if (queue.size() == 0) {
-                        try {
-                            queue.wait();
-                        } catch (InterruptedException ie) {
-                            LOG.error("Interrupt while waiting for alert queue",
-                                      ie);
-                        }
-                    }
-
-                    if (queue.size() == 0) {
-                        map = null;
-                    } else {
-                        map = queue.removeFirst();
-                    }
-                }
-
-                if (map == null) {
-                    continue;
-                }
-
-                if (map.containsKey("t")) {
-                    lastTime = map.get("t");
-                } else {
-                    LOG.error("SNDAQ message does not contain 't' field");
-                }
-
-                if (!sentStart) {
-                    sendAction("start", lastTime, runNumber);
-                    sentStart = true;
-                }
-
-                try {
-                    zmq.sendObject(map);
-                } catch (AlertException ae) {
-                    LOG.error("Cannot send " + map, ae);
-                }
-            }
-
-            sendAction("stop", lastTime, runNumber);
-
-            if (zmq.isActive()) {
-                zmq.close();
-            }
-
-            stopped = true;
-        }
-
-        private void sendAction(String action, Object time, int runNumber)
-        {
-            HashMap<String, Object> map = new HashMap<String, Object>();
-            map.put(action, runNumber);
-            map.put("t", time);
-
-            try {
-                zmq.sendObject(map);
-            } catch (AlertException ae) {
-                LOG.error("Cannot send " + map, ae);
-            }
-        }
-
-        private void sendStop()
-        {
-            sendAction("stop", lastTime, runNumber);
-        }
-
-        public void start()
-        {
-            stopping = false;
-            stopped = false;
-
-            thread.start();
-        }
-
-        public void stop()
-        {
-            synchronized (queue) {
-                stopping = true;
-                queue.notify();
-            }
-        }
-
-        public void switchToNewRun(int newNum)
-        {
-            synchronized (queue) {
-                sendStop();
-                sentStart = false;
-                runNumber = newNum;
-            }
-        }
+        // set the run number
+        runNumber = num;
     }
 }

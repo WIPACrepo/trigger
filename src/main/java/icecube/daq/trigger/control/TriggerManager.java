@@ -2,6 +2,7 @@ package icecube.daq.trigger.control;
 
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.juggler.alert.AlertException;
+import icecube.daq.juggler.alert.AlertQueue;
 import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IHitPayload;
@@ -135,6 +136,7 @@ public class TriggerManager
 
     /** gather histograms for monitoring */
     private MultiplicityDataManager multiDataMgr;
+    private AlertQueue alertQueue;
 
     private IByteBufferCache outCache;
     private TriggerCollector collector;
@@ -342,6 +344,16 @@ public class TriggerManager
     }
 
     /**
+     * Get the alert queue for messages sent to I3Live
+     *
+     * @return alert queue
+     */
+    public AlertQueue getAlertQueue()
+    {
+        return alertQueue;
+    }
+
+    /**
      * @deprecated
      *
      * @return total number of hits read from splicer
@@ -430,6 +442,48 @@ public class TriggerManager
     public Map<String, Integer> getQueuedInputsMap()
     {
         return inputList.getLengths();
+    }
+
+    /**
+     * Get the number of dropped SNDAQ alerts
+     *
+     * @return number of dropped SNDAQ alerts
+     */
+    public long getSNDAQAlertsDropped()
+    {
+        if (collector == null) {
+            return 0;
+        }
+
+        return collector.getSNDAQAlertsDropped();
+    }
+
+    /**
+     * Get the number of SNDAQ alerts queued for writing
+     *
+     * @return number of queued SNDAQ alerts
+     */
+    public int getSNDAQAlertsQueued()
+    {
+        if (collector == null) {
+            return 0;
+        }
+
+        return collector.getSNDAQAlertsQueued();
+    }
+
+    /**
+     * Get the number of alerts sent to SNDAQ
+     *
+     * @return number of SNDAQ alerts
+     */
+    public long getSNDAQAlertsSent()
+    {
+        if (collector == null) {
+            return 0;
+        }
+
+        return collector.getSNDAQAlertsSent();
     }
 
     /**
@@ -667,12 +721,13 @@ public class TriggerManager
         }
     }
 
-    public void sendTriplets(Alerter alerter, int runNumber)
+    public void sendTriplets(int runNumber)
         throws TriggerException
     {
-        if (!alerter.isActive()) {
-            final String msg = "Alerter " + alerter + " is not active";
-            throw new TriggerException(msg);
+        if (alertQueue == null) {
+            throw new TriggerException("AlertQueue has not been set");
+        } else if (alertQueue.isStopped()) {
+            throw new TriggerException("AlertQueue is stopped");
         }
 
         if (runNumber == Integer.MIN_VALUE) {
@@ -716,7 +771,8 @@ public class TriggerManager
         values.put("triplets", triplets);
 
         try {
-            alerter.send("trigger_triplets", Alerter.Priority.EMAIL, values);
+            alertQueue.push("trigger_triplets", Alerter.Priority.EMAIL,
+                            values);
         } catch (AlertException ae) {
             throw new TriggerException("Cannot send alert", ae);
         }
@@ -725,11 +781,20 @@ public class TriggerManager
     /**
      * Set the object which sends I3Live alerts
      *
-     * @param alerter alerter object
+     * @param alertQueue alert queue
      */
-    public void setAlerter(Alerter alerter)
+    public void setAlertQueue(AlertQueue alertQueue)
     {
-        multiDataMgr.setAlerter(alerter);
+        if (alertQueue == null) {
+            throw new Error("AlertQueue cannot be null");
+        }
+
+        this.alertQueue = alertQueue;
+        if (alertQueue.isStopped()) {
+            alertQueue.start();
+        }
+
+        multiDataMgr.setAlertQueue(alertQueue);
     }
 
     /**
@@ -898,7 +963,6 @@ public class TriggerManager
     /**
      * Switch to a new run.
      *
-     * @param alerter unused
      * @param runNumber new run number
      */
     public void switchToNewRun(int runNumber)

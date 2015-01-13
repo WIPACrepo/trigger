@@ -165,7 +165,7 @@ public class SPS2012Triggers
     public void sendInIceData(WritableByteChannel[] tails, int numObjs)
         throws IOException
     {
-        java.util.Iterator<String> domIter = registry.keys().iterator();
+        java.util.Iterator<Long> domIter = registry.keys().iterator();
 
         for (int i = 0; i < numObjs; i++) {
             final long time;

@@ -321,8 +321,8 @@ class LogicalChannel implements Comparable<LogicalChannel>
         LogicalChannel logCh = new LogicalChannel();
         logCh.numericMBID   = hit.getDOMID().longValue();
         logCh.mbid          = String.format("%012x", logCh.numericMBID);
-        logCh.string        = registry.getStringMajor(logCh.mbid);
-        logCh.module        = registry.getStringMinor(logCh.mbid);
+        logCh.string        = registry.getStringMajor(logCh.numericMBID);
+        logCh.module        = registry.getStringMinor(logCh.numericMBID);
         return logCh;
     }
 

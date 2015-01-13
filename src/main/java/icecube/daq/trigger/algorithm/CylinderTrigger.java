@@ -228,10 +228,10 @@ public class CylinderTrigger extends AbstractTrigger
         // Loop over hit pairs
         for (int ihit = 0; ihit < q.length; ihit++)
         {
-            String mbid0 = String.format("%012x", q[ihit].getDOMID().longValue());
-            DeployedDOM d0 = domRegistry.getDom(mbid0);
+            DeployedDOM d0 =
+                domRegistry.getDom(q[ihit].getDOMID().longValue());
             if (d0 == null) {
-                throw new Error("Cannot find DOM " + mbid0);
+                throw new Error("Cannot find DOM " + q[ihit].getDOMID());
             }
 
             hitsInCylinder.clear();
@@ -239,10 +239,10 @@ public class CylinderTrigger extends AbstractTrigger
             for (int jhit = 0; jhit < q.length; jhit++)
             {
                 if (ihit == jhit) continue;
-                String mbid1 = String.format("%012x", q[jhit].getDOMID().longValue());
-                DeployedDOM d1 = domRegistry.getDom(mbid1);
+                DeployedDOM d1 =
+                    domRegistry.getDom(q[jhit].getDOMID().longValue());
                 if (d1 == null) {
-                    throw new Error("Cannot find DOM " + mbid1);
+                    throw new Error("Cannot find DOM " + q[jhit].getDOMID());
                 }
 
                 double dx = d1.getX() - d0.getX();

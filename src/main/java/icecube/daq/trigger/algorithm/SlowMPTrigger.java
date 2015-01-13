@@ -64,17 +64,17 @@ public class SlowMPTrigger extends AbstractTrigger
             hit  = new_hit;
 
             utc_time = hit.getHitTimeUTC().longValue();
-            mb_id = hit.getDOMID().toString();
+            mb_id = hit.getDOMID().longValue();
         }
 
         private IHitPayload hit;
 
-        private String mb_id;
+        private long mb_id;
         private long utc_time;
 
         private DeployedDOM dom;
 
-        public String get_mb_id()
+        public long get_mb_id()
         {
             return mb_id;
         }
@@ -798,11 +798,13 @@ public class SlowMPTrigger extends AbstractTrigger
 
         DeployedDOM dom1 = hit1.get_dom();
         if (dom1 == null) {
-            throw new Error("Cannot find " + hit1.get_mb_id());
+            throw new Error(String.format("Cannot find %012x",
+                                          hit1.get_mb_id()));
         }
         DeployedDOM dom2 = hit2.get_dom();
         if (dom2 == null) {
-            throw new Error("Cannot find " + hit2.get_mb_id());
+            throw new Error(String.format("Cannot find %012x",
+                                          hit1.get_mb_id()));
         }
 
         int string_nr1 = dom1.getStringMajor();

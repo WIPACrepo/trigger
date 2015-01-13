@@ -465,7 +465,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	    int numberOfHits = 1;
 
 	    // get neighboring doms
-	    String centerId = center.getDOMID().toString();
+	    long centerId = center.getDOMID().longValue();
 	    ArrayList<String> neighbors = getNeighboringDoms(centerId);
 
 	    // loop over all other hits and check to see if they are in the volume element
@@ -488,7 +488,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	}
     }
 
-    private ArrayList<String> getNeighboringDoms(String centerDom)
+    private ArrayList<String> getNeighboringDoms(long centerDom)
     {
 	ArrayList<String> neighbors = new ArrayList<String>();
 
@@ -497,7 +497,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	int centerPosition = getTriggerHandler().getDOMRegistry().getStringMinor(centerDom);
 
 	// get the vertical shift of the center string
-	int vShift = stringMap.getVerticalOffset(Integer.valueOf(centerString));
+	int vShift = stringMap.getVerticalOffset(centerString);
 
 	// calculate the range of DOM positions in this volume element
 	int minPos = centerPosition - volumeHeight;

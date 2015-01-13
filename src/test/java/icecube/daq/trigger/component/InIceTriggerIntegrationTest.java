@@ -116,7 +116,7 @@ public class InIceTriggerIntegrationTest
     private void sendInIceData(Pipe[] tails, int numObjs, DOMRegistry registry)
         throws IOException
     {
-        java.util.Iterator<String> domIter = registry.keys().iterator();
+        java.util.Iterator<Long> domIter = registry.keys().iterator();
 
         for (int i = 0; i < numObjs; i++) {
             final long time;

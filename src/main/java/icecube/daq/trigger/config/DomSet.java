@@ -5,6 +5,8 @@ import icecube.daq.payload.IDOMID;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.apache.log4j.Logger;
+
 /**
  * Created by IntelliJ IDEA.
  * User: pat
@@ -19,6 +21,8 @@ import java.util.HashSet;
  */
 public class DomSet
 {
+    private static final Logger LOG = Logger.getLogger(DomSet.class);
+
     /**
      * Name of this DomSet
      */
@@ -27,7 +31,7 @@ public class DomSet
     /**
      * List of doms in this DomSet
      */
-    private final HashSet<String> set;
+    private final HashSet<Long> set;
 
     /**
      * Constructor, takes the name of the set and the list of domid's
@@ -37,8 +41,18 @@ public class DomSet
     public DomSet(String name, Collection<String> set)
     {
         this.name = name;
-        this.set = new HashSet<String>(7500);
-        this.set.addAll(set);
+        this.set = new HashSet<Long>(7500);
+        for (String idstr : set) {
+            long domid;
+            try {
+                domid = Long.parseLong(idstr, 16);
+            } catch (NumberFormatException nfe) {
+                LOG.error("Cannot convert \"" + idstr + "\" to long value");
+                continue;
+            }
+
+            this.set.add(domid);
+        }
     }
 
     /**
@@ -104,8 +118,7 @@ public class DomSet
             return false;
         }
 
-        String domId = dom.toString().toLowerCase();
-        return set.contains(domId);
+        return set.contains(dom.longValue());
     }
 
     /**

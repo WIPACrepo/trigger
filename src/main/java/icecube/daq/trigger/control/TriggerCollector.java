@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
  * Collect requests from trigger algorithms in the proper order.
  */
 public class TriggerCollector
+    implements ITriggerCollector
 {
     private static final Log LOG = LogFactory.getLog(TriggerCollector.class);
 

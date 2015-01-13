@@ -6,7 +6,7 @@ import icecube.daq.payload.impl.TriggerRequestFactory;
 import icecube.daq.trigger.common.ITriggerAlgorithm;
 import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.control.PayloadSubscriber;
-import icecube.daq.trigger.control.TriggerCollector;
+import icecube.daq.trigger.control.ITriggerCollector;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 
@@ -82,6 +82,11 @@ public interface INewAlgorithm
     IPayload getReleaseTime();
 
     /**
+     * Flush the algorithm.
+     */
+    void flush();
+
+    /**
      * Does this algorithm include all relevant hits in each request
      * so that it can be used to calculate multiplicity?
      *
@@ -125,7 +130,7 @@ public interface INewAlgorithm
      *
      * @param collector trigger collector
      */
-    void setTriggerCollector(TriggerCollector collector);
+    void setTriggerCollector(ITriggerCollector collector);
 
     /**
      * Set the factory used to create trigger requests.

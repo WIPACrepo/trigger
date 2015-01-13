@@ -22,7 +22,7 @@ import icecube.daq.trigger.control.HitFilter;
 import icecube.daq.trigger.control.INewManager;
 import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.control.PayloadSubscriber;
-import icecube.daq.trigger.control.TriggerCollector;
+import icecube.daq.trigger.control.ITriggerCollector;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -30,6 +30,7 @@ import icecube.daq.trigger.exceptions.UnimplementedError;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +79,7 @@ public abstract class AbstractTrigger
 
     private ArrayList<ITriggerRequestPayload> requests =
         new ArrayList<ITriggerRequestPayload>();
-    private TriggerCollector collector;
+    private ITriggerCollector collector;
 
     private PayloadSubscriber subscriber;
 
@@ -335,6 +336,29 @@ public abstract class AbstractTrigger
 
     protected void formTrigger(List hits, IDOMID dom, ISourceID string)
     {
+        final int numberOfHits = hits.size();
+        if (numberOfHits == 0) {
+            throw new Error("Cannot form trigger from empty list of hits");
+        }
+
+        formTrigger(hits, (IHitPayload) hits.get(0),
+                    (IHitPayload) hits.get(numberOfHits - 1), dom, string);
+    }
+
+    protected void formTrigger(List hits)
+    {
+        final int num = hits.size();
+        if (num == 0) {
+            throw new Error("Cannot form trigger from empty list of hits");
+        }
+
+        formTrigger(hits, (IHitPayload) hits.get(0),
+                    (IHitPayload) hits.get(num - 1), null, null);
+    }
+
+    private void formTrigger(Collection hits, IHitPayload firstHit,
+                             IHitPayload lastHit, IDOMID dom, ISourceID string)
+    {
         if (null == triggerFactory) {
             throw new Error("TriggerFactory is not set!");
         }
@@ -345,10 +369,8 @@ public abstract class AbstractTrigger
         }
 
         // get times (this assumes that the hits are time-ordered)
-        IUTCTime firstTime =
-            ((IHitPayload) hits.get(0)).getPayloadTimeUTC();
-        IUTCTime lastTime =
-            ((IHitPayload) hits.get(numberOfHits - 1)).getPayloadTimeUTC();
+        IUTCTime firstTime = firstHit.getPayloadTimeUTC();
+        IUTCTime lastTime = lastHit.getPayloadTimeUTC();
 
         if (LOG.isDebugEnabled() && (triggerCounter % printMod == 0)) {
             LOG.debug("New Trigger " + triggerCounter + " from " +
@@ -358,8 +380,7 @@ public abstract class AbstractTrigger
         }
 
         // set earliest payload of interest to 1/10 ns after the last hit
-        IUTCTime lastHitTime =
-            ((IHitPayload) hits.get(numberOfHits - 1)).getHitTimeUTC();
+        IUTCTime lastHitTime = lastHit.getHitTimeUTC();
 
         final int uid = getNextUID();
 
@@ -896,7 +917,7 @@ public abstract class AbstractTrigger
      *
      * @param collector trigger collector
      */
-    public void setTriggerCollector(TriggerCollector collector)
+    public void setTriggerCollector(ITriggerCollector collector)
     {
         this.collector = collector;
     }

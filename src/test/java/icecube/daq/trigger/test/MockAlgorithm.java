@@ -8,7 +8,7 @@ import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.common.ITriggerManager;
 import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.control.PayloadSubscriber;
-import icecube.daq.trigger.control.TriggerCollector;
+import icecube.daq.trigger.control.ITriggerCollector;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -40,7 +40,7 @@ public class MockAlgorithm
 
     private boolean fetchAll = true;
 
-    private TriggerCollector coll;
+    private ITriggerCollector coll;
 
     public MockAlgorithm(String name)
     {
@@ -94,6 +94,11 @@ public class MockAlgorithm
         }
 
         trigMoniMap.put(key, value);
+    }
+
+    public void flush()
+    {
+        throw new Error("Unimplemented");
     }
 
     public IPayload getEarliestPayloadOfInterest()
@@ -281,7 +286,7 @@ public class MockAlgorithm
         this.sub = sub;
     }
 
-    public void setTriggerCollector(TriggerCollector coll)
+    public void setTriggerCollector(ITriggerCollector coll)
     {
         this.coll = coll;
     }

@@ -918,6 +918,7 @@ public class TriggerManagerTest
         mgr.sendTriplets(runNum);
 
         flushQueue(mgr.getAlertQueue());
+        mgr.getAlertQueue().stopAndWait();
 
         // XXX this doesn't validate the body of the alert
         assertEquals("Unexpected number of alerts", 1, alerter.getNumSent());

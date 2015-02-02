@@ -374,6 +374,7 @@ public class MultiplicityDataManagerTest
         assertTrue("Unexpected return value", sent);
 
         flushQueue(aq);
+        aq.stopAndWait();
 
         assertEquals("Unexpected send", 1, alerter.getNumSent());
     }

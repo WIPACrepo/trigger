@@ -360,10 +360,6 @@ public class TriggerManager
      */
     public long getCount()
     {
-        if (collector == null) {
-            return 0;
-        }
-
         return getTotalProcessed();
     }
 
@@ -561,6 +557,20 @@ public class TriggerManager
         start = 0;
         inputCount = 0;
         lastInputListSize = 0;
+    }
+
+    /**
+     * Are all data collection threads stopped?
+     *
+     * @return <tt>true</tt> if the data collection threads are stopped
+     */
+    public boolean isStopped()
+    {
+        if (collector == null) {
+            return true;
+        }
+
+        return collector.isStopped();
     }
 
     private boolean isValidIncomingPayload(ILoadablePayload payload)

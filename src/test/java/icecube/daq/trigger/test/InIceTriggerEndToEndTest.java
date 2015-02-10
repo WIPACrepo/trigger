@@ -173,6 +173,18 @@ public class InIceTriggerEndToEndTest
         waitUntilProcessed(rdr, trigMgr);
         waitUntilStopped(rdr, splicer, "StopMsg");
 
+        // wait for all collection threads to stop
+        for (int i = 0; i < REPS && !trigMgr.isStopped(); i++) {
+            try {
+                Thread.sleep(SLEEP_TIME);
+            } catch (InterruptedException ie) {
+                // ignore interrupts
+            }
+        }
+
+        assertTrue("Collection thread(s) not stopped: " + trigMgr,
+                   trigMgr.isStopped());
+
         assertEquals("Bad number of payloads written",
                      trigCfg.getExpectedNumberOfInIcePayloads(numObjs),
                      outProc.getNumberWritten());
@@ -202,6 +214,14 @@ public class InIceTriggerEndToEndTest
             }
         }
 
+        assertTrue("Nothing read while waiting for processing",
+                   rdr.getTotalRecordsReceived() > 0);
+        assertTrue(String.format("Total processed (%d) should be more than " +
+                                 " total received (%d)",
+                                 mgr.getTotalProcessed(),
+                                 rdr.getTotalRecordsReceived()),
+                   mgr.getTotalProcessed() >= rdr.getTotalRecordsReceived());
+
         for (int i = 0; i < REPS &&
                  (mgr.getNumInputsQueued() > 0 ||
                   mgr.getNumOutputsQueued() > 0);
@@ -213,6 +233,9 @@ public class InIceTriggerEndToEndTest
                 // ignore interrupts
             }
         }
+
+        assertEquals("Input queue is not empty", 0, mgr.getNumInputsQueued());
+        assertEquals("Output queue is not empty", 0, mgr.getNumOutputsQueued());
     }
 
     public static final void waitUntilRunning(DAQComponentIOProcess proc)

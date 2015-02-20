@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 15431 2015-02-20 19:38:33Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 15432 2015-02-20 19:43:09Z dglo $
  *
  * Date: August 19 2005
  *
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 15431 2015-02-20 19:38:33Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 15432 2015-02-20 19:43:09Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -61,11 +61,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      * list of hits in current trigger
      */
     private LinkedList hitsWithinTriggerWindow = new LinkedList();
-
-    /**
-     * number of hits in hitsWithinTriggerWindow
-     */
-    private int numberOfHitsInTriggerWindow;
 
     private boolean configThreshold = false;
     private boolean configTimeWindow = false;
@@ -257,13 +252,10 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
                         // We now have the start of a new trigger
                         hitsWithinTriggerWindow.addAll(slidingTimeWindow.copy());
-                        numberOfHitsInTriggerWindow =
-                            hitsWithinTriggerWindow.size();
-
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Trigger is now on," +
                                       " numberOfHitsInTriggerWindow = "
-                                      + numberOfHitsInTriggerWindow +
+                                      + hitsWithinTriggerWindow.size() +
                                       " triggerWindowStart = "
                                       + getTriggerWindowStart() +
                                       " triggerWindowStop = "
@@ -386,7 +378,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
                         onTrigger = false;
                         hitsWithinTriggerWindow.clear();
-                        numberOfHitsInTriggerWindow = 0;
 
                     } else if (usableHit) {
                         addHitToTriggerWindow(hit);
@@ -394,7 +385,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Still on trigger," +
                                       " numberOfHitsInTriggerWindow = "
-                                      + numberOfHitsInTriggerWindow);
+                                      + hitsWithinTriggerWindow.size());
                         }
                     }
                 }
@@ -414,7 +405,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         if (onTrigger) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Last Trigger is on, numberOfHitsInTriggerWindow = "
-                          + numberOfHitsInTriggerWindow);
+                          + hitsWithinTriggerWindow.size());
             }
         }
         //see if TimeWindow has enough hits to form a trigger before
@@ -422,13 +413,12 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         else if(slidingTimeWindow.aboveThreshold()) {
 
             hitsWithinTriggerWindow.addAll(slidingTimeWindow.copy());
-            numberOfHitsInTriggerWindow = hitsWithinTriggerWindow.size();
 
             if (LOG.isDebugEnabled()) {
                 LOG.debug(" Last Trigger is now on," +
                           " numberOfHitsInTriggerWindow = " +
-                          numberOfHitsInTriggerWindow +
-                          (numberOfHitsInTriggerWindow == 0 ? "" :
+                          hitsWithinTriggerWindow.size() +
+                          (hitsWithinTriggerWindow.size() == 0 ? "" :
                            " triggerWindowStart = " +
                            getTriggerWindowStart() + " triggerWindowStop = "+
                            getTriggerWindowStop()));
@@ -474,7 +464,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
     private void addHitToTriggerWindow(IHitPayload triggerPrimitive)
     {
         hitsWithinTriggerWindow.addLast(triggerPrimitive);
-        numberOfHitsInTriggerWindow = hitsWithinTriggerWindow.size();
     }
 
     /**
@@ -510,7 +499,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
     {
         slidingTimeWindow = new SlidingTimeWindow();
         hitsWithinTriggerWindow.clear();
-        numberOfHitsInTriggerWindow = 0;
     }
 
     private final class SlidingTimeWindow {

@@ -114,7 +114,7 @@ class TriggerRequestComparator
  */
 public class TriggerManager
     implements INewManager, SplicedAnalysis, SplicerListener,
-               TriggerManagerMBean
+               SubscriptionManager, TriggerManagerMBean
 {
     /** Payload used to indicate that input is finished */
     public static final DummyPayload FLUSH_PAYLOAD =
@@ -132,7 +132,6 @@ public class TriggerManager
         new ArrayList<INewAlgorithm>();
 
     private SubscribedList inputList = new SubscribedList();
-    private List<TriggerThread> threadList = new ArrayList<TriggerThread>();
 
     /** gather histograms for monitoring */
     private MultiplicityDataManager multiDataMgr;
@@ -317,6 +316,8 @@ public class TriggerManager
                     }
 
                     inputCount++;
+                } else {
+                    LOG.error("Ignoring invalid payload " + payload);
                 }
             }
         }
@@ -417,6 +418,26 @@ public class TriggerManager
     }
 
     /**
+     * XXX Use getQueuedRequestsMap instead
+     *
+     * @return number of queued requests
+     * @deprecated use getQueuedRequestsMap()
+     */
+    public int getNumRequestsQueued()
+    {
+        Map<String, Integer> map = getQueuedRequestsMap();
+
+        int num = 0;
+        if (map != null) {
+            for (Map.Entry<String, Integer> entry : map.entrySet()) {
+                num += entry.getValue();
+            }
+        }
+
+        return num;
+    }
+
+    /**
      * Get the number of requests queued for writing
      *
      * @return size of output queue
@@ -438,6 +459,20 @@ public class TriggerManager
     public Map<String, Integer> getQueuedInputsMap()
     {
         return inputList.getLengths();
+    }
+
+    /**
+     * Get map of trigger names to number of queued requests
+     *
+     * @return map of {name : numQueuedRequests}
+     */
+    public Map<String, Integer> getQueuedRequestsMap()
+    {
+        HashMap map = new HashMap<String, Integer>();
+        for (INewAlgorithm a : algorithms) {
+            map.put(a.getTriggerName(), a.getNumberOfCachedRequests());
+        }
+        return map;
     }
 
     /**
@@ -700,7 +735,7 @@ public class TriggerManager
                         continue;
                     }
 
-                    inputList.push(sub);
+                    inputList.push((IPayload) sub.deepCopy());
                 }
 
                 return;
@@ -708,7 +743,7 @@ public class TriggerManager
         }
 
         // queue ordinary payload
-        inputList.push(payload);
+        inputList.push((IPayload) payload.deepCopy());
     }
 
     public void resetUIDs()
@@ -900,28 +935,18 @@ public class TriggerManager
      */
     public void starting(SplicerChangedEvent evt)
     {
-        if (collector == null || collector.isStopped()) {
-            collector = new TriggerCollector(srcId, algorithms, outputEngine,
-                                             outCache, multiDataMgr);
-
-            if (runNumber != Integer.MIN_VALUE) {
-                collector.setRunNumber(runNumber, false);
-            }
-
-            collector.startThreads(splicer);
+        if (collector != null && !collector.isStopped()) {
+            LOG.error("Collector was not stopped");
         }
 
-        subscribeAlgorithms();
+        collector = new TriggerCollector(srcId, algorithms, outputEngine,
+                                         outCache, multiDataMgr, this);
 
-        int id = 0;
-        for (INewAlgorithm algo : algorithms) {
-            TriggerThread thread = new TriggerThread(id, algo);
-            thread.start();
-
-            threadList.add(thread);
-
-            id++;
+        if (runNumber != Integer.MIN_VALUE) {
+            collector.setRunNumber(runNumber, false);
         }
+
+        collector.startThreads(splicer);
     }
 
     /**
@@ -929,13 +954,6 @@ public class TriggerManager
      */
     public void stopThread()
     {
-        for (TriggerThread thread : threadList) {
-            thread.stop();
-        }
-        for (TriggerThread thread : threadList) {
-            thread.join();
-        }
-
         if (collector != null && !collector.isStopped()) {
             collector.stop();
         }
@@ -949,6 +967,10 @@ public class TriggerManager
     public void stopped(SplicerChangedEvent evt)
     {
         stopThread();
+
+        // clear cached values
+        timeOfLastHit = null;
+        srcOfLastHit = null;
     }
 
     /**
@@ -961,7 +983,7 @@ public class TriggerManager
         // do nothing
     }
 
-    void subscribeAlgorithms()
+    public void subscribeAll()
     {
         for (INewAlgorithm algo : algorithms) {
             PayloadSubscriber subscriber =
@@ -1019,7 +1041,6 @@ public class TriggerManager
                 LOG.debug("This is the LAST POSSIBLE SPLICEABLE!");
             }
             flush();
-            stopThread();
         }
 
         for (Object obj : event.getAllSpliceables()) {
@@ -1034,8 +1055,24 @@ public class TriggerManager
         }
     }
 
+    public void unsubscribeAll()
+    {
+        if (inputList.getNumSubscribers() > 0) {
+            for (INewAlgorithm a : algorithms) {
+                a.unsubscribe(inputList);
+                a.resetAlgorithm();
+            }
+
+            if (inputList.getNumSubscribers() > 0) {
+                LOG.error(String.format("SubscribedList still has %d entries",
+                                        inputList.size()));
+            }
+        }
+    }
+
     public String toString()
     {
-        return "TrigMgr[in#" + inputList.size() + "," + collector + "]";
+        return "TrigMgr[in#" + inputList.size() + ",req#" +
+            getNumRequestsQueued() + "," + collector + "]";
     }
 }

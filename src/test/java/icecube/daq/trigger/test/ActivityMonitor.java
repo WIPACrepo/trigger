@@ -13,6 +13,7 @@ class TriggerMonitor
     private long received;
     private long queuedIn;
     private long processed;
+    private long queuedReq;
     private long queuedOut;
     private long sent;
     private boolean stopped;
@@ -47,6 +48,10 @@ class TriggerMonitor
             }
             if (processed != comp.getTriggerManager().getTotalProcessed()) {
                 processed = comp.getTriggerManager().getTotalProcessed();
+                changed = true;
+            }
+            if (queuedReq != comp.getTriggerManager().getNumRequestsQueued()) {
+                queuedReq = comp.getTriggerManager().getNumRequestsQueued();
                 changed = true;
             }
             if (queuedOut != comp.getTriggerManager().getNumOutputsQueued()) {
@@ -97,8 +102,8 @@ class TriggerMonitor
         }
 
         summarized = stopped;
-        return String.format(" %s %d->%d->%d", prefix, received, processed,
-                             sent);
+        return String.format(" %s %d->%d->%d->%d->%d->%d", prefix, received,
+                             queuedIn, processed, queuedReq, queuedOut, sent);
     }
 }
 

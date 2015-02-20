@@ -4,9 +4,10 @@ import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.impl.TriggerRequestFactory;
 import icecube.daq.trigger.common.ITriggerAlgorithm;
+import icecube.daq.trigger.control.ITriggerCollector;
 import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.control.PayloadSubscriber;
-import icecube.daq.trigger.control.ITriggerCollector;
+import icecube.daq.trigger.control.SubscribedList;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 
@@ -104,9 +105,16 @@ public interface INewAlgorithm
      *
      * @param interval time interval to check
      * @param released list of released requests
+     *
+     * @return number of released requests
      */
-    void release(Interval interval,
-                 List<ITriggerRequestPayload> released);
+    int release(Interval interval,
+                List<ITriggerRequestPayload> released);
+
+    /**
+     * Reset the algorithm to its initial condition.
+     */
+    void resetAlgorithm();
 
     /**
      * Reset the UID to signal a run switch.
@@ -138,4 +146,9 @@ public interface INewAlgorithm
      * @param triggerFactory trigger factory
      */
     void setTriggerFactory(TriggerRequestFactory triggerFactory);
+
+    /**
+     * Disconnect the input provider.
+     */
+    void unsubscribe(SubscribedList list);
 }

@@ -127,15 +127,18 @@ class MyCollector
     MyCollector(int srcId, List<INewAlgorithm> algorithms,
                 DAQComponentOutputProcess outputEngine,
                 IByteBufferCache outCache,
-                IMonitoringDataManager multiDataMgr)
+                IMonitoringDataManager multiDataMgr,
+                SubscriptionManager subMgr)
     {
-        super(srcId, algorithms, outputEngine, outCache, multiDataMgr);
+        super(srcId, algorithms, outputEngine, outCache, multiDataMgr, subMgr);
     }
 
+    @Override
     public ICollectorThread createCollectorThread(String name, int srcId,
                                                   List<INewAlgorithm> algo,
                                                   IMonitoringDataManager mdm,
-                                                  IOutputThread outThrd)
+                                                  IOutputThread outThrd,
+                                                  SubscriptionManager subMgr)
     {
         if (thrd == null) {
             thrd = new MockCollectorThread();
@@ -201,7 +204,7 @@ public class TriggerCollectorTest
     public void testCreate()
     {
         try {
-            new TriggerCollector(INICE_ID, null, null, null, null);
+            new TriggerCollector(INICE_ID, null, null, null, null, null);
             fail("Constructor should fail with null algorithm list");
         } catch (Error err) {
             // expect this to fail
@@ -211,7 +214,7 @@ public class TriggerCollectorTest
             new ArrayList<INewAlgorithm>();
 
         try {
-            new TriggerCollector(INICE_ID, algorithms, null, null, null);
+            new TriggerCollector(INICE_ID, algorithms, null, null, null, null);
             fail("Constructor should fail with empty algorithm list");
         } catch (Error err) {
             // expect this to fail
@@ -220,7 +223,7 @@ public class TriggerCollectorTest
         algorithms.add(new MockAlgorithm("foo"));
 
         try {
-            new TriggerCollector(INICE_ID, algorithms, null, null, null);
+            new TriggerCollector(INICE_ID, algorithms, null, null, null, null);
             fail("Constructor should fail with null output process");
         } catch (Error err) {
             // expect this to fail
@@ -229,7 +232,7 @@ public class TriggerCollectorTest
         MockOutputProcess out = new MockOutputProcess();
 
         try {
-            new TriggerCollector(INICE_ID, algorithms, out, null, null);
+            new TriggerCollector(INICE_ID, algorithms, out, null, null, null);
             fail("Constructor should fail with null output cache");
         } catch (Error err) {
             // expect this to fail
@@ -238,7 +241,8 @@ public class TriggerCollectorTest
         MockBufferCache bufCache = new MockBufferCache("foo");
 
         TriggerCollector tc =
-            new TriggerCollector(INICE_ID, algorithms, out, bufCache, null);
+            new TriggerCollector(INICE_ID, algorithms, out, bufCache, null,
+                                 null);
         assertFalse("New collector is stopped", tc.isStopped());
         assertEquals("New collector queue should be empty",
                      0L, tc.getNumQueued());
@@ -258,7 +262,7 @@ public class TriggerCollectorTest
         MockOutputProcess out = new MockOutputProcess();
 
         MyCollector tc =
-            new MyCollector(INICE_ID, algorithms, out, bufCache, null);
+            new MyCollector(INICE_ID, algorithms, out, bufCache, null, null);
 
         tc.startThreads(null);
 
@@ -285,7 +289,7 @@ public class TriggerCollectorTest
         MockOutputProcess out = new MockOutputProcess();
 
         MyCollector tc =
-            new MyCollector(INICE_ID, algorithms, out, bufCache, null);
+            new MyCollector(INICE_ID, algorithms, out, bufCache, null, null);
 
         assertFalse("Collector thread UID should not be reset",
                     tc.wasUIDReset());

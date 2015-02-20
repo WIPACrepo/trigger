@@ -149,6 +149,53 @@ public class InIceTriggerIntegrationTest
         System.getProperties().setProperty(SNDAQAlerter.PROPERTY, ":12345");
     }
 
+    private void startAndRun(IniceTriggerComponent comp, DOMRegistry domReg,
+                             int runInstance)
+        throws DAQCompException, IOException
+    {
+        final int numTails = 10;
+        final int numObjs = numTails * 10;
+
+        tails = DAQTestUtil.connectToReader(comp.getReader(),
+                                            comp.getInputCache(), numTails);
+
+        InIceValidator validator = new InIceValidator();
+        DAQTestUtil.connectToSink("iiOut", comp.getWriter(),
+                                  comp.getOutputCache(), validator);
+
+        comp.starting(12345);
+
+        DAQTestUtil.startComponentIO(comp);
+
+        ActivityMonitor activity = new ActivityMonitor(comp, "II");
+
+        // load data into input channels
+        sendInIceData(tails, numObjs, domReg);
+
+        final int expTriggers = numObjs / NUM_HITS_PER_TRIGGER;
+
+        final boolean dumpActivity = false;
+        final boolean dumpSplicers = false;
+        final boolean dumpBEStats = false;
+
+        activity.waitForStasis(10, 100, expTriggers, dumpActivity,
+                               dumpSplicers);
+
+        DAQTestUtil.sendStops(tails);
+
+        activity.waitForStasis(10, 100, expTriggers, dumpActivity,
+                               dumpSplicers);
+
+        //assertEquals("Bad number of payloads written",
+        //             expTriggers, comp.getPayloadsSent() - 1);
+
+        assertFalse("Found invalid payload(s)", validator.foundInvalid());
+
+        comp.stopped();
+
+        DAQTestUtil.checkCaches(comp, runInstance);
+    }
+
     public static Test suite()
     {
         return new TestSuite(InIceTriggerIntegrationTest.class);
@@ -176,13 +223,6 @@ public class InIceTriggerIntegrationTest
         throws DAQCompException, IOException, SplicerException,
                TriggerException
     {
-        final boolean dumpActivity = false;
-        final boolean dumpSplicers = false;
-        final boolean dumpBEStats = false;
-
-        final int numTails = 10;
-        final int numObjs = numTails * 10;
-
         File cfgFile =
             DAQTestUtil.buildConfigFile(getClass().getResource("/").getPath(),
                                         "sps-2012-013");
@@ -206,38 +246,10 @@ public class InIceTriggerIntegrationTest
 
         comp.configuring(cfgFile.getName());
 
-        tails = DAQTestUtil.connectToReader(comp.getReader(),
-                                            comp.getInputCache(), numTails);
+        startAndRun(comp, domReg, 1);
 
-        InIceValidator validator = new InIceValidator();
-        DAQTestUtil.connectToSink("iiOut", comp.getWriter(),
-                                  comp.getOutputCache(), validator);
+        startAndRun(comp, domReg, 2);
 
-        comp.starting(12345);
-
-        DAQTestUtil.startComponentIO(comp);
-
-        ActivityMonitor activity = new ActivityMonitor(comp, "II");
-
-        // load data into input channels
-        sendInIceData(tails, numObjs, domReg);
-
-        final int expTriggers = numObjs / NUM_HITS_PER_TRIGGER;
-
-        activity.waitForStasis(10, 100, expTriggers, dumpActivity,
-                               dumpSplicers);
-
-        DAQTestUtil.sendStops(tails);
-
-        activity.waitForStasis(10, 100, expTriggers, dumpActivity,
-                               dumpSplicers);
-
-        assertEquals("Bad number of payloads written",
-                     expTriggers, comp.getPayloadsSent() - 1);
-
-        assertFalse("Found invalid payload(s)", validator.foundInvalid());
-
-        DAQTestUtil.checkCaches(comp);
         DAQTestUtil.destroyComponentIO(comp);
 
         if (appender.getLevel().equals(org.apache.log4j.Level.ALL)) {

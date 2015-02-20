@@ -20,9 +20,10 @@ import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.HitFilter;
 import icecube.daq.trigger.control.INewManager;
+import icecube.daq.trigger.control.ITriggerCollector;
 import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.control.PayloadSubscriber;
-import icecube.daq.trigger.control.ITriggerCollector;
+import icecube.daq.trigger.control.SubscribedList;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -402,7 +403,12 @@ public abstract class AbstractTrigger
             new ArrayList<IWriteablePayload>();
         for (Object obj : hits) {
             IWriteablePayload hit = (IWriteablePayload) obj;
-            hitList.add((IWriteablePayload) hit.deepCopy());
+            IWriteablePayload copy = (IWriteablePayload) hit.deepCopy();
+            if (copy.getUTCTime() < 0) {
+                LOG.error("Ignoring bad hit " + copy + " (from " + hit + ")");
+                continue;
+            }
+            hitList.add(copy);
         }
 
         // make payload
@@ -474,6 +480,10 @@ public abstract class AbstractTrigger
      */
     public int getInputQueueSize()
     {
+        if (subscriber == null) {
+            return -1;
+        }
+
         return subscriber.size();
     }
 
@@ -734,6 +744,8 @@ public abstract class AbstractTrigger
                 count++;
             }
         }
+        requests.clear();
+
         if (count > 0) {
             LOG.error("Recycled " + count + " unused " + toString() +
                       " requests");
@@ -745,10 +757,13 @@ public abstract class AbstractTrigger
      *
      * @param interval time interval to check
      * @param released list of released requests
+     *
+     * @return number of released requests
      */
-    public void release(Interval interval,
-                        List<ITriggerRequestPayload> released)
+    public int release(Interval interval,
+                       List<ITriggerRequestPayload> released)
     {
+        int num = 0;
         synchronized (requests) {
             int i = 0;
             for (ITriggerRequestPayload req : requests) {
@@ -790,9 +805,12 @@ public abstract class AbstractTrigger
 
                 // add released requests to the list and remove from the cache
                 released.addAll(sub);
+                num += sub.size();
                 sub.clear();
             }
         }
+
+        return num;
     }
 
     public void reportHit(IHitPayload hit)
@@ -831,6 +849,18 @@ public abstract class AbstractTrigger
     }
 
     /**
+     * Reset the algorithm to its initial condition.
+     */
+    public void resetAlgorithm()
+    {
+        resetUID();
+
+        onTrigger = false;
+        earliestPayloadOfInterest = null;
+        releaseTime = null;
+    }
+
+    /**
      * Reset the UID to signal a run switch.
      */
     public void resetUID()
@@ -860,6 +890,7 @@ public abstract class AbstractTrigger
         synchronized (requests) {
             requests.add(flushReq);
         }
+        collector.setChanged();
     }
 
     /**
@@ -976,6 +1007,24 @@ public abstract class AbstractTrigger
     }
 
     /**
+     * Unset the list subscriber client (for monitoring the input queue).
+     */
+    public void unsubscribe(SubscribedList list)
+    {
+        if (subscriber == null) {
+            LOG.warn(triggerName + " is not subscribed to the input queue");
+            return;
+        }
+
+        if (!list.unsubscribe(subscriber)) {
+            LOG.warn(triggerName +
+                     " was not fully unsubscribed from the input queue");
+        }
+
+        subscriber = null;
+    }
+
+    /**
      * Wrap the trigger in a global trigger jacket and report it.
      *
      * @param trigReq trigger request
@@ -1063,6 +1112,7 @@ public abstract class AbstractTrigger
      */
     public String toString()
     {
-        return triggerName + "#" + triggerCounter;
+        return triggerName + "#" + triggerCounter + "[" + requests.size() +
+            "]";
     }
 }

@@ -115,11 +115,17 @@ public final class DAQTestUtil
     public static void checkCaches(TriggerComponent comp)
         throws DAQCompException
     {
-        checkCaches(comp, comp.getName(), false);
+        checkCaches(comp, comp.getName(), 1, false);
+    }
+
+    public static void checkCaches(TriggerComponent comp, int numRuns)
+        throws DAQCompException
+    {
+        checkCaches(comp, comp.getName(), numRuns, false);
     }
 
     public static void checkCaches(TriggerComponent comp, String name,
-                                   boolean debug)
+                                   int numRuns, boolean debug)
         throws DAQCompException
     {
         IByteBufferCache inCache = comp.getInputCache();
@@ -138,7 +144,7 @@ public final class DAQTestUtil
 
         assertEquals(name + " mismatch between triggers allocated and sent",
                      outCache.getTotalBuffersAcquired(),
-                     comp.getPayloadsSent() - 1);
+                     comp.getTotalPayloadsSent() - numRuns);
     }
 
     public static final void closePipeList(Pipe[] list)

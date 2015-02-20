@@ -8,11 +8,18 @@ import icecube.daq.payload.IPayload;
 public interface PayloadSubscriber
 {
     /**
-     * Is there data available?
+     * Get subscriber name
      *
-     * @return <tt>true</tt> if there are more payloads available
+     * @return name
      */
-    boolean hasData();
+    String getName();
+
+    /**
+     * Has this list been stopped?
+     *
+     * @return <tt>true</tt> if the list has been stopped
+     */
+    boolean isStopped();
 
     /**
      * Return the next available payload.  Note that this may block if there
@@ -21,6 +28,13 @@ public interface PayloadSubscriber
      * @return next available payload.
      */
     IPayload pop();
+
+    /**
+     * Add a payload to the queue.
+     *
+     * @param pay payload
+     */
+    void push(IPayload pay);
 
     /**
      * Get the number of queued payloads

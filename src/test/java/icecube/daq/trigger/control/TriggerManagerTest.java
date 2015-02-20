@@ -319,7 +319,7 @@ public class TriggerManagerTest
         TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.addTrigger(new MockAlgorithm("foo"));
-        mgr.subscribeAlgorithms();
+        mgr.subscribeAll();
 
         List splObjs = new ArrayList();
         splObjs.add(new NonHit(123, 456));
@@ -327,11 +327,19 @@ public class TriggerManagerTest
         mgr.execute(splObjs, 0);
 
         assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
+                     2, appender.getNumberOfMessages());
 
-        final String msg = "TriggerHandler only knows about either" +
-            " HitPayloads or TriggerRequestPayloads!";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
+        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
+            final String msg;
+            if (i == 0) {
+                msg = "TriggerHandler only knows about either" +
+                    " HitPayloads or TriggerRequestPayloads!";
+            } else {
+                msg = "Ignoring invalid payload ";
+            }
+            assertTrue("Bad log message " + msg,
+                       ((String) appender.getMessage(i)).startsWith(msg));
+        }
 
         appender.clear();
     }
@@ -345,7 +353,7 @@ public class TriggerManagerTest
         TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.addTrigger(new MockAlgorithm("foo"));
-        mgr.subscribeAlgorithms();
+        mgr.subscribeAll();
 
         List splObjs = new ArrayList();
         splObjs.add(new MyHit(123, 234));
@@ -361,13 +369,21 @@ public class TriggerManagerTest
         mgr.execute(splObjs, 0);
 
         assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
+                     2, appender.getNumberOfMessages());
 
         final double diff = (badOrder.getUTCTime() - goodOrder.getUTCTime());
-        final String msg = "Hit from " + badOrder.getSourceID() +
-            " out of order! This time - Last time = " + diff +
-            ", src of last hit = " + goodOrder.getSourceID();
-        assertEquals("Bad log message", msg, appender.getMessage(0));
+        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
+            final String msg;
+            if (i == 0) {
+                msg = "Hit from " + badOrder.getSourceID() +
+                    " out of order! This time - Last time = " + diff +
+                    ", src of last hit = " + goodOrder.getSourceID();
+            } else {
+                msg = "Ignoring invalid payload ";
+            }
+            assertTrue("Bad log message " + msg,
+                       ((String) appender.getMessage(i)).startsWith(msg));
+        }
 
         appender.clear();
     }
@@ -381,7 +397,7 @@ public class TriggerManagerTest
         TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.addTrigger(new MockAlgorithm("foo"));
-        mgr.subscribeAlgorithms();
+        mgr.subscribeAll();
 
         List splObjs = new ArrayList();
         splObjs.add(new MyHit(123, 234));
@@ -403,7 +419,7 @@ public class TriggerManagerTest
         TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.addTrigger(new MockAlgorithm("foo"));
-        mgr.subscribeAlgorithms();
+        mgr.subscribeAll();
 
         List splObjs = new ArrayList();
         splObjs.add(new MockTriggerRequest(1, 2, 3, 4, 5));
@@ -411,11 +427,19 @@ public class TriggerManagerTest
         mgr.execute(splObjs, 0);
 
         assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
+                     2, appender.getNumberOfMessages());
 
-        final String msg = "Source #" + INICE_ID +
-            " cannot process trigger requests";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
+        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
+            final String msg;
+            if (i == 0) {
+                msg = "Source #" + INICE_ID +
+                    " cannot process trigger requests";
+            } else {
+                msg = "Ignoring invalid payload ";
+            }
+            assertTrue("Bad log message " + msg,
+                       ((String) appender.getMessage(i)).startsWith(msg));
+        }
 
         appender.clear();
     }
@@ -429,7 +453,7 @@ public class TriggerManagerTest
         TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.addTrigger(new MockAlgorithm("foo"));
-        mgr.subscribeAlgorithms();
+        mgr.subscribeAll();
 
         List splObjs = new ArrayList();
         splObjs.add(new MockTriggerRequest(1, 2, 3, 4, 5));
@@ -451,7 +475,7 @@ public class TriggerManagerTest
         TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.addTrigger(new MockAlgorithm("foo"));
-        mgr.subscribeAlgorithms();
+        mgr.subscribeAll();
 
         List splObjs = new ArrayList();
         splObjs.add(new MockTriggerRequest(1, 2, 3, 4, 5));
@@ -484,7 +508,7 @@ public class TriggerManagerTest
         TriggerManager mgr = new TriggerManager(src, bufCache);
 
         mgr.addTrigger(new MockAlgorithm("foo"));
-        mgr.subscribeAlgorithms();
+        mgr.subscribeAll();
 
         List splObjs = new ArrayList();
         splObjs.add(new MockTriggerRequest(1, 2, 3, 4, 5));
@@ -936,6 +960,13 @@ public class TriggerManagerTest
         MyHit(int srcId, long timeVal)
         {
             super(timeVal);
+
+            this.srcId = srcId;
+        }
+
+        public Object deepCopy()
+        {
+            return new MyHit(srcId, getUTCTime());
         }
 
         public IDOMID getDOMID()

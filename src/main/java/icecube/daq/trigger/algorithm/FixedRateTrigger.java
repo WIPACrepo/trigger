@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 15431 2015-02-20 19:38:33Z dglo $
+ * Version $Id: FixedRateTrigger.java 15433 2015-02-20 20:41:21Z dglo $
  *
  * Date: May 1 2006
  *
@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 15431 2015-02-20 19:38:33Z dglo $
+ * @version $Id: FixedRateTrigger.java 15433 2015-02-20 20:41:21Z dglo $
  * @author pat
  */
 public class FixedRateTrigger extends AbstractTrigger
@@ -143,15 +143,17 @@ public class FixedRateTrigger extends AbstractTrigger
      */
     public void flush()
     {
-        reset();
+        // nothing to do here
     }
 
     /**
-     * reset
+     * Reset the algorithm to its initial condition.
      */
-    private void reset()
+    public void resetAlgorithm()
     {
         numberOfHitsProcessed = 0;
+
+        super.resetAlgorithm();
     }
 
     /**

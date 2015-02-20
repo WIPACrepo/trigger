@@ -680,6 +680,16 @@ public class IniceVolumeTrigger extends AbstractTrigger {
         numberOfHitsInTriggerWindow = 0;
     }
 
+    /**
+     * Reset the algorithm to its initial condition.
+     */
+    public void resetAlgorithm()
+    {
+        reset();
+
+        super.resetAlgorithm();
+    }
+
     private final class SlidingTimeWindow {
 
         private LinkedList hits;

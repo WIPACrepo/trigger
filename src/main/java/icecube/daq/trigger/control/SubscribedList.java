@@ -16,14 +16,7 @@ public class SubscribedList
     /**
      * List of subscribers
      */
-    private List<ListSubscriber> subs = new ArrayList<ListSubscriber>();
-
-    /**
-     * Create subscribed list managment object.
-     */
-    public SubscribedList()
-    {
-    }
+    private List<PayloadSubscriber> subs = new ArrayList<PayloadSubscriber>();
 
     /**
      * Get the lengths of all subscriber lists
@@ -33,12 +26,20 @@ public class SubscribedList
     public Map<String, Integer> getLengths()
     {
         HashMap<String, Integer> map = new HashMap<String, Integer>();
-        for (ListSubscriber sub : subs) {
-            synchronized (sub.list) {
-                map.put(sub.name, sub.list.size());
-            }
+        for (PayloadSubscriber sub : subs) {
+            map.put(sub.getName(), sub.size());
         }
         return map;
+    }
+
+    /**
+     * Get the number of subscribers to this list
+     *
+     * @return number of subscribers
+     */
+    public int getNumSubscribers()
+    {
+        return subs.size();
     }
 
     /**
@@ -52,13 +53,8 @@ public class SubscribedList
             throw new Error("No subscribers have been added");
         }
 
-        for (ListSubscriber sub : subs) {
-            synchronized (sub.list) {
-                sub.list.addLast(pay);
-
-                // let subscribers know that there's data available
-                sub.list.notify();
-            }
+        for (PayloadSubscriber sub : subs) {
+            sub.push(pay);
         }
     }
 
@@ -70,11 +66,10 @@ public class SubscribedList
     public int size()
     {
         int longest = 0;
-        for (ListSubscriber sub : subs) {
-            synchronized (sub.list) {
-                if (sub.list.size() > longest) {
-                    longest = sub.list.size();
-                }
+        for (PayloadSubscriber sub : subs) {
+            final int len = sub.size();
+            if (len > longest) {
+                longest = len;
             }
         }
         return longest;
@@ -87,13 +82,27 @@ public class SubscribedList
      *
      * @return subscriber object
      */
-    public ListSubscriber subscribe(String name)
+    public PayloadSubscriber subscribe(String name)
     {
-        ListSubscriber newSub = new ListSubscriber(name);
+        PayloadSubscriber newSub = new ListSubscriber(name);
         synchronized (subs) {
             subs.add(newSub);
         }
         return newSub;
+    }
+
+    /**
+     * Remove a subscriber.
+     *
+     * @param subscriber object
+     *
+     * @return <tt>true</tt> if the subscriber was removed
+     */
+    public boolean unsubscribe(PayloadSubscriber sub)
+    {
+        synchronized (subs) {
+            return subs.remove(sub);
+        }
     }
 
     /**
@@ -109,6 +118,8 @@ public class SubscribedList
 
         /** Subscriber name */
         private String name;
+        /** Is the list stopping? */
+        private boolean stopping;
         /** Has the list been stopped? */
         private boolean stopped;
 
@@ -123,6 +134,16 @@ public class SubscribedList
         }
 
         /**
+         * Get subscriber name
+         *
+         * @return name
+         */
+        public String getName()
+        {
+            return name;
+        }
+
+        /**
          * Is there data available?
          *
          * @return <tt>true</tt> if there are more payloads available
@@ -130,6 +151,16 @@ public class SubscribedList
         public boolean hasData()
         {
             return list.size() > 0;
+        }
+
+        /**
+         * Has this list been stopped?
+         *
+         * @return <tt>true</tt> if the list has been stopped
+         */
+        public boolean isStopped()
+        {
+            return stopped;
         }
 
         /**
@@ -141,7 +172,7 @@ public class SubscribedList
         public IPayload pop()
         {
             synchronized (list) {
-                while (!stopped && list.size() == 0) {
+                while (!stopping && list.size() == 0) {
                     try {
                         list.wait();
                     } catch (InterruptedException ie) {
@@ -149,11 +180,27 @@ public class SubscribedList
                     }
                 }
 
-                if (stopped && list.size() == 0) {
+                if (stopping && list.size() == 0) {
+                    stopped = true;
                     return null;
                 }
 
                 return list.removeFirst();
+            }
+        }
+
+        /**
+         * Add a payload to the queue.
+         *
+         * @param pay payload
+         */
+        public void push(IPayload pay)
+        {
+            synchronized (list) {
+                list.addLast(pay);
+
+                // let subscribers know that there's data available
+                list.notify();
             }
         }
 
@@ -173,7 +220,7 @@ public class SubscribedList
         public void stop()
         {
             synchronized (list) {
-                stopped = true;
+                stopping = true;
                 list.notify();
             }
         }
@@ -186,6 +233,7 @@ public class SubscribedList
         public String toString()
         {
             return name + "@" + list.size() +
+                (stopping ? ":stopping" : "") +
                 (stopped ? ":stopped" : "");
         }
     }

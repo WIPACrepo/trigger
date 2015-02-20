@@ -12,6 +12,7 @@ import icecube.daq.trigger.test.MockAlgorithm;
 import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockBufferCache;
 import icecube.daq.trigger.test.MockOutputProcess;
+import icecube.daq.trigger.test.MockSubscriber;
 import icecube.daq.trigger.test.MockTriggerRequest;
 
 import java.nio.ByteBuffer;
@@ -176,6 +177,20 @@ class MockDataManager
     }
 }
 
+class MockSubscriptionManager
+    implements SubscriptionManager
+{
+    public void subscribeAll()
+    {
+        // do nothing
+    }
+
+    public void unsubscribeAll()
+    {
+        // do nothing
+    }
+}
+
 public class CollectorThreadTest
 {
     private static final int INICE_ID =
@@ -238,6 +253,7 @@ public class CollectorThreadTest
     public void testCreate()
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("creAlgo");
+        fooAlgo.setSubscriber(new MockSubscriber());
 
         ArrayList<INewAlgorithm> algorithms =
             new ArrayList<INewAlgorithm>();
@@ -248,7 +264,8 @@ public class CollectorThreadTest
         MockBufferCache bufCache = new MockBufferCache("foo");
 
         CollectorThread ct =
-            new CollectorThread("cre", INICE_ID, algorithms, null, outThrd);
+            new CollectorThread("cre", INICE_ID, algorithms, null, outThrd,
+                                null);
     }
 
     @Test
@@ -265,7 +282,8 @@ public class CollectorThreadTest
         MockBufferCache bufCache = new MockBufferCache("foo");
 
         CollectorThread ct =
-            new CollectorThread("api", INICE_ID, algorithms, null, outThrd);
+            new CollectorThread("api", INICE_ID, algorithms, null, outThrd,
+                                null);
         ct.resetUID();
     }
 
@@ -283,7 +301,8 @@ public class CollectorThreadTest
         MockBufferCache bufCache = new MockBufferCache("foo");
 
         CollectorThread ct =
-            new CollectorThread("find", INICE_ID, algorithms, null, outThrd);
+            new CollectorThread("find", INICE_ID, algorithms, null, outThrd,
+                                null);
         assertNull("Found unexpected interval", ct.findInterval());
 
         final long start = 1;
@@ -312,7 +331,8 @@ public class CollectorThreadTest
         Interval ival = new Interval(4L, 5L);
 
         CollectorThread ct =
-            new CollectorThread("pushII", INICE_ID, algorithms, null, outThrd);
+            new CollectorThread("pushII", INICE_ID, algorithms, null, outThrd,
+                                null);
         ct.pushTrigger(new MockTriggerRequest(1, 2, 3, ival.start, ival.end));
 
         assertEquals("Should be one request queued",
@@ -345,7 +365,8 @@ public class CollectorThreadTest
         Interval ival = new Interval(4L, 5L);
 
         CollectorThread ct =
-            new CollectorThread("pushG", GLOBAL_ID, algorithms, mgr, outThrd);
+            new CollectorThread("pushG", GLOBAL_ID, algorithms, mgr, outThrd,
+                                null);
         ct.pushTrigger(new MockTriggerRequest(1, 2, 3, ival.start, ival.end));
         checkDataMgr(mgr, false, false, false);
 
@@ -386,7 +407,8 @@ public class CollectorThreadTest
         Interval ival = new Interval(4L, 5L);
 
         CollectorThread ct =
-            new CollectorThread("pushG", GLOBAL_ID, algorithms, mgr, outThrd);
+            new CollectorThread("pushG", GLOBAL_ID, algorithms, mgr, outThrd,
+                                null);
         ct.pushTrigger(new MockTriggerRequest(1, 2, 3, ival.start, ival.end));
         checkDataMgr(mgr, true, false, false);
 
@@ -420,7 +442,8 @@ public class CollectorThreadTest
         Interval ival = new Interval(4L, 5L);
 
         CollectorThread ct =
-            new CollectorThread("pushG", GLOBAL_ID, algorithms, mgr, outThrd);
+            new CollectorThread("pushG", GLOBAL_ID, algorithms, mgr, outThrd,
+                                null);
         ct.pushTrigger(new MockTriggerRequest(0, 2, 3, ival.start, ival.end));
         checkDataMgr(mgr, true, false, false);
 
@@ -455,7 +478,8 @@ public class CollectorThreadTest
         Interval ival = new Interval(4L, 5L);
 
         CollectorThread ct =
-            new CollectorThread("pushG", GLOBAL_ID, algorithms, mgr, outThrd);
+            new CollectorThread("pushG", GLOBAL_ID, algorithms, mgr, outThrd,
+                                null);
         ct.setRunNumber(12345, true);
 
         ct.pushTrigger(new MockTriggerRequest(0, 2, 3, ival.start, ival.end));
@@ -492,7 +516,8 @@ public class CollectorThreadTest
         Interval ival = new Interval(4L, 5L);
 
         CollectorThread ct =
-            new CollectorThread("pushG", GLOBAL_ID, algorithms, mgr, outThrd);
+            new CollectorThread("pushG", GLOBAL_ID, algorithms, mgr, outThrd,
+                                null);
         ct.setRunNumber(12345, true);
 
         ct.pushTrigger(new MockTriggerRequest(0, 2, 3, ival.start, ival.end));
@@ -534,7 +559,7 @@ public class CollectorThreadTest
 
         CollectorThread ct =
             new CollectorThread("sendReqEmpty", INICE_ID, algorithms, mgr,
-                                outThrd);
+                                outThrd, null);
 
         Interval ival = new Interval(10, 30);
 
@@ -572,7 +597,7 @@ public class CollectorThreadTest
 
         CollectorThread ct =
             new CollectorThread("sendReqII1", INICE_ID, algorithms, mgr,
-                                outThrd);
+                                outThrd, null);
 
         Interval ival0 = new Interval(11, 15);
         fooAlgo.addInterval(ival0);
@@ -615,7 +640,7 @@ public class CollectorThreadTest
 
         CollectorThread ct =
             new CollectorThread("sendReqGT1", GLOBAL_ID, algorithms, mgr,
-                                outThrd);
+                                outThrd, null);
 
         Interval ival0 = new Interval(11, 15);
         fooAlgo.addInterval(ival0);
@@ -659,7 +684,7 @@ public class CollectorThreadTest
 
         CollectorThread ct =
             new CollectorThread("sendReqIIMany", INICE_ID, algorithms, mgr,
-                                outThrd);
+                                outThrd, null);
 
         Interval ival0 = new Interval(11, 15);
         fooAlgo.addInterval(ival0);
@@ -707,7 +732,7 @@ public class CollectorThreadTest
 
         CollectorThread ct =
             new CollectorThread("sendReqMany", GLOBAL_ID, algorithms, mgr,
-                                outThrd);
+                                outThrd, null);
 
         Interval ival0 = new Interval(11, 15);
         fooAlgo.addInterval(ival0);
@@ -753,7 +778,7 @@ public class CollectorThreadTest
 
         CollectorThread ct =
             new CollectorThread("setChgNoAlgo", INICE_ID, algorithms, mgr,
-                                outThrd);
+                                outThrd, null);
 
         ct.setChanged();
     }
@@ -775,7 +800,7 @@ public class CollectorThreadTest
 
         CollectorThread ct =
             new CollectorThread("setChgNoFlush", INICE_ID, algorithms, mgr,
-                                outThrd);
+                                outThrd, null);
 
         ct.setChanged();
     }
@@ -797,7 +822,7 @@ public class CollectorThreadTest
 
         CollectorThread ct =
             new CollectorThread("setChgFlush", INICE_ID, algorithms, mgr,
-                                outThrd);
+                                outThrd, null);
 
         fooAlgo.setSawFlush();
 
@@ -809,6 +834,7 @@ public class CollectorThreadTest
                        Interval[] reqList)
     {
         MockRunAlgorithm fooAlgo = new MockRunAlgorithm(name + "Algo");
+        fooAlgo.setSubscriber(new MockSubscriber());
 
         ArrayList<INewAlgorithm> algorithms =
             new ArrayList<INewAlgorithm>();
@@ -825,8 +851,11 @@ public class CollectorThreadTest
 
         MockDataManager mgr = new MockDataManager();
 
+        MockSubscriptionManager subMgr = new MockSubscriptionManager();
+
         CollectorThread ct =
-            new CollectorThread(name, INICE_ID, algorithms, mgr, outThrd);
+            new CollectorThread(name, INICE_ID, algorithms, mgr, outThrd,
+                                subMgr);
         ct.setRunNumber(1234, false);
 
         fooAlgo.setSawFlush();
@@ -850,9 +879,9 @@ public class CollectorThreadTest
             assertEquals("Bad number of log messages",
                          1, appender.getNumberOfMessages());
 
-            final String msg = "New interval [" + newStart + "-" + newEnd +
+            final String expMsg = "New interval [" + newStart + "-" + newEnd +
                 "] precedes old interval [" + oldStart + "-" + oldEnd + "]";
-            assertEquals("Bad log message", msg, appender.getMessage(0));
+            assertEquals("Bad log message", expMsg, appender.getMessage(0));
 
             appender.clear();
         }
@@ -1029,16 +1058,18 @@ class MockRunAlgorithm
         super(name);
     }
 
-    public void release(Interval interval,
-                        List<ITriggerRequestPayload> released)
+    public int release(Interval interval,
+                       List<ITriggerRequestPayload> released)
     {
         final int len = released.size();
 
-        super.release(interval, released);
+        int rtnval = super.release(interval, released);
 
         if (!flushed && getNumberOfIntervals() == 0) {
             addInterval(FlushRequest.FLUSH_TIME, FlushRequest.FLUSH_TIME);
             flushed = true;
         }
+
+        return rtnval;
     }
 }

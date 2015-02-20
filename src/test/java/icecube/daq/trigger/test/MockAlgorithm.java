@@ -6,9 +6,10 @@ import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.TriggerRequestFactory;
 import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.common.ITriggerManager;
+import icecube.daq.trigger.control.ITriggerCollector;
 import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.control.PayloadSubscriber;
-import icecube.daq.trigger.control.ITriggerCollector;
+import icecube.daq.trigger.control.SubscribedList;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -137,7 +138,7 @@ public class MockAlgorithm
      */
     public int getNumberOfCachedRequests()
     {
-        throw new Error("Unimplemented");
+        return intervals.size();
     }
 
     public int getNumberOfIntervals()
@@ -200,9 +201,11 @@ public class MockAlgorithm
         intervals.clear();
     }
 
-    public void release(Interval interval,
-                        List<ITriggerRequestPayload> released)
+    public int release(Interval interval,
+                       List<ITriggerRequestPayload> released)
     {
+        int rtnval = 0;
+
         int i = 0;
         while (i < intervals.size()) {
             Interval iv = intervals.get(i);
@@ -224,12 +227,21 @@ public class MockAlgorithm
                     req = gReq;
                 }
                 released.add(req);
+                rtnval++;
+
                 intervals.remove(i);
                 if (!fetchAll) {
                     break;
                 }
             }
         }
+
+        return rtnval;
+    }
+
+    public void resetAlgorithm()
+    {
+        throw new Error("Unimplemented");
     }
 
     public void resetUID()
@@ -314,6 +326,15 @@ public class MockAlgorithm
     public void setTriggerType(int type)
     {
         throw new Error("Unimplemented");
+    }
+
+    public void unsubscribe(SubscribedList list)
+    {
+        if (!list.unsubscribe(sub)) {
+            throw new Error("Cannot remove " + toString() + " from " + list);
+        }
+
+        sub = null;
     }
 
     public String toString()

@@ -8,6 +8,7 @@ import icecube.daq.trigger.common.ITriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.MockAlgorithm;
 import icecube.daq.trigger.test.MockAppender;
+import icecube.daq.trigger.test.MockSubscriber;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -65,57 +66,6 @@ class MyPayload
     public void setCache(IByteBufferCache x0)
     {
         throw new Error("Unimplemented");
-    }
-}
-
-class MockSubscriber
-    implements PayloadSubscriber
-{
-    private ArrayList<IPayload> payloads = new ArrayList<IPayload>();
-
-    private TriggerThread thrd;
-
-    public MockSubscriber()
-    {
-        this.thrd = thrd;
-    }
-
-    public void add(IPayload pay)
-    {
-        payloads.add(pay);
-    }
-
-    public boolean hasData()
-    {
-        return payloads.size() > 0;
-    }
-
-    public IPayload pop()
-    {
-        if (payloads.size() <= 1 && thrd != null) {
-            thrd.stop();
-        }
-
-        if (payloads.size() < 1) {
-            return null;
-        }
-
-        return payloads.remove(0);
-    }
-
-    public int size()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void setThread(TriggerThread thrd)
-    {
-        this.thrd = thrd;
-    }
-
-    public void stop()
-    {
-        // do nothing
     }
 }
 

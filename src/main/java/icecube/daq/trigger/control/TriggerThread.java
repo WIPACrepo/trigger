@@ -9,7 +9,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Trigger algorithm thread.
  */
-class TriggerThread
+public class TriggerThread
     implements Runnable
 {
     /** Message logger. */
@@ -18,10 +18,16 @@ class TriggerThread
     private int id;
     private INewAlgorithm algorithm;
     private Thread thread;
+    private boolean stopping;
     private boolean stopped;
+    private long numSent;
 
     TriggerThread(int id, INewAlgorithm algorithm)
     {
+        if (algorithm == null) {
+            throw new Error("Algorithm cannot be null");
+        }
+
         this.id = id;
         this.algorithm = algorithm;
     }
@@ -46,7 +52,8 @@ class TriggerThread
     public void start()
     {
         if (algorithm.getSubscriber() == null) {
-            throw new Error("Algorithm is not subscribed to any lists");
+            throw new Error(algorithm.toString() +
+                            " is not subscribed to any lists");
         }
 
         thread = new Thread(this);
@@ -56,17 +63,23 @@ class TriggerThread
 
     public void stop()
     {
-        stopped = true;
+        stopping = true;
 
-        algorithm.getSubscriber().stop();
+        PayloadSubscriber sub = algorithm.getSubscriber();
+        if (sub == null) {
+            LOG.error(algorithm.toString() +
+                      " is not subscribed to any lists");
+        } else {
+            sub.stop();
+        }
     }
 
     public void run()
     {
-        while (!stopped || algorithm.getSubscriber().hasData()) {
+        while (true) {
             IPayload pay = algorithm.getSubscriber().pop();
             if (pay == null) {
-                if (stopped && !algorithm.getSubscriber().hasData()) {
+                if (stopping && algorithm.getSubscriber().isStopped()) {
                     break;
                 }
 
@@ -75,6 +88,7 @@ class TriggerThread
             } else if (pay == TriggerManager.FLUSH_PAYLOAD) {
                 algorithm.sendLast();
             } else {
+                numSent++;
                 try {
                     algorithm.runTrigger(pay);
                 } catch (Throwable thr) {
@@ -82,14 +96,28 @@ class TriggerThread
                               thr);
                 }
             }
-
-            Thread.yield();
         }
+
+        stopped = true;
     }
 
     public String toString()
     {
-        return "TriggerThread#" + id + ":" + algorithm.getTriggerName() + ":" +
-            algorithm.getSubscriber() + (stopped ? ":stopped" : "");
+        PayloadSubscriber sub = algorithm.getSubscriber();
+
+        int qlen;
+        if (sub == null) {
+            qlen = -1;
+        } else {
+            qlen = sub.size();
+        }
+
+        return "TriggerThread#" + id +
+            ":" + algorithm.getTriggerName() +
+            "[" + sub + "]" +
+            ",sent#" + numSent +
+            ",q#" + qlen +
+            (stopping ? ":stopping" : "") +
+            (stopped ? ":stopped" : "");
     }
 }

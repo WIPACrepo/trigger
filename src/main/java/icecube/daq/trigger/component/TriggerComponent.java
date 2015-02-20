@@ -339,7 +339,7 @@ public class TriggerComponent
      */
     public long getPayloadsSent()
     {
-        return outputEngine.getTotalRecordsSent();
+        return outputEngine.getRecordsSent();
     }
 
     /**
@@ -363,6 +363,16 @@ public class TriggerComponent
     }
 
     /**
+     * Get the total number of trigger requests written out
+     *
+     * @return requests sent
+     */
+    public long getTotalPayloadsSent()
+    {
+        return outputEngine.getTotalRecordsSent();
+    }
+
+    /**
      * Get the trigger manager for this component.
      *
      * @return trigger manager
@@ -379,7 +389,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 15333 2015-01-09 22:08:50Z dglo $";
+        return "$Id: TriggerComponent.java 15433 2015-02-20 20:41:21Z dglo $";
     }
 
     /**

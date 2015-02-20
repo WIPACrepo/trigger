@@ -79,16 +79,14 @@ public class MockOutputProcess
         throw new Error("Unimplemented");
     }
 
-    public long[] getRecordsSent()
+    public long getRecordsSent()
     {
-        long[] rtnval = new long[1];
-        if (outChan == null) {
-            rtnval[0] = 0L;
-        } else {
-            rtnval[0] = outChan.getNumberWritten();
-        }
+        return outChan.getNumberWritten();
+    }
 
-        return rtnval;
+    public long getTotalRecordsSent()
+    {
+        throw new Error("Unimplemented");
     }
 
     public boolean isConnected()

@@ -669,31 +669,15 @@ public class IniceVolumeTrigger extends AbstractTrigger {
         numberOfHitsInTriggerWindow = hitsWithinTriggerWindow.size();
     }
 
+    /**
+     * Reset SimpleMajorityTrigger parameters
+     */
     private void reset()
     {
-
-        /**
-         *Reseting SimpleMajorityTrigger parameters
-         */
-
         slidingTimeWindow = new SlidingTimeWindow();
-        threshold = 0;
-        timeWindow = 0;
         numberOfHitsProcessed = 0;
         hitsWithinTriggerWindow.clear();
         numberOfHitsInTriggerWindow = 0;
-        configThreshold = false;
-        configTimeWindow = false;
-
-        /**
-         * Resetting VolumeTrigger parameters
-         */
-
-        volumeHeight = 0;
-        centerShift = 0;
-        configVolumeHeight = false;
-        configCenterShift = false;
-
     }
 
     private final class SlidingTimeWindow {

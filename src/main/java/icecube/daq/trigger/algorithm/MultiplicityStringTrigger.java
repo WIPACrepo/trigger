@@ -707,33 +707,15 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
         numberOfHitsInTriggerWindow = hitsWithinTriggerWindow.size();
     }
 
+    /**
+     * Reset SimpleMajorityTrigger parameters
+     */
     private void reset()
     {
-
-        /**
-         *Reseting SimpleMajorityTrigger parameters
-         */
-
         slidingTimeWindow = new SlidingTimeWindow();
-        threshold = 0;
-        timeWindow = 0;
         numberOfHitsProcessed = 0;
         hitsWithinTriggerWindow.clear();
         numberOfHitsInTriggerWindow = 0;
-        configThreshold = false;
-        configTimeWindow = false;
-
-        /**
-         * Resetting StringTrigger parameters
-         */
-
-        numberOfVetoTopDoms = 0;
-        maxLength = 0;
-        string = -1;
-        configNumberOfVetoTopDoms = false;
-        configMaxLength = false;
-        configString = false;
-
     }
 
     private final class SlidingTimeWindow {

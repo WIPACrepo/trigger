@@ -191,10 +191,16 @@ public class ClusterTrigger extends AbstractTrigger
             long mbid = hitPayload.getDOMID().longValue();
             DeployedDOM dom =
                 getTriggerHandler().getDOMRegistry().getDom(mbid);
+            String chanStr;
+            if (dom == null) {
+                chanStr = "<null>";
+            } else {
+                chanStr = String.format("(%d, %d)", dom.getStringMajor(),
+                                        dom.getStringMinor());
+            }
             logger.debug("Received hit at UTC " + hitPayload.getUTCTime() +
-                         " - logical channel (" + dom.getStringMajor() +
-                         ", " + dom.getStringMinor() +
-                         ") queue size = " + triggerQueue.size());
+                         " - logical channel " + chanStr +
+                         " queue size = " + triggerQueue.size());
         }
 
         // try to form a request
@@ -263,6 +269,11 @@ public class ClusterTrigger extends AbstractTrigger
         for (IHitPayload hit : triggerQueue) {
             long mbid = hit.getDOMID().longValue();
             DeployedDOM dom = domRegistry.getDom(mbid);
+            if (dom == null) {
+                logger.error(String.format("Cannot find DOM %012x from %s", mbid, hit.toString()));
+                continue;
+            }
+
             int m0 = Math.max( 1, dom.getStringMinor() - coherenceUp);
             int m1 = Math.min(60, dom.getStringMinor() + coherenceDown);
             for (int m = m0; m <= m1; m++) {

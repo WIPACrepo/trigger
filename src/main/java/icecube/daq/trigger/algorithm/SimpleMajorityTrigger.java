@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 15271 2014-11-19 18:46:22Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 15429 2015-02-20 19:22:20Z dglo $
  *
  * Date: August 19 2005
  *
@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 15271 2014-11-19 18:46:22Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 15429 2015-02-20 19:22:20Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -43,7 +43,8 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
     private static final Log LOG =
         LogFactory.getLog(SimpleMajorityTrigger.class);
 
-    private static int triggerNumber = 0;
+    private static int nextTriggerNumber;
+    private int triggerNumber;
 
     /**
      * Trigger parameters
@@ -71,7 +72,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
     public SimpleMajorityTrigger()
     {
-        triggerNumber++;
+        triggerNumber = ++nextTriggerNumber;
     }
 
     /*

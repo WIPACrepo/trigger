@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 15271 2014-11-19 18:46:22Z dglo $
+ * Version $Id: CalibrationTrigger.java 15429 2015-02-20 19:22:20Z dglo $
  *
  * Date: August 27 2005
  *
@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 15271 2014-11-19 18:46:22Z dglo $
+ * @version $Id: CalibrationTrigger.java 15429 2015-02-20 19:22:20Z dglo $
  * @author pat
  */
 public class CalibrationTrigger extends AbstractTrigger
@@ -42,7 +42,8 @@ public class CalibrationTrigger extends AbstractTrigger
     private static final Log LOG =
         LogFactory.getLog(CalibrationTrigger.class);
 
-    private static int triggerNumber = 0;
+    private static int nextTriggerNumber;
+    private int triggerNumber;
 
     /**
      * Type of hit to trigger on.
@@ -56,7 +57,7 @@ public class CalibrationTrigger extends AbstractTrigger
      */
     public CalibrationTrigger()
     {
-        triggerNumber++;
+        triggerNumber = ++nextTriggerNumber;
     }
 
     /**

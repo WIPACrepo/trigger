@@ -32,14 +32,15 @@ public class DefaultIniceStringTrigger extends AbstractTrigger
     private static final Log LOG =
         LogFactory.getLog(DefaultIniceStringTrigger.class);
 
-    private static int triggerNumber = 0;
+    private static int nextTriggerNumber;
+    private int triggerNumber;
 
     private int stringTriggerType;
     private boolean configStringTriggerType = false;
 
     public DefaultIniceStringTrigger()
     {
-	triggerNumber++;
+        triggerNumber = ++nextTriggerNumber;
     }
 
     public boolean isConfigured()

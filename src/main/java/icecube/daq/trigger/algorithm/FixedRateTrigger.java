@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 15271 2014-11-19 18:46:22Z dglo $
+ * Version $Id: FixedRateTrigger.java 15429 2015-02-20 19:22:20Z dglo $
  *
  * Date: May 1 2006
  *
@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 15271 2014-11-19 18:46:22Z dglo $
+ * @version $Id: FixedRateTrigger.java 15429 2015-02-20 19:22:20Z dglo $
  * @author pat
  */
 public class FixedRateTrigger extends AbstractTrigger
@@ -40,7 +40,8 @@ public class FixedRateTrigger extends AbstractTrigger
     /**
      * unique id within this trigger type
      */
-    private static int triggerNumber = 0;
+    private static int nextTriggerNumber;
+    private int triggerNumber;
 
     /**
      * Time interval between triggers (in integral number of nanoseconds)
@@ -67,7 +68,7 @@ public class FixedRateTrigger extends AbstractTrigger
      */
     public FixedRateTrigger()
     {
-        triggerNumber++;
+        triggerNumber = ++nextTriggerNumber;
     }
 
     /**

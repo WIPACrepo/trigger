@@ -39,7 +39,8 @@ public class TrigBoardTrigger extends AbstractTrigger
     private static final Log LOG =
         LogFactory.getLog(TrigBoardTrigger.class);
 
-    private static int triggerNumber = 0;
+    private static int nextTriggerNumber;
+    private int triggerNumber;
 
     private int prescale;
     private int numberProcessed = 0;
@@ -49,7 +50,7 @@ public class TrigBoardTrigger extends AbstractTrigger
     public TrigBoardTrigger()
         throws IllegalParameterValueException
     {
-        triggerNumber++;
+        triggerNumber = ++nextTriggerNumber;
         try {
             configHitFilter(1);
         } catch (ConfigException ce) {

@@ -49,7 +49,8 @@ public class IniceVolumeTrigger extends AbstractTrigger {
     private static final Log LOG =
         LogFactory.getLog(IniceVolumeTrigger.class);
 
-    private static int triggerNumber = 0;
+    private static int nextTriggerNumber;
+    private int triggerNumber;
 
     /**
      * Trigger Parameters
@@ -99,8 +100,8 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 
     public IniceVolumeTrigger()
     {
-        triggerNumber++;
-	stringMap = StringMap.getInstance();
+        triggerNumber = ++nextTriggerNumber;
+        stringMap = StringMap.getInstance();
     }
 
     /**

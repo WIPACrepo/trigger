@@ -41,7 +41,8 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
     private static final Log LOG =
         LogFactory.getLog(PhysicsMinBiasTrigger.class);
 
-    private static int triggerNumber = 0;
+    private static int nextTriggerNumber;
+    private int triggerNumber;
 
     private int prescale;
     private int deadtime;
@@ -54,7 +55,7 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
 
     public PhysicsMinBiasTrigger()
     {
-        triggerNumber++;
+        triggerNumber = ++nextTriggerNumber;
     }
 
     /**

@@ -39,7 +39,8 @@ public class SyncBoardTrigger extends AbstractTrigger
     private static final Log LOG =
         LogFactory.getLog(SyncBoardTrigger.class);
 
-    private static int triggerNumber = 0;
+    private static int nextTriggerNumber;
+    private int triggerNumber;
 
     private int prescale;
     private int numberProcessed = 0;
@@ -49,7 +50,7 @@ public class SyncBoardTrigger extends AbstractTrigger
     public SyncBoardTrigger()
         throws IllegalParameterValueException
     {
-        triggerNumber++;
+        triggerNumber = ++nextTriggerNumber;
         try {
             configHitFilter(0);
         } catch (ConfigException ce) {

@@ -45,7 +45,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
     private static final Log LOG =
         LogFactory.getLog(MultiplicityStringTrigger.class);
 
-    private static int triggerNumber = 0;
+    private static int nextTriggerNumber;
+    private int triggerNumber;
 
     /**
      * Trigger Parameters
@@ -95,7 +96,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
     public MultiplicityStringTrigger()
     {
-        triggerNumber++;
+        triggerNumber = ++nextTriggerNumber;
     }
 
     /**

@@ -48,7 +48,6 @@ public class TriggerThread
         }
     }
 
-
     public void start()
     {
         if (algorithm.getSubscriber() == null) {

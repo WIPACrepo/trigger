@@ -32,10 +32,6 @@ class TriggerMonitor
             summarized = stopped;
         }
 
-        boolean newStopped = (comp == null ||
-                              (!comp.getReader().isRunning() &&
-                               comp.getWriter().isStopped()));
-
         boolean changed = false;
         if (comp != null && !summarized) {
             if (received != comp.getPayloadsReceived()) {
@@ -64,6 +60,9 @@ class TriggerMonitor
             }
         }
 
+        boolean newStopped = (comp == null ||
+                              (!comp.getReader().isRunning() &&
+                               comp.getWriter().isStopped()));
         if (stopped != newStopped) {
             stopped = newStopped;
         }

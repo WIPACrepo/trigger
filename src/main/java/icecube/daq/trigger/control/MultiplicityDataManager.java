@@ -112,7 +112,7 @@ class CountData
     public static final long DAQ_SECOND = 10000000000L;
     public static final long DAQ_BIN_WIDTH = DAQ_SECOND * SECONDS_PER_BIN;
 
-    public static final long RATE_VERSION = 0;
+    public static final int RATE_VERSION = 0;
 
     private int runNumber;
     private long endTime;
@@ -236,7 +236,7 @@ class Bins
 public class MultiplicityDataManager
     implements IMonitoringDataManager
 {
-    public static final long MULTIPLICITY_VERSION = 0;
+    public static final int MULTIPLICITY_VERSION = 0;
 
     /** Log object for this class */
     private static final Log LOG =

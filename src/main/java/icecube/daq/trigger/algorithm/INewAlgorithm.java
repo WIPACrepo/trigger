@@ -39,6 +39,11 @@ public interface INewAlgorithm
     void addReadout(int rdoutType, int offset, int minus, int plus);
 
     /**
+     * Flush the algorithm.
+     */
+    void flush();
+
+    /**
      * Get the input queue size.
      *
      * @return input queue size
@@ -81,11 +86,6 @@ public interface INewAlgorithm
      * @return release time
      */
     IPayload getReleaseTime();
-
-    /**
-     * Flush the algorithm.
-     */
-    void flush();
 
     /**
      * Does this algorithm include all relevant hits in each request

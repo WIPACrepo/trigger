@@ -726,6 +726,20 @@ public abstract class AbstractTrigger
     }
 
     /**
+     * Is there data available?
+     *
+     * @return <tt>true</tt> if there are more payloads available
+     */
+    public boolean hasData()
+    {
+        if (subscriber == null) {
+            return false;
+        }
+
+        return subscriber.hasData();
+    }
+
+    /**
      * Has this algorithm been fully configured?
      *
      * @return <tt>true</tt> if the algorithm has been fully configured

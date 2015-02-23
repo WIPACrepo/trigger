@@ -15,6 +15,13 @@ public interface PayloadSubscriber
     String getName();
 
     /**
+     * Is there data available?
+     *
+     * @return <tt>true</tt> if there are more payloads available
+     */
+    boolean hasData();
+
+    /**
      * Has this list been stopped?
      *
      * @return <tt>true</tt> if the list has been stopped

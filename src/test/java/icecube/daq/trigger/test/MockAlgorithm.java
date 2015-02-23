@@ -186,6 +186,11 @@ public class MockAlgorithm
         return type;
     }
 
+    public boolean hasData()
+    {
+        return sub.hasData();
+    }
+
     public boolean hasValidMultiplicity()
     {
         return validMultiplicity;

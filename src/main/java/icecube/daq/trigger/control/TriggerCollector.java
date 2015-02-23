@@ -450,7 +450,21 @@ class CollectorThread
             }
         }
 
-        while (!stopping) {
+        while (true) {
+            if (stopping) {
+                boolean algoStopped = true;
+                for (INewAlgorithm a : algorithms) {
+                    if (a.hasData()) {
+                        algoStopped = false;
+                        break;
+                    }
+                }
+
+                if (algoStopped) {
+                    break;
+                }
+            }
+
             synchronized (threadLock) {
                 if (!changed) {
                     try {
@@ -472,6 +486,7 @@ class CollectorThread
                 if (interval.start == FlushRequest.FLUSH_TIME &&
                     interval.end == FlushRequest.FLUSH_TIME)
                 {
+                    // if the interval is a FLUSH, we're done
                     stopping = true;
 
                     outThrd.notifyThread();

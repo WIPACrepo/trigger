@@ -1,6 +1,7 @@
 package icecube.daq.trigger.test;
 
 import icecube.daq.io.DAQComponentIOProcess;
+import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
@@ -170,7 +171,7 @@ public class InIceTriggerEndToEndTest
         trigCfg.sendInIceData(tails, numObjs);
         trigCfg.sendInIceStops(tails);
 
-        waitUntilProcessed(rdr, trigMgr);
+        waitForStasis(rdr, trigMgr, outProc, false);
         waitUntilStopped(rdr, splicer, "StopMsg");
 
         // wait for all collection threads to stop
@@ -199,17 +200,64 @@ public class InIceTriggerEndToEndTest
     private static final int REPS = 100;
     private static final int SLEEP_TIME = 100;
 
-    public static final void waitUntilProcessed(SpliceablePayloadReader rdr,
-                                                TriggerManager mgr)
+    public static final void waitForStasis(SpliceablePayloadReader rdr,
+                                           TriggerManager mgr,
+                                           DAQComponentOutputProcess out,
+                                           boolean debug)
     {
-        for (int i = 0; i < REPS &&
-                 (rdr.getTotalRecordsReceived() == 0 ||
-                  mgr.getTotalProcessed() < rdr.getTotalRecordsReceived());
-             i++)
-        {
+        final int maxStatic = 10;
+
+        // track data progress through the system
+        long received = 0;
+        long queuedIn = 0;
+        long processed = 0;
+        long queuedReq = 0;
+        long queuedOut = 0;
+        long sent = 0;
+
+        int numStatic = 0;
+        boolean changed = false;
+        for (int i = 0; i < REPS; i++) {
+            if (received != rdr.getTotalRecordsReceived()) {
+                received = rdr.getTotalRecordsReceived();
+                changed = true;
+            }
+            if (queuedIn != mgr.getNumInputsQueued()) {
+                queuedIn = mgr.getNumInputsQueued();
+                changed = true;
+            }
+            if (processed != mgr.getTotalProcessed()) {
+                processed = mgr.getTotalProcessed();
+                changed = true;
+            }
+            if (queuedOut != mgr.getNumOutputsQueued()) {
+                queuedOut = mgr.getNumOutputsQueued();
+                changed = true;
+            }
+            if (sent != out.getRecordsSent()) {
+                sent = out.getRecordsSent();
+                changed = true;
+            }
+
+            // if nothing's changed, remember how many reps were static
+            if (!changed || sent == 0) {
+                numStatic = 0;
+            } else {
+                numStatic++;
+            }
+            if (numStatic > maxStatic) {
+                break;
+            }
+
+            if (debug) {
+                System.err.printf("#%d: r%d->i%d->p%d->q%d->o%d->s%d\n",
+                                  i, received, queuedIn, processed, queuedReq,
+                                  queuedOut, sent);
+            }
+
             try {
                 Thread.sleep(SLEEP_TIME);
-            } catch (InterruptedException ie) {
+            } catch (Throwable thr) {
                 // ignore interrupts
             }
         }
@@ -221,18 +269,6 @@ public class InIceTriggerEndToEndTest
                                  mgr.getTotalProcessed(),
                                  rdr.getTotalRecordsReceived()),
                    mgr.getTotalProcessed() >= rdr.getTotalRecordsReceived());
-
-        for (int i = 0; i < REPS &&
-                 (mgr.getNumInputsQueued() > 0 ||
-                  mgr.getNumOutputsQueued() > 0);
-             i++)
-        {
-            try {
-                Thread.sleep(SLEEP_TIME);
-            } catch (InterruptedException ie) {
-                // ignore interrupts
-            }
-        }
 
         assertEquals("Input queue is not empty", 0, mgr.getNumInputsQueued());
         assertEquals("Output queue is not empty", 0, mgr.getNumOutputsQueued());

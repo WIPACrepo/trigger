@@ -14,7 +14,7 @@ import icecube.daq.trigger.exceptions.UnknownParameterException;
 import java.util.List;
 
 public interface INewAlgorithm
-    extends ITriggerAlgorithm
+    extends Comparable<INewAlgorithm>, ITriggerAlgorithm
 {
     /**
      * Add a trigger parameter.
@@ -74,6 +74,13 @@ public interface INewAlgorithm
     int getNumberOfCachedRequests();
 
     /**
+     * Get the number of trigger intervals sent to the collector.
+     *
+     * @return sent count
+     */
+    long getSentTriggerCount();
+
+    /**
      * Get the input provider.
      *
      * @return input queue subscription
@@ -86,6 +93,13 @@ public interface INewAlgorithm
      * @return release time
      */
     IPayload getReleaseTime();
+
+    /**
+     * Are there requests waiting to be processed?
+     *
+     * @return <tt>true</tt> if there are more requests available
+     */
+    boolean hasCachedRequests();
 
     /**
      * Is there data available?

@@ -214,7 +214,7 @@ public class MockAlgorithm
 
     public boolean hasCachedRequests()
     {
-        return intervals.size() > 0;
+        return intervals.size() > 0 && !intervals.get(0).isFlush();
     }
 
     public boolean hasValidMultiplicity()

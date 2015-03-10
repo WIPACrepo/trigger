@@ -177,6 +177,18 @@ public class CylinderTriggerTest
 
         waitUntilStopped(rdr, splicer, "StopMsg");
 
+        // wait for all collection threads to stop
+        for (int i = 0; i < REPS && !trigMgr.isStopped(); i++) {
+            try {
+                Thread.sleep(SLEEP_TIME);
+            } catch (InterruptedException ie) {
+                // ignore interrupts
+            }
+        }
+
+        assertTrue("Collection thread(s) not stopped: " + trigMgr,
+                   trigMgr.isStopped());
+
         assertEquals("Bad number of payloads written",
                      trigCfg.getExpectedNumberOfInIcePayloads(numObjs),
                      outProc.getNumberWritten());

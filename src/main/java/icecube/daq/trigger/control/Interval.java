@@ -96,6 +96,17 @@ public class Interval
     }
 
     /**
+     * Is this interval from a flush request?
+     *
+     * @return <tt>true</tt> if the interval is from a flush request
+     */
+    public boolean isFlush()
+    {
+        return start == FlushRequest.FLUSH_TIME &&
+            end == FlushRequest.FLUSH_TIME;
+    }
+
+    /**
      * Are the objects equal?
      *
      * @param obj object being compared

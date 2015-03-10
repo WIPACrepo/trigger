@@ -71,7 +71,7 @@ public abstract class AbstractTrigger
     protected TriggerRequestFactory triggerFactory;
     protected boolean onTrigger;
     protected int triggerCounter;
-    protected int sentTriggerCounter;
+    private int sentTriggerCounter;
     private int printMod = 1000;
 
     private IPayload earliestPayloadOfInterest;
@@ -112,6 +112,22 @@ public abstract class AbstractTrigger
     public void addReadout(int rdoutType, int offset, int minus, int plus)
     {
         readouts.add(new TriggerReadout(rdoutType, offset, minus, plus));
+    }
+
+    public int compareTo(INewAlgorithm a)
+    {
+        int val = getTriggerName().compareTo(a.getTriggerName());
+        if (val == 0) {
+            val = trigType - a.getTriggerType();
+            if (val == 0) {
+                val = trigCfgId - a.getTriggerConfigId();
+                if (val == 0) {
+                    val = srcId - a.getSourceId();
+                }
+            }
+        }
+
+        return val;
     }
 
     protected void configHitFilter(int domSetId)
@@ -631,7 +647,7 @@ public abstract class AbstractTrigger
     }
 
     /**
-     * Get the number of trigger sent to the collector.
+     * Get the number of trigger intervals sent to the collector.
      *
      * @return sent count
      */
@@ -723,6 +739,19 @@ public abstract class AbstractTrigger
     public int getTriggerType()
     {
         return trigType;
+    }
+
+    /**
+     * Are there requests waiting to be processed?
+     *
+     * @return <tt>true</tt> if there are non-flush requests available
+     */
+    public boolean hasCachedRequests()
+    {
+        synchronized (requests) {
+            return requests.size() > 0 &&
+                requests.get(0).getUID() != FlushRequest.UID;
+        }
     }
 
     /**
@@ -1126,7 +1155,7 @@ public abstract class AbstractTrigger
      */
     public String toString()
     {
-        return triggerName + "#" + triggerCounter + "[" + requests.size() +
+        return triggerName + "#" + sentTriggerCounter + "[" + requests.size() +
             "]";
     }
 }

@@ -97,6 +97,22 @@ public class MockAlgorithm
         trigMoniMap.put(key, value);
     }
 
+    public int compareTo(INewAlgorithm a)
+    {
+        int val = getTriggerName().compareTo(a.getTriggerName());
+        if (val == 0) {
+            val = type - a.getTriggerType();
+            if (val == 0) {
+                val = cfgId - a.getTriggerConfigId();
+                if (val == 0) {
+                    val = srcId - a.getSourceId();
+                }
+            }
+        }
+
+        return val;
+    }
+
     public void flush()
     {
         throw new Error("Unimplemented");
@@ -151,6 +167,11 @@ public class MockAlgorithm
         throw new Error("Unimplemented");
     }
 
+    public long getSentTriggerCount()
+    {
+        throw new Error("Unimplemented");
+    }
+
     public int getSourceId()
     {
         return srcId;
@@ -189,6 +210,11 @@ public class MockAlgorithm
     public boolean hasData()
     {
         return sub.hasData();
+    }
+
+    public boolean hasCachedRequests()
+    {
+        return intervals.size() > 0;
     }
 
     public boolean hasValidMultiplicity()

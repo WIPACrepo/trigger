@@ -454,7 +454,7 @@ class CollectorThread
             if (stopping) {
                 boolean algoStopped = true;
                 for (INewAlgorithm a : algorithms) {
-                    if (a.hasData()) {
+                    if (a.hasData() || a.hasCachedRequests()) {
                         algoStopped = false;
                         break;
                     }

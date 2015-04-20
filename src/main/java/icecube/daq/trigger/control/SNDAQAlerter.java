@@ -276,7 +276,7 @@ public class SNDAQAlerter
     /**
      * Set the current run number
      *
-     * @param runNumber run number
+     * @param num run number
      */
     public void setRunNumber(int num)
     {

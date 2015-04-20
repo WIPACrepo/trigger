@@ -257,12 +257,10 @@ public class TriggerManager
     }
 
     /**
-     * Add a list of algorithms for this handler and optionally include
-     * a list of algorithms configured for all other handlers.  The
-     * <tt>otherList<tt> is to help the global trigger monitoring code
+     * Add the list of algorithms configured for all other handlers, to
+     * be used by the global trigger monitoring code
      *
-     * @param list list of trigger algorithms to add
-     * @param otherList list of algorithms configured for other handlers
+     * @param extra list of additional trigger algorithms to add
      */
     public void addExtraAlgorithms(List<INewAlgorithm> extra)
     {

@@ -94,7 +94,7 @@ public class SubscribedList
     /**
      * Remove a subscriber.
      *
-     * @param subscriber object
+     * @param sub subscriber object
      *
      * @return <tt>true</tt> if the subscriber was removed
      */

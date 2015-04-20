@@ -48,7 +48,8 @@ public class TriggerCollector
      * @param algorithms list of active trigger algorithms
      * @param outputEngine object which writes out requests
      * @param outCache output payload cache
-     * @param splicer used in the output thread to truncate the splicer
+     * @param moniDataMgr object which manages monitoring data
+     * @param subMgr subscription manager
      */
     public TriggerCollector(int srcId, List<INewAlgorithm> algorithms,
                             DAQComponentOutputProcess outputEngine,

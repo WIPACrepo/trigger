@@ -28,8 +28,6 @@ public abstract class TriggerCreator
      * @param doc XML document
      * @param compId component source ID
      *
-     * @return list of configured trigger algorithms
-     *
      * @throws TriggerException if there is a problem
      */
     public static void buildTriggers(Document doc, int compId,

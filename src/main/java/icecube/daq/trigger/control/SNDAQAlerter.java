@@ -189,7 +189,7 @@ public class SNDAQAlerter
         }
 
         if (smt8init) {
-            alertQueue = new AlertQueue(alerter);
+            alertQueue = new AlertQueue("SNDAQQueue", alerter);
             alertQueue.start();
         }
     }

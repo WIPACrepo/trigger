@@ -235,8 +235,7 @@ public class InIceTriggerIntegrationTest
         }
 
         MockAlerter alerter = new MockAlerter();
-        alerter.setExpectedVarName("trigger_triplets");
-        alerter.setExpectedPriority(Priority.EMAIL);
+        alerter.addExpected("trigger_triplets", Priority.EMAIL, 2);
 
         // set up in-ice trigger
         comp = new IniceTriggerComponent();
@@ -251,6 +250,8 @@ public class InIceTriggerIntegrationTest
         startAndRun(comp, domReg, 2);
 
         DAQTestUtil.destroyComponentIO(comp);
+
+        alerter.check();
 
         if (appender.getLevel().equals(org.apache.log4j.Level.ALL)) {
             appender.clear();

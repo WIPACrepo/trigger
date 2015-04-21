@@ -6,11 +6,49 @@ import icecube.daq.juggler.alert.AlertException;
 import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.payload.IUTCTime;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
+
+class ExpectedAlertCount
+{
+    private String varName;
+    private Alerter.Priority prio;
+    private int expected;
+    private int count;
+
+    ExpectedAlertCount(String varName, Alerter.Priority prio, int expected)
+    {
+        this.varName = varName;
+        this.prio = prio;
+        this.expected = expected;
+    }
+
+    void check()
+    {
+        if (expected != count) {
+            fail(String.format("Expected %d %s %s alerts, got %d", expected,
+                               varName, prio, count));
+        }
+    }
+
+    void inc()
+    {
+        if (++count > expected) {
+            fail(String.format("Saw extra alert for %s@%s (expected %d)",
+                               varName, prio, expected));
+        }
+    }
+
+    boolean matches(String varName, Alerter.Priority prio)
+    {
+        return this.varName.equals(varName) && this.prio.equals(prio);
+    }
+}
 
 public class MockAlerter
     implements Alerter
@@ -18,12 +56,23 @@ public class MockAlerter
     private boolean inactive;
     private boolean closed;
 
+    List<ExpectedAlertCount> expected = new ArrayList<ExpectedAlertCount>();
     private int numSent;
-    private String expVarName;
-    private Priority expPrio;
 
     public MockAlerter()
     {
+    }
+
+    public void addExpected(String varName, Priority prio, int count)
+    {
+        expected.add(new ExpectedAlertCount(varName, prio, count));
+    }
+
+    public void check()
+    {
+        for (ExpectedAlertCount e : expected) {
+            e.check();
+        }
     }
 
     public void close()
@@ -110,13 +159,18 @@ public class MockAlerter
             }
         }
 
-        if (expVarName == null || expPrio == null) {
+        boolean found = false;
+        for (ExpectedAlertCount e : expected) {
+            if (!e.matches(varname, prio)) continue;
+
+            e.inc();
+            found = true;
+        }
+        if (!found) {
             fail("Received unexpected " + varname + " alert, prio " + prio);
         }
 
-        assertEquals("Unexpected varname", expVarName, varname);
-        assertEquals("Unexpected priority", expPrio, prio);
-
+        // make sure we can turn alert into a JSON string
         Gson gson = new Gson();
         gson.toJson(obj);
 
@@ -127,15 +181,5 @@ public class MockAlerter
         throws AlertException
     {
         throw new Error("Unimplemented");
-    }
-
-    public void setExpectedPriority(Priority prio)
-    {
-        expPrio = prio;
-    }
-
-    public void setExpectedVarName(String name)
-    {
-        expVarName = name;
     }
 }

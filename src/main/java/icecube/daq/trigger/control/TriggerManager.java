@@ -373,29 +373,6 @@ public class TriggerManager
     }
 
     /**
-     * Get the most recent set of trigger counts to be used for
-     * detector monitoring.
-     *
-     * @return list of trigger count data.
-     */
-    public List<Map<String, Object>> getMoniCounts()
-    {
-        List<Map<String, Object>> mapList;
-        try {
-            mapList = multiDataMgr.getCounts();
-        } catch (MultiplicityDataException mde) {
-            LOG.error("Cannot get trigger counts for monitoring", mde);
-            mapList = null;
-        }
-
-        if (mapList == null) {
-            return new ArrayList<Map<String, Object>>();
-        }
-
-        return mapList;
-    }
-
-    /**
      * XXX Use getQueuedInputsMap instead
      *
      * @return number of queued inputs
@@ -753,12 +730,12 @@ public class TriggerManager
     }
 
     /**
-     * Send per-run histograms
+     * Send final monitoring messages
      */
-    public void sendHistograms()
+    public void sendFinalMoni()
     {
         try {
-            multiDataMgr.send();
+            multiDataMgr.sendFinal();
         } catch (MultiplicityDataException mde) {
             LOG.error("Cannot send multiplicity data", mde);
         }

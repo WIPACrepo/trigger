@@ -11,6 +11,9 @@ public interface IMonitoringDataManager
     void reset()
         throws MultiplicityDataException;
 
-    boolean send()
+    boolean sendFinal()
+        throws MultiplicityDataException;
+
+    boolean sendSingleBin()
         throws MultiplicityDataException;
 }

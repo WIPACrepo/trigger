@@ -526,6 +526,7 @@ public class TriggerManagerTest
         mgr.execute(splObjs, 0);
     }
 
+/*
     @Test
     public void testMoniCountsUnstarted()
     {
@@ -558,6 +559,7 @@ public class TriggerManagerTest
         assertNotNull("List should not be null", list);
         assertEquals("Unexpected list entries", 0, list.size());
     }
+*/
 
     @Test
     public void testSendHistoUnstarted()
@@ -567,7 +569,7 @@ public class TriggerManagerTest
 
         TriggerManager mgr = new TriggerManager(src, bufCache);
 
-        mgr.sendHistograms();
+        mgr.sendFinalMoni();
 
         assertEquals("Bad number of log messages",
                      1, appender.getNumberOfMessages());
@@ -584,10 +586,13 @@ public class TriggerManagerTest
         MockSourceID src = new MockSourceID(GLOBAL_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
+        MockAlerter alerter = new MockAlerter();
+
         TriggerManager mgr = new TriggerManager(src, bufCache);
+        mgr.setAlertQueue(new AlertQueue(alerter));
         mgr.setRunNumber(123);
 
-        mgr.sendHistograms();
+        mgr.sendFinalMoni();
     }
 
     @Test
@@ -727,11 +732,12 @@ public class TriggerManagerTest
         MockBufferCache bufCache = new MockBufferCache("foo");
 
         MockAlerter alerter = new MockAlerter();
-        alerter.setExpectedVarName("trigger_multiplicity");
-        alerter.setExpectedPriority(Priority.SCP);
+        alerter.addExpected("trigger_multiplicity", Priority.SCP, 3);
+        alerter.addExpected("trigger_rate", Priority.EMAIL, 9);
 
         TriggerManager mgr = new TriggerManager(src, bufCache);
         mgr.setAlertQueue(new AlertQueue(alerter));
+        mgr.setRunNumber(123);
 
         ArrayList<MockAlgorithm> algo = new ArrayList<MockAlgorithm>();
         for (int i = 0; i < 3; i++) {
@@ -784,6 +790,7 @@ public class TriggerManagerTest
 
         List<Map<String, Object>> counts;
 
+/*
         counts = mgr.getMoniCounts();
         for (Map<String, Object> map : counts) {
             if (!map.containsKey("runNumber")) {
@@ -792,6 +799,7 @@ public class TriggerManagerTest
                 fail("Expected run#" + runNum + " in " + map);
             }
         }
+*/
 
         final int newNum = 456;
 
@@ -804,6 +812,7 @@ public class TriggerManagerTest
             try { Thread.sleep(100); } catch (Exception ex) { }
         }
 
+/*
         boolean pastOldNum = false;
         counts = mgr.getMoniCounts();
         for (Map<String, Object> map : counts) {
@@ -817,8 +826,12 @@ public class TriggerManagerTest
                 }
             }
         }
+*/
+
+        alerter.check();
     }
 
+/*
     @Test
     public void testCountsIISwitchRun()
     {
@@ -914,6 +927,7 @@ public class TriggerManagerTest
             }
         }
     }
+*/
 
     @Test
     public void testSendTriplets()
@@ -935,8 +949,7 @@ public class TriggerManagerTest
         final int runNum = 12543;
 
         MockAlerter alerter = new MockAlerter();
-        alerter.setExpectedVarName("trigger_triplets");
-        alerter.setExpectedPriority(Priority.EMAIL);
+        alerter.addExpected("trigger_triplets", Priority.EMAIL, 1);
         mgr.setAlertQueue(new AlertQueue(alerter));
 
         mgr.sendTriplets(runNum);
@@ -946,6 +959,7 @@ public class TriggerManagerTest
 
         // XXX this doesn't validate the body of the alert
         assertEquals("Unexpected number of alerts", 1, alerter.getNumSent());
+        alerter.check();
     }
 
     class MyHit

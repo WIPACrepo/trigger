@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,6 +37,9 @@ import org.apache.commons.logging.LogFactory;
 public class TriggerCollector
     implements ITriggerCollector
 {
+    /** Monitoring task frequency (in seconds) */
+    public static final long MONI_SECONDS = 600;
+
     private static final Log LOG = LogFactory.getLog(TriggerCollector.class);
 
     private ICollectorThread collThrd;
@@ -48,8 +53,7 @@ public class TriggerCollector
      * @param algorithms list of active trigger algorithms
      * @param outputEngine object which writes out requests
      * @param outCache output payload cache
-     * @param moniDataMgr object which manages monitoring data
-     * @param subMgr subscription manager
+     * @param splicer used in the output thread to truncate the splicer
      */
     public TriggerCollector(int srcId, List<INewAlgorithm> algorithms,
                             DAQComponentOutputProcess outputEngine,
@@ -204,6 +208,32 @@ public class TriggerCollector
     }
 }
 
+/**
+ * Send periodic monitoring messages
+ */
+class MonitoringTask
+    extends TimerTask
+{
+    private static final Log LOG = LogFactory.getLog(MonitoringTask.class);
+
+    /** Multiplicity data manager */
+    private IMonitoringDataManager moniDataMgr;
+
+    MonitoringTask(IMonitoringDataManager moniDataMgr)
+    {
+        this.moniDataMgr = moniDataMgr;
+    }
+
+    public void run()
+    {
+        try {
+            moniDataMgr.sendSingleBin();
+        } catch (MultiplicityDataException mde) {
+            LOG.error("Cannot send monitoring bin", mde);
+        }
+    }
+}
+
 interface ICollectorThread
 {
     long getSNDAQAlertsDropped();
@@ -259,6 +289,8 @@ class CollectorThread
     private boolean stopped;
 
     private int runNumber = Integer.MIN_VALUE;
+
+    private Timer moniTimer;
 
     public CollectorThread(String name, int srcId,
                            List<INewAlgorithm> algorithms,
@@ -397,10 +429,16 @@ class CollectorThread
         if (srcId == SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID) {
             // if we're switching runs, reset mergedUID
             if (switchMerged) {
+                if (moniTimer != null) {
+                    // stop monitoring task(s)
+                    moniTimer.cancel();
+                    moniTimer = null;
+                }
+
                 try {
-                    moniDataMgr.send();
+                    moniDataMgr.sendFinal();
                 } catch (MultiplicityDataException mde) {
-                    LOG.error("Failed to send multiplicity data", mde);
+                    LOG.error("Failed to send monitoring data", mde);
                 }
 
                 try {
@@ -411,6 +449,15 @@ class CollectorThread
 
                 switchMerged = false;
                 mergedUID = 0;
+            }
+
+            // we've got data, start monitoring task
+            if (moniTimer == null) {
+                final long period = TriggerCollector.MONI_SECONDS * 1000L;
+
+                moniTimer = new Timer("Monitor#" + runNumber);
+                moniTimer.scheduleAtFixedRate(new MonitoringTask(moniDataMgr),
+                                              0, period);
             }
 
             try {

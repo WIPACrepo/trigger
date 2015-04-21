@@ -129,7 +129,7 @@ class MockDataManager
         wasReset = true;
     }
 
-    public boolean send()
+    public boolean sendFinal()
         throws MultiplicityDataException
     {
         if (throwSendEx) {
@@ -139,6 +139,12 @@ class MockDataManager
         wasSent = true;
 
         return doReset;
+    }
+
+    public boolean sendSingleBin()
+        throws MultiplicityDataException
+    {
+        return false;
     }
 
     public void setDoReset()

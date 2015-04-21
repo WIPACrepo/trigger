@@ -312,7 +312,7 @@ public class MultiplicityDataManagerTest
         mgr.setAlertQueue(new AlertQueue(alerter));
 
         try {
-            mgr.send();
+            mgr.sendFinal();
             fail("Should not succeed");
         } catch (MultiplicityDataException mde) {
             assertNotNull("Null message", mde.getMessage());
@@ -332,7 +332,7 @@ public class MultiplicityDataManagerTest
         mgr.setAlertQueue(new AlertQueue(alerter));
         mgr.start(123);
 
-        boolean sent = mgr.send();
+        boolean sent = mgr.sendFinal();
         assertFalse("Unexpected return value", sent);
         assertEquals("Unexpected send", 0, alerter.getNumSent());
     }
@@ -367,16 +367,17 @@ public class MultiplicityDataManagerTest
         mgr.add(new MockTriggerRequest(uid++, srcId, type, cfgId,
                                        nextBin + 4, nextBin + 5));
 
-        alerter.setExpectedVarName("trigger_multiplicity");
-        alerter.setExpectedPriority(Alerter.Priority.SCP);
+        alerter.addExpected("trigger_multiplicity", Alerter.Priority.SCP, 1);
+        alerter.addExpected("trigger_rate", Alerter.Priority.EMAIL, 1);
 
-        boolean sent = mgr.send();
+        boolean sent = mgr.sendFinal();
         assertTrue("Unexpected return value", sent);
 
         flushQueue(aq);
         aq.stopAndWait();
 
-        assertEquals("Unexpected send", 1, alerter.getNumSent());
+        assertEquals("Unexpected send", 2, alerter.getNumSent());
+        alerter.check();
     }
 
     @Test

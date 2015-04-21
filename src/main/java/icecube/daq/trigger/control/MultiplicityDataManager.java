@@ -367,6 +367,16 @@ public class MultiplicityDataManager
         }
     }
 
+    /**
+     * Add an algorithm to the list.
+     *
+     * @param algorithm trigger algorithm
+     */
+    public void addAlgorithm(INewAlgorithm algorithm)
+    {
+        algorithms.add(algorithm);
+    }
+
     public List<Map<String, Object>> getCounts()
         throws MultiplicityDataException
     {
@@ -400,16 +410,6 @@ public class MultiplicityDataManager
         }
 
         return list;
-    }
-
-    /**
-     * Add an algorithm to the list.
-     *
-     * @param algorithm trigger algorithm
-     */
-    public void addAlgorithm(INewAlgorithm algorithm)
-    {
-        algorithms.add(algorithm);
     }
 
     /**
@@ -456,7 +456,42 @@ public class MultiplicityDataManager
         nextRunNumber = NO_NUMBER;
     }
 
-    public boolean send()
+    public boolean sendFinal()
+        throws MultiplicityDataException
+    {
+        MultiplicityDataException delayed = null;
+        try {
+            // send final bin(s) of data
+            sendSingleBin();
+        } catch (MultiplicityDataException mde) {
+            if (delayed == null) {
+                // cache first exception and throw it when we're done
+                delayed = mde;
+            }
+            delayed = mde;
+        }
+
+        boolean rtnval;
+        try {
+            // send multiplicity data for entire run
+            rtnval = sendMultiplicity();
+        } catch (MultiplicityDataException mde) {
+            if (delayed == null) {
+                // cache first exception and throw it when we're done
+                delayed = mde;
+            }
+            rtnval = false;
+        }
+
+        if (delayed != null) {
+            // throw cached exception
+            throw delayed;
+        }
+
+        return rtnval;
+    }
+
+    private boolean sendMultiplicity()
         throws MultiplicityDataException
     {
         if (binmap == null) {
@@ -512,6 +547,43 @@ public class MultiplicityDataManager
         for (Map<String, Object> values : valueList) {
             try {
                 alertQueue.push("trigger_multiplicity", Alerter.Priority.SCP,
+                                values);
+            } catch (AlertException ae) {
+                throw new MultiplicityDataException("Cannot send alert", ae);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Send the current bin of data to I3Live
+     *
+     * @return list of trigger count data.
+     */
+    public boolean sendSingleBin()
+        throws MultiplicityDataException
+    {
+        return sendTriggerCounts();
+    }
+
+    private boolean sendTriggerCounts()
+        throws MultiplicityDataException
+    {
+        if (alertQueue == null) {
+            throw new MultiplicityDataException("AlertQueue has not" +
+                                                " been set");
+        }
+
+        List<Map<String, Object>> mapList = getCounts();
+        if (mapList == null) {
+            // if there's no data, we're done
+            return false;
+        }
+
+        for (Map<String, Object> values : mapList) {
+            try {
+                alertQueue.push("trigger_rate", Alerter.Priority.EMAIL,
                                 values);
             } catch (AlertException ae) {
                 throw new MultiplicityDataException("Cannot send alert", ae);

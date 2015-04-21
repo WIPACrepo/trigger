@@ -292,17 +292,6 @@ public class TriggerComponent
     }
 
     /**
-     * Get the trigger counts for detector monitoring.
-     *
-     *
-     * @return list of trigger count data.
-     */
-    public List<Map<String, Object>> getMoniCounts()
-    {
-        return triggerManager.getMoniCounts();
-    }
-
-    /**
      * Get the ByteBufferCache used to track the outgoing request payloads
      *
      * @return output cache
@@ -389,7 +378,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 15433 2015-02-20 20:41:21Z dglo $";
+        return "$Id: TriggerComponent.java 15522 2015-04-21 18:46:44Z dglo $";
     }
 
     /**
@@ -452,15 +441,16 @@ public class TriggerComponent
     }
 
     /**
-     * Send histograms after run has stopped.
+     * Send final monitoring messages after run has stopped.
      *
-     * @throws DAQCompException if there is a problem sending histograms
+     * @throws DAQCompException if there is a problem sending one or more
+     *                          messages
      */
     public void stopped()
         throws DAQCompException
     {
         if (isGlobalTrigger) {
-            triggerManager.sendHistograms();
+            triggerManager.sendFinalMoni();
         }
     }
 

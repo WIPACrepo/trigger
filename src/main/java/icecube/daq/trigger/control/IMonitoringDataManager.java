@@ -14,6 +14,13 @@ public interface IMonitoringDataManager
     boolean sendFinal()
         throws MultiplicityDataException;
 
-    boolean sendSingleBin()
+    /**
+     * Send a single bin of data
+     *
+     * @param isFinal <tt>true</tt> if this is the final bin
+     *
+     * @throws MultiplicityDataException if there is a problem
+     */
+    boolean sendSingleBin(boolean isFinal)
         throws MultiplicityDataException;
 }

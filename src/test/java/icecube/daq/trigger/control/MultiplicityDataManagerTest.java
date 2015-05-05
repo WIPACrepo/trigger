@@ -60,6 +60,15 @@ public class MultiplicityDataManagerTest
 
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
+
+        // set the Leapseconds config directory so UTCTime.toDateString() works
+        File configDir = new File(getClass().getResource("/config").getPath());
+        if (!configDir.exists()) {
+            throw new IllegalArgumentException("Cannot find config" +
+                                               " directory under " +
+                                               getClass().getResource("/"));
+        }
+        Leapseconds.setConfigDirectory(configDir);
     }
 
     @After
@@ -111,7 +120,7 @@ public class MultiplicityDataManagerTest
 
         mgr.add(new MockTriggerRequest(1, srcId, type, cfgId, 4, 5));
 
-        List<Map<String, Object>> histo = mgr.getCounts();
+        List<Map<String, Object>> histo = mgr.getSummary(10, true);
         assertNotNull("Histogram should not be null", histo);
         assertEquals("Unexpected histogram list " + histo, 0, histo.size());
     }
@@ -190,15 +199,6 @@ public class MultiplicityDataManagerTest
     public void testAddMulti()
         throws MultiplicityDataException
     {
-        // set the Leapseconds config directory to UTCTime.toDateString() works
-        File configDir = new File(getClass().getResource("/config").getPath());
-        if (!configDir.exists()) {
-            throw new IllegalArgumentException("Cannot find config" +
-                                               " directory under " +
-                                               getClass().getResource("/"));
-        }
-        Leapseconds.setConfigDirectory(configDir);
-
         final int srcId = SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID;
         final int cfgId = 2;
         final int type = 3;
@@ -219,11 +219,11 @@ public class MultiplicityDataManagerTest
         mgr.add(new MockTriggerRequest(uid++, srcId, type, cfgId,
                                        firstBin + 4, firstBin + 5));
 
-        final long nextBin = firstBin + CountData.DAQ_BIN_WIDTH;
+        final long nextBin = firstBin + Bins.WIDTH;
         mgr.add(new MockTriggerRequest(uid++, srcId, type, cfgId,
                                        nextBin + 4, nextBin + 5));
 
-        List<Map<String, Object>> histo = mgr.getCounts();
+        List<Map<String, Object>> histo = mgr.getSummary(10, true);
         assertNotNull("Histogram should not be null", histo);
         assertEquals("Unexpected histogram list " + histo, 1, histo.size());
 
@@ -235,6 +235,50 @@ public class MultiplicityDataManagerTest
     }
 
     @Test
+    public void testMultiSummary()
+        throws MultiplicityDataException
+    {
+        final int srcId = SourceIdRegistry.INICE_TRIGGER_SOURCE_ID;
+        final int cfgId = 2;
+        final int type = 3;
+
+        MockAlerter alerter = new MockAlerter();
+
+        MultiplicityDataManager mgr = new MultiplicityDataManager();
+        mgr.setAlertQueue(new AlertQueue(alerter));
+        mgr.setFirstGoodTime(1);
+
+        mgr.addAlgorithm(new MockAlgorithm("TstMultiSummary", type, cfgId,
+                                           srcId));
+
+        mgr.start(123);
+
+        final int numBins = 10;
+        final int extraBins = 2;
+        int uid = 1;
+        long binTime = 100000;
+
+        for (int i = 0; i < numBins + extraBins; i++) {
+            mgr.add(new MockTriggerRequest(uid++, srcId, type, cfgId,
+                                           binTime + 4, binTime + 5));
+            binTime += Bins.WIDTH;
+        }
+
+        List<Map<String, Object>> histo = mgr.getSummary(10, true);
+        assertNotNull("Histogram should not be null", histo);
+        assertEquals("Unexpected histogram list " + histo, 2, histo.size());
+
+        for (int i = 0; i < 2; i++) {
+            Map<String, Object> map = histo.get(i);
+            assertEquals("Bad type", type, map.get("trigid"));
+            assertEquals("Bad config ID", cfgId, map.get("configid"));
+            assertEquals("Bad source ID", srcId, map.get("sourceid"));
+            assertEquals("Bad count", (i == 0 ? numBins : extraBins - 1),
+                         map.get("value"));
+        }
+    }
+
+    @Test
     public void testGetCountsNoStart()
     {
         MockAlerter alerter = new MockAlerter();
@@ -243,7 +287,7 @@ public class MultiplicityDataManagerTest
         mgr.setAlertQueue(new AlertQueue(alerter));
 
         try {
-            mgr.getCounts();
+            mgr.getSummary(10, true);
             fail("Should not succeed");
         } catch (MultiplicityDataException mde) {
             assertNotNull("Null message", mde.getMessage());
@@ -264,7 +308,7 @@ public class MultiplicityDataManagerTest
 
         mgr.start(123);
 
-        List<Map<String, Object>> histo = mgr.getCounts();
+        List<Map<String, Object>> histo = mgr.getSummary(10, true);
         assertNull("Unexpected histogram list " + histo, histo);
     }
 
@@ -363,7 +407,7 @@ public class MultiplicityDataManagerTest
         mgr.add(new MockTriggerRequest(uid++, srcId, type, cfgId,
                                        firstBin + 4, firstBin + 5));
 
-        final long nextBin = firstBin + CountData.DAQ_BIN_WIDTH;
+        final long nextBin = firstBin + Bins.WIDTH;
         mgr.add(new MockTriggerRequest(uid++, srcId, type, cfgId,
                                        nextBin + 4, nextBin + 5));
 

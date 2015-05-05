@@ -141,7 +141,7 @@ class MockDataManager
         return doReset;
     }
 
-    public boolean sendSingleBin()
+    public boolean sendSingleBin(boolean isFinal)
         throws MultiplicityDataException
     {
         return false;

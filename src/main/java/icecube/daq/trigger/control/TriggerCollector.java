@@ -227,7 +227,7 @@ class MonitoringTask
     public void run()
     {
         try {
-            moniDataMgr.sendSingleBin();
+            moniDataMgr.sendSingleBin(false);
         } catch (MultiplicityDataException mde) {
             LOG.error("Cannot send monitoring bin", mde);
         }
@@ -257,6 +257,9 @@ class CollectorThread
     implements ICollectorThread, Runnable
 {
     private static final Log LOG = LogFactory.getLog(CollectorThread.class);
+
+    /** Number of milliseconds in a second */
+    private static final long MILLIS_PER_SECOND = 1000L;
 
     int srcId;
     private List<INewAlgorithm> algorithms;
@@ -453,11 +456,12 @@ class CollectorThread
 
             // we've got data, start monitoring task
             if (moniTimer == null) {
-                final long period = TriggerCollector.MONI_SECONDS * 1000L;
+                final long period =
+                    TriggerCollector.MONI_SECONDS * MILLIS_PER_SECOND;
 
                 moniTimer = new Timer("Monitor#" + runNumber);
                 moniTimer.scheduleAtFixedRate(new MonitoringTask(moniDataMgr),
-                                              0, period);
+                                              period, period);
             }
 
             try {

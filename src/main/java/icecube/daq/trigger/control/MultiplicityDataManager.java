@@ -106,14 +106,11 @@ class HashKey
     }
 }
 
+/**
+ * This is essentially a 'struct' to hold three values
+ */
 class CountData
 {
-    public static final long SECONDS_PER_BIN = 60;
-    public static final long DAQ_SECOND = 10000000000L;
-    public static final long DAQ_BIN_WIDTH = DAQ_SECOND * SECONDS_PER_BIN;
-
-    public static final int RATE_VERSION = 0;
-
     private int runNumber;
     private long endTime;
     private int count;
@@ -125,30 +122,33 @@ class CountData
         this.count = count;
     }
 
-    Map<String, Object> getValuesMap(int srcId, int type, int cfgId)
+    int getCount()
     {
-        HashMap<String, Object> values = new HashMap<String, Object>();
+        return count;
+    }
 
-        values.put("runNumber", Integer.valueOf(runNumber));
+    long getEndTime()
+    {
+        return endTime;
+    }
 
-        values.put("sourceid", Integer.valueOf(srcId));
-        values.put("trigid", Integer.valueOf(type));
-        values.put("configid", Integer.valueOf(cfgId));
-
-        values.put("value", Integer.valueOf(count));
-        values.put("recordingStartTime",
-                   UTCTime.toDateString(endTime - DAQ_BIN_WIDTH + 1));
-        values.put("recordingStopTime", UTCTime.toDateString(endTime));
-        values.put("version", RATE_VERSION);
-
-        return values;
+    int getRunNumber()
+    {
+        return runNumber;
     }
 }
 
 class Bins
 {
+    public static final int RATE_VERSION = 0;
+
     private static final String XLABEL = "nchannels";
     private static final String YLABEL = "nentries";
+
+    public static final long SECONDS_PER_BIN = 60;
+    public static final long DAQ_TICKS_PER_SECOND = 10000000000L;
+    public static final long WIDTH =
+        DAQ_TICKS_PER_SECOND * SECONDS_PER_BIN;
 
     private int[] bins;
     private int overflow;
@@ -162,6 +162,12 @@ class Bins
     Bins(int maxBins)
     {
         bins = new int[maxBins];
+    }
+
+    private void addBin(int runNumber)
+    {
+        counts.add(new CountData(runNumber, endTime, count));
+        count = 0;
     }
 
     synchronized Map<String, Object> getBinData()
@@ -191,16 +197,63 @@ class Bins
         return map;
     }
 
-    synchronized Map<String, Object> getCountData(int srcId, int type,
-                                                  int cfgId)
+    synchronized Map<String, Object> getSummary(int srcId, int type,
+                                                int cfgId, int numBins,
+                                                boolean allowPartial)
     {
-        if (counts.size() == 0) {
+        if (counts.size() == 0 || (!allowPartial && counts.size() < numBins)) {
             return null;
         }
 
-        return counts.remove(0).getValuesMap(srcId, type, cfgId);
+        // if we're returning a partial summary, get the correct number of bins
+        if (counts.size() < numBins) {
+            numBins = counts.size();
+        }
+
+        int runNumber = Integer.MAX_VALUE;
+        long startTime = Long.MIN_VALUE;
+        long endTime = Long.MAX_VALUE;
+        int total = 0;
+
+        for (int i = 0; i < numBins; i++) {
+            CountData cd = counts.remove(0);
+            if (i == 0) {
+                runNumber = cd.getRunNumber();
+                startTime = cd.getEndTime() - WIDTH + 1;
+            } else if (cd.getRunNumber() != runNumber) {
+                // next bin is for a different run
+                counts.add(0, cd);
+                break;
+            }
+
+            endTime = cd.getEndTime();
+            total += cd.getCount();
+        }
+
+        HashMap<String, Object> values = new HashMap<String, Object>();
+
+        values.put("runNumber", Integer.valueOf(runNumber));
+
+        values.put("sourceid", Integer.valueOf(srcId));
+        values.put("trigid", Integer.valueOf(type));
+        values.put("configid", Integer.valueOf(cfgId));
+
+        values.put("value", Integer.valueOf(total));
+        values.put("recordingStartTime", UTCTime.toDateString(startTime));
+        values.put("recordingStopTime", UTCTime.toDateString(endTime));
+        values.put("version", RATE_VERSION);
+
+        return values;
     }
 
+    /**
+     * Increment the specified bin and total count
+     *
+     * @param firstTime start time of trigger
+     * @param lastTime end time of trigger
+     * @param runNumber current run number
+     * @param bin bin number
+     */
     synchronized void inc(IUTCTime firstTime, IUTCTime lastTime, int runNumber,
                           int bin)
     {
@@ -213,14 +266,15 @@ class Bins
             bins[bin]++;
         }
 
-        if (this.endTime == Long.MIN_VALUE) {
-            this.endTime = firstTime.longValue() + CountData.DAQ_BIN_WIDTH;
+        if (endTime == Long.MIN_VALUE) {
+            endTime = firstTime.longValue() + WIDTH;
         }
 
+        // (lastTime - firstTime) may span multiple bins;
+        // first bin gets full count, remaining bins set to 0
         while (lastTime.longValue() > endTime) {
-            counts.add(new CountData(runNumber, endTime, count));
-            endTime += CountData.DAQ_BIN_WIDTH;
-            count = 0;
+            addBin(runNumber);
+            endTime += WIDTH;
         }
 
         count++;
@@ -242,7 +296,7 @@ public class MultiplicityDataManager
     private static final Log LOG =
         LogFactory.getLog(MultiplicityDataManager.class);
 
-    private static final int NUM_BINS = 200;
+    private static final int MAX_BINS = 200;
 
     private static final int NO_NUMBER = Integer.MIN_VALUE;
 
@@ -360,7 +414,7 @@ public class MultiplicityDataManager
         synchronized (binmap) {
             if (!binmap.containsKey(key)) {
                 // add new algorithm
-                binmap.put(key, new Bins(NUM_BINS));
+                binmap.put(key, new Bins(MAX_BINS));
             }
             binmap.get(key).inc(req.getFirstTimeUTC(), req.getLastTimeUTC(),
                                 runNumber, bin);
@@ -377,7 +431,17 @@ public class MultiplicityDataManager
         algorithms.add(algorithm);
     }
 
-    public List<Map<String, Object>> getCounts()
+    /**
+     * Add together up to <tt>numBins</tt> bins and return totals
+     *
+     * @param numBins number of bins to summarize
+     * @param allowPartial if <tt>true</tt>, return a summary of less than
+     *                     <tt>numBins</tt> bins
+     *
+     * @return <tt>null</tt> if there are not enough bins to summarize
+     */
+    public List<Map<String, Object>> getSummary(int numBins,
+                                                boolean allowPartial)
         throws MultiplicityDataException
     {
         if (binmap == null) {
@@ -397,8 +461,9 @@ public class MultiplicityDataManager
                     Bins bins = binmap.get(key);
                     while (true) {
                         Map<String, Object> values =
-                            bins.getCountData(key.getSourceID(), key.getType(),
-                                              key.getConfigID());
+                            bins.getSummary(key.getSourceID(), key.getType(),
+                                            key.getConfigID(), numBins,
+                                            allowPartial);
                         if (values == null) {
                             break;
                         }
@@ -462,7 +527,7 @@ public class MultiplicityDataManager
         MultiplicityDataException delayed = null;
         try {
             // send final bin(s) of data
-            sendSingleBin();
+            sendSingleBin(true);
         } catch (MultiplicityDataException mde) {
             if (delayed == null) {
                 // cache first exception and throw it when we're done
@@ -561,13 +626,13 @@ public class MultiplicityDataManager
      *
      * @return list of trigger count data.
      */
-    public boolean sendSingleBin()
+    public boolean sendSingleBin(boolean isFinal)
         throws MultiplicityDataException
     {
-        return sendTriggerCounts();
+        return sendTriggerCounts(isFinal);
     }
 
-    private boolean sendTriggerCounts()
+    private boolean sendTriggerCounts(boolean isFinal)
         throws MultiplicityDataException
     {
         if (alertQueue == null) {
@@ -575,7 +640,7 @@ public class MultiplicityDataManager
                                                 " been set");
         }
 
-        List<Map<String, Object>> mapList = getCounts();
+        List<Map<String, Object>> mapList = getSummary(10, isFinal);
         if (mapList == null) {
             // if there's no data, we're done
             return false;

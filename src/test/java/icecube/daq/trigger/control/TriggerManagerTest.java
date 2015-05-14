@@ -733,7 +733,7 @@ public class TriggerManagerTest
 
         MockAlerter alerter = new MockAlerter();
         alerter.addExpected("trigger_multiplicity", Priority.SCP, 3);
-        alerter.addExpected("trigger_rate", Priority.EMAIL, 9);
+        alerter.addExpected("trigger_rate", Priority.EMAIL, 3);
 
         TriggerManager mgr = new TriggerManager(src, bufCache);
         mgr.setAlertQueue(new AlertQueue(alerter));

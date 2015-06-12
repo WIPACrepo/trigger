@@ -12,8 +12,11 @@ public class IniceTriggerComponent
 {
     /**
      * Create an in-ice hit trigger handler.
+     *
+     * @throws DAQCompException if component cannot be created
      */
     public IniceTriggerComponent()
+        throws DAQCompException
     {
         super(DAQCmdInterface.DAQ_INICE_TRIGGER, 0);
     }

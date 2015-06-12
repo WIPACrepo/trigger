@@ -15,8 +15,12 @@ import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.PayloadFactory;
 import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
+import icecube.daq.splicer.PrioritySplicer;
+import icecube.daq.splicer.Spliceable;
+import icecube.daq.splicer.SpliceableComparator;
 import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
+import icecube.daq.splicer.SplicerException;
 import icecube.daq.trigger.common.DAQTriggerComponent;
 import icecube.daq.trigger.common.ITriggerAlgorithm;
 import icecube.daq.trigger.common.ITriggerManager;
@@ -52,13 +56,16 @@ public class TriggerComponent
     private static final Log LOG =
         LogFactory.getLog(TriggerComponent.class);
 
+    private static final Spliceable LAST_SPLICEABLE =
+        SpliceableFactory.LAST_POSSIBLE_SPLICEABLE;
+
     private ISourceID sourceId;
 
     private TriggerManager triggerManager;
 
     private IByteBufferCache inCache;
     private IByteBufferCache outCache;
-    private Splicer splicer;
+    private Splicer<Spliceable> splicer;
     private SpliceablePayloadReader inputEngine;
     private SimpleOutputEngine outputEngine;
 
@@ -75,6 +82,7 @@ public class TriggerComponent
      * @param id component ID (usually <tt>0</tt> for trigger handlers)
      */
     public TriggerComponent(String name, int id)
+        throws DAQCompException
     {
         super(name, id);
 
@@ -85,19 +93,23 @@ public class TriggerComponent
         String inputType;
         String outputType;
         String shortName;
+        int totChannels;
         if (name.equals(DAQCmdInterface.DAQ_GLOBAL_TRIGGER)) {
             isGlobalTrigger = true;
             inputType = DAQConnector.TYPE_TRIGGER;
             outputType = DAQConnector.TYPE_GLOBAL_TRIGGER;
             shortName = "GTrig";
+            totChannels = 2;
         } else if (name.equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
             inputType = DAQConnector.TYPE_STRING_HIT;
             outputType = DAQConnector.TYPE_TRIGGER;
             shortName = "IITrig";
+            totChannels = DAQCmdInterface.DAQ_MAX_NUM_STRINGS;
         } else if (name.equals(DAQCmdInterface.DAQ_ICETOP_TRIGGER)) {
             inputType = DAQConnector.TYPE_ICETOP_HIT;
             outputType = DAQConnector.TYPE_TRIGGER;
             shortName = "ITTrig";
+            totChannels = DAQCmdInterface.DAQ_MAX_NUM_IDH;
         } else {
             throw new Error("Unknown trigger " + name);
         }
@@ -117,7 +129,24 @@ public class TriggerComponent
         addMBean("manager", triggerManager);
 
         // Create splicer and introduce it to the trigger manager
-        splicer = new HKN1Splicer(triggerManager);
+        SpliceableComparator splCmp =
+            new SpliceableComparator(LAST_SPLICEABLE);
+        if (System.getProperty("usePrioritySplicer") == null) {
+            splicer = new HKN1Splicer<Spliceable>(triggerManager, splCmp,
+                                                  LAST_SPLICEABLE);
+        } else {
+            try {
+                splicer = new PrioritySplicer<Spliceable>(shortName + "Sorter",
+                                                          triggerManager,
+                                                          splCmp,
+                                                          LAST_SPLICEABLE,
+                                                          totChannels);
+            } catch (SplicerException se) {
+                throw new DAQCompException("Cannot create splicer", se);
+            }
+            addMBean(shortName + "Sorter", splicer);
+        }
+
         triggerManager.setSplicer(splicer);
 
         // Create and register input engine
@@ -378,7 +407,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 15522 2015-04-21 18:46:44Z dglo $";
+        return "$Id: TriggerComponent.java 15570 2015-06-12 16:19:32Z dglo $";
     }
 
     /**

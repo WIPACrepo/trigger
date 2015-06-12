@@ -16,6 +16,8 @@ import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.TriggerRequestFactory;
 import icecube.daq.payload.impl.UTCTime;
+import icecube.daq.splicer.Spliceable;
+import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.SplicedAnalysis;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
@@ -113,8 +115,9 @@ class TriggerRequestComparator
  * Read in hits from the splicer and send them to the algorithms.
  */
 public class TriggerManager
-    implements INewManager, SplicedAnalysis, SplicerListener,
-               SubscriptionManager, TriggerManagerMBean
+    implements INewManager, SplicedAnalysis<Spliceable>,
+               SplicerListener<Spliceable>, SubscriptionManager,
+               TriggerManagerMBean
 {
     /** Payload used to indicate that input is finished */
     public static final DummyPayload FLUSH_PAYLOAD =
@@ -145,19 +148,10 @@ public class TriggerManager
 
     private DOMRegistry domRegistry;
 
-    /**
-     * the begining position of each new spliced buffer, modulo the decrement
-     * due to shifting
-     */
-    private int start;
-
     /** spliceable input count */
     private long inputCount;
 
     private long recycleCount;
-
-    /** size of last input list */
-    private int lastInputListSize;
 
     /**
      * source of last hit, used for monitoring
@@ -274,7 +268,7 @@ public class TriggerManager
      *
      * @param evt ignored
      */
-    public void disposed(SplicerChangedEvent evt)
+    public void disposed(SplicerChangedEvent<Spliceable> evt)
     {
         throw new UnimplementedError();
     }
@@ -283,44 +277,33 @@ public class TriggerManager
      * Add the new list of hits from the splicer to the input queue.
      *
      * @param splicedObjects list of hits
-     * @param decrement starting index
      */
-    public void execute(List splicedObjects, int decrement)
+    public void analyze(List<Spliceable> splicedObjects)
     {
         // Loop over the new objects in the splicer
         int numberOfObjectsInSplicer = splicedObjects.size();
-        lastInputListSize = numberOfObjectsInSplicer - (start - decrement);
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Splicer contains: [" + lastInputListSize + ":" +
-                      numberOfObjectsInSplicer + "]");
-        }
+        for (Spliceable spl : splicedObjects) {
+            ILoadablePayload payload = (ILoadablePayload) spl;
 
-        if (lastInputListSize > 0) {
-            for (int index = start - decrement;
-                 numberOfObjectsInSplicer != index; index++)
-            {
-                ILoadablePayload payload =
-                    (ILoadablePayload) splicedObjects.get(index);
-
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("  Processing payload " + inputCount +
-                              " with time " + payload.getPayloadTimeUTC());
-                }
-
-                if (isValidIncomingPayload(payload)) {
-                    synchronized (inputList) {
-                        pushInput(payload);
-                    }
-
-                    inputCount++;
-                } else {
-                    LOG.error("Ignoring invalid payload " + payload);
-                }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("  Processing payload " + inputCount +
+                          " with time " + payload.getPayloadTimeUTC());
             }
-        }
 
-        start = numberOfObjectsInSplicer;
+            if (isValidIncomingPayload(payload)) {
+                synchronized (inputList) {
+                    pushInput(payload);
+                }
+
+                inputCount++;
+            } else {
+                LOG.error("Ignoring invalid payload " + payload);
+            }
+
+            // we're done with this payload
+            payload.recycle();
+        }
     }
 
     /**
@@ -328,7 +311,7 @@ public class TriggerManager
      *
      * @param evt ignored
      */
-    public void failed(SplicerChangedEvent evt)
+    public void failed(SplicerChangedEvent<Spliceable> evt)
     {
         throw new UnimplementedError();
     }
@@ -564,9 +547,7 @@ public class TriggerManager
 
     protected void init()
     {
-        start = 0;
         inputCount = 0;
-        lastInputListSize = 0;
     }
 
     /**
@@ -667,9 +648,12 @@ public class TriggerManager
 
     private void pushInput(ILoadablePayload payload)
     {
-        if (payload.getPayloadInterfaceType() ==
+        if (payload.getPayloadInterfaceType() !=
             PayloadInterfaceRegistry.I_TRIGGER_REQUEST)
         {
+            // queue ordinary payload
+            inputList.push((IPayload) payload.deepCopy());
+        } else {
             try {
                 payload.loadPayload();
             } catch (IOException ioe) {
@@ -681,7 +665,10 @@ public class TriggerManager
             }
 
             ITriggerRequestPayload req = (ITriggerRequestPayload) payload;
-            if (req.isMerged()) {
+            if (!req.isMerged()) {
+                // queue single trigger request
+                inputList.push((IPayload) payload.deepCopy());
+            } else {
                 // extract list of merged triggers
                 List subList;
                 try {
@@ -712,13 +699,8 @@ public class TriggerManager
 
                     inputList.push((IPayload) sub.deepCopy());
                 }
-
-                return;
             }
         }
-
-        // queue ordinary payload
-        inputList.push((IPayload) payload.deepCopy());
     }
 
     public void resetUIDs()
@@ -898,7 +880,7 @@ public class TriggerManager
      *
      * @param evt ignored
      */
-    public void started(SplicerChangedEvent evt)
+    public void started(SplicerChangedEvent<Spliceable> evt)
     {
         // do nothing
     }
@@ -908,7 +890,7 @@ public class TriggerManager
      *
      * @param evt ignored
      */
-    public void starting(SplicerChangedEvent evt)
+    public void starting(SplicerChangedEvent<Spliceable> evt)
     {
         if (collector != null && !collector.isStopped()) {
             LOG.error("Collector was not stopped");
@@ -939,8 +921,9 @@ public class TriggerManager
      *
      * @param evt ignored
      */
-    public void stopped(SplicerChangedEvent evt)
+    public void stopped(SplicerChangedEvent<Spliceable> evt)
     {
+        flush();
         stopThread();
 
         // clear cached values
@@ -953,7 +936,7 @@ public class TriggerManager
      *
      * @param evt ignored
      */
-    public void stopping(SplicerChangedEvent evt)
+    public void stopping(SplicerChangedEvent<Spliceable> evt)
     {
         // do nothing
     }
@@ -993,41 +976,6 @@ public class TriggerManager
 
         // update private copy of run number
         this.runNumber = runNumber;
-    }
-
-    /**
-     * Called when the {@link icecube.daq.splicer.Splicer Splicer} has
-     * truncated its "rope". This method is called whenever the "rope" is cut,
-     * for example to make a clean start from the frayed beginning of a "rope",
-     * and not just when the {@link Splicer#truncate(Spliceable)} method is
-     * invoked. This enables the client to be notified as to which Spliceables
-     * are never going to be accessed again by the Splicer.
-     *
-     * @param event the event encapsulating this truncation.
-     */
-    public void truncated(SplicerChangedEvent event)
-    {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Splicer truncated: " + event.getSpliceable());
-        }
-
-        if (event.getSpliceable() == Splicer.LAST_POSSIBLE_SPLICEABLE) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("This is the LAST POSSIBLE SPLICEABLE!");
-            }
-            flush();
-        }
-
-        for (Object obj : event.getAllSpliceables()) {
-            ILoadablePayload payload = (ILoadablePayload) obj;
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Recycle payload " + recycleCount + " at " +
-                          payload.getPayloadTimeUTC());
-            }
-
-            payload.recycle();
-            recycleCount++;
-        }
     }
 
     public void unsubscribeAll()

@@ -20,38 +20,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
 
-class MockTruncateThread
-    implements ITruncateThread
-{
-    private boolean started;
-    private boolean stopped;
-
-    public boolean isStarted()
-    {
-        return started;
-    }
-
-    public boolean isStopped()
-    {
-        return stopped;
-    }
-
-    public void start(Splicer splicer)
-    {
-        started = true;
-    }
-
-    public void stop()
-    {
-        stopped = true;
-    }
-
-    public void truncate(Spliceable spl)
-    {
-        // do nothing
-    }
-}
-
 public class OutputThreadTest
 {
     private static final int INICE_ID =
@@ -245,19 +213,14 @@ public class OutputThreadTest
     {
         MockOutputProcess outProc = new MockOutputProcess("Run");
         MockBufferCache bufCache = new MockBufferCache("foo");
-        MockTruncateThread trunc = new MockTruncateThread();
         OutputThread thrd =
-            new OutputThread("foo", INICE_ID, outProc, bufCache, trunc);
+            new OutputThread("foo", INICE_ID, outProc, bufCache);
 
         assertEquals("Bad initial number queued", 0L, thrd.getNumQueued());
         assertFalse("Bad initial 'stopped' state", thrd.isStopped());
         assertFalse("Bad initial 'waiting' state", thrd.isWaiting());
 
         MockSplicer spl = new MockSplicer();
-
-        assertFalse("TruncateThread should not be started", trunc.isStarted());
-        assertFalse("TruncateThread should not be stopped", trunc.isStopped());
-
         thrd.start(spl);
 
         for (int i = 0; !thrd.isWaiting() && i < 10; i++) {
@@ -270,8 +233,6 @@ public class OutputThreadTest
 
         assertFalse("OutputThread should not be stopped", thrd.isStopped());
         assertTrue("OutputThread should be waiting", thrd.isWaiting());
-        assertTrue("TruncateThread should be started", trunc.isStarted());
-        assertFalse("TruncateThread should not be stopped", trunc.isStopped());
 
         MockOutputChannel outChan = new MockOutputChannel();
         outProc.setOutputChannel(outChan);
@@ -305,8 +266,6 @@ public class OutputThreadTest
 
         assertTrue("OutputThread should be stopped", thrd.isStopped());
         assertFalse("OutputThread should not be waiting", thrd.isWaiting());
-        assertTrue("TruncateThread should be started", trunc.isStarted());
-        assertTrue("TruncateThread should be stopped", trunc.isStopped());
     }
 
     @Test
@@ -314,19 +273,14 @@ public class OutputThreadTest
     {
         MockOutputProcess outProc = new MockOutputProcess("RunGT");
         MockBufferCache bufCache = new MockBufferCache("foo");
-        MockTruncateThread trunc = new MockTruncateThread();
         OutputThread thrd =
-            new OutputThread("foo", GLOBAL_ID, outProc, bufCache, trunc);
+            new OutputThread("foo", GLOBAL_ID, outProc, bufCache);
 
         assertEquals("Bad initial number queued", 0L, thrd.getNumQueued());
         assertFalse("Bad initial 'stopped' state", thrd.isStopped());
         assertFalse("Bad initial 'waiting' state", thrd.isWaiting());
 
         MockSplicer spl = new MockSplicer();
-
-        assertFalse("TruncateThread should not be started", trunc.isStarted());
-        assertFalse("TruncateThread should not be stopped", trunc.isStopped());
-
         thrd.start(spl);
 
         for (int i = 0; !thrd.isWaiting() && i < 10; i++) {
@@ -339,8 +293,6 @@ public class OutputThreadTest
 
         assertFalse("OutputThread should not be stopped", thrd.isStopped());
         assertTrue("OutputThread should be waiting", thrd.isWaiting());
-        assertTrue("TruncateThread should be started", trunc.isStarted());
-        assertFalse("TruncateThread should not be stopped", trunc.isStopped());
 
         MockOutputChannel outChan = new MockOutputChannel();
         outProc.setOutputChannel(outChan);
@@ -374,8 +326,6 @@ public class OutputThreadTest
 
         assertTrue("OutputThread should be stopped", thrd.isStopped());
         assertFalse("OutputThread should not be waiting", thrd.isWaiting());
-        assertTrue("TruncateThread should be started", trunc.isStarted());
-        assertTrue("TruncateThread should be stopped", trunc.isStopped());
     }
 
     @Test
@@ -383,19 +333,14 @@ public class OutputThreadTest
     {
         MockOutputProcess outProc = new MockOutputProcess("RunNoOutput");
         MockBufferCache bufCache = new MockBufferCache("foo");
-        MockTruncateThread trunc = new MockTruncateThread();
         OutputThread thrd =
-            new OutputThread("foo", 1, outProc, bufCache, trunc);
+            new OutputThread("foo", 1, outProc, bufCache);
 
         assertEquals("Bad initial number queued", 0L, thrd.getNumQueued());
         assertFalse("Bad initial 'stopped' state", thrd.isStopped());
         assertFalse("Bad initial 'waiting' state", thrd.isWaiting());
 
         MockSplicer spl = new MockSplicer();
-
-        assertFalse("TruncateThread should not be started", trunc.isStarted());
-        assertFalse("TruncateThread should not be stopped", trunc.isStopped());
-
         thrd.start(spl);
 
         for (int i = 0; !thrd.isWaiting() && i < 10; i++) {
@@ -408,8 +353,6 @@ public class OutputThreadTest
 
         assertFalse("OutputThread should not be stopped", thrd.isStopped());
         assertTrue("OutputThread should be waiting", thrd.isWaiting());
-        assertTrue("TruncateThread should be started", trunc.isStarted());
-        assertFalse("TruncateThread should not be stopped", trunc.isStopped());
 
 /*
         MockOutputChannel outChan = new MockOutputChannel();
@@ -445,8 +388,6 @@ public class OutputThreadTest
 
         assertTrue("OutputThread should be stopped", thrd.isStopped());
         assertFalse("OutputThread should not be waiting", thrd.isWaiting());
-        assertTrue("TruncateThread should be started", trunc.isStarted());
-        assertTrue("TruncateThread should be stopped", trunc.isStopped());
     }
 
     @Test
@@ -454,19 +395,14 @@ public class OutputThreadTest
     {
         MockOutputProcess outProc = new MockOutputProcess("RunNoChannel");
         MockBufferCache bufCache = new MockBufferCache("foo");
-        MockTruncateThread trunc = new MockTruncateThread();
         OutputThread thrd =
-            new OutputThread("foo", 1, outProc, bufCache, trunc);
+            new OutputThread("foo", 1, outProc, bufCache);
 
         assertEquals("Bad initial number queued", 0L, thrd.getNumQueued());
         assertFalse("Bad initial 'stopped' state", thrd.isStopped());
         assertFalse("Bad initial 'waiting' state", thrd.isWaiting());
 
         MockSplicer spl = new MockSplicer();
-
-        assertFalse("TruncateThread should not be started", trunc.isStarted());
-        assertFalse("TruncateThread should not be stopped", trunc.isStopped());
-
         thrd.start(spl);
 
         for (int i = 0; !thrd.isWaiting() && i < 10; i++) {
@@ -479,8 +415,6 @@ public class OutputThreadTest
 
         assertFalse("OutputThread should not be stopped", thrd.isStopped());
         assertTrue("OutputThread should be waiting", thrd.isWaiting());
-        assertTrue("TruncateThread should be started", trunc.isStarted());
-        assertFalse("TruncateThread should not be stopped", trunc.isStopped());
 
         assertEquals("Found unexpected output payloads",
                      0, outProc.getNumberWritten());

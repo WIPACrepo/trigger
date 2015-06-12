@@ -1,7 +1,7 @@
 /*
  * class: DummyPayload
  *
- * Version $Id: DummyPayload.java 15194 2014-10-17 19:26:00Z dglo $
+ * Version $Id: DummyPayload.java 15570 2015-06-12 16:19:32Z dglo $
  *
  * Date: October 7 2005
  *
@@ -22,9 +22,8 @@ import java.nio.ByteBuffer;
 
 /**
  * This class is a dummy payload that only has a UTC time associated with it.
- * Its main purpose is for truncating the Splicer.
  *
- * @version $Id: DummyPayload.java 15194 2014-10-17 19:26:00Z dglo $
+ * @version $Id: DummyPayload.java 15570 2015-06-12 16:19:32Z dglo $
  * @author pat
  */
 public class DummyPayload

@@ -7,6 +7,9 @@ import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
+import icecube.daq.splicer.Spliceable;
+import icecube.daq.splicer.SpliceableComparator;
+import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.trigger.config.DomSetFactory;
@@ -44,6 +47,9 @@ public class CylinderTriggerTest
 
     private static final MockSourceID srcId =
         new MockSourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
+
+    private static final Spliceable LAST_SPLICEABLE =
+        SpliceableFactory.LAST_POSSIBLE_SPLICEABLE;
 
     public CylinderTriggerTest(String name)
     {
@@ -140,7 +146,10 @@ public class CylinderTriggerTest
 
         trigMgr.setOutputEngine(outProc);
 
-        HKN1Splicer splicer = new HKN1Splicer(trigMgr);
+        SpliceableComparator splCmp =
+            new SpliceableComparator(LAST_SPLICEABLE);
+        HKN1Splicer<Spliceable> splicer =
+            new HKN1Splicer<Spliceable>(trigMgr, splCmp, LAST_SPLICEABLE);
         trigMgr.setSplicer(splicer);
         trigMgr.setRunNumber(1);
 
@@ -236,7 +245,8 @@ public class CylinderTriggerTest
                                                String extra)
     {
         for (int i = 0; i < REPS &&
-                 (!proc.isStopped() || splicer.getState() != Splicer.STOPPED);
+                 (!proc.isStopped() ||
+                  splicer.getState() != Splicer.State.STOPPED);
              i++)
         {
             try {
@@ -248,9 +258,9 @@ public class CylinderTriggerTest
 
         assertTrue("IOProcess in " + proc.getPresentState() +
                    ", not Idle after " + action + extra, proc.isStopped());
-        assertTrue("Splicer in " + splicer.getStateString() +
+        assertTrue("Splicer in " + splicer.getState().name() +
                    ", not STOPPED after " + action + extra,
-                   splicer.getState() == Splicer.STOPPED);
+                   splicer.getState() == Splicer.State.STOPPED);
     }
 
     public static void main(String[] args)

@@ -8,6 +8,7 @@ import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.splicer.Spliceable;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MockTriggerRequest
-    implements Comparable, ITriggerRequestPayload
+    implements Comparable, ITriggerRequestPayload, Spliceable
 {
     private static final int LENGTH = 41;
 
@@ -76,6 +77,11 @@ public class MockTriggerRequest
         }
 
         return (int) (a.longValue() - b.longValue());
+    }
+
+    public int compareSpliceable(Spliceable spl)
+    {
+        throw new Error("Unimplemented");
     }
 
     public int compareTo(Object obj)

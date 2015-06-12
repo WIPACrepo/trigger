@@ -12,8 +12,11 @@ public class IcetopTriggerComponent
 {
     /**
      * Create an icetop hit trigger handler.
+     *
+     * @throws DAQCompException if component cannot be created
      */
     public IcetopTriggerComponent()
+        throws DAQCompException
     {
         super(DAQCmdInterface.DAQ_ICETOP_TRIGGER, 0);
     }

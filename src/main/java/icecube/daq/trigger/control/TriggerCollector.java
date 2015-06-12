@@ -43,7 +43,6 @@ public class TriggerCollector
     private static final Log LOG = LogFactory.getLog(TriggerCollector.class);
 
     private ICollectorThread collThrd;
-    private ITruncateThread truncThrd;
     private IOutputThread outThrd;
 
     /**
@@ -53,7 +52,6 @@ public class TriggerCollector
      * @param algorithms list of active trigger algorithms
      * @param outputEngine object which writes out requests
      * @param outCache output payload cache
-     * @param splicer used in the output thread to truncate the splicer
      */
     public TriggerCollector(int srcId, List<INewAlgorithm> algorithms,
                             DAQComponentOutputProcess outputEngine,
@@ -77,10 +75,8 @@ public class TriggerCollector
             a.setTriggerCollector(this);
         }
 
-        truncThrd = createTruncateThread("TruncateThread");
-
         outThrd = createOutputThread("OutputThread", srcId, outputEngine,
-                                     outCache, truncThrd);
+                                     outCache);
 
         collThrd = createCollectorThread("TriggerCollector", srcId, algorithms,
                                          moniDataMgr, outThrd, subMgr);
@@ -98,15 +94,9 @@ public class TriggerCollector
 
     public IOutputThread createOutputThread(String name, int srcId,
                                             DAQComponentOutputProcess outEng,
-                                            IByteBufferCache outCache,
-                                            ITruncateThread truncThrd)
+                                            IByteBufferCache outCache)
     {
-        return new OutputThread(name, srcId, outEng, outCache, truncThrd);
-    }
-
-    public ITruncateThread createTruncateThread(String name)
-    {
-        return new TruncateThread(name);
+        return new OutputThread(name, srcId, outEng, outCache);
     }
 
     /**
@@ -204,7 +194,7 @@ public class TriggerCollector
 
     public String toString()
     {
-        return "TrigColl[" + collThrd + "," + truncThrd + "," + outThrd + "]";
+        return "TrigColl[" + collThrd + "," + outThrd + "]";
     }
 }
 
@@ -768,9 +758,6 @@ class OutputThread
     /** Global trigger UID which will eventually be the event UID */
     private int eventUID = 1;
 
-    /** Thread which manages splicer truncation */
-    private ITruncateThread truncThrd;
-
     /**
      * Create and start output thread.
      *
@@ -782,14 +769,13 @@ class OutputThread
      */
     public OutputThread(String name, int srcId,
                         DAQComponentOutputProcess outputEngine,
-                        IByteBufferCache outCache, ITruncateThread truncThrd)
+                        IByteBufferCache outCache)
     {
         thread = new Thread(this);
         thread.setName(name);
 
         this.outputEngine = outputEngine;
         this.outCache = outCache;
-        this.truncThrd = truncThrd;
 
         isGlobalTrigger = srcId == SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID;
     }
@@ -933,10 +919,6 @@ class OutputThread
             }
         }
 
-        // let the splicer know it's safe to recycle
-        // everything before the end of this request
-        truncThrd.truncate(new DummyPayload(req.getFirstTimeUTC()));
-
         // now recycle it
         req.recycle();
     }
@@ -999,8 +981,6 @@ class OutputThread
     public void start(Splicer splicer)
     {
         thread.start();
-
-        truncThrd.start(splicer);
     }
 
     public void stop()
@@ -1009,8 +989,6 @@ class OutputThread
             stopping = true;
             outputQueue.notify();
         }
-
-        truncThrd.stop();
     }
 
     public String toString()
@@ -1032,117 +1010,5 @@ class OutputThread
 
         return "OutThrd[" + stateStr + ",outQ#" + outputQueue.size() +
             ",uid=" + eventUID + "]";
-    }
-}
-
-interface ITruncateThread
-{
-    void start(Splicer splicer);
-
-    void stop();
-
-    void truncate(Spliceable spl);
-}
-
-class TruncateThread
-    implements ITruncateThread, Runnable
-{
-    private static final Log LOG = LogFactory.getLog(TruncateThread.class);
-
-    private Thread thread;
-    private Splicer splicer;
-
-    private Object threadLock = new Object();
-    private Spliceable nextTrunc;
-    private boolean stopping;
-    private boolean stopped;
-
-    TruncateThread(String name)
-    {
-        thread = new Thread(this);
-        thread.setName(name);
-    }
-
-    public void run()
-    {
-        if (splicer == null) {
-            LOG.error("Splicer has not been set");
-            return;
-        }
-
-        while (!stopping) {
-            Spliceable spl;
-            synchronized (threadLock) {
-                if (!stopping && nextTrunc == null) {
-                    try {
-                        threadLock.wait();
-                    } catch (InterruptedException ie) {
-                        // ignore interrupts
-                        continue;
-                    }
-                }
-
-                spl = nextTrunc;
-                nextTrunc = null;
-            }
-
-            // 'spl' will be set to null when thread is stopped
-            if (spl != null) {
-                // let the splicer know it's safe to recycle
-                // everything before the end of this request
-                try {
-                    splicer.truncate(spl);
-                } catch (Throwable thr) {
-                    LOG.error("Truncate failed for " + spl, thr);
-                }
-            }
-        }
-
-        stopped = true;
-    }
-
-    public void start(Splicer splicer)
-    {
-        this.splicer = splicer;
-
-        thread.start();
-    }
-
-    public void stop()
-    {
-        synchronized (threadLock) {
-            stopping = true;
-            threadLock.notify();
-        }
-    }
-
-    public void truncate(Spliceable spl)
-    {
-        if (spl == null) {
-            LOG.error("Cannot truncate null spliceable");
-        } else {
-            synchronized (threadLock) {
-                nextTrunc = spl;
-                threadLock.notify();
-            }
-        }
-    }
-
-    public String toString()
-    {
-        String stateStr;
-        if (thread == null) {
-            stateStr = "noThread";
-        } else if (!thread.isAlive()) {
-            stateStr = "dead";
-        } else if (stopped) {
-            stateStr = "stopped";
-        } else if (stopping) {
-            stateStr = "stopping";
-        } else {
-            stateStr = "running";
-        }
-
-        return "TruncThrd[" + stateStr + "]";
     }
 }

@@ -9,6 +9,8 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.splicer.Spliceable;
+import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
 import icecube.daq.trigger.common.ITriggerAlgorithm;
 import icecube.daq.trigger.common.ITriggerManager;
@@ -278,18 +280,18 @@ public class TriggerManagerTest
     }
 
     @Test
-    public void testExecuteEmpty()
+    public void testAnalyzeEmpty()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
 
         TriggerManager mgr = new TriggerManager(src, bufCache);
 
-        mgr.execute(new ArrayList(), 0);
+        mgr.analyze(new ArrayList());
     }
 
     @Test
-    public void testExecuteNoSub()
+    public void testAnalyzeNoSub()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
@@ -300,7 +302,7 @@ public class TriggerManagerTest
         splObjs.add(new MyHit(123, 456));
 
         try {
-            mgr.execute(splObjs, 0);
+            mgr.analyze(splObjs);
             fail("Should not succeed");
         } catch (Error err) {
             assertNotNull("Message should not be null", err.getMessage());
@@ -311,7 +313,7 @@ public class TriggerManagerTest
     }
 
     @Test
-    public void testExecuteBad()
+    public void testAnalyzeBad()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
@@ -324,7 +326,8 @@ public class TriggerManagerTest
         List splObjs = new ArrayList();
         splObjs.add(new NonHit(123, 456));
 
-        mgr.execute(splObjs, 0);
+        mgr.analyze(splObjs);
+        splObjs.clear();
 
         assertEquals("Bad number of log messages",
                      2, appender.getNumberOfMessages());
@@ -345,7 +348,7 @@ public class TriggerManagerTest
     }
 
     @Test
-    public void testExecuteHitOutOfOrder()
+    public void testAnalyzeHitOutOfOrder()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
@@ -358,7 +361,8 @@ public class TriggerManagerTest
         List splObjs = new ArrayList();
         splObjs.add(new MyHit(123, 234));
 
-        mgr.execute(splObjs, 0);
+        mgr.analyze(splObjs);
+        splObjs.clear();
 
         MyHit goodOrder = new MyHit(123, 345);
         splObjs.add(goodOrder);
@@ -366,7 +370,8 @@ public class TriggerManagerTest
         MyHit badOrder = new MyHit(321, 246);
         splObjs.add(badOrder);
 
-        mgr.execute(splObjs, 0);
+        mgr.analyze(splObjs);
+        splObjs.clear();
 
         assertEquals("Bad number of log messages",
                      2, appender.getNumberOfMessages());
@@ -389,7 +394,7 @@ public class TriggerManagerTest
     }
 
     @Test
-    public void testExecuteHits()
+    public void testAnalyzeHits()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
@@ -402,16 +407,18 @@ public class TriggerManagerTest
         List splObjs = new ArrayList();
         splObjs.add(new MyHit(123, 234));
 
-        mgr.execute(splObjs, 0);
+        mgr.analyze(splObjs);
+        splObjs.clear();
 
         splObjs.add(new MyHit(123, 246));
         splObjs.add(new MyHit(321, 345));
 
-        mgr.execute(splObjs, 0);
+        mgr.analyze(splObjs);
+        splObjs.clear();
     }
 
     @Test
-    public void testExecuteTrigReqBadComp()
+    public void testAnalyzeTrigReqBadComp()
     {
         MockSourceID src = new MockSourceID(INICE_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
@@ -424,7 +431,8 @@ public class TriggerManagerTest
         List splObjs = new ArrayList();
         splObjs.add(new MockTriggerRequest(1, 2, 3, 4, 5));
 
-        mgr.execute(splObjs, 0);
+        mgr.analyze(splObjs);
+        splObjs.clear();
 
         assertEquals("Bad number of log messages",
                      2, appender.getNumberOfMessages());
@@ -445,7 +453,7 @@ public class TriggerManagerTest
     }
 
     @Test
-    public void testExecuteTrigReqsNoMerged()
+    public void testAnalyzeTrigReqsNoMerged()
     {
         MockSourceID src = new MockSourceID(GLOBAL_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
@@ -458,16 +466,18 @@ public class TriggerManagerTest
         List splObjs = new ArrayList();
         splObjs.add(new MockTriggerRequest(1, 2, 3, 4, 5));
 
-        mgr.execute(splObjs, 0);
+        mgr.analyze(splObjs);
+        splObjs.clear();
 
         splObjs.add(new MockTriggerRequest(2, 2, 2, 6, 7));
         splObjs.add(new MockTriggerRequest(4, 1, 7, 14, 16));
 
-        mgr.execute(splObjs, 0);
+        mgr.analyze(splObjs);
+        splObjs.clear();
     }
 
     @Test
-    public void testExecuteTrigReqsNoSublist()
+    public void testAnalyzeTrigReqsNoSublist()
     {
         MockSourceID src = new MockSourceID(GLOBAL_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
@@ -480,7 +490,8 @@ public class TriggerManagerTest
         List splObjs = new ArrayList();
         splObjs.add(new MockTriggerRequest(1, 2, 3, 4, 5));
 
-        mgr.execute(splObjs, 0);
+        mgr.analyze(splObjs);
+        splObjs.clear();
 
         splObjs.add(new MockTriggerRequest(2, 2, 2, 6, 7));
 
@@ -488,7 +499,8 @@ public class TriggerManagerTest
         merged.setMerged();
         splObjs.add(merged);
 
-        mgr.execute(splObjs, 0);
+        mgr.analyze(splObjs);
+        splObjs.clear();
 
         assertEquals("Bad number of log messages",
                      1, appender.getNumberOfMessages());
@@ -500,7 +512,7 @@ public class TriggerManagerTest
     }
 
     @Test
-    public void testExecuteTrigReqs()
+    public void testAnalyzeTrigReqs()
     {
         MockSourceID src = new MockSourceID(GLOBAL_ID);
         MockBufferCache bufCache = new MockBufferCache("foo");
@@ -513,7 +525,8 @@ public class TriggerManagerTest
         List splObjs = new ArrayList();
         splObjs.add(new MockTriggerRequest(1, 2, 3, 4, 5));
 
-        mgr.execute(splObjs, 0);
+        mgr.analyze(splObjs);
+        splObjs.clear();
 
         splObjs.add(new MockTriggerRequest(2, 2, 2, 6, 7));
 
@@ -523,7 +536,8 @@ public class TriggerManagerTest
 
         splObjs.add(merged);
 
-        mgr.execute(splObjs, 0);
+        mgr.analyze(splObjs);
+        splObjs.clear();
     }
 
 /*
@@ -633,8 +647,9 @@ public class TriggerManagerTest
         final int runNum = 123;
         mgr.setRunNumber(runNum);
 
-        SplicerChangedEvent evt = new SplicerChangedEvent(mgr, 0, null,
-                                                          new ArrayList());
+        SplicerChangedEvent<Spliceable> evt =
+            new SplicerChangedEvent<Spliceable>(spl, Splicer.State.STARTING,
+                                                null, new ArrayList());
         mgr.starting(evt);
 
         mgr.switchToNewRun(456);
@@ -657,8 +672,9 @@ public class TriggerManagerTest
 
         mgr.setRunNumber(123);
 
-        SplicerChangedEvent evt = new SplicerChangedEvent(mgr, 0, null,
-                                                          new ArrayList());
+        SplicerChangedEvent<Spliceable> evt =
+            new SplicerChangedEvent<Spliceable>(spl, Splicer.State.STARTING,
+                                                null, new ArrayList());
         mgr.starting(evt);
 
         mgr.switchToNewRun(456);
@@ -773,8 +789,9 @@ public class TriggerManagerTest
         final int runNum = 123;
         mgr.setRunNumber(runNum);
 
-        SplicerChangedEvent evt = new SplicerChangedEvent(mgr, 0, null,
-                                                          new ArrayList());
+        SplicerChangedEvent<Spliceable> evt =
+            new SplicerChangedEvent<Spliceable>(spl, Splicer.State.STARTING,
+                                                null, new ArrayList());
         mgr.starting(evt);
 
         mgr.setFirstGoodTime(0);
@@ -876,8 +893,9 @@ public class TriggerManagerTest
         final int runNum = 123;
         mgr.setRunNumber(runNum);
 
-        SplicerChangedEvent evt = new SplicerChangedEvent(mgr, 0, null,
-                                                          new ArrayList());
+        SplicerChangedEvent<Spliceable> evt =
+            new SplicerChangedEvent<Spliceable>(spl, Splicer.State.STARTING,
+                                                null, new ArrayList());
         mgr.starting(evt);
 
         mgr.setFirstGoodTime(0);
@@ -964,7 +982,7 @@ public class TriggerManagerTest
 
     class MyHit
         extends MockPayload
-        implements IHitPayload
+        implements IHitPayload, Spliceable
     {
         private int srcId;
 
@@ -976,6 +994,11 @@ public class TriggerManagerTest
             super(timeVal);
 
             this.srcId = srcId;
+        }
+
+        public int compareSpliceable(Spliceable spl)
+        {
+            throw new Error("Unimplemented");
         }
 
         public Object deepCopy()

@@ -12,8 +12,11 @@ public class GlobalTriggerComponent
 {
     /**
      * Create a global trigger handler.
+     *
+     * @throws DAQCompException if component cannot be created
      */
     public GlobalTriggerComponent()
+        throws DAQCompException
     {
         super(DAQCmdInterface.DAQ_GLOBAL_TRIGGER, 0);
     }

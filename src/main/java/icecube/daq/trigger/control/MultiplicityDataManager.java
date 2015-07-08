@@ -32,6 +32,8 @@ class HashKey
     private int srcId;
     private int type;
     private int cfgId;
+    private boolean validMultiplicity;
+
     private int key;
 
     HashKey(ITriggerRequestPayload req)
@@ -47,6 +49,7 @@ class HashKey
         this.srcId = srcId;
         this.type = type;
         this.cfgId = cfgId;
+        this.validMultiplicity = validMultiplicity;
 
         int tmpSrc = srcId / 1000;
         if (tmpSrc < 0 || tmpSrc > 31) {
@@ -95,9 +98,19 @@ class HashKey
         return cfgId;
     }
 
+    public boolean hasValidMultiplicity()
+    {
+        return validMultiplicity;
+    }
+
     public int hashCode()
     {
         return key;
+    }
+
+    public void setValidMultiplicity(boolean val)
+    {
+        validMultiplicity = val;
     }
 
     public String toString()
@@ -360,11 +373,6 @@ public class MultiplicityDataManager
             return;
         }
 
-        // ignore algorithms with invalid multiplicities (SlowMP, FixedRate)
-        if (!hasValidMultiplicity(req)) {
-            return;
-        }
-
         // ignore requests seen before the first good time
         if (firstGoodTime == Integer.MIN_VALUE) {
             final String msg =
@@ -387,7 +395,6 @@ public class MultiplicityDataManager
         }
 
         // and we've finally got something we can monitor!
-
         HashKey key;
         try {
             key = new HashKey(req);
@@ -413,6 +420,9 @@ public class MultiplicityDataManager
 
         synchronized (binmap) {
             if (!binmap.containsKey(key)) {
+                // will this provide a valid multiplicity value?
+                key.setValidMultiplicity(hasValidMultiplicity(req));
+
                 // add new algorithm
                 binmap.put(key, new Bins(MAX_BINS));
             }
@@ -589,6 +599,10 @@ public class MultiplicityDataManager
                 new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSSSS");
 
             for (HashKey key : binmap.keySet()) {
+                if (!key.hasValidMultiplicity()) {
+                    continue;
+                }
+
                 HashMap<String, Object> values = new HashMap<String, Object>();
 
                 values.put("sourceid", key.getSourceID());

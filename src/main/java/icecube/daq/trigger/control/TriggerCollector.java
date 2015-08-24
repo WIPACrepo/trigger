@@ -933,6 +933,8 @@ class OutputThread
      */
     public void run()
     {
+        boolean warnedChannel = false;
+
         ByteBuffer trigBuf;
         while (!stopping || outputQueue.size() > 0) {
             synchronized (outputQueue) {
@@ -962,15 +964,31 @@ class OutputThread
             if (outChan == null) {
                 outChan = outputEngine.getChannel();
                 if (outChan == null) {
-                    throw new Error("Output channel has not been set" +
-                                    " in " + outputEngine);
+                    if (!warnedChannel) {
+                        LOG.error("Output channel has not been set in " +
+                                  outputEngine + "; stopping");
+                        warnedChannel = true;
+                    }
+                    stopping = true;
                 }
             }
 
             //--ship the trigger to its destination
-            outChan.receiveByteBuffer(trigBuf);
+            if (outChan != null) {
+                outChan.receiveByteBuffer(trigBuf);
+            }
         }
 
+        // yikes, must have stopped without sending anything
+        if (outChan == null) {
+            outChan = outputEngine.getChannel();
+            if (outChan == null && !warnedChannel) {
+                LOG.error("Output channel has not been set in " +
+                          outputEngine + "; not sending last payload");
+            }
+        }
+
+        // send stop message
         if (outChan != null) {
             outChan.sendLastAndStop();
         }

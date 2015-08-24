@@ -388,6 +388,16 @@ public class OutputThreadTest
 
         assertTrue("OutputThread should be stopped", thrd.isStopped());
         assertFalse("OutputThread should not be waiting", thrd.isWaiting());
+
+        assertEquals("Bad number of log messages",
+                     1, appender.getNumberOfMessages());
+
+        final String errMsg = "Output channel has not been set in ";
+        final String logMsg = (String) appender.getMessage(0);
+        assertTrue("Bad log message \"" + logMsg + "\"",
+                   logMsg.startsWith(errMsg));
+
+        appender.clear();
     }
 
     @Test
@@ -434,5 +444,15 @@ public class OutputThreadTest
         assertFalse("Thread is still alive", thrd.isAlive());
         assertEquals("Found queued data", 0L, thrd.getNumQueued());
         assertEquals("Data was written", 0, outProc.getNumberWritten());
+
+        assertEquals("Bad number of log messages",
+                     1, appender.getNumberOfMessages());
+
+        final String errMsg = "Output channel has not been set in ";
+        final String logMsg = (String) appender.getMessage(0);
+        assertTrue("Bad log message \"" + logMsg + "\"",
+                   logMsg.startsWith(errMsg));
+
+        appender.clear();
     }
 }

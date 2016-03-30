@@ -111,6 +111,16 @@ public class DomSet
     }
 
     /**
+     * Return the number of DOMs in this set.
+     *
+     * @return number of DOMs
+     */
+    public int size()
+    {
+        return set.size();
+    }
+
+    /**
      * Return a debugging string.
      *
      * @return debugging string

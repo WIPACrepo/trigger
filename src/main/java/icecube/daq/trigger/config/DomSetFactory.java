@@ -49,13 +49,13 @@ public abstract class DomSetFactory
      * Add all DOMs from <tt>hub</tt> within the range
      * [<tt>low</tt>-<tt>high</tt>] to the <tt>domIds</tt> list.
      */
-    private static void addAllDoms(List<String>domIds, int hub, int low,
+    private static void addAllDoms(List<Long> domIds, int hub, int low,
                                    int high)
     {
         for (DeployedDOM dom : domRegistry.getDomsOnHub(hub)) {
             int pos = dom.getStringMinor();
             if (pos >= low && pos <= high) {
-                domIds.add(dom.getMainboardId());
+                domIds.add(dom.getNumericMainboardId());
             }
         }
     }
@@ -224,7 +224,7 @@ public abstract class DomSetFactory
             return null;
         }
 
-        ArrayList<String> domIds = new ArrayList<String>();
+        ArrayList<Long> domIds = new ArrayList<Long>();
 
         loadOuterStrings(name, domIds, topNode);
 
@@ -356,7 +356,7 @@ public abstract class DomSetFactory
         return new DomSet(name, domIds);
     }
 
-    private static void loadOuterStrings(String name, List<String> domIds,
+    private static void loadOuterStrings(String name, List<Long> domIds,
                                          Node topNode)
         throws ConfigException
     {

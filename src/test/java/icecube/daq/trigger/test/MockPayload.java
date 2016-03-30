@@ -1,25 +1,27 @@
 package icecube.daq.trigger.test;
 
-import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ILoadablePayload;
-import icecube.daq.payload.IPayloadDestination;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.IWriteablePayload;
+import icecube.daq.payload.PayloadFormatException;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.zip.DataFormatException;
 
 public abstract class MockPayload
     implements Comparable, ILoadablePayload, IWriteablePayload
 {
-    private IUTCTime time;
-    private DataFormatException loadDFException;
+    private long time;
+    private PayloadFormatException loadPFException;
     private IOException loadIOException;
+
+    private IUTCTime timeObj;
 
     public MockPayload(long timeVal)
     {
-        time = new MockUTCTime(timeVal);
+        time = timeVal;
     }
 
     public int compareTo(Object obj)
@@ -33,20 +35,13 @@ public abstract class MockPayload
         }
 
         MockPayload mp = (MockPayload) obj;
-        if (time == null) {
-            if (mp.time == null) {
-                return 0;
-            }
-
-            return 1;
-        } else if (mp.time == null) {
-            return -1;
-        }
-
-        return (int) (mp.time.longValue() - time.longValue());
+        return (int) (mp.time - time);
     }
 
-    public abstract Object deepCopy();
+    public Object deepCopy()
+    {
+        throw new Error("Unimplemented");
+    }
 
     public void dispose()
     {
@@ -58,43 +53,50 @@ public abstract class MockPayload
         return compareTo(obj) == 0;
     }
 
-    public abstract int getPayloadInterfaceType();
-
-    public abstract int getPayloadLength();
+    public ByteBuffer getPayloadBacking()
+    {
+        throw new Error("Unimplemented");
+    }
 
     public IUTCTime getPayloadTimeUTC()
+    {
+        if (timeObj == null) {
+            timeObj = new MockUTCTime(time);
+        }
+
+        return timeObj;
+    }
+
+    public int getPayloadType()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public long getUTCTime()
     {
         return time;
     }
 
-    public abstract int getPayloadType();
-
-    public long getUTCTime()
-    {
-        return time.longValue();
-    }
-
     public int hashCode()
     {
-        if (time == null) {
-            return 0;
-        }
-
-        final long timeVal = time.longValue();
-
         final long modValue = Integer.MAX_VALUE / 256;
 
-        final long topTwo = timeVal / modValue;
+        final long topTwo = time / modValue;
 
         return (int) (topTwo / modValue) + (int) (topTwo % modValue) +
-            (int) (timeVal % modValue);
+            (int) (time % modValue);
+    }
+
+    public int length()
+    {
+        throw new Error("Unimplemented");
     }
 
     public void loadPayload()
-        throws IOException, DataFormatException
+        throws IOException, PayloadFormatException
     {
-        if (loadDFException != null) {
-            throw loadDFException;
+        if (loadPFException != null) {
+            throw loadPFException;
         } else if (loadIOException != null) {
             throw loadIOException;
         }
@@ -107,10 +109,15 @@ public abstract class MockPayload
         // do nothing
     }
 
+    public void setCache(IByteBufferCache bufCache)
+    {
+        throw new Error("Unimplemented");
+    }
+
     public void setLoadPayloadException(Exception ex)
     {
-        if (ex instanceof DataFormatException) {
-            loadDFException = (DataFormatException) ex;
+        if (ex instanceof PayloadFormatException) {
+            loadPFException = (PayloadFormatException) ex;
         } else if (ex instanceof IOException) {
             loadIOException = (IOException) ex;
         } else {
@@ -119,11 +126,9 @@ public abstract class MockPayload
         }
     }
 
-    public abstract int writePayload(boolean writeLoaded,
-                                     IPayloadDestination dest)
-        throws IOException;
-
-    public abstract int writePayload(boolean writeLoaded, int offset,
-                                     ByteBuffer buf)
-        throws IOException;
+    public int writePayload(boolean writeLoaded, int offset, ByteBuffer buf)
+        throws IOException
+    {
+        throw new Error("Unimplemented");
+    }
 }

@@ -9,7 +9,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>trigger</artifactId>
   <packaging>jar</packaging>
-  <name>trigger</name>
+  <name>Trigger</name>
   <description>The ${project.name} sub-system of the Surface Data Acquisition system for the IceCube Project.</description>
 
   <scm>
@@ -73,60 +73,6 @@
               </archive>
             </configuration>
           </execution>
-<!-- Remove this comment to enable EBShell
-          <execution>
-            <id>ebshell</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier>ebshell</classifier>
-              <archive>
-                <manifest>
-                  <mainClass>icecube.daq.trigger.component.EBShell</mainClass>
-                  <addClasspath>true</addClasspath>
-                  <classpathPrefix>../lib</classpathPrefix>
-                </manifest>
-              </archive>
-            </configuration>
-          </execution>
-Remove this comment to enable EBShell -->
-<!-- Remove this comment to enable TriggerShell
-          <execution>
-            <id>shell</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier>shell</classifier>
-              <archive>
-                <manifest>
-                  <mainClass>icecube.daq.trigger.component.TriggerShell</mainClass>
-                  <addClasspath>true</addClasspath>
-                  <classpathPrefix>../lib</classpathPrefix>
-                </manifest>
-              </archive>
-            </configuration>
-          </execution>
-Remove this comment to enable TriggerShell -->
-<!-- Remove this comment to enable SimpleTrigger
-          <execution>
-            <id>simptrig</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier>simptrig</classifier>
-              <archive>
-                <manifest>
-                  <mainClass>icecube.daq.trigger.component.SimpleTrigger</mainClass>
-                  <addClasspath>true</addClasspath>
-                  <classpathPrefix>../lib</classpathPrefix>
-                </manifest>
-              </archive>
-            </configuration>
-          </execution>
-Remove this comment to enable SimpleTrigger -->
         </executions>
       </plugin>
      <plugin>
@@ -152,6 +98,11 @@ Remove this comment to enable SimpleTrigger -->
   <dependencies>
     <dependency>
       <groupId>edu.wisc.icecube</groupId>
+      <artifactId>daq-common</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.wisc.icecube</groupId>
       <artifactId>daq-io</artifactId>
     </dependency>
 
@@ -166,8 +117,23 @@ Remove this comment to enable SimpleTrigger -->
     </dependency>
 
     <dependency>
-      <groupId>jaxen</groupId>
-      <artifactId>jaxen</artifactId>
+      <groupId>edu.wisc.icecube</groupId>
+      <artifactId>splicer</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.wisc.icecube</groupId>
+      <artifactId>trigger-common</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.xml.parsers</groupId>
+      <artifactId>jaxp-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
     </dependency>
   </dependencies>
 

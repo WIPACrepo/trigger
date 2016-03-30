@@ -2,6 +2,7 @@ package icecube.daq.trigger.test;
 
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.Poolable;
+import icecube.daq.payload.impl.UTCTime;
 
 public class MockUTCTime
     implements IUTCTime, Poolable
@@ -97,6 +98,15 @@ public class MockUTCTime
     public double timeDiff_ns(IUTCTime otherTime)
     {
         return (double) (time - otherTime.longValue());
+    }
+
+    /**
+     * Return a human-readable date/time string
+     * @return human-readable date/time string
+     */
+    public String toDateString()
+    {
+        return UTCTime.toDateString(time);
     }
 
     public String toString()

@@ -2,7 +2,8 @@ package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -13,18 +14,7 @@ import icecube.daq.util.DeployedDOM;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.Arrays;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
-import org.apache.log4j.Logger;
 
 /**
  * The VolumeTrigger is based on the ClusterTrigger, with a slight modifications to
@@ -72,8 +62,6 @@ public class CylinderTrigger extends AbstractTrigger
 
     private Comparator hitComparator = new HitComparator();
 
-    private static final Logger logger = Logger.getLogger(CylinderTrigger.class);
-
     public CylinderTrigger()
     {
         triggerQueue    = new LinkedList<IHitPayload>();
@@ -85,23 +73,32 @@ public class CylinderTrigger extends AbstractTrigger
         setHeight(100.0);
     }
 
+    /**
+     * Add a trigger parameter.
+     *
+     * @param name parameter name
+     * @param value parameter value
+     *
+     * @throws UnknownParameterException if the parameter is unknown
+     * @throws IllegalParameterValueException if the parameter value is bad
+     */
     @Override
-    public void addParameter(TriggerParameter parameter) throws UnknownParameterException,
-            IllegalParameterValueException
+    public void addParameter(String name, String value)
+        throws UnknownParameterException, IllegalParameterValueException
     {
-        if (parameter.getName().equals("timeWindow"))
-            setTimeWindow(Long.parseLong(parameter.getValue()));
-        else if (parameter.getName().equals("multiplicity"))
-            setMultiplicity(Integer.parseInt(parameter.getValue()));
-        else if (parameter.getName().equals("simpleMultiplicity"))
-            setSimpleMultiplicity(Integer.parseInt(parameter.getValue()));
-        else if (parameter.getName().equals("radius"))
-            setRadius(Double.parseDouble(parameter.getValue()));
-        else if (parameter.getName().equals("height"))
-            setHeight(Double.parseDouble(parameter.getValue()));
-        else if (parameter.getName().equals("domSet"))
+        if (name.equals("timeWindow"))
+            setTimeWindow(Long.parseLong(value));
+        else if (name.equals("multiplicity"))
+            setMultiplicity(Integer.parseInt(value));
+        else if (name.equals("simpleMultiplicity"))
+            setSimpleMultiplicity(Integer.parseInt(value));
+        else if (name.equals("radius"))
+            setRadius(Double.parseDouble(value));
+        else if (name.equals("height"))
+            setHeight(Double.parseDouble(value));
+        else if (name.equals("domSet"))
         {
-            domSetId = Integer.parseInt(parameter.getValue());
+            domSetId = Integer.parseInt(value);
             try {
                 configHitFilter(domSetId);
             } catch (ConfigException ce) {
@@ -109,7 +106,7 @@ public class CylinderTrigger extends AbstractTrigger
                                                          domSetId, ce);
             }
         }
-        super.addParameter(parameter);
+        super.addParameter(name, value);
     }
 
     public int getSimpleMultiplicity()
@@ -172,38 +169,50 @@ public class CylinderTrigger extends AbstractTrigger
     @Override
     public void runTrigger(IPayload payload) throws TriggerException
     {
+        if (!(payload instanceof IHitPayload)) {
+            throw new TriggerException("Payload object " + payload +
+                                       " cannot be upcast to IHitPayload.");
+        }
 
-        if (!(payload instanceof IHitPayload))
-            throw new TriggerException(
-                    "Payload object " + payload + " cannot be upcast to IHitPayload."
-                    );
-        // This upcast should be safe now
         IHitPayload hitPayload = (IHitPayload) payload;
 
-        // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
-        if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
-        if (!hitFilter.useHit(hitPayload)) return;
-
+        // try to form a request
+        boolean formed = false;
         while (triggerQueue.size() > 0 &&
-                hitPayload.getHitTimeUTC().longValue() -
-                triggerQueue.element().getHitTimeUTC().longValue() > timeWindow)
+               hitPayload.getUTCTime() - triggerQueue.element().getUTCTime() >
+               timeWindow)
         {
-            if (triggerQueue.size() >= multiplicity && processHitQueue())
-            {
-                if (triggerQueue.size() > 0) formTrigger(triggerQueue, null, null);
+            if (triggerQueue.size() >= multiplicity && processHitQueue()) {
+                formTrigger(triggerQueue, null, null);
                 triggerQueue.clear();
-                setEarliestPayloadOfInterest(hitPayload);
+                formed = true;
                 break;
             }
-            else
-            {
-                triggerQueue.removeFirst();
-                IHitPayload firstHitInQueue = triggerQueue.peek();
-                if (firstHitInQueue == null) firstHitInQueue = hitPayload;
-                setEarliestPayloadOfInterest(firstHitInQueue);
-            }
+
+            triggerQueue.removeFirst();
         }
-        triggerQueue.add(hitPayload);
+
+        // if earliest time wasn't set by formTrigger(), set it now
+        if (!formed) {
+            IHitPayload earliest = null;
+            if (triggerQueue.size() > 0) {
+                earliest = triggerQueue.peek();
+            } else {
+                earliest = hitPayload;
+            }
+
+            // set earliest time to just before this time
+            IUTCTime earliestUTC =
+                earliest.getPayloadTimeUTC().getOffsetUTCTime(-0.1);
+            setEarliestPayloadOfInterest(new DummyPayload(earliestUTC));
+        }
+
+        // if new hit is usable, add it to the queue
+        if (getHitType(hitPayload) == AbstractTrigger.SPE_HIT &&
+            hitFilter.useHit(hitPayload))
+        {
+            triggerQueue.add(hitPayload);
+        }
     }
 
     private boolean processHitQueue()
@@ -219,15 +228,23 @@ public class CylinderTrigger extends AbstractTrigger
         // Loop over hit pairs
         for (int ihit = 0; ihit < q.length; ihit++)
         {
-            String mbid0 = String.format("%012x", q[ihit].getDOMID().longValue());
-            DeployedDOM d0 = domRegistry.getDom(mbid0);
+            DeployedDOM d0 =
+                domRegistry.getDom(q[ihit].getDOMID().longValue());
+            if (d0 == null) {
+                throw new Error("Cannot find DOM " + q[ihit].getDOMID());
+            }
+
             hitsInCylinder.clear();
             hitsInCylinder.add(q[ihit]);
             for (int jhit = 0; jhit < q.length; jhit++)
             {
                 if (ihit == jhit) continue;
-                String mbid1 = String.format("%012x", q[jhit].getDOMID().longValue());
-                DeployedDOM d1 = domRegistry.getDom(mbid1);
+                DeployedDOM d1 =
+                    domRegistry.getDom(q[jhit].getDOMID().longValue());
+                if (d1 == null) {
+                    throw new Error("Cannot find DOM " + q[jhit].getDOMID());
+                }
+
                 double dx = d1.getX() - d0.getX();
                 double dy = d1.getY() - d0.getY();
                 double dz = d1.getZ() - d0.getZ();
@@ -250,6 +267,26 @@ public class CylinderTrigger extends AbstractTrigger
         return true;
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "VOLUME";
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    public boolean hasValidMultiplicity()
+    {
+        return true;
+    }
 }
 
 class HitComparator

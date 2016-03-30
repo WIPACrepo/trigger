@@ -1,13 +1,13 @@
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.oldpayload.PayloadInterfaceRegistry;
-import icecube.daq.oldpayload.impl.TriggerRequestPayload;
+import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.payload.impl.TriggerRequest;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -16,7 +16,7 @@ import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  *
@@ -29,34 +29,48 @@ import java.util.Vector;
 public class DefaultIniceStringTrigger extends AbstractTrigger
 {
 
-    private static final Log log = LogFactory.getLog(DefaultIniceStringTrigger.class);
+    private static final Log LOG =
+        LogFactory.getLog(DefaultIniceStringTrigger.class);
 
-    private static int triggerNumber = 0;
+    private static int nextTriggerNumber;
+    private int triggerNumber;
 
     private int stringTriggerType;
     private boolean configStringTriggerType = false;
 
-    public DefaultIniceStringTrigger() {
-	triggerNumber++;
+    public DefaultIniceStringTrigger()
+    {
+        triggerNumber = ++nextTriggerNumber;
     }
 
-    public boolean isConfigured() {
+    public boolean isConfigured()
+    {
 	return configStringTriggerType;
     }
 
-    public void addParameter(TriggerParameter parameter)
+    /**
+     * Add a trigger parameter.
+     *
+     * @param name parameter name
+     * @param value parameter value
+     *
+     * @throws UnknownParameterException if the parameter is unknown
+     * @throws IllegalParameterValueException if the parameter value is bad
+     */
+    public void addParameter(String name, String value)
 	throws UnknownParameterException, IllegalParameterValueException
     {
-	if (parameter.getName().compareTo("stringTriggerType") == 0) {
-	    stringTriggerType = Integer.parseInt(parameter.getValue());
+	if (name.compareTo("stringTriggerType") == 0) {
+	    stringTriggerType = Integer.parseInt(value);
 	    configStringTriggerType = true;
 	} else {
-	    throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
+	    throw new UnknownParameterException("Unknown parameter: " + name);
 	}
-	super.addParameter(parameter);
+	super.addParameter(name, value);
     }
 
-    public void setTriggerName(String triggerName) {
+    public void setTriggerName(String triggerName)
+    {
 	super.triggerName = triggerName + triggerNumber;
     }
 
@@ -66,7 +80,7 @@ public class DefaultIniceStringTrigger extends AbstractTrigger
 
 	// check to see what kind of payload this is
 	int interfaceType = payload.getPayloadInterfaceType();
-	if (interfaceType != PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD) {
+	if (interfaceType != PayloadInterfaceRegistry.I_TRIGGER_REQUEST) {
 	    // set earliest time of interest
 	    IUTCTime earliestTime = payload.getPayloadTimeUTC();
 	    IPayload earliestPayload = new DummyPayload(earliestTime.getOffsetUTCTime(0.1));
@@ -78,7 +92,7 @@ public class DefaultIniceStringTrigger extends AbstractTrigger
 	try {
 	    trigger.loadPayload();
 	} catch (Exception e) {
-	    log.error("Error loading trigger request payload", e);
+	    LOG.error("Error loading trigger request payload", e);
 	    return;
 	}
 
@@ -98,18 +112,17 @@ public class DefaultIniceStringTrigger extends AbstractTrigger
 	    IUTCTime firstTime = trigger.getFirstTimeUTC();
 	    IUTCTime lastTime = trigger.getLastTimeUTC();
 	    IReadoutRequest readoutRequest = trigger.getReadoutRequest();
-	    Vector str = new Vector();
+	    ArrayList<IWriteablePayload> str = new ArrayList<IWriteablePayload>();
 	    str.add(trigger);
 
-	    TriggerRequestPayload newTrigger
-		= (TriggerRequestPayload) triggerFactory.createPayload(triggerCounter,
-								       triggerType,
-								       triggerConfigId,
-								       sourceId,
-								       firstTime,
-								       lastTime,
-								       str,
-								       readoutRequest);
+	    TriggerRequest newTrigger
+		= (TriggerRequest) triggerFactory.createPayload(triggerCounter,
+								       getTriggerType(),
+								       getTriggerConfigId(),
+								       getSourceId(),
+								       firstTime.longValue(),
+								       lastTime.longValue(),
+								       readoutRequest, str);
 
 	    reportTrigger(newTrigger);
 
@@ -122,10 +135,30 @@ public class DefaultIniceStringTrigger extends AbstractTrigger
 
     }
 
-    public void flush() {
+    public void flush()
+    {
 	// nothing to flush
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "DEFAULT_II_STRING";
+    }
 
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    public boolean hasValidMultiplicity()
+    {
+        return true;
+    }
 }
 

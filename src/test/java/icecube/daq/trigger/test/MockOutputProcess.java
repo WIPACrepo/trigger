@@ -12,11 +12,18 @@ import java.nio.channels.WritableByteChannel;
 public class MockOutputProcess
     implements DAQComponentOutputProcess
 {
+    private String name;
     private MockOutputChannel outChan;
     private BaseValidator validator;
 
     public MockOutputProcess()
     {
+        this(null);
+    }
+
+    public MockOutputProcess(String name)
+    {
+        this.name = name;
     }
 
     public QueuedOutputChannel addDataChannel(WritableByteChannel chan,
@@ -72,16 +79,14 @@ public class MockOutputProcess
         throw new Error("Unimplemented");
     }
 
-    public long[] getRecordsSent()
+    public long getRecordsSent()
     {
-        long[] rtnval = new long[1];
-        if (outChan == null) {
-            rtnval[0] = 0L;
-        } else {
-            rtnval[0] = outChan.getNumberWritten();
-        }
+        return outChan.getNumberWritten();
+    }
 
-        return rtnval;
+    public long getTotalRecordsSent()
+    {
+        throw new Error("Unimplemented");
     }
 
     public boolean isConnected()
@@ -148,5 +153,14 @@ public class MockOutputProcess
     public void startProcessing()
     {
         throw new Error("Unimplemented");
+    }
+
+    public String toString()
+    {
+        if (name == null) {
+            return "MockOutProc=>" + outChan;
+        }
+
+        return "MockOutProc[" + name + "]=>" + outChan;
     }
 }

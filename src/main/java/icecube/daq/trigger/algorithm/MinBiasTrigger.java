@@ -1,7 +1,7 @@
 /*
  * class: MinBiasTrigger
  *
- * Version $Id: MinBiasTrigger.java 13696 2012-05-14 17:35:47Z dglo $
+ * Version $Id: MinBiasTrigger.java 15429 2015-02-20 19:22:20Z dglo $
  *
  * Date: August 27 2005
  *
@@ -10,10 +10,10 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.payload.IUTCTime;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -27,53 +27,47 @@ import org.apache.commons.logging.LogFactory;
  * This class implements a simple minimum bias trigger. It simply counts hits and
  * applies a prescale for determining when a trigger should be formed.
  *
- * @version $Id: MinBiasTrigger.java 13696 2012-05-14 17:35:47Z dglo $
+ * @version $Id: MinBiasTrigger.java 15429 2015-02-20 19:22:20Z dglo $
  * @author pat
  */
-public class MinBiasTrigger extends AbstractTrigger
+public class MinBiasTrigger
+    extends AbstractTrigger
 {
+    /** Log object for this class */
+    private static final Log LOG = LogFactory.getLog(MinBiasTrigger.class);
 
-    /**
-     * Log object for this class
-     */
-    private static final Log log = LogFactory.getLog(MinBiasTrigger.class);
-
-    private static int triggerNumber = 0;
+    private static int nextTriggerNumber;
+    private int triggerNumber;
 
     private int prescale;
     private int numberProcessed = 0;
 
     private boolean configPrescale = false;
 
-    public MinBiasTrigger() {
-        triggerNumber++;
+    public MinBiasTrigger()
+    {
+        triggerNumber = ++nextTriggerNumber;
     }
 
     /**
-     * Is the trigger configured?
+     * Add a trigger parameter.
      *
-     * @return true if it is
+     * @param name parameter name
+     * @param value parameter value
+     *
+     * @throws UnknownParameterException if the parameter is unknown
+     * @throws IllegalParameterValueException if the parameter value is bad
      */
-    public boolean isConfigured() {
-        return configPrescale;
-    }
-
-    /**
-     * Add a parameter.
-     *
-     * @param parameter TriggerParameter object.
-     *
-     * @throws icecube.daq.trigger.exceptions.UnknownParameterException
-     *
-     */
-    public void addParameter(TriggerParameter parameter) throws UnknownParameterException, IllegalParameterValueException {
-        if (parameter.getName().compareTo("prescale") == 0) {
-            prescale = Integer.parseInt(parameter.getValue());
+    public void addParameter(String name, String value)
+        throws UnknownParameterException, IllegalParameterValueException
+    {
+        if (name.compareTo("prescale") == 0) {
+            prescale = Integer.parseInt(value);
             configPrescale = true;
-        } else if (parameter.getName().compareTo("triggerPrescale") == 0) {
-            triggerPrescale = Integer.parseInt(parameter.getValue());
-        } else if (parameter.getName().compareTo("domSet") == 0) {
-            domSetId = Integer.parseInt(parameter.getValue());
+        } else if (name.compareTo("triggerPrescale") == 0) {
+            triggerPrescale = Integer.parseInt(value);
+        } else if (name.compareTo("domSet") == 0) {
+            domSetId = Integer.parseInt(value);
             try {
                 configHitFilter(domSetId);
             } catch (ConfigException ce) {
@@ -81,16 +75,33 @@ public class MinBiasTrigger extends AbstractTrigger
                                                          domSetId, ce);
             }
         } else {
-            throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
+            throw new UnknownParameterException("Unknown parameter: " + name);
         }
-        super.addParameter(parameter);
+        super.addParameter(name, value);
     }
 
-    public void setTriggerName(String triggerName) {
-        super.triggerName = triggerName + triggerNumber;
-        if (log.isInfoEnabled()) {
-            log.info("TriggerName set to " + super.triggerName);
-        }
+    /**
+     * Flush the trigger. Basically indicates that there will be no further
+     * payloads to process.
+     */
+    public void flush()
+    {
+        // nothing to do here
+    }
+
+    public int getPrescale()
+    {
+        return prescale;
+    }
+
+    /**
+     * Is the trigger configured?
+     *
+     * @return true if it is
+     */
+    public boolean isConfigured()
+    {
+        return configPrescale;
     }
 
     /**
@@ -101,51 +112,71 @@ public class MinBiasTrigger extends AbstractTrigger
      * @throws icecube.daq.trigger.exceptions.TriggerException
      *          if the algorithm doesn't like this payload
      */
-    public void runTrigger(IPayload payload) throws TriggerException {
-        int interfaceType = payload.getPayloadInterfaceType();
-        if ((interfaceType != PayloadInterfaceRegistry.I_HIT_PAYLOAD) &&
-            (interfaceType != PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)) {
-            throw new TriggerException("Expecting an IHitPayload, got type " + interfaceType);
-        }
-        IHitPayload hit = (IHitPayload) payload;
-
-        // check hit filter
-        if (!hitFilter.useHit(hit)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Hit from DOM " + hit.getDOMID() + " not in DomSet");
-            }
-            return;
-        }
-
+    public void runTrigger(IPayload payload)
+        throws TriggerException
+    {
         if (prescale == -1) {
             throw new TriggerException("Prescale has not been set!");
         }
 
-        numberProcessed++;
-        if (numberProcessed % prescale == 0) {
-            // report this as a trigger
-            formTrigger(hit, null, null);
+        int interfaceType = payload.getPayloadInterfaceType();
+        if ((interfaceType != PayloadInterfaceRegistry.I_HIT_PAYLOAD) &&
+            (interfaceType != PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD))
+        {
+            throw new TriggerException("Expecting an IHitPayload, got type " +
+                                       interfaceType);
+        }
+        IHitPayload hit = (IHitPayload) payload;
 
-        } else {
+        boolean formedTrigger = false;
+        if (hitFilter.useHit(hit)) {
+            numberProcessed++;
+            if (numberProcessed % prescale == 0) {
+                // report this as a trigger
+                formTrigger(hit, null, null);
+                formedTrigger = true;
+            }
+        }
+
+        if (!formedTrigger) {
             // just update earliest time of interest
-            IPayload earliest = new DummyPayload(hit.getHitTimeUTC().getOffsetUTCTime(0.1));
+            IUTCTime offsetTime = hit.getHitTimeUTC().getOffsetUTCTime(0.1);
+            IPayload earliest = new DummyPayload(offsetTime);
             setEarliestPayloadOfInterest(earliest);
         }
     }
 
-    /**
-     * Flush the trigger. Basically indicates that there will be no further payloads to process.
-     */
-    public void flush() {
-        // nothing to do here
-    }
-
-    public int getPrescale() {
-        return prescale;
-    }
-
-    public void setPrescale(int prescale) {
+    public void setPrescale(int prescale)
+    {
         this.prescale = prescale;
     }
 
+    public void setTriggerName(String triggerName)
+    {
+        super.triggerName = triggerName + triggerNumber;
+        if (LOG.isInfoEnabled()) {
+            LOG.info("TriggerName set to " + super.triggerName);
+        }
+    }
+
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "MIN_BIAS";
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    public boolean hasValidMultiplicity()
+    {
+        return true;
+    }
 }

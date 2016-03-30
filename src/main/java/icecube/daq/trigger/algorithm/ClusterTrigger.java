@@ -1,18 +1,20 @@
 package icecube.daq.trigger.algorithm;
 
+import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.trigger.config.TriggerParameter;
+import icecube.daq.payload.IUTCTime;
+import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.DeployedDOM;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Set;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
@@ -81,18 +83,27 @@ public class ClusterTrigger extends AbstractTrigger
         configCoherence = false;
     }
 
+    /**
+     * Add a trigger parameter.
+     *
+     * @param name parameter name
+     * @param value parameter value
+     *
+     * @throws UnknownParameterException if the parameter is unknown
+     * @throws IllegalParameterValueException if the parameter value is bad
+     */
     @Override
-    public void addParameter(TriggerParameter parameter) throws UnknownParameterException,
-            IllegalParameterValueException
+    public void addParameter(String name, String value)
+        throws UnknownParameterException, IllegalParameterValueException
     {
-        if (parameter.getName().equals("timeWindow"))
-            setTimeWindow(Long.parseLong(parameter.getValue()));
-        else if (parameter.getName().equals("multiplicity"))
-            setMultiplicity(Integer.parseInt(parameter.getValue()));
-        else if (parameter.getName().equals("coherenceLength"))
-            setCoherenceLength(Integer.parseInt(parameter.getValue()));
-        else if (parameter.getName().equals("domSet")) {
-            domSetId = Integer.parseInt(parameter.getValue());
+        if (name.equals("timeWindow"))
+            setTimeWindow(Long.parseLong(value));
+        else if (name.equals("multiplicity"))
+            setMultiplicity(Integer.parseInt(value));
+        else if (name.equals("coherenceLength"))
+            setCoherenceLength(Integer.parseInt(value));
+        else if (name.equals("domSet")) {
+            domSetId = Integer.parseInt(value);
             try {
                 configHitFilter(domSetId);
             } catch (ConfigException ce) {
@@ -100,7 +111,7 @@ public class ClusterTrigger extends AbstractTrigger
                                                          domSetId, ce);
             }
         }
-        super.addParameter(parameter);
+        super.addParameter(name, value);
     }
 
     public long getTimeWindow()
@@ -144,98 +155,175 @@ public class ClusterTrigger extends AbstractTrigger
         triggerQueue.clear();
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "CLUSTER";
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    public boolean hasValidMultiplicity()
+    {
+        return true;
+    }
+
     @Override
     public void runTrigger(IPayload payload) throws TriggerException
     {
-        if (!(payload instanceof IHitPayload))
-            throw new TriggerException(
-                    "Payload object " + payload + " cannot be upcast to IHitPayload."
-                    );
-        // This upcast should be safe now
-        IHitPayload hitPayload = (IHitPayload) payload;
+        if (!(payload instanceof IHitPayload)) {
+            throw new TriggerException("Payload object " + payload +
+                                       " cannot be upcast to IHitPayload.");
+        }
 
-        // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
-        if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
-        if (!hitFilter.useHit(hitPayload)) return;
+        IHitPayload hitPayload = (IHitPayload) payload;
 
         if (logger.isDebugEnabled())
         {
-            LogicalChannel logical = LogicalChannel.fromHitPayload(
-                    hitPayload, getTriggerHandler().getDOMRegistry());
-            logger.debug("Received hit at UTC " +
-                    hitPayload.getHitTimeUTC() +
-                    " - logical channel " + logical +
-                    " queue size = " + triggerQueue.size());
+            long mbid = hitPayload.getDOMID().longValue();
+            DeployedDOM dom =
+                getTriggerHandler().getDOMRegistry().getDom(mbid);
+            String chanStr;
+            if (dom == null) {
+                chanStr = "<null>";
+            } else {
+                chanStr = String.format("(%d, %d)", dom.getStringMajor(),
+                                        dom.getStringMinor());
+            }
+            logger.debug("Received hit at UTC " + hitPayload.getUTCTime() +
+                         " - logical channel " + chanStr +
+                         " queue size = " + triggerQueue.size());
         }
 
-        while (triggerQueue.size() > 0 &&
-                hitPayload.getHitTimeUTC().longValue() -
-                triggerQueue.element().getHitTimeUTC().longValue() > timeWindow)
-        {
-            if (triggerQueue.size() >= multiplicity && processHitQueue())
-            {
-                if (triggerQueue.size() > 0) formTrigger(triggerQueue, null, null);
-                triggerQueue.clear();
-                setEarliestPayloadOfInterest(hitPayload);
+        // try to form a request
+        boolean formed = false;
+        while (true) {
+            boolean stoploop = (triggerQueue.size() > 0 &&
+                                hitPayload.getUTCTime() -
+                                triggerQueue.element().getUTCTime() >
+                                timeWindow);
+
+            if (!stoploop) {
                 break;
             }
-            else
-            {
-                triggerQueue.removeFirst();
-                IHitPayload firstHitInQueue = triggerQueue.peek();
-                if (firstHitInQueue == null) firstHitInQueue = hitPayload;
-                setEarliestPayloadOfInterest(firstHitInQueue);
+
+            boolean found = (triggerQueue.size() >= multiplicity &&
+                             processHitQueue());
+            if (found) {
+                formTrigger(triggerQueue);
+                triggerQueue.clear();
+                formed = true;
+                break;
             }
+
+            triggerQueue.removeFirst();
         }
-        triggerQueue.add(hitPayload);
+
+        // if earliest time wasn't set by formTrigger(), set it now
+        if (!formed) {
+            IHitPayload earliest = null;
+            if (triggerQueue.size() > 0) {
+                earliest = triggerQueue.peek();
+            } else {
+                earliest = hitPayload;
+            }
+
+            // set earliest time to just before this time
+            IUTCTime earliestUTC =
+                earliest.getPayloadTimeUTC().getOffsetUTCTime(-0.1);
+            setEarliestPayloadOfInterest(new DummyPayload(earliestUTC));
+        }
+
+        // if new hit is usable, add it to the queue
+        boolean use1 = getHitType(hitPayload) == AbstractTrigger.SPE_HIT;
+        boolean use2 = hitFilter.useHit(hitPayload);
+        boolean usable = use1 && use2;
+        if (usable)
+        {
+            triggerQueue.add(hitPayload);
+        }
     }
+
+    // preallocate coherence array
+    // (this is faster than reallocating for every hit)
+    private int[][] coherence = new int[86][60];
 
     private boolean processHitQueue()
     {
-    	final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
-        final TreeMap<LogicalChannel, Integer> coherenceMap = new TreeMap<LogicalChannel, Integer>();
+        final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
         boolean trigger = false;
 
-        for (IHitPayload hit : triggerQueue)
-        {
-            LogicalChannel central = LogicalChannel.fromHitPayload(hit, domRegistry);
-            int m0 = Math.max( 1, central.module - coherenceUp);
-            int m1 = Math.min(60, central.module + coherenceDown);
-            for (int m = m0; m <= m1; m++)
-            {
-                LogicalChannel ch = new LogicalChannel(central.string, m);
-                int counter = 0;
-                if (coherenceMap.containsKey(ch)) counter = coherenceMap.get(ch);
-                counter += 1;
-                if (counter >= multiplicity) trigger = true;
-                coherenceMap.put(ch, counter);
+        // clear coherence array
+        for (int[] row : coherence) {
+            java.util.Arrays.fill(row, 0);
+        }
+
+        for (IHitPayload hit : triggerQueue) {
+            long mbid = hit.getDOMID().longValue();
+            DeployedDOM dom = domRegistry.getDom(mbid);
+            if (dom == null) {
+                logger.error(String.format("Cannot find DOM %012x from %s", mbid, hit.toString()));
+                continue;
+            }
+
+            int m0 = Math.max( 1, dom.getStringMinor() - coherenceUp);
+            int m1 = Math.min(60, dom.getStringMinor() + coherenceDown);
+            for (int m = m0; m <= m1; m++) {
+                // if one site exceeds multiplicity, we've got a trigger!
+                final int site =
+                    ++coherence[dom.getStringMajor() - 1][m - 1];
+                if (site >= multiplicity) {
+                    trigger = true;
+                }
             }
         }
 
-        if (logger.isDebugEnabled())
-        {
-            for (LogicalChannel ch : coherenceMap.keySet())
-            {
-                logger.debug("Logical channel " + ch + " : " + coherenceMap.get(ch));
+        if (logger.isDebugEnabled()) {
+            for (int s = 0; s < coherence.length; s++) {
+                for (int p = 0; p < coherence[s].length; p++) {
+                    if (coherence[s][p] > 0) {
+                        final String str =
+                            String.format("(%d, %d): %s", s + 1, p + 1,
+                                          coherence[s][p]);
+                        logger.debug(str);
+                    }
+                }
             }
         }
 
         // No trigger so skip next operation
         if (!trigger) return false;
 
-        // Remove sites in coherence map less than threshold
-        for (Iterator<Integer> it = coherenceMap.values().iterator(); it.hasNext(); )
-            if (it.next() < multiplicity) it.remove();
-
-        // Prune hits not in spatial cluster out of queue as these
-        // will be built into trigger very soon.
-        for (Iterator<IHitPayload> hitIt = triggerQueue.iterator(); hitIt.hasNext(); )
+        // Prune hits not in spatial cluster out of queue;
+        // remaining hits will be built into a trigger very soon.
+        for (Iterator<IHitPayload> hitIt = triggerQueue.iterator();
+             hitIt.hasNext(); )
         {
             IHitPayload hit = hitIt.next();
-            LogicalChannel testCh = LogicalChannel.fromHitPayload(hit, domRegistry);
+            long mbid = hit.getDOMID().longValue();
+            DeployedDOM dom = domRegistry.getDom(mbid);
+            int[] string = coherence[dom.getStringMajor() - 1];
+
+            int top = Math.max( 1, dom.getStringMinor() - coherenceUp) - 1;
+            int bottom =
+                Math.min(60, dom.getStringMinor() + coherenceDown) - 1;
+
             boolean clust = false;
-            for (LogicalChannel ch : coherenceMap.keySet())
-                if (ch.isNear(testCh, coherenceUp, coherenceDown)) clust = true;
+            for (int i = top; i <= bottom; i++) {
+                if (string[i] >= multiplicity) {
+                    clust = true;
+                    break;
+                }
+            }
+
             if (!clust) hitIt.remove();
         }
 
@@ -246,86 +334,4 @@ public class ClusterTrigger extends AbstractTrigger
     {
         return configTimeWindow && configMultiplicity && configCoherence;
     }
-
-}
-
-class LogicalChannel implements Comparable<LogicalChannel>
-{
-    int string;
-    int module;
-    long numericMBID;
-    String mbid;
-
-    LogicalChannel()
-    {
-        this(0, 0);
-    }
-
-    LogicalChannel(int string, int module)
-    {
-        this.string = string;
-        this.module = module;
-        this.numericMBID = 0x00000000000L;
-        this.mbid   = "000000000000";
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return 64 * string + module - 1;
-    }
-
-    static LogicalChannel fromHitPayload(IHitPayload hit, DOMRegistry registry)
-    {
-        LogicalChannel logCh = new LogicalChannel();
-        logCh.numericMBID   = hit.getDOMID().longValue();
-        logCh.mbid          = String.format("%012x", logCh.numericMBID);
-        logCh.string        = registry.getStringMajor(logCh.mbid);
-        logCh.module        = registry.getStringMinor(logCh.mbid);
-        return logCh;
-    }
-
-    /**
-     * Determine whether given channel is inside [up,down] radius of this
-     * channel.
-     * @param ch test channel to compare
-     * @param up up radius
-     * @param down down radius
-     * @return true if within near neighborhood
-     */
-    boolean isNear(LogicalChannel ch, int up, int down)
-    {
-        if (string != ch.string) return false;
-        int intraStringSeparation = ch.module - module;
-        if ((intraStringSeparation < 0 && -intraStringSeparation <= up) ||
-                (intraStringSeparation > 0 && intraStringSeparation <= down) ||
-                intraStringSeparation == 0) return true;
-        return false;
-    }
-
-    @Override
-    public String toString()
-    {
-        return String.format("(%d, %d)", string, module);
-    }
-
-    public int compareTo(LogicalChannel o)
-    {
-        if (hashCode() < o.hashCode())
-            return -1;
-        else if (hashCode() > o.hashCode())
-            return 1;
-        else
-            return 0;
-    }
-
-    @Override
-    public boolean equals(Object obj)
-    {
-        return hashCode() == obj.hashCode();
-    }
-
-
-
-
 }

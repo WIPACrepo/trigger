@@ -1,173 +1,69 @@
-/*
- * class: Sorter
- *
- * Version $Id: Sorter.java 4574 2009-08-28 21:32:32Z dglo $
- *
- * Date: July 15 2005
- *
- * (c) 2005 IceCube Collaboration
- */
-
 package icecube.daq.trigger.control;
 
-import icecube.daq.payload.IReadoutRequestElement;
-import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.impl.UTCTime;
+import icecube.daq.trigger.exceptions.UnimplementedError;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
- * This class is to provide the earliest/latest UTC-timeStamp.
- *
- * @version $Id: Sorter.java 4574 2009-08-28 21:32:32Z dglo $
- * @author shseo
+ * This class provides the earliest/latest UTC-timeStamp.
  */
 public class Sorter
 {
     /**
-     * Create an instance of this class.
-     * Default constructor is declared, but private, to stop accidental
-     * creation of an instance of the class.
+     * Create a sorter object.
      */
     public Sorter()
     {
     }
 
-    //--todo: include excetion
     /**
-     * This method is to provide time-ordered list of ReadoutElements.
-     * NOTE: This method destroys the original list
+     * XXX Unimplemented
      *
-     * @param listReadoutElementsUTCTimeUnsorted
-     * @return
-     */
-    public List getReadoutElementsUTCTimeSorted(List listReadoutElementsUTCTimeUnsorted)
-    {
-        List listReadoutElementsUTCTimeSorted = new ArrayList();
-
-        IReadoutRequestElement element = null;
-        IReadoutRequestElement earliestElement = null;
-        IUTCTime earliestUTCTime = new UTCTime(Long.MAX_VALUE);
-        IUTCTime tStartUTCTime = null;
-
-        int iSizeUnsortedList = listReadoutElementsUTCTimeUnsorted.size();
-        int index = -1;
-
-        // XXX YIKES!  This needs to be changed to use Collection.sort()
-
-        if(iSizeUnsortedList > 1)
-        {
-            //boolean bStop = false;
-            //while(!bStop){
-            while(listReadoutElementsUTCTimeSorted.size() < iSizeUnsortedList-1)
-            {
-                for(int i=0; i < listReadoutElementsUTCTimeUnsorted.size(); i++)
-                {
-                    element = (IReadoutRequestElement) listReadoutElementsUTCTimeUnsorted.get(i);
-
-                    tStartUTCTime = element.getFirstTimeUTC();
-
-                    if(earliestUTCTime.compareTo(tStartUTCTime) >= 0)
-                    {
-                        earliestElement = element;
-                        //index is updated to indicate the position of the earliest UTCTime element.
-                        index = i;
-                        earliestUTCTime = tStartUTCTime;
-                    }
-
-                }
-
-                listReadoutElementsUTCTimeSorted.add(earliestElement);
-                listReadoutElementsUTCTimeUnsorted.remove(index);
-                earliestUTCTime = new UTCTime(Long.MAX_VALUE);
-
-            }
-
-            listReadoutElementsUTCTimeSorted.add(listReadoutElementsUTCTimeUnsorted.get(0));
-
-        } else
-        {
-            listReadoutElementsUTCTimeSorted = listReadoutElementsUTCTimeUnsorted;
-        }
-
-        return listReadoutElementsUTCTimeSorted;
-    }
-    /**
-     * This method is to give earliest readoutTime_start in a listReadoutElements.
+     * @param list unused
      *
-     * @param listReadoutElements
-     * @return
+     * @return UnimplementedError
      */
-    public IUTCTime getUTCTimeEarliest(List listReadoutElements)
+    public IUTCTime getUTCTimeEarliest(List list)
     {
-        return getUTCTimeEarliest(listReadoutElements, false);
-    }
-    public IUTCTime getUTCTimeEarliest(List listObjects, boolean isPayloadObjects)
-    {
-        IUTCTime UTCTime_earliest = new UTCTime(Long.MAX_VALUE);
-        IUTCTime UTCTime_start = null;
-
-        Iterator iterElements = listObjects.iterator();
-
-        while(iterElements.hasNext())
-        {
-            if(isPayloadObjects)
-            {
-                ITriggerRequestPayload tPayload = (ITriggerRequestPayload) iterElements.next();
-                UTCTime_start = tPayload.getFirstTimeUTC();
-
-            }else{//ReadoutElement
-                IReadoutRequestElement element = (IReadoutRequestElement) iterElements.next();
-                UTCTime_start = element.getFirstTimeUTC();
-            }
-
-            if(UTCTime_earliest.compareTo(UTCTime_start) > 0)
-            {
-                UTCTime_earliest = UTCTime_start;
-            }
-        }
-        return UTCTime_earliest;
-    }
-    public IUTCTime getUTCTimeLatest(List listObjects, boolean isPayloadObjects)
-    {
-        IUTCTime UTCTime_latest = new UTCTime(Long.MIN_VALUE);
-        IUTCTime UTCTime_end = null;
-
-        Iterator iterElements = listObjects.iterator();
-        while(iterElements.hasNext())
-        {
-            if(isPayloadObjects)
-            {
-                ITriggerRequestPayload tPayload = (ITriggerRequestPayload) iterElements.next();
-                UTCTime_end = tPayload.getLastTimeUTC();
-
-            }else{
-
-                IReadoutRequestElement element = (IReadoutRequestElement) iterElements.next();
-                UTCTime_end = element.getLastTimeUTC();
-            }
-
-            if(UTCTime_latest.compareTo(UTCTime_end) < 0)
-            {
-                UTCTime_latest = UTCTime_end;
-            }
-        }
-
-        return UTCTime_latest;
+        return getUTCTimeEarliest(list, false);
     }
 
     /**
-     * This method is to give latest readoutTime_start in a listReadoutElements.
+     * XXX Unimplemented
      *
-     * @param listReadoutElements
-     * @return
+     * @param list unused
+     * @param isPayloadObject unused
+     *
+     * @return UnimplementedError
      */
-    public IUTCTime getUTCTimeLatest(List listReadoutElements)
+    public IUTCTime getUTCTimeEarliest(List list, boolean isPayloadObject)
     {
-        return getUTCTimeLatest(listReadoutElements, false);
+        throw new UnimplementedError();
     }
 
+    /**
+     * XXX Unimplemented
+     *
+     * @param list unused
+     *
+     * @return UnimplementedError
+     */
+    public IUTCTime getUTCTimeLatest(List list)
+    {
+        return getUTCTimeLatest(list, false);
+    }
+
+    /**
+     * XXX Unimplemented
+     *
+     * @param list unused
+     * @param isPayloadObject unused
+     *
+     * @return UnimplementedError
+     */
+    public IUTCTime getUTCTimeLatest(List list, boolean isPayloadObject)
+    {
+        throw new UnimplementedError();
+    }
 }

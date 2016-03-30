@@ -10,10 +10,9 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
@@ -37,18 +36,26 @@ public class TrigBoardTrigger extends AbstractTrigger
     /**
      * Log object for this class
      */
-    private static final Log log = LogFactory.getLog(TrigBoardTrigger.class);
+    private static final Log LOG =
+        LogFactory.getLog(TrigBoardTrigger.class);
 
-    private static int triggerNumber = 0;
+    private static int nextTriggerNumber;
+    private int triggerNumber;
 
     private int prescale;
     private int numberProcessed = 0;
 
     private boolean configPrescale = false;
 
-    public TrigBoardTrigger() throws ConfigException {
-        triggerNumber++;
-        configHitFilter(1);
+    public TrigBoardTrigger()
+        throws IllegalParameterValueException
+    {
+        triggerNumber = ++nextTriggerNumber;
+        try {
+            configHitFilter(1);
+        } catch (ConfigException ce) {
+            throw new IllegalParameterValueException("Bad DomSet #1", ce);
+        }
     }
 
     /**
@@ -56,34 +63,39 @@ public class TrigBoardTrigger extends AbstractTrigger
      *
      * @return true if it is
      */
-    public boolean isConfigured() {
+    public boolean isConfigured()
+    {
         return configPrescale;
     }
 
     /**
-     * Add a parameter.
+     * Add a trigger parameter.
      *
-     * @param parameter TriggerParameter object.
+     * @param name parameter name
+     * @param value parameter value
      *
-     * @throws icecube.daq.trigger.exceptions.UnknownParameterException
-     *
+     * @throws UnknownParameterException if the parameter is unknown
+     * @throws IllegalParameterValueException if the parameter value is bad
      */
-    public void addParameter(TriggerParameter parameter) throws UnknownParameterException, IllegalParameterValueException {
-        if (parameter.getName().compareTo("prescale") == 0) {
-            prescale = Integer.parseInt(parameter.getValue());
+    public void addParameter(String name, String value)
+        throws UnknownParameterException, IllegalParameterValueException
+    {
+        if (name.compareTo("prescale") == 0) {
+            prescale = Integer.parseInt(value);
             configPrescale = true;
-        } else if (parameter.getName().compareTo("triggerPrescale") == 0) {
-            triggerPrescale = Integer.parseInt(parameter.getValue());
+        } else if (name.compareTo("triggerPrescale") == 0) {
+            triggerPrescale = Integer.parseInt(value);
         } else {
-            throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
+            throw new UnknownParameterException("Unknown parameter: " + name);
         }
-        super.addParameter(parameter);
+        super.addParameter(name, value);
     }
 
-    public void setTriggerName(String triggerName) {
+    public void setTriggerName(String triggerName)
+    {
         super.triggerName = triggerName + triggerNumber;
-        if (log.isInfoEnabled()) {
-            log.info("TriggerName set to " + super.triggerName);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("TriggerName set to " + super.triggerName);
         }
     }
 
@@ -95,7 +107,9 @@ public class TrigBoardTrigger extends AbstractTrigger
      * @throws icecube.daq.trigger.exceptions.TriggerException
      *          if the algorithm doesn't like this payload
      */
-    public void runTrigger(IPayload payload) throws TriggerException {
+    public void runTrigger(IPayload payload)
+        throws TriggerException
+    {
         int interfaceType = payload.getPayloadInterfaceType();
         if ((interfaceType != PayloadInterfaceRegistry.I_HIT_PAYLOAD) &&
             (interfaceType != PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)) {
@@ -105,8 +119,8 @@ public class TrigBoardTrigger extends AbstractTrigger
 
         // check hit filter
         if (!hitFilter.useHit(hit)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Hit from DOM " + hit.getDOMID() + " not in DomSet");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Hit from DOM " + hit.getDOMID() + " not in DomSet");
             }
             return;
         }
@@ -130,16 +144,39 @@ public class TrigBoardTrigger extends AbstractTrigger
     /**
      * Flush the trigger. Basically indicates that there will be no further payloads to process.
      */
-    public void flush() {
+    public void flush()
+    {
         // nothing to do here
     }
 
-    public int getPrescale() {
+    public int getPrescale()
+    {
         return prescale;
     }
 
-    public void setPrescale(int prescale) {
+    public void setPrescale(int prescale)
+    {
         this.prescale = prescale;
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "TRIG_BOARD";
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    public boolean hasValidMultiplicity()
+    {
+        return true;
+    }
 }

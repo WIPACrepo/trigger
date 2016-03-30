@@ -1,28 +1,30 @@
 package icecube.daq.trigger.config;
 
+import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.util.DOMRegistry;
 import icecube.daq.util.DeployedDOM;
-import icecube.daq.trigger.exceptions.ConfigException;
+import icecube.daq.util.JAXPUtil;
+import icecube.daq.util.JAXPUtilException;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
-
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Configuration file utility
  */
-public class DomSetFactory
+public abstract class DomSetFactory
 {
     /**
      * logging object
@@ -38,13 +40,15 @@ public class DomSetFactory
      * Trigger configuration directory
      * (usually ~pdaq/pDAQ__current/config/trigger)
      */
-    private static File TRIGGER_CONFIG_DIR;
+    private static File triggerConfigDir;
+
+    /** DOMRegistry */
+    private static DOMRegistry domRegistry;
 
     /**
-     * DOMRegistry
+     * Add all DOMs from <tt>hub</tt> within the range
+     * [<tt>low</tt>-<tt>high</tt>] to the <tt>domIds</tt> list.
      */
-    private static DOMRegistry domRegistry = null;
-
     private static void addAllDoms(List<String>domIds, int hub, int low,
                                    int high)
     {
@@ -61,6 +65,8 @@ public class DomSetFactory
      *
      * @param id DomSet ID
      *
+     * @return DOMs in the named set
+     *
      * @throws ConfigException if there is a problem
      */
     public static DomSet getDomSet(int id)
@@ -75,29 +81,59 @@ public class DomSetFactory
      * @param id DomSet ID
      * @param filename name of XML file containing DomSet definitions
      *
+     * @return DOMs in the named set
+     *
      * @throws ConfigException if there is a problem
      */
     public static DomSet getDomSet(int id, String filename)
         throws ConfigException
     {
-        if (filename == null) {
-            filename = DOMSET_DEFS_FILE;
+        if (triggerConfigDir == null) {
+            throw new ConfigException("Trigger configuration directory" +
+                                      " has not been set");
         }
 
-        Document doc = loadXMLDocument(filename);
-        List<Node> nodeList = doc.selectNodes("//domsets/domset");
-        for (Node n : nodeList) {
+        String realname;
+        if (filename == null) {
+            realname = DOMSET_DEFS_FILE;
+        } else {
+            realname = filename;
+        }
+
+        Document doc;
+        try {
+            doc = JAXPUtil.loadXMLDocument(triggerConfigDir, realname);
+        } catch (JAXPUtilException jux) {
+            throw new ConfigException(jux);
+        }
+
+        NodeList nodeList;
+        try {
+            nodeList = JAXPUtil.extractNodeList(doc, "//domsets/domset");
+        } catch (JAXPUtilException jux) {
+            throw new ConfigException(jux);
+        }
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node n = nodeList.item(i);
+
+            if (n.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+
+            Element elem = (Element) n;
+
             int dsid;
             try {
-                dsid = Integer.parseInt(n.valueOf("@id"));
+                dsid = Integer.parseInt(elem.getAttribute("id"));
             } catch (NumberFormatException nfe) {
-                LOG.error("Ignoring bad DomSet ID \"" + n.valueOf("@id") +
-                          "\"");
+                LOG.error("Ignoring bad DomSet ID \"" +
+                          elem.getAttribute("id") + "\"");
                 continue;
             }
 
             if (dsid == id) {
-                return loadDomSet(n.valueOf("@name"), n);
+                return loadDomSet(elem.getAttribute("name"), n);
             }
         }
 
@@ -105,9 +141,11 @@ public class DomSetFactory
     }
 
     /**
-     * Load the specified DomSet.
+     * Load the specified DomSet from the default DomSet file.
      *
      * @param name DomSet name
+     *
+     * @return DOMs in the named set
      *
      * @throws ConfigException if there is a problem
      */
@@ -123,6 +161,8 @@ public class DomSetFactory
      * @param name DomSet name
      * @param filename name of XML file containing DomSet definitions
      *
+     * @return DOMs in the named set
+     *
      * @throws ConfigException if there is a problem
      */
     public static DomSet getDomSet(String name, String filename)
@@ -131,14 +171,43 @@ public class DomSetFactory
         if (name == null) {
             throw new ConfigException("DomSet name cannot be null");
         }
-        if (filename == null) {
-            filename = DOMSET_DEFS_FILE;
+
+        if (triggerConfigDir == null) {
+            throw new ConfigException("Trigger configuration directory" +
+                                      " has not been set");
         }
 
-        Document doc = loadXMLDocument(filename);
-        List<Node> nodeList = doc.selectNodes("//domsets/domset");
-        for (Node n : nodeList) {
-            if (name.equals(n.valueOf("@name"))) {
+        String realname;
+        if (filename == null) {
+            realname = DOMSET_DEFS_FILE;
+        } else {
+            realname = filename;
+        }
+
+        Document doc;
+        try {
+            doc = JAXPUtil.loadXMLDocument(triggerConfigDir, realname);
+        } catch (JAXPUtilException jux) {
+            throw new ConfigException(jux);
+        }
+
+        NodeList nodeList;
+        try {
+            nodeList = JAXPUtil.extractNodeList(doc, "//domsets/domset");
+        } catch (JAXPUtilException jux) {
+            throw new ConfigException(jux);
+        }
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node n = nodeList.item(i);
+
+            if (n.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+
+            Element elem = (Element) n;
+
+            if (name.equals(elem.getAttribute("name"))) {
                 return loadDomSet(name, n);
             }
         }
@@ -159,23 +228,39 @@ public class DomSetFactory
 
         loadOuterStrings(name, domIds, topNode);
 
-        List<Node> posList = topNode.selectNodes("positions");
-        for (Node p : posList) {
+        XPath xpath = XPathFactory.newInstance().newXPath();
+
+        NodeList posList;
+        try {
+            posList = JAXPUtil.extractNodeList(xpath, topNode, "positions");
+        } catch (JAXPUtilException jux) {
+            throw new ConfigException(jux);
+        }
+
+        for (int i = 0; i < posList.getLength(); i++) {
+            Node np = posList.item(i);
+
+            if (np.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+
+            Element p = (Element) np;
+
             int low;
             try {
-                low = Integer.parseInt(p.valueOf("@low"));
+                low = Integer.parseInt(p.getAttribute("low"));
             } catch (NumberFormatException nfe) {
                 throw new ConfigException("Bad low position \"" +
-                                          p.valueOf("@low") +
+                                          p.getAttribute("low") +
                                           "\" for DomSet " + name);
             }
 
             int high;
             try {
-                high = Integer.parseInt(p.valueOf("@high"));
+                high = Integer.parseInt(p.getAttribute("high"));
             } catch (NumberFormatException nfe) {
                 throw new ConfigException("Bad high position \"" +
-                                          p.valueOf("@high") +
+                                          p.getAttribute("high") +
                                           "\" for DomSet " + name);
             }
 
@@ -186,18 +271,32 @@ public class DomSetFactory
                                           high);
             }
 
-            List<Node> strList = p.selectNodes("string");
-            for (Node s : strList) {
+            NodeList strList;
+            try {
+                strList = JAXPUtil.extractNodeList(xpath, p, "string");
+            } catch (JAXPUtilException jux) {
+                throw new ConfigException(jux);
+            }
+
+            for (int j = 0; j < strList.getLength(); j++) {
+                Node n = strList.item(j);
+
+                if (n.getNodeType() != Node.ELEMENT_NODE) {
+                    continue;
+                }
+
+                Element s = (Element) n;
+
                 int hub;
                 try {
-                    hub = Integer.parseInt(s.valueOf("@hub"));
+                    hub = Integer.parseInt(s.getAttribute("hub"));
                 } catch (NumberFormatException nfe) {
                     throw new ConfigException("Bad string hub \"" +
-                                              s.valueOf("@hub") +
+                                              s.getAttribute("hub") +
                                               "\" for DomSet " + name);
                 }
 
-                String pos = s.valueOf("@position");
+                String pos = s.getAttribute("position");
                 if (pos.length() != 0) {
                     LOG.error("DomSet " + name + " positions " + low + "-" +
                               high + ", hub " + hub + " should not include" +
@@ -207,23 +306,37 @@ public class DomSetFactory
                 addAllDoms(domIds, hub, low, high);
             }
 
-            List<Node> strsList = p.selectNodes("strings");
-            for (Node s : strsList) {
+            NodeList strsList;
+            try {
+                strsList = JAXPUtil.extractNodeList(xpath, p, "strings");
+            } catch (JAXPUtilException jux) {
+                throw new ConfigException(jux);
+            }
+
+            for (int j = 0; j < strsList.getLength(); j++) {
+                Node n = strsList.item(j);
+
+                if (n.getNodeType() != Node.ELEMENT_NODE) {
+                    continue;
+                }
+
+                Element s = (Element) n;
+
                 int lowhub;
                 try {
-                    lowhub = Integer.parseInt(s.valueOf("@lowhub"));
+                    lowhub = Integer.parseInt(s.getAttribute("lowhub"));
                 } catch (NumberFormatException nfe) {
                     throw new ConfigException("Bad strings lowhub \"" +
-                                              s.valueOf("@lowhub") +
+                                              s.getAttribute("lowhub") +
                                               "\" for DomSet " + name);
                 }
 
                 int highhub;
                 try {
-                    highhub = Integer.parseInt(s.valueOf("@highhub"));
+                    highhub = Integer.parseInt(s.getAttribute("highhub"));
                 } catch (NumberFormatException nfe) {
                     throw new ConfigException("Bad strings highhub \"" +
-                                              s.valueOf("@highhub") +
+                                              s.getAttribute("highhub") +
                                               "\" for DomSet " + name);
                 }
 
@@ -247,23 +360,37 @@ public class DomSetFactory
                                          Node topNode)
         throws ConfigException
     {
-        List<Node> list = topNode.selectNodes("string");
-        for (Node s : list) {
+        NodeList list;
+        try {
+            list = JAXPUtil.extractNodeList(topNode, "string");
+        } catch (JAXPUtilException jux) {
+            throw new ConfigException(jux);
+        }
+
+        for (int i = 0; i < list.getLength(); i++) {
+            Node n = list.item(i);
+
+            if (n.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+
+            Element s = (Element) n;
+
             int hub;
             try {
-                hub = Integer.parseInt(s.valueOf("@hub"));
+                hub = Integer.parseInt(s.getAttribute("hub"));
             } catch (NumberFormatException nfe) {
                 throw new ConfigException("Bad string hub \"" +
-                                          s.valueOf("@hub") +
+                                          s.getAttribute("hub") +
                                           "\" for DomSet " + name);
             }
 
             int pos;
             try {
-                pos = Integer.parseInt(s.valueOf("@position"));
+                pos = Integer.parseInt(s.getAttribute("position"));
             } catch (NumberFormatException nfe) {
                 throw new ConfigException("Bad string position \"" +
-                                          s.valueOf("@position") +
+                                          s.getAttribute("position") +
                                           "\" for DomSet " + name);
             }
 
@@ -271,67 +398,37 @@ public class DomSetFactory
         }
     }
 
-    private static Document loadXMLDocument(String filename)
-        throws ConfigException
-    {
-        if (TRIGGER_CONFIG_DIR == null) {
-            throw new ConfigException("Trigger configuration directory" +
-                                      " has not been set");
-        }
-
-        File defnFile = new File(TRIGGER_CONFIG_DIR, filename);
-        if (!defnFile.isFile()) {
-            throw new ConfigException("DomSet definitions file \"" +
-                                      defnFile + "\" does not exist");
-        }
-
-        // open definitions file
-        FileInputStream in;
-        try {
-            in = new FileInputStream(defnFile);
-        } catch (IOException ioe) {
-            throw new ConfigException("Cannot open DomSet definitions" +
-                                      " file \"" + defnFile + "\"", ioe);
-        }
-
-        // load definitions
-        try {
-            SAXReader rdr = new SAXReader();
-            Document doc;
-            try {
-                doc = rdr.read(in);
-            } catch (DocumentException de) {
-                throw new ConfigException("Cannot read run configuration" +
-                                          " file \"" + defnFile + "\"", de);
-            }
-
-            return doc;
-        } finally {
-            try {
-                in.close();
-            } catch (IOException ioe) {
-                // ignore errors on close
-            }
-        }
-    }
-
+    /**
+     * Set the configuration directory.
+     *
+     * @param configDir absolute path of DAQ configuration directory
+     *
+     * @throws ConfigException if there is a problem
+     */
     public static void setConfigurationDirectory(String configDir)
         throws ConfigException
     {
         if (configDir == null) {
-            TRIGGER_CONFIG_DIR = null;
+            triggerConfigDir = null;
         } else {
             File tmpDir = new File(configDir, "trigger");
             if (!tmpDir.isDirectory()) {
-                throw new ConfigException("Trigger configuration directory \"" +
-                                          tmpDir + "\" does not exist");
+                throw new ConfigException("Trigger configuration" +
+                                          " directory \"" + tmpDir +
+                                          "\" does not exist");
             }
 
-            TRIGGER_CONFIG_DIR = tmpDir;
+            triggerConfigDir = tmpDir;
         }
     }
 
-    public static void setDomRegistry(DOMRegistry dr) {
+    /**
+     * Set the DOM registry used to find all DOMs associated with a hub.
+     *
+     * @param dr DOM registry
+     */
+    public static void setDomRegistry(DOMRegistry dr)
+    {
         domRegistry = dr;
     }
 }

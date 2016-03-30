@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 13604 2012-03-29 08:06:04Z kael $
+ * Version $Id: FixedRateTrigger.java 15433 2015-02-20 20:41:21Z dglo $
  *
  * Date: May 1 2006
  *
@@ -10,11 +10,10 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.oldpayload.PayloadInterfaceRegistry;
+import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -26,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 13604 2012-03-29 08:06:04Z kael $
+ * @version $Id: FixedRateTrigger.java 15433 2015-02-20 20:41:21Z dglo $
  * @author pat
  */
 public class FixedRateTrigger extends AbstractTrigger
@@ -35,12 +34,14 @@ public class FixedRateTrigger extends AbstractTrigger
     /**
      * Log object for this class
      */
-    private static final Log log = LogFactory.getLog(FixedRateTrigger.class);
+    private static final Log LOG =
+        LogFactory.getLog(FixedRateTrigger.class);
 
     /**
      * unique id within this trigger type
      */
-    private static int triggerNumber = 0;
+    private static int nextTriggerNumber;
+    private int triggerNumber;
 
     /**
      * Time interval between triggers (in integral number of nanoseconds)
@@ -55,7 +56,7 @@ public class FixedRateTrigger extends AbstractTrigger
     /**
      * flag to indicate that trigger has been configured
      */
-    private boolean configInterval = false;
+    private boolean configInterval;
 
     /**
      * UTC time of next trigger
@@ -65,8 +66,9 @@ public class FixedRateTrigger extends AbstractTrigger
     /**
      * Default constructor
      */
-    public FixedRateTrigger() {
-        triggerNumber++;
+    public FixedRateTrigger()
+    {
+        triggerNumber = ++nextTriggerNumber;
     }
 
     /**
@@ -74,42 +76,47 @@ public class FixedRateTrigger extends AbstractTrigger
      *
      * @return true if it is
      */
-    public boolean isConfigured() {
+    public boolean isConfigured()
+    {
         return configInterval;
     }
 
     /**
-     * Add a parameter.
+     * Add a trigger parameter.
      *
-     * @param parameter TriggerParameter object.
+     * @param name parameter name
+     * @param value parameter value
      *
-     * @throws icecube.daq.trigger.exceptions.UnknownParameterException
-     *
+     * @throws UnknownParameterException if the parameter is unknown
+     * @throws IllegalParameterValueException if the parameter value is bad
      */
-    public void addParameter(TriggerParameter parameter) throws UnknownParameterException, IllegalParameterValueException {
-        if (parameter.getName().compareTo("interval") == 0) {
-            String txt = parameter.getValue().trim();
+    public void addParameter(String name, String value)
+        throws UnknownParameterException, IllegalParameterValueException
+    {
+        if (name.compareTo("interval") == 0) {
+            String txt = value.trim();
             if (txt.matches("[0-9]+"))
                 interval = Long.parseLong(txt);
             else
                 interval = (long) (Double.parseDouble(txt) * 1.0E9);
             configInterval = true;
-        } else if (parameter.getName().compareTo("triggerPrescale") == 0) {
-            triggerPrescale = Integer.parseInt(parameter.getValue());
+        } else if (name.compareTo("triggerPrescale") == 0) {
+            triggerPrescale = Integer.parseInt(value);
         } else {
-            throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
+            throw new UnknownParameterException("Unknown parameter: " + name);
         }
-        super.addParameter(parameter);
+        super.addParameter(name, value);
     }
 
     /**
      * Set name of trigger, include triggerNumber
      * @param triggerName
      */
-    public void setTriggerName(String triggerName) {
+    public void setTriggerName(String triggerName)
+    {
         super.triggerName = triggerName + triggerNumber;
-        if (log.isInfoEnabled()) {
-            log.info("TriggerName set to " + super.triggerName);
+        if (LOG.isInfoEnabled()) {
+            LOG.info("TriggerName set to " + super.triggerName);
         }
     }
 
@@ -117,7 +124,8 @@ public class FixedRateTrigger extends AbstractTrigger
      * Get interval.
      * @return time interval between triggers (in nanoseconds)
      */
-    public long getInterval() {
+    public long getInterval()
+    {
         return interval;
     }
 
@@ -125,23 +133,27 @@ public class FixedRateTrigger extends AbstractTrigger
      * Set interval.
      * @param interval time interval between triggers (in nanoseconds)
      */
-    public void setInterval(int interval) {
+    public void setInterval(int interval)
+    {
         this.interval = interval;
     }
 
     /**
      * Flush the trigger. Basically indicates that there will be no further payloads to process.
      */
-    public void flush() {
-        reset();
+    public void flush()
+    {
+        // nothing to do here
     }
 
     /**
-     * reset
+     * Reset the algorithm to its initial condition.
      */
-    private void reset() {
+    public void resetAlgorithm()
+    {
         numberOfHitsProcessed = 0;
-        configInterval = false;
+
+        super.resetAlgorithm();
     }
 
     /**
@@ -152,7 +164,9 @@ public class FixedRateTrigger extends AbstractTrigger
      * @throws icecube.daq.trigger.exceptions.TriggerException
      *          if the algorithm doesn't like this payload
      */
-    public void runTrigger(IPayload payload) throws TriggerException {
+    public void runTrigger(IPayload payload)
+        throws TriggerException
+    {
         // check that this is a hit
         int interfaceType = payload.getPayloadInterfaceType();
         if ((interfaceType != PayloadInterfaceRegistry.I_HIT_PAYLOAD) &&
@@ -178,4 +192,24 @@ public class FixedRateTrigger extends AbstractTrigger
         numberOfHitsProcessed++;
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "UNBIASED";
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    public boolean hasValidMultiplicity()
+    {
+        return false;
+    }
 }

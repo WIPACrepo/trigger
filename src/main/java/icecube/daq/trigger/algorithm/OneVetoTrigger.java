@@ -1,7 +1,7 @@
 /*
  * class: OneVetoTrigger
  *
- * Version $Id: OneVetoTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * Version $Id: OneVetoTrigger.java 15271 2014-11-19 18:46:22Z dglo $
  *
  * Date: January 25 2006
  *
@@ -11,7 +11,6 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.ITriggerRequestPayload;
-import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 
@@ -24,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class is accept all incoming triggers but to veto one configured triggers.
  *
- * @version $Id: OneVetoTrigger.java 4574 2009-08-28 21:32:32Z dglo $
+ * @version $Id: OneVetoTrigger.java 15271 2014-11-19 18:46:22Z dglo $
  * @author shseo
  */
 public class OneVetoTrigger
@@ -33,7 +32,8 @@ public class OneVetoTrigger
     /**
     * Log object for this class
     */
-    private static final Log log = LogFactory.getLog(OneVetoTrigger.class);
+    private static final Log LOG =
+        LogFactory.getLog(OneVetoTrigger.class);
 
     private int miConfiguredTriggerType_1;
     private int miConfiguredTriggerConfigId_1;
@@ -90,12 +90,13 @@ public class OneVetoTrigger
     public List getConfiguredTriggerIDs()
     {
         List listConfiguredTriggerIDs = new ArrayList();
-        listConfiguredTriggerIDs.add(new Integer(miConfiguredTrigId_1));
+        listConfiguredTriggerIDs.add(Integer.valueOf(miConfiguredTrigId_1));
 
         return listConfiguredTriggerIDs;
     }
 
-    public boolean isConfiguredTrigger(ITriggerRequestPayload tPayload) {
+    public boolean isConfiguredTrigger(ITriggerRequestPayload tPayload)
+    {
         int iTrigId = getTriggerId(tPayload);
         if(iTrigId != miUnconfiguredTrigId)
         {
@@ -104,7 +105,8 @@ public class OneVetoTrigger
          return false;
     }
 
-    public boolean isConfigured() {
+    public boolean isConfigured()
+    {
         boolean bIsConfigured = mbConfigTriggerType_1 &&
                                 mbConfigTriggerConfigId_1 &&
                                 mbConfigSourceId_1;
@@ -113,44 +115,69 @@ public class OneVetoTrigger
 
     }
     /**
-     * This method performs configuration.
+     * Add a trigger parameter.
      *
-     * @param parameter TriggerParameter object
-     * @throws icecube.daq.trigger.exceptions.UnknownParameterException
+     * @param name parameter name
+     * @param value parameter value
+     *
+     * @throws UnknownParameterException if the parameter is unknown
+     * @throws IllegalParameterValueException if the parameter value is bad
      */
-    public void addParameter(TriggerParameter parameter) throws UnknownParameterException, IllegalParameterValueException
+    public void addParameter(String name, String value)
+        throws UnknownParameterException, IllegalParameterValueException
     {
         miCurrentNumberOfConfigurationParameters++;
 
-        String paramName = parameter.getName();
-        String paramValue = parameter.getValue();
+        String paramName = name;
+        String paramValue = value;
 
-        if (paramName.compareTo("triggerType1") == 0) {
+        if (paramName.compareTo("getTriggerType()1") == 0) {
             miConfiguredTriggerType_1 = Integer.parseInt(paramValue);
-            //mlistConfiguredTriggerType.add(new Integer(Integer.parseInt(paramValue)));
+            //mlistConfiguredTriggerType.add(Integer.valueOf(Integer.parseInt(paramValue)));
             mbConfigTriggerType_1 = true;
-        } else if (paramName.compareTo("triggerConfigId1") == 0) {
+        } else if (paramName.compareTo("getTriggerConfigId()1") == 0) {
             miConfiguredTriggerConfigId_1 = Integer.parseInt(paramValue);
-            //mlistConfiguredTriggerConfigId.add(new Integer(Integer.parseInt(paramValue)));
+            //mlistConfiguredTriggerConfigId.add(Integer.valueOf(Integer.parseInt(paramValue)));
             mbConfigTriggerConfigId_1 = true;
-        } else if (paramName.compareTo("sourceId1") == 0) {
+        } else if (paramName.compareTo("getSourceId()1") == 0) {
             miConfiguredSourceId_1 = Integer.parseInt(paramValue);
-            //mlistConfiguredSourceId.add(new Integer(Integer.parseInt(paramValue)));
+            //mlistConfiguredSourceId.add(Integer.valueOf(Integer.parseInt(paramValue)));
             mbConfigSourceId_1 = true;
         } else {
             throw new UnknownParameterException("Unknown parameter: " + paramName);
         }
 
-        super.addParameter(parameter);
+        super.addParameter(name, value);
 
         if(miCurrentNumberOfConfigurationParameters == NUMBER_OF_REQUIRED_CONFIG_PARAMETERS){
             if(!isConfigured())
             {
-                log.error("OneVetoTrigger was NOT properly configured!");
+                LOG.error("OneVetoTrigger was NOT properly configured!");
             }else{
-                log.info("OneVetoTrigger was properly configured!");
+                LOG.info("OneVetoTrigger was properly configured!");
             }
         }
 
+    }
+
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "ONE_VETO";
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    public boolean hasValidMultiplicity()
+    {
+        return true;
     }
 }

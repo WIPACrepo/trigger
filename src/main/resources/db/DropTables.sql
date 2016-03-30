@@ -1,9 +1,0 @@
-DROP TABLE TriggerConfiguration;
-DROP TABLE TriggerId;
-DROP TABLE TriggerConfig;
-DROP TABLE TriggerName;
-DROP TABLE ParamConfig;
-DROP TABLE Param;
-DROP TABLE ParamValue;
-DROP TABLE ReadoutConfig;
-DROP TABLE ReadoutParameters;

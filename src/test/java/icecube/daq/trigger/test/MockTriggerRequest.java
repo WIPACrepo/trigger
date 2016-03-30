@@ -1,121 +1,126 @@
 package icecube.daq.trigger.test;
 
-import icecube.daq.oldpayload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IByteBufferCache;
-import icecube.daq.payload.ICompositePayload;
-import icecube.daq.payload.IHitPayload;
-import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.IPayloadDestination;
 import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.IWriteablePayload;
-import icecube.daq.payload.PayloadRegistry;
+import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.Spliceable;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.DataFormatException;
 
 public class MockTriggerRequest
-    extends MockPayload
     implements Comparable, ITriggerRequestPayload, Spliceable
 {
-    public static final int LENGTH = 33;
+    private static final int LENGTH = 41;
 
-    private IUTCTime firstTime;
-    private IUTCTime lastTime;
+    private int uid;
     private int type;
     private int cfgId;
-    private int uid;
-
-    private ISourceID srcId;
+    private int srcId = SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID;
+    private IUTCTime startTime;
+    private IUTCTime endTime;
     private IReadoutRequest rdoutReq;
+    private boolean recycled;
+    private boolean merged;
+    private List<IPayload> payloads;
 
-    private ArrayList payloadList = new ArrayList();
-
-    private DataFormatException getPayDFException;
-
-    public MockTriggerRequest(long firstVal, long lastVal)
+    public MockTriggerRequest(int uid, int type, int cfgId, long startVal,
+                              long endVal)
     {
-        this(firstVal, lastVal, -1, -1);
+        this(uid, SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID, type, cfgId,
+             startVal, endVal);
     }
 
-    public MockTriggerRequest(long firstVal, long lastVal, int type, int cfgId)
+    public MockTriggerRequest(int uid, int srcId, int type, int cfgId,
+                              long startVal, long endVal)
     {
-        this(firstVal, lastVal, type, cfgId, -1);
-    }
+        if (startVal > endVal) {
+            throw new Error("Starting time " + startVal +
+                            " cannot be greater than ending time " + endVal);
+        }
 
-    public MockTriggerRequest(long firstVal, long lastVal, int type, int cfgId,
-                              int srcId)
-    {
-        this(firstVal, lastVal, type, cfgId, srcId, 0);
-    }
-
-    public MockTriggerRequest(long firstVal, long lastVal, int type, int cfgId,
-                              int srcId, int uid)
-    {
-        super(firstVal);
-
-        this.firstTime = new MockUTCTime(firstVal);
-        this.lastTime = new MockUTCTime(lastVal);
+        this.uid = uid;
+        this.srcId = srcId;
         this.type = type;
         this.cfgId = cfgId;
-        this.uid = uid;
 
-        if (srcId >= 0) {
-            setSourceID(srcId);
-        }
+        startTime = new MockUTCTime(startVal);
+        endTime = new MockUTCTime(endVal);
     }
 
-    public void addPayload(IPayload payload)
+    public void addPayload(IPayload pay)
     {
-        payloadList.add(payload);
+        if (payloads == null) {
+            payloads = new ArrayList<IPayload>();
+        }
+
+        payloads.add(pay);
+    }
+
+    private static int compareTimes(IUTCTime a, IUTCTime b)
+    {
+        if (a == null) {
+            if (b == null) {
+                return 0;
+            }
+
+            return 1;
+        } else if (b == null) {
+            return -1;
+        }
+
+        return (int) (a.longValue() - b.longValue());
     }
 
     public int compareSpliceable(Spliceable spl)
     {
-        if (spl == null) {
-            return 1;
-        } else if (!(spl instanceof ICompositePayload)) {
-            return getClass().getName().compareTo(spl.getClass().getName());
+        throw new Error("Unimplemented");
+    }
+
+    public int compareTo(Object obj)
+    {
+        if (!(obj instanceof ITriggerRequestPayload)) {
+            return getClass().getName().compareTo(obj.getClass().getName());
         }
 
-        ICompositePayload comp = (ICompositePayload) spl;
-
-        int cmp = (comp.getTriggerType() - type);
-        if (cmp == 0) {
-            cmp = firstTime.compareTo(comp.getFirstTimeUTC());
-            if (cmp == 0) {
-                cmp = lastTime.compareTo(comp.getLastTimeUTC());
+        ITriggerRequestPayload req = (ITriggerRequestPayload) obj;
+        int val = uid - req.getUID();
+        if (val != 0) {
+            val = compareTimes(startTime, req.getFirstTimeUTC());
+            if (val != 0) {
+                val = compareTimes(endTime, req.getLastTimeUTC());
             }
         }
-        return cmp;
+
+        return val;
     }
 
     public Object deepCopy()
     {
-        MockTriggerRequest tr =
-            new MockTriggerRequest(firstTime.longValue(),
-                                   lastTime.longValue(), type, cfgId);
-        if (srcId != null) {
-            tr.srcId = (ISourceID) srcId.deepCopy();
-        }
+        return new MockTriggerRequest(uid, type, cfgId, startTime.longValue(),
+                                      endTime.longValue());
+    }
 
-        if (rdoutReq != null) {
-            tr.rdoutReq = new MockReadoutRequest(rdoutReq);
-        }
+    public void dispose()
+    {
+        throw new Error("Unimplemented");
+    }
 
-        return tr;
+    public boolean equals(Object obj)
+    {
+        return compareTo(obj) == 0;
     }
 
     public IUTCTime getFirstTimeUTC()
     {
-        return firstTime;
+        return startTime;
     }
 
     public List getHitList()
@@ -125,37 +130,32 @@ public class MockTriggerRequest
 
     public IUTCTime getLastTimeUTC()
     {
-        return lastTime;
-    }
-
-    public List getPayloads()
-        throws DataFormatException
-    {
-        if (getPayDFException != null) {
-            throw getPayDFException;
-        }
-
-        return payloadList;
+        return endTime;
     }
 
     public ByteBuffer getPayloadBacking()
     {
-        return null;
+        throw new Error("Unimplemented");
     }
 
     public int getPayloadInterfaceType()
     {
-        return PayloadInterfaceRegistry.I_TRIGGER_REQUEST_PAYLOAD;
+        return PayloadInterfaceRegistry.I_TRIGGER_REQUEST;
     }
 
-    public int getPayloadLength()
+    public IUTCTime getPayloadTimeUTC()
     {
-        return LENGTH;
+        return startTime;
     }
 
     public int getPayloadType()
     {
-        return PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST;
+        throw new Error("Unimplemented");
+    }
+
+    public List getPayloads()
+    {
+        return payloads;
     }
 
     public IReadoutRequest getReadoutRequest()
@@ -165,7 +165,7 @@ public class MockTriggerRequest
 
     public ISourceID getSourceID()
     {
-        return srcId;
+        return new MockSourceID(srcId);
     }
 
     public int getTriggerConfigID()
@@ -175,7 +175,7 @@ public class MockTriggerRequest
 
     public String getTriggerName()
     {
-        return "Mock";
+        throw new Error("Unimplemented");
     }
 
     public int getTriggerType()
@@ -188,14 +188,40 @@ public class MockTriggerRequest
         return uid;
     }
 
-    public void setGetPayloadsException(Exception ex)
+    public long getUTCTime()
     {
-        if (ex instanceof DataFormatException) {
-            getPayDFException = (DataFormatException) ex;
-        } else {
-            throw new Error("Unknown exception type " +
-                            ex.getClass().getName() + ": " + ex);
+        throw new Error("Unimplemented");
+    }
+
+    public int hashCode()
+    {
+        return uid + type +
+            (int) (startTime.longValue() % (long) Integer.MAX_VALUE) +
+            (int) (endTime.longValue() % (long) Integer.MAX_VALUE);
+    }
+
+    public boolean isMerged()
+    {
+        return merged;
+    }
+
+    public int length()
+    {
+        return LENGTH;
+    }
+
+    public void loadPayload()
+    {
+        // unneeded
+    }
+
+    public void recycle()
+    {
+        if (recycled) {
+            throw new Error("Payload has already been recycled");
         }
+
+        recycled = true;
     }
 
     public void setCache(IByteBufferCache cache)
@@ -203,45 +229,44 @@ public class MockTriggerRequest
         throw new Error("Unimplemented");
     }
 
-    public void setReadoutRequest(IReadoutRequest rdoutReq)
+    public void setMerged()
     {
-        this.rdoutReq = rdoutReq;
+        merged = true;
     }
 
-    public void setSourceID(int srcVal)
+    public void setReadoutRequest(IReadoutRequest rReq)
     {
-        this.srcId = new MockSourceID(srcVal);
+        rdoutReq = rReq;
     }
 
-    public int writePayload(boolean writeLoaded, IPayloadDestination dest)
+    /**
+     * Set the universal ID for global requests which will become events.
+     *
+     * @param uid new UID
+     */
+    public void setUID(int uid)
+    {
+        this.uid = uid;
+    }
+
+    public int writePayload(boolean b0, int i1, ByteBuffer x2)
         throws IOException
     {
-        throw new Error("Unimplemented");
-    }
-
-    public int writePayload(boolean writeLoaded, int offset, ByteBuffer buf)
-        throws IOException
-    {
-        if (writeLoaded) {
-            throw new Error("Cannot write loaded payload");
-        } else if (offset != 0) {
-            throw new Error("Unexpected non-zero offset is " + offset);
-        } else if (buf.limit() < offset + LENGTH) {
-            throw new Error("Expected " + (offset + LENGTH) +
-                            "-byte buffer, not " + buf.limit());
-        }
-
-        for (char ch = 1; ch < LENGTH; ch++) {
-            buf.putChar(offset + (int) ch - 1, (char) ch);
-        }
-
+        // do nothing
         return LENGTH;
     }
 
     public String toString()
     {
-        return "MockTriggerRequest:type#" + type + ",cfg#" + cfgId +
-            ",srcId#" + srcId + ",uid#" + uid + "[" + firstTime + "," +
-            lastTime + "]";
+        final int plen;
+        if (payloads == null) {
+            plen = 0;
+        } else {
+            plen = payloads.size();
+        }
+
+        return String.format("MockTrigReq[%d typ %d cfg %d [%d-%d] pay %d]",
+                             uid, type, cfgId, startTime.longValue(),
+                             endTime.longValue(), plen);
     }
 }

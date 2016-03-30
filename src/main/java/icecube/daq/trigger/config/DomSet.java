@@ -5,21 +5,23 @@ import icecube.daq.payload.IDOMID;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.apache.log4j.Logger;
+
 /**
  * Created by IntelliJ IDEA.
  * User: pat
  * Date: Sep 13, 2006
  * Time: 10:43:45 AM
  *
- *
- * This class is a container of domId's used to filter hits in the triggers.
- * The object is created with a name (like 'Inice doms') and a list of mainboard
- * id's (must be lowercase hex string). Then one can check that a given IDOMID is
- * or isn't contained in the set.
+ * This class is a container of DOM IDs used to filter hits in the triggers.
+ * The object is created with a name (like 'Inice doms') and a list of
+ * mainboard IDs (must be lowercase hex string). Then one can check that a
+ * given DOM ID is or isn't contained in the set.
  *
  */
 public class DomSet
 {
+    private static final Logger LOG = Logger.getLogger(DomSet.class);
 
     /**
      * Name of this DomSet
@@ -29,17 +31,48 @@ public class DomSet
     /**
      * List of doms in this DomSet
      */
-    private final HashSet<String> set;
+    private final HashSet<Long> set;
 
     /**
      * Constructor, takes the name of the set and the list of domid's
      * @param name name of domset
      * @param set list of domIds, must be lowercase hex
      */
-    public DomSet(String name, Collection<String> set) {
+    public DomSet(String name, Collection<String> set)
+    {
         this.name = name;
-        this.set = new HashSet<String>(7500);
-        this.set.addAll(set);
+        this.set = new HashSet<Long>(7500);
+        for (String idstr : set) {
+            long domid;
+            try {
+                domid = Long.parseLong(idstr, 16);
+            } catch (NumberFormatException nfe) {
+                LOG.error("Cannot convert \"" + idstr + "\" to long value");
+                continue;
+            }
+
+            this.set.add(domid);
+        }
+    }
+
+    /**
+     * Compare this DomSet with another object.
+     *
+     * @param other object being compared
+     *
+     * @return <tt>true</tt> if both sets contain the same DOM IDs
+     */
+    public boolean equals(Object other)
+    {
+        if (other == null) {
+            return false;
+        }
+
+        if (!(other instanceof DomSet)) {
+            return getClass().equals(other.getClass());
+        }
+
+        return equals((DomSet) other);
     }
 
     /**
@@ -59,8 +92,19 @@ public class DomSet
      * Get the name of this DomSet
      * @return name
      */
-    public String getName() {
+    public String getName()
+    {
         return name;
+    }
+
+    /**
+     * Get the hash code.
+     *
+     * @return hash code
+     */
+    public int hashCode()
+    {
+        return name.hashCode() + set.hashCode();
     }
 
     /**
@@ -68,11 +112,20 @@ public class DomSet
      * @param dom IDOMID to check
      * @return true if dom is in set, false otherwise
      */
-    public boolean inSet(IDOMID dom) {
-        String domId = dom.toString().toLowerCase();
-        return set.contains(domId);
+    public boolean inSet(IDOMID dom)
+    {
+        if (dom == null) {
+            return false;
+        }
+
+        return set.contains(dom.longValue());
     }
 
+    /**
+     * Return a debugging string.
+     *
+     * @return debugging string
+     */
     public String toString()
     {
         return name + "*" + set.size();

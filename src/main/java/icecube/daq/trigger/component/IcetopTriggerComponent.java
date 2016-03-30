@@ -4,18 +4,26 @@ import icecube.daq.common.DAQCmdInterface;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQCompServer;
 
+/**
+ * Trigger handler for evaluating icetop hits.
+ */
 public class IcetopTriggerComponent
     extends TriggerComponent
 {
-
-    private static final String COMPONENT_NAME = DAQCmdInterface.DAQ_ICETOP_TRIGGER;
-    private static final int COMPONENT_ID = 0;
-
-    public IcetopTriggerComponent() {
-        super(COMPONENT_NAME, COMPONENT_ID);
+    /**
+     * Create an icetop hit trigger handler.
+     *
+     * @throws DAQCompException if component cannot be created
+     */
+    public IcetopTriggerComponent()
+        throws DAQCompException
+    {
+        super(DAQCmdInterface.DAQ_ICETOP_TRIGGER, 0);
     }
 
-    public static void main(String[] args) throws DAQCompException {
+    public static void main(String[] args)
+        throws DAQCompException
+    {
         DAQCompServer srvr;
         try {
             srvr = new DAQCompServer(new IcetopTriggerComponent(), args);
@@ -26,5 +34,4 @@ public class IcetopTriggerComponent
         }
         srvr.startServing();
     }
-
 }

@@ -1,15 +1,19 @@
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.oldpayload.impl.MasterPayloadFactory;
-import icecube.daq.oldpayload.impl.TriggerRequestPayloadFactory;
+import icecube.daq.payload.impl.PayloadFactory;
 import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
+import icecube.daq.splicer.Spliceable;
+import icecube.daq.splicer.SpliceableComparator;
+import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
+import icecube.daq.trigger.config.DomSetFactory;
+import icecube.daq.trigger.control.SNDAQAlerter;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.ComponentObserver;
@@ -44,6 +48,9 @@ public class CylinderTriggerTest
     private static final MockSourceID srcId =
         new MockSourceID(SourceIdRegistry.INICE_TRIGGER_SOURCE_ID);
 
+    private static final Spliceable LAST_SPLICEABLE =
+        SpliceableFactory.LAST_POSSIBLE_SPLICEABLE;
+
     public CylinderTriggerTest(String name)
     {
         super(name);
@@ -66,16 +73,6 @@ public class CylinderTriggerTest
         appender.clear();
     }
 
-    private static TriggerRequestPayloadFactory
-        getTriggerRequestFactory(MasterPayloadFactory factory)
-    {
-        final int payloadId =
-            PayloadRegistry.PAYLOAD_ID_TRIGGER_REQUEST;
-
-        return (TriggerRequestPayloadFactory)
-            factory.getPayloadFactory(payloadId);
-    }
-
     protected void setUp()
         throws Exception
     {
@@ -85,6 +82,9 @@ public class CylinderTriggerTest
 
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
+
+        // initialize SNDAQ ZMQ address to nonsense
+        System.getProperties().setProperty(SNDAQAlerter.PROPERTY, ":12345");
     }
 
     public static Test suite()
@@ -95,6 +95,9 @@ public class CylinderTriggerTest
     protected void tearDown()
         throws Exception
     {
+        // remove SNDAQ ZMQ address
+        System.clearProperty(SNDAQAlerter.PROPERTY);
+
         assertEquals("Bad number of log messages",
                      0, appender.getNumberOfMessages());
 
@@ -110,10 +113,10 @@ public class CylinderTriggerTest
         // set up in-ice trigger
         VitreousBufferCache cache = new VitreousBufferCache("IITrig");
 
-        MasterPayloadFactory factory = new MasterPayloadFactory(cache);
+        PayloadFactory factory = new PayloadFactory(cache);
 
         TriggerManager trigMgr =
-            new TriggerManager(srcId, getTriggerRequestFactory(factory));
+            new TriggerManager(srcId, cache);
 
         String configDir =
             getClass().getResource("/config/").getPath();
@@ -124,6 +127,8 @@ public class CylinderTriggerTest
             configDir = configDir.substring(0, breakPt) + "test-" +
                 configDir.substring(breakPt);
         }
+
+        DomSetFactory.setConfigurationDirectory(configDir);
 
         try {
             trigMgr.setDOMRegistry(DOMRegistry.loadRegistry(configDir));
@@ -139,10 +144,14 @@ public class CylinderTriggerTest
         outProc.setOutputChannel(new MockOutputChannel());
         outProc.setValidator(trigCfg.getInIceValidator());
 
-        trigMgr.setPayloadOutput(outProc);
+        trigMgr.setOutputEngine(outProc);
 
-        HKN1Splicer splicer = new HKN1Splicer(trigMgr);
+        SpliceableComparator splCmp =
+            new SpliceableComparator(LAST_SPLICEABLE);
+        HKN1Splicer<Spliceable> splicer =
+            new HKN1Splicer<Spliceable>(trigMgr, splCmp, LAST_SPLICEABLE);
         trigMgr.setSplicer(splicer);
+        trigMgr.setRunNumber(1);
 
         ComponentObserver observer = new ComponentObserver();
 
@@ -176,6 +185,18 @@ public class CylinderTriggerTest
         trigCfg.sendInIceStops(tails);
 
         waitUntilStopped(rdr, splicer, "StopMsg");
+
+        // wait for all collection threads to stop
+        for (int i = 0; i < REPS && !trigMgr.isStopped(); i++) {
+            try {
+                Thread.sleep(SLEEP_TIME);
+            } catch (InterruptedException ie) {
+                // ignore interrupts
+            }
+        }
+
+        assertTrue("Collection thread(s) not stopped: " + trigMgr,
+                   trigMgr.isStopped());
 
         assertEquals("Bad number of payloads written",
                      trigCfg.getExpectedNumberOfInIcePayloads(numObjs),
@@ -224,7 +245,8 @@ public class CylinderTriggerTest
                                                String extra)
     {
         for (int i = 0; i < REPS &&
-                 (!proc.isStopped() || splicer.getState() != Splicer.STOPPED);
+                 (!proc.isStopped() ||
+                  splicer.getState() != Splicer.State.STOPPED);
              i++)
         {
             try {
@@ -236,9 +258,9 @@ public class CylinderTriggerTest
 
         assertTrue("IOProcess in " + proc.getPresentState() +
                    ", not Idle after " + action + extra, proc.isStopped());
-        assertTrue("Splicer in " + splicer.getStateString() +
+        assertTrue("Splicer in " + splicer.getState().name() +
                    ", not STOPPED after " + action + extra,
-                   splicer.getState() == Splicer.STOPPED);
+                   splicer.getState() == Splicer.State.STOPPED);
     }
 
     public static void main(String[] args)

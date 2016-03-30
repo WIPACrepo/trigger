@@ -2,7 +2,6 @@ package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
-import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -28,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 public class SlowMPTrigger extends AbstractTrigger
 {
 
-    private static final Log log = LogFactory.getLog(SlowMPTrigger.class);
+    private static final Log LOG = LogFactory.getLog(SlowMPTrigger.class);
     private long t_proximity; // t_proximity in nanoseconds, eliminates most muon_hlcs
     private long t_min;
     private long t_max;
@@ -65,17 +64,17 @@ public class SlowMPTrigger extends AbstractTrigger
             hit  = new_hit;
 
             utc_time = hit.getHitTimeUTC().longValue();
-            mb_id = hit.getDOMID().toString();
+            mb_id = hit.getDOMID().longValue();
         }
 
         private IHitPayload hit;
 
-        private String mb_id;
+        private long mb_id;
         private long utc_time;
 
         private DeployedDOM dom;
 
-        public String get_mb_id()
+        public long get_mb_id()
         {
             return mb_id;
         }
@@ -196,118 +195,132 @@ public class SlowMPTrigger extends AbstractTrigger
 
     }
 
+    /**
+     * Add a trigger parameter.
+     *
+     * @param name parameter name
+     * @param value parameter value
+     *
+     * @throws UnknownParameterException if the parameter is unknown
+     * @throws IllegalParameterValueException if the parameter value is bad
+     */
     @Override
-    public void addParameter(TriggerParameter parameter) throws UnknownParameterException,
-               IllegalParameterValueException
+    public void addParameter(String name, String value)
+        throws UnknownParameterException, IllegalParameterValueException
                {
-                   if (parameter.getName().equals("t_proximity"))
+                   if (name.equals("t_proximity"))
 		   {
-                       if(Long.parseLong(parameter.getValue())>=0)
+                       if(Long.parseLong(value)>=0)
 		       {
-                           set_t_proximity(Long.parseLong(parameter.getValue()));
+                           set_t_proximity(Long.parseLong(value));
                            t_proximity_configured = true;
                        }
                        else
 		       {
-                          throw new IllegalParameterValueException("Illegal t_proximity value: " + Long.parseLong(parameter.getValue()));
+                          throw new IllegalParameterValueException("Illegal t_proximity value: " + Long.parseLong(value));
                        }
 		   }
-                   else if (parameter.getName().equals("t_min"))
+                   else if (name.equals("t_min"))
 		   {
-                       if(Long.parseLong(parameter.getValue())>=0)
+                       if(Long.parseLong(value)>=0)
 		       {
-                           set_t_min(Long.parseLong(parameter.getValue()));
+                           set_t_min(Long.parseLong(value));
                            t_min_configured = true;
                        }
                        else
 		       {
-                          throw new IllegalParameterValueException("Illegal t_min value: " + Long.parseLong(parameter.getValue()));
+                          throw new IllegalParameterValueException("Illegal t_min value: " + Long.parseLong(value));
                        }
 		   }
-                   else if (parameter.getName().equals("t_max"))
+                   else if (name.equals("t_max"))
 		   {
-                       if(Long.parseLong(parameter.getValue())>=0)
+                       if(Long.parseLong(value)>=0)
 		       {
-                           set_t_max(Long.parseLong(parameter.getValue()));
+                           set_t_max(Long.parseLong(value));
                            t_max_configured = true;
                        }
 		       else
                        {
-                          throw new IllegalParameterValueException("Illegal t_max value: " + Long.parseLong(parameter.getValue()));
+                          throw new IllegalParameterValueException("Illegal t_max value: " + Long.parseLong(value));
                        }
 		   }
 
-                   else if (parameter.getName().equals("dc_algo"))
-		   {
-                           set_dc_algo(Boolean.parseBoolean(parameter.getValue()));
+                   else if (name.equals("dc_algo"))
+                  {
+                           set_dc_algo(Boolean.parseBoolean(value));
                            dc_algo_configured = true;
-		   }
-                   else if (parameter.getName().equals("delta_d"))
+                  }
+                   else if (name.equals("delta_d"))
 		   {
-                       if(Integer.parseInt(parameter.getValue())>=0)
+                       if(Integer.parseInt(value)>=0)
 		       {
-                           set_delta_d(Integer.parseInt(parameter.getValue()));
+                           set_delta_d(Integer.parseInt(value));
                            delta_d_configured = true;
                        }
                        else
 		       {
-                          throw new IllegalParameterValueException("Illegal delta_d value: " + Integer.parseInt(parameter.getValue()));
+                          throw new IllegalParameterValueException("Illegal delta_d value: " + Integer.parseInt(value));
                        }
 		   }
-                   else if (parameter.getName().equals("alpha_min"))
-		   {
-                       if( (Double.parseDouble(parameter.getValue())>=10) && (Double.parseDouble(parameter.getValue())<=180) )  // forbid values below 10 to make sure alpha_min is configured in degree
-		       {
-                           set_alpha_min(Double.parseDouble(parameter.getValue()));
-			   cos_alpha_min = Math.cos((Math.PI/180)*alpha_min); // cos_alpha_min is the cos of alpha_min not the min of cos_alpha
+                   else if (name.equals("alpha_min"))
+                   {
+                       if( (Double.parseDouble(value)>=10) && (Double.parseDouble(value)<=180) )  // forbid values below 10 to make sure alpha_min is configured in degree
+                       {
+                           set_alpha_min(Double.parseDouble(value));
+                          cos_alpha_min = Math.cos((Math.PI/180)*alpha_min); // cos_alpha_min is the cos of alpha_min not the min of cos_alpha
                            alpha_min_configured = true;
                        }
                        else
-		       {
-                          throw new IllegalParameterValueException("Illegal alpha_min value: " + Double.parseDouble(parameter.getValue()));
+                       {
+                          throw new IllegalParameterValueException("Illegal alpha_min value: " + Double.parseDouble(value));
                        }
-		   }
-                   else if (parameter.getName().equals("rel_v"))
+                   }
+                   else if (name.equals("rel_v"))
 		   {
-                       if(Double.parseDouble(parameter.getValue())>=0)
+                       if(Double.parseDouble(value)>=0)
 		       {
-                           set_rel_v(Double.parseDouble(parameter.getValue()));
+                           set_rel_v(Double.parseDouble(value));
                            rel_v_configured = true;
                        }
                        else
 		       {
-                          throw new IllegalParameterValueException("Illegal rel_v value: " + Double.parseDouble(parameter.getValue()));
+                          throw new IllegalParameterValueException("Illegal rel_v value: " + Double.parseDouble(value));
                        }
 		   }
-                   else if (parameter.getName().equals("min_n_tuples"))
+                   else if (name.equals("min_n_tuples"))
 		   {
-                       if(Integer.parseInt(parameter.getValue())>=0)
+                       if(Integer.parseInt(value)>=0)
 		       {
-                           set_min_n_tuples(Integer.parseInt(parameter.getValue()));
+                           set_min_n_tuples(Integer.parseInt(value));
                            min_n_tuples_configured = true;
                        }
                        else
 		       {
-                          throw new IllegalParameterValueException("Illegal min_n_tuples value: " + Integer.parseInt(parameter.getValue()));
+                          throw new IllegalParameterValueException("Illegal min_n_tuples value: " + Integer.parseInt(value));
                        }
 		   }
-                   else if (parameter.getName().equals("max_event_length"))
+                   else if (name.equals("max_event_length"))
 		   {
-                       if(Long.parseLong(parameter.getValue())>=0)
+                       if(Long.parseLong(value)>=0)
 		       {
-                           set_max_event_length(Long.parseLong(parameter.getValue()));
+                           set_max_event_length(Long.parseLong(value));
                            max_event_length_configured = true;
                        }
                        else
 		       {
-                          throw new IllegalParameterValueException("Illegal max_event_length value: " + Long.parseLong(parameter.getValue()));
+                          throw new IllegalParameterValueException("Illegal max_event_length value: " + Long.parseLong(value));
                        }
 		   }
-                   else if (parameter.getName().equals("domSet"))
+                   else if (name.equals("domSet"))
 		   {
-                       int domSetId = Integer.parseInt(parameter.getValue());
-                       if(domSetId>=0)
+                       int domSetId = Integer.parseInt(value);
+                       if(domSetId<0)
 		       {
+                               throw new IllegalParameterValueException("Bad DomSet #" +
+                                                                        domSetId);
+                       }
+                       else
+                       {
                            try {
                                configHitFilter(domSetId);
                            } catch (ConfigException ce) {
@@ -318,10 +331,10 @@ public class SlowMPTrigger extends AbstractTrigger
 		   }
 		   else
 		   {
-		      throw new UnknownParameterException("Unknown parameter: " + parameter.getName());
+		      throw new UnknownParameterException("Unknown parameter: " + name);
 
 		   }
-                   super.addParameter(parameter);
+                   super.addParameter(name, value);
                }
     // t_proximity
 
@@ -437,7 +450,7 @@ public class SlowMPTrigger extends AbstractTrigger
         one_hit_list.clear();
         two_hit_list.clear();
 
-        log.info("FLUSHHH!!!");
+        LOG.info("FLUSHHH!!!");
 
         muon_time_window = -1;
     }
@@ -462,185 +475,165 @@ public class SlowMPTrigger extends AbstractTrigger
                                        );
         // This upcast should be safe now
         IHitPayload hitPayload = (IHitPayload) payload;
-        //log.warn("HITTIME: " + hitPayload.getHitTimeUTC() + "PAYLOADTIME: " + hitPayload.getPayloadTimeUTC());
-        // Check hit type and perhaps pre-screen DOMs based on channel (HitFilter)
-        if (getHitType(hitPayload) != AbstractTrigger.SPE_HIT) return;
-        if (!hitFilter.useHit(hitPayload)) return;
+        //LOG.warn("HITTIME: " + hitPayload.getHitTimeUTC() + "PAYLOADTIME: " + hitPayload.getPayloadTimeUTC());
+        // Check hit type and perhaps pre-screen DOMs based on channel
+        boolean usableHit =
+            getHitType(hitPayload) == AbstractTrigger.SPE_HIT &&
+            hitFilter.useHit(hitPayload);
 
         //if (domRegistry == null) {
         //    domRegistry = getTriggerHandler().getDOMRegistry();
         //}
 
-        if(one_hit_list.size() == 0) // size is 0, so just add it to the list
+        min_hit_info new_hit = new min_hit_info(hitPayload);
+
+        if(usableHit && one_hit_list.size() == 0) // size is 0, so just add it to the list
         {
-            min_hit_info new_hit = new min_hit_info(hitPayload);
-            //int string_nr = new_hit.get_dom().getStringMajor();
-            //int om_nr = new_hit.get_dom().getStringMinor();
-            // log.warn("FIRST HIT IN LIST: time " +new_hit.get_time() + " string: " + string_nr + " om: " + om_nr);
             one_hit_list.add(new_hit);
+            return;
         }
-        else // not zero, so compare payload with current one_hit_list if any hlc pair can be formed
+
+        // remove this next line again
+
+
+        //int string_nr = new_hit.get_dom().getStringMajor();
+        //int om_nr = new_hit.get_dom().getStringMinor();
+        //LOG.warn("LATER HIT IN LIST: time " +new_hit.get_time() + " string: " + string_nr + " om: " + om_nr + "diff: " + (new_hit.get_time()-one_hit_list.getFirst().get_time()));
+        //System.out.format("list contains %d entries..%n TWOHIT_list contains %d entries..%n", one_hit_list.size(), two_hit_list.size() );
+        while(one_hit_list.size() > 0 &&
+              new_hit.get_time() - one_hit_list.element().get_time() > 10000L)
+            // makes no sense to compare HLC hits that are longer apart than 1000 nanoseconds, so remove first from list
         {
+            //  LOG.warn("remove first hit from onehitlist because time diff > 10000, actually:" +( new_hit.get_time()-one_hit_list.element().get_time()));
+            //System.out.format("REMOVED FIRST ELEMENT !");
+            one_hit_list.removeFirst();
+        }
 
-            min_hit_info new_hit = new min_hit_info(hitPayload);
-
-            // remove this next line again
-
-
-            //int string_nr = new_hit.get_dom().getStringMajor();
-            //int om_nr = new_hit.get_dom().getStringMinor();
-            //log.warn("LATER HIT IN LIST: time " +new_hit.get_time() + " string: " + string_nr + " om: " + om_nr + "diff: " + (new_hit.get_time()-one_hit_list.getFirst().get_time()));
-            //System.out.format("list contains %d entries..%n TWOHIT_list contains %d entries..%n", one_hit_list.size(), two_hit_list.size() );
-            while( new_hit.get_time() - one_hit_list.element().get_time() > 10000L)
-                // makes no sense to compare HLC hits that are longer apart than 1000 nanoseconds, so remove first from list
+        if (!usableHit)
+        {
+            if (one_hit_list.size() == 0 && two_hit_list.size() == 0)
             {
-                //  log.warn("remove first hit from onehitlist because time diff > 10000, actually:" +( new_hit.get_time()-one_hit_list.element().get_time()));
-                //System.out.format("REMOVED FIRST ELEMENT !");
-                one_hit_list.removeFirst();
-
-                if(one_hit_list.size() == 0)
-                {
-                    break;
-                }
+                setEarliestPayloadOfInterest(hitPayload);
             }
 
-            //log.warn("ONEHITLIST: " + one_hit_list.size() + " newwest " +  new_hit.get_time());
+            return;
+        }
 
-            //ListIterator iter = one_hit_list.listIterator(); added the following
-            // lines, make use of toArray instead of iterator for some speed
-            ///one_hit_list.add(new_hit);
-            min_hit_info[] one_hit_array = one_hit_list.toArray(new min_hit_info[0]);
-            int initial_size = one_hit_list.size();
-            int no_of_removed_elems = 0;
+        //LOG.warn("ONEHITLIST: " + one_hit_list.size() + " newwest " +  new_hit.get_time());
 
-            //while(iter.hasNext())
-            for(int i = 0; i < initial_size; i++)
+        //ListIterator iter = one_hit_list.listIterator(); added the following
+        // lines, make use of toArray instead of iterator for some speed
+        ///one_hit_list.add(new_hit);
+        min_hit_info[] one_hit_array = one_hit_list.toArray(new min_hit_info[0]);
+        int initial_size = one_hit_list.size();
+        int no_of_removed_elems = 0;
+
+        //while(iter.hasNext())
+        for(int i = 0; i < initial_size; i++)
+        {
+            //System.out.format("muon_time_window: %d", muon_time_window);
+            min_hit_info check_payload = HLCPairCheck(one_hit_array[i], new_hit);
+            //check_payload = one_hit_array[i];
+
+            if(check_payload == null)
             {
-                //System.out.format("muon_time_window: %d", muon_time_window);
-                min_hit_info check_payload = HLCPairCheck(one_hit_array[i], new_hit);
-                //check_payload = one_hit_array[i];
-
-                if(check_payload != null)
-                {
-                    if(two_hit_list.size() == 0)        // the pair list is empty
-                    {
-                        if(muon_time_window == -1)
-                        {
-                            two_hit_list.add(check_payload);
-                            // set earliest payload of interest ?=!
-                            //log.info("Adding two_hit entry -> muon == -1");
-                            setEarliestPayloadOfInterest(check_payload.get_hit());
-                        }
-                        else
-                        {
-                            if(check_payload.get_time() - muon_time_window <= t_proximity)
-                            {
-                                muon_time_window = check_payload.get_time();
-                            }
-                            else
-                            {
-                                two_hit_list.add(check_payload);
-                                //log.info("Adding two_hit entry -> muon time window was set.. is now unset..");
-                                muon_time_window = -1;
-                                setEarliestPayloadOfInterest(check_payload.get_hit());
-                                // set earliest payload of interest ?=!
-                            }
-                        }
-                    }
-                    else // the pair list is not empty
-                    {
-                        if(muon_time_window == -1)
-                        {
-                            if(check_payload.get_time() - two_hit_list.getLast().get_time() <= t_proximity)
-                            {
-                                muon_time_window = check_payload.get_time();
-                                //log.info("removing last hit of two_hit_list..., while muon == -1");
-                                two_hit_list.removeLast();
-                            }
-                            else
-                            {
-                                if((check_payload.get_time()-two_hit_list.getLast().get_time() < t_max)
-                                   && (check_payload.get_time() - two_hit_list.getFirst().get_time() <
-                                       max_event_length))
-                                {
-                                    two_hit_list.add(check_payload);
-                                    //log.info("adding twohitlist... below time differences..");
-                                }
-                                else
-                                {
-                                    CheckTriggerStatus(); // checks current two_hit_list for 3-tuples
-                                    //log.info("Adding twohitlist... after chewcking trigger status");
-                                    two_hit_list.add(check_payload);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if(check_payload.get_time() - muon_time_window <= t_proximity)
-                            {
-                                muon_time_window = check_payload.get_time();
-                            }
-                            else
-                            {
-                                muon_time_window = -1;
-                                if((check_payload.get_time()- two_hit_list.getLast().get_time() < t_max)
-                                   && (check_payload.get_time() - two_hit_list.getFirst().get_time() <
-                                       max_event_length))
-                                {
-                                    two_hit_list.add(check_payload); // checks current two_hit_list for 3-tupleseckTriggerStatus(); // checks current two_hit_list for 3-tuples
-                                    //log.info("Adding twohitlist... below time differences............");
-                                }
-                                else
-                                {
-                                    CheckTriggerStatus();
-                                    //log.info("ADding twohitlist... after checking trigger status");
-                                    two_hit_list.add(check_payload);
-                                }
-                            }
-                        }
-                    }
-
-                    one_hit_list.remove(i-no_of_removed_elems);
-                    ++no_of_removed_elems;
-
-                    //iter.remove();
-                }
-                else
-                {
-                    //log.info("NULL:::::");
-                    //System.out.format("NULLLLLLL");
-                }
-                // with the remaining Payloads in the linked list
-            }
-
-            one_hit_list.add(new_hit); // at the end add the current hitPayload for further comparisons
-            if(two_hit_list.size() > 0)
-            {
-                if(one_hit_list.getFirst().get_time() - two_hit_list.getLast().get_time() > t_max) // definetely cannot prdouce a trigger, set earliest palyoad
-                {
-                    //log.warn("TMAX WAS ALREADY REACHED::------------" + "t1 " + one_hit_list.getFirst().get_time() + " t2 " + two_hit_list.getLast().get_time());
-                    CheckTriggerStatus();
-
-
-                }
+                //LOG.info("NULL:::::");
+                //System.out.format("NULLLLLLL");
             }
             else
             {
-                setEarliestPayloadOfInterest(one_hit_list.getFirst().get_hit());
+                if(two_hit_list.size() == 0)        // the pair list is empty
+                {
+                    if(muon_time_window == -1)
+                    {
+                        two_hit_list.add(check_payload);
+                        // set earliest payload of interest ?=!
+                        //LOG.info("Adding two_hit entry -> muon == -1");
+                        setEarliestPayloadOfInterest(check_payload.get_hit());
+                    }
+                    else
+                    {
+                        if(check_payload.get_time() - muon_time_window <= t_proximity)
+                        {
+                            muon_time_window = check_payload.get_time();
+                        }
+                        else
+                        {
+                            two_hit_list.add(check_payload);
+                            //LOG.info("Adding two_hit entry -> muon time window was set.. is now unset..");
+                            muon_time_window = -1;
+                            setEarliestPayloadOfInterest(check_payload.get_hit());
+                            // set earliest payload of interest ?=!
+                        }
+                    }
+                }
+                else // the pair list is not empty
+                {
+                    if(muon_time_window == -1)
+                    {
+                        if(check_payload.get_time() - two_hit_list.getLast().get_time() <= t_proximity)
+                        {
+                            muon_time_window = check_payload.get_time();
+                            //LOG.info("removing last hit of two_hit_list..., while muon == -1");
+                            two_hit_list.removeLast();
+                        }
+                        else
+                        {
+                            if((check_payload.get_time()-two_hit_list.getLast().get_time() >= t_max)
+                               || (check_payload.get_time() - two_hit_list.getFirst().get_time() >=
+                                   max_event_length))
+                            {
+                                CheckTriggerStatus(); // checks current two_hit_list for 3-tuples
+                            }
+
+                            two_hit_list.add(check_payload);
+                        }
+                    }
+                    else
+                    {
+                        if(check_payload.get_time() - muon_time_window <= t_proximity)
+                        {
+                            muon_time_window = check_payload.get_time();
+                        }
+                        else
+                        {
+                            muon_time_window = -1;
+                            if((check_payload.get_time()- two_hit_list.getLast().get_time() >= t_max)
+                               || (check_payload.get_time() - two_hit_list.getFirst().get_time() >=
+                                   max_event_length))
+                            {
+                                CheckTriggerStatus();
+                            }
+
+                            two_hit_list.add(check_payload);
+                        }
+                    }
+                }
+
+                one_hit_list.remove(i-no_of_removed_elems);
+                ++no_of_removed_elems;
+
+                //iter.remove();
             }
-
+            // with the remaining Payloads in the linked list
         }
-        //    System.out.format("muon_time_window: %d", muon_time_window);
-        //   log.warn("list contains " + one_hit_list.size() +  " entries..");
-        //   log.warn(" TWOHIT_list contains " + two_hit_list.size() + "entries..");
 
-
+        one_hit_list.add(new_hit); // at the end add the current hitPayload for further comparisons
+        if(two_hit_list.size() == 0)
+        {
+            setEarliestPayloadOfInterest(one_hit_list.getFirst().get_hit());
+        }
+        else if(one_hit_list.getFirst().get_time() - two_hit_list.getLast().get_time() > t_max) // definetely cannot prdouce a trigger, set earliest palyoad
+        {
+            //LOG.warn("TMAX WAS ALREADY REACHED::------------" + "t1 " + one_hit_list.getFirst().get_time() + " t2 " + two_hit_list.getLast().get_time());
+            CheckTriggerStatus();
+        }
     }
 
     private void CheckTriggerStatus()
     {
         int list_size = two_hit_list.size();
-        //log.info("CHECKING TRIGGER STATUS because of timing: 2hitsize " + list_size);
+        //LOG.info("CHECKING TRIGGER STATUS because of timing: 2hitsize " + list_size);
         if(list_size >= 3)
         {
             min_hit_info[] q = two_hit_list.toArray(new min_hit_info[0]);
@@ -678,7 +671,7 @@ public class SlowMPTrigger extends AbstractTrigger
             if(info.get_num_tuples() >= min_n_tuples)
             {
                 //System.out.format("FOUND TRIGGER: start: %d, end :%d with %d tuples%n",info.get_first_hit().get_time(), info.get_last_hit().get_time(), info.get_num_tuples() );
-                //log.warn("FOUND TRIGGER: length: " + (info.get_last_hit().getHitTimeUTC().longValue()-info.get_first_hit().getHitTimeUTC().longValue()) + " with " + info.get_num_tuples());
+                //LOG.warn("FOUND TRIGGER: length: " + (info.get_last_hit().getHitTimeUTC().longValue()-info.get_first_hit().getHitTimeUTC().longValue()) + " with " + info.get_num_tuples());
                 // form trigger here for each trigger_info
                 formTrigger(info.get_hit_list(), null, null);
 
@@ -701,7 +694,7 @@ public class SlowMPTrigger extends AbstractTrigger
     {
         long t_diff1 = hit2.get_time() - hit1.get_time();
         long t_diff2 = hit3.get_time() - hit2.get_time();
-        //log.warn("CHECKING TRIPLE t_diff1 " + t_diff1 + " / t_diff2 " + t_diff2);
+        //LOG.warn("CHECKING TRIPLE t_diff1 " + t_diff1 + " / t_diff2 " + t_diff2);
         if((t_diff1 > t_min) && (t_diff2 > t_min) && (t_diff1 < t_max) && (t_diff2 < t_max))
         {
             long t_diff3 = hit3.get_time() - hit1.get_time();
@@ -714,24 +707,24 @@ public class SlowMPTrigger extends AbstractTrigger
             double p_diff2 = domRegistry.distanceBetweenDOMs(hit2.get_mb_id(), hit3.get_mb_id());
             double p_diff3 = domRegistry.distanceBetweenDOMs(hit1.get_mb_id(), hit3.get_mb_id());
             double cos_alpha = 1.0;
-            //log.warn("    ->step2 - p_diff1: " + p_diff1 + " p_diff2: " + p_diff2 + " pdiff3: " + p_diff3);
+            //LOG.warn("    ->step2 - p_diff1: " + p_diff1 + " p_diff2: " + p_diff2 + " pdiff3: " + p_diff3);
 
             if ( !( (p_diff1 > 0) && (p_diff2 > 0) && (p_diff3 > 0) ))
             {
-               //log.warn("exiting check triple because p_diff1: " +  p_diff1 + " p_diff2: " + p_diff2 +  " p_diff3:" + p_diff3);
+               //LOG.warn("exiting check triple because p_diff1: " +  p_diff1 + " p_diff2: " + p_diff2 +  " p_diff3:" + p_diff3);
                return;
             }
 
             if (!dc_algo)
-	    {
+           {
                 cos_alpha =  ( Math.pow(p_diff1,2) + Math.pow(p_diff2,2) - Math.pow(p_diff3,2)) / ( 2*p_diff1*p_diff2 );
                 //double alpha = (180/Math.PI)*Math.acos(cos_alpha);
-                //log.warn("    ->step2 - p_diff1: " + p_diff1 + " p_diff2: " + p_diff2 + " pdiff3: " + p_diff3 );
-                //log.warn("cos_alpha: " + cos_alpha + " alpha: " + alpha + " cos_alpha_min: " + cos_alpha_min + " alpha_min: " + alpha_min );
+                //LOG.warn("    ->step2 - p_diff1: " + p_diff1 + " p_diff2: " + p_diff2 + " pdiff3: " + p_diff3 );
+                //LOG.warn("cos_alpha: " + cos_alpha + " alpha: " + alpha + " cos_alpha_min: " + cos_alpha_min + " alpha_min: " + alpha_min );
             }
             //else
             //{
-            //    log.warn("    ->step2 - p_diff1: " + p_diff1 + " p_diff2: " + p_diff2 + " pdiff3: " + p_diff3 + " delta_d: " + delta_d );
+            //    LOG.warn("    ->step2 - p_diff1: " + p_diff1 + " p_diff2: " + p_diff2 + " pdiff3: " + p_diff3 + " delta_d: " + delta_d );
             //}
             if(   ( (dc_algo) && (p_diff1 + p_diff2 - p_diff3 <= delta_d) )   ||   ( (!dc_algo) && (cos_alpha <= cos_alpha_min) )   )
             {
@@ -742,7 +735,7 @@ public class SlowMPTrigger extends AbstractTrigger
                 double inv_v_mean = (inv_v1+inv_v2+inv_v3)/3.0;
 
                 //System.out.print(Math.abs(inv_v2-inv_v1)/inv_v_mean);
-                //  log.warn("        ->step3 - inv_v_mean " + Math.abs(inv_v2-inv_v1)/inv_v_mean);
+                //  LOG.warn("        ->step3 - inv_v_mean " + Math.abs(inv_v2-inv_v1)/inv_v_mean);
                 if(Math.abs(inv_v2-inv_v1)/inv_v_mean <= rel_v)
                 {
                     // Found Triple
@@ -805,11 +798,13 @@ public class SlowMPTrigger extends AbstractTrigger
 
         DeployedDOM dom1 = hit1.get_dom();
         if (dom1 == null) {
-            throw new Error("Cannot find " + hit1.get_mb_id());
+            throw new Error(String.format("Cannot find %012x",
+                                          hit1.get_mb_id()));
         }
         DeployedDOM dom2 = hit2.get_dom();
         if (dom2 == null) {
-            throw new Error("Cannot find " + hit2.get_mb_id());
+            throw new Error(String.format("Cannot find %012x",
+                                          hit1.get_mb_id()));
         }
 
         int string_nr1 = dom1.getStringMajor();
@@ -823,14 +818,34 @@ public class SlowMPTrigger extends AbstractTrigger
             if( Math.abs(om_nr1 - om_nr2) <= 2)
             {
                 //System.out.format("FOUND PAIR!!! | OM %d - %d / STRING %d%n", om_nr1, om_nr2, string_nr1);
-                //log.info("FOUND PAIR   -> oms: " + om_nr1 + " " + om_nr2 + " strings: " + string_nr1 + " " + string_nr2 + " timediff: " + (hit2.get_time()-hit1.get_time()) + " time1: " + hit1.get_time() + " time2: " + hit2.get_time());
+                //LOG.info("FOUND PAIR   -> oms: " + om_nr1 + " " + om_nr2 + " strings: " + string_nr1 + " " + string_nr2 + " timediff: " + (hit2.get_time()-hit1.get_time()) + " time1: " + hit1.get_time() + " time2: " + hit2.get_time());
                 return hit1;
 
             }
-            //log.info("NULL-> oms: " + om_nr1 + " " + om_nr2 + " strings: " + string_nr1 + " " + string_nr2);
+            //LOG.info("NULL-> oms: " + om_nr1 + " " + om_nr2 + " strings: " + string_nr1 + " " + string_nr2);
         }
 
         return null;
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    public String getMonitoringName()
+    {
+        return "SLOW_PARTICLE";
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    public boolean hasValidMultiplicity()
+    {
+        return false;
+    }
 }

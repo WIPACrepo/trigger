@@ -1,7 +1,7 @@
 /*
  * class: TriggerReadout
  *
- * Version $Id: TriggerReadout.java 12879 2011-04-14 16:47:37Z dglo $
+ * Version $Id: TriggerReadout.java 14467 2013-05-03 16:18:13Z dglo $
  *
  * Date: November 23 2005
  *
@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class represents a trigger readout.
  *
- * @version $Id: TriggerReadout.java 12879 2011-04-14 16:47:37Z dglo $
+ * @version $Id: TriggerReadout.java 14467 2013-05-03 16:18:13Z dglo $
  * @author pat
  */
 public class TriggerReadout
@@ -27,12 +27,13 @@ public class TriggerReadout
     /**
      * Log object for this class.
      */
-    private static final Log log = LogFactory.getLog(TriggerReadout.class);
+    private static final Log LOG = LogFactory.getLog(TriggerReadout.class);
 
     /**
      * Default readout type.
      */
-    private static final int DEFAULT_READOUT_TYPE = IReadoutRequestElement.READOUT_TYPE_GLOBAL;
+    public static final int DEFAULT_READOUT_TYPE =
+        IReadoutRequestElement.READOUT_TYPE_GLOBAL;
 
     /**
      * String value of readout type.
@@ -45,7 +46,8 @@ public class TriggerReadout
     private static final String IT_MODULE   = "IT_MODULE";
 
     /**
-     * Type of readout (see {@link icecube.daq.payload.IReadoutRequestElement IReadoutRequestElement}).
+     * Type of readout (see {@link icecube.daq.payload.IReadoutRequestElement
+     * IReadoutRequestElement}).
      */
     private int type;
 
@@ -69,7 +71,8 @@ public class TriggerReadout
     /**
      * Default constructor.
      */
-    public TriggerReadout() {
+    public TriggerReadout()
+    {
         this(DEFAULT_READOUT_TYPE, 0, 0, 0);
     }
 
@@ -80,119 +83,21 @@ public class TriggerReadout
      * @param minus time extenstion into past
      * @param plus time extenstion into future
      */
-    public TriggerReadout(int type, int offset, int minus, int plus) {
+    public TriggerReadout(int type, int offset, int minus, int plus)
+    {
         this.type = checkType(type);
         this.offset = offset;
         if (minus < 0) {
-            log.warn("Readout time minus should be non-negative");
+            LOG.warn("Readout time minus should be non-negative");
             this.minus = -minus;
         } else {
             this.minus = minus;
         }
         if (plus < 0) {
-            log.warn("Readout time plus should be non-negative");
+            LOG.warn("Readout time plus should be non-negative");
             this.plus = -plus;
         } else {
             this.plus = plus;
-        }
-    }
-
-    /**
-     * Get readout type.
-     * @return type
-     */
-    public int getType() {
-        return type;
-    }
-
-    /**
-     * Set readout type.
-     * Type is checked against known readout types and is set to DEFAULT_READOUT_TYPE if unknown.
-     * @param type type
-     */
-    public void setType(int type) {
-        this.type = checkType(type);
-    }
-
-    /**
-     * Get readout offset.
-     * @return offset in nanoseconds
-     */
-    public int getOffset() {
-        return offset;
-    }
-
-    /**
-     * Set readout offset.
-     * @param offset offset in nanoseconds
-     */
-    public void setOffset(int offset) {
-        this.offset = offset;
-    }
-
-    /**
-     * Get readout time minus.
-     * @return time minus in nanoseconds
-     */
-    public int getMinus() {
-        return minus;
-    }
-
-    /**
-     * Set readout time minus. This should be a non-negative value.
-     * @param minus time minus in nanoseconds
-     */
-    public void setMinus(int minus) {
-        if (minus < 0) {
-            log.warn("Readout time minus should be non-negative");
-            this.minus = -minus;
-        } else {
-            this.minus = minus;
-        }
-    }
-
-    /**
-     * Get readout time plus.
-     * @return time plus in nanoseconds
-     */
-    public int getPlus() {
-        return plus;
-    }
-
-    /**
-     * Set readout time plus. This should be a non-negative value.
-     * @param plus time plus in nanoseconds
-     */
-    public void setPlus(int plus) {
-        if (plus < 0) {
-            log.warn("Readout time plus should be non-negative");
-            this.plus = -plus;
-        } else {
-            this.plus = plus;
-        }
-    }
-
-    /**
-     * Get readout type as a string.
-     * @return string value
-     */
-    public String getTypeAsString() {
-        switch (type) {
-            case IReadoutRequestElement.READOUT_TYPE_GLOBAL :
-                return IIIT_GLOBAL;
-            case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL :
-                return II_GLOBAL;
-            case IReadoutRequestElement.READOUT_TYPE_II_STRING :
-                return II_STRING;
-            case IReadoutRequestElement.READOUT_TYPE_II_MODULE :
-                return II_MODULE;
-            case IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL :
-                return IT_GLOBAL;
-            case IReadoutRequestElement.READOUT_TYPE_IT_MODULE :
-                return IT_MODULE;
-            default :
-                log.error("Unknown readout type");
-                return null;
         }
     }
 
@@ -201,28 +106,33 @@ public class TriggerReadout
      * @param type type to check
      * @return input type or DEFAULT_READOUT_TYPE if input is unknown
      */
-    private int checkType(int type) {
+    private int checkType(int type)
+    {
         switch (type) {
-            case IReadoutRequestElement.READOUT_TYPE_GLOBAL :
-            case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL :
-            case IReadoutRequestElement.READOUT_TYPE_II_STRING :
-            case IReadoutRequestElement.READOUT_TYPE_II_MODULE :
-            case IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL :
-            case IReadoutRequestElement.READOUT_TYPE_IT_MODULE :
-                return type;
-            default :
-                log.warn("Unknown readout type " + type);
-                return DEFAULT_READOUT_TYPE;
+        case IReadoutRequestElement.READOUT_TYPE_GLOBAL :
+        case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL :
+        case IReadoutRequestElement.READOUT_TYPE_II_STRING :
+        case IReadoutRequestElement.READOUT_TYPE_II_MODULE :
+        case IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL :
+        case IReadoutRequestElement.READOUT_TYPE_IT_MODULE :
+            return type;
+        default :
+            LOG.warn("Unknown readout type " + type);
+            return DEFAULT_READOUT_TYPE;
         }
     }
 
     /**
-     * Calculates the maximum extentent of the readout into the past.
-     * @param readout TriggerReadout to use
-     * @return maximum reach into past, in nanoseconds
+     * Compare this object against <tt>object</tt>
+     *
+     * @param object object being checked
+     *
+     * @return <tt>true</tt> if the objects are equal
      */
-    public static int getMaxReadoutPast(TriggerReadout readout) {
-        return (readout.getOffset() - readout.getMinus());
+    public boolean equals(Object object)
+    {
+        return object != null && (object instanceof TriggerReadout) &&
+            object.hashCode() == hashCode();
     }
 
     /**
@@ -230,32 +140,147 @@ public class TriggerReadout
      * @param readout TriggerReadout to use
      * @return maximum reach into future, in nanoseconds
      */
-    public static int getMaxReadoutFuture(TriggerReadout readout) {
+    public static int getMaxReadoutFuture(TriggerReadout readout)
+    {
         return (readout.getOffset() + readout.getPlus());
+    }
+
+    /**
+     * Calculates the maximum extentent of the readout into the past.
+     * @param readout TriggerReadout to use
+     * @return maximum reach into past, in nanoseconds
+     */
+    public static int getMaxReadoutPast(TriggerReadout readout)
+    {
+        return (readout.getOffset() - readout.getMinus());
+    }
+
+    /**
+     * Get readout time minus.
+     * @return time minus in nanoseconds
+     */
+    public int getMinus()
+    {
+        return minus;
+    }
+
+    /**
+     * Get readout offset.
+     * @return offset in nanoseconds
+     */
+    public int getOffset()
+    {
+        return offset;
+    }
+
+    /**
+     * Get readout time plus.
+     * @return time plus in nanoseconds
+     */
+    public int getPlus()
+    {
+        return plus;
+    }
+
+    /**
+     * Get readout type.
+     * @return type
+     */
+    public int getType()
+    {
+        return type;
+    }
+
+    /**
+     * Get readout type as a string.
+     * @return string value
+     */
+    public String getTypeAsString()
+    {
+        switch (type) {
+        case IReadoutRequestElement.READOUT_TYPE_GLOBAL :
+            return IIIT_GLOBAL;
+        case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL :
+            return II_GLOBAL;
+        case IReadoutRequestElement.READOUT_TYPE_II_STRING :
+            return II_STRING;
+        case IReadoutRequestElement.READOUT_TYPE_II_MODULE :
+            return II_MODULE;
+        case IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL :
+            return IT_GLOBAL;
+        case IReadoutRequestElement.READOUT_TYPE_IT_MODULE :
+            return IT_MODULE;
+        default :
+            LOG.error("Unknown readout type");
+            return null;
+        }
+    }
+
+    /**
+     * Hashcode for this readout.
+     *
+     * @return hash code
+     */
+    public int hashCode()
+    {
+        return toString().hashCode();
+    }
+
+    /**
+     * Set readout time minus. This should be a non-negative value.
+     * @param minus time minus in nanoseconds
+     */
+    public void setMinus(int minus)
+    {
+        if (minus < 0) {
+            LOG.warn("Readout time minus should be non-negative");
+            this.minus = -minus;
+        } else {
+            this.minus = minus;
+        }
+    }
+
+    /**
+     * Set readout offset.
+     * @param offset offset in nanoseconds
+     */
+    public void setOffset(int offset)
+    {
+        this.offset = offset;
+    }
+
+    /**
+     * Set readout time plus. This should be a non-negative value.
+     * @param plus time plus in nanoseconds
+     */
+    public void setPlus(int plus)
+    {
+        if (plus < 0) {
+            LOG.warn("Readout time plus should be non-negative");
+            this.plus = -plus;
+        } else {
+            this.plus = plus;
+        }
+    }
+
+    /**
+     * Set readout type.
+     * Type is checked against known readout types and is set to
+     * DEFAULT_READOUT_TYPE if unknown.
+     * @param type type
+     */
+    public void setType(int type)
+    {
+        this.type = checkType(type);
     }
 
     /**
      * Print out the readout as a string.
      * @return string dump of readout
      */
-    public String toString() {
-        return (getTypeAsString() + " : " + offset + " - " + minus + " + " + plus);
+    public String toString()
+    {
+        return getTypeAsString() + " : " + offset + " - " + minus + " + " +
+            plus;
     }
-
-    public int hashCode() {
-        return toString().hashCode();
-    }
-
-    public boolean equals(Object object) {
-        if (object == null) {
-            return false;
-        } else if (!(object instanceof TriggerReadout)) {
-            return false;
-        } else if (object.hashCode() != hashCode()) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
 }

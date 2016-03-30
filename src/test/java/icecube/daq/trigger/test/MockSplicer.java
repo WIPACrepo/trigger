@@ -1,131 +1,28 @@
 package icecube.daq.trigger.test;
 
-import icecube.daq.splicer.ClosedStrandException;
 import icecube.daq.splicer.OrderingException;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.SplicedAnalysis;
 import icecube.daq.splicer.Splicer;
-import icecube.daq.splicer.SplicerChangedEvent;
-import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.SplicerListener;
 import icecube.daq.splicer.StrandTail;
 
 import java.io.IOException;
 import java.nio.channels.SelectableChannel;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 public class MockSplicer
-    implements Splicer
+    implements Splicer<Spliceable>
 {
-    private static final Log LOG = LogFactory.getLog(MockSplicer.class);
-
-    private int state = STOPPED;
-
-    private SplicedAnalysis analysis;
-    private ArrayList<SplicerListener> listeners =
-        new ArrayList<SplicerListener>();
-    private ArrayList<MockStrandTail> strands = new ArrayList<MockStrandTail>();
-
-    private ArrayList<Spliceable> rope = new ArrayList<Spliceable>();
-    private int ropeDec = 0;
-
-    private int nextTailNum = 0;
-
-    class MockStrandTail
-        implements StrandTail
-    {
-        private MockSplicer splicer;
-        private int tailState = STARTED;
-        private int tailNum = nextTailNum++;
-
-        public MockStrandTail(MockSplicer splicer)
-        {
-            this.splicer = splicer;
-        }
-
-        public void close()
-        {
-            throw new Error("Unimplemented");
-        }
-
-        public Spliceable head()
-        {
-            throw new Error("Unimplemented");
-        }
-
-        public boolean isClosed()
-        {
-            throw new Error("Unimplemented");
-        }
-
-        public StrandTail push(List spliceables)
-            throws OrderingException, ClosedStrandException
-        {
-            throw new Error("Unimplemented");
-        }
-
-        public synchronized StrandTail push(Spliceable spliceable)
-            throws OrderingException, ClosedStrandException
-        {
-            if (state == Splicer.STOPPED) {
-                start(spliceable);
-            }
-
-            if (tailState == Splicer.STOPPING) {
-                LOG.error("Attempt to push on top of LAST_POSSIBLE_SPLICEABLE");
-            } else if (spliceable == Splicer.LAST_POSSIBLE_SPLICEABLE) {
-                tailState = STOPPING;
-                tailStateChanged();
-            } else {
-                addSpliceable(spliceable);
-            }
-
-            return this;
-        }
-
-        public int size()
-        {
-            return 0;
-        }
-
-        public String toString()
-        {
-            return "MockStrand#" + tailNum;
-        }
-    }
-
-    public MockSplicer(SplicedAnalysis analysis)
-    {
-        this.analysis = analysis;
-    }
-
-    public void addSpliceableChannel(SelectableChannel selChan)
+    public void addSpliceableChannel(SelectableChannel x0)
         throws IOException
     {
         throw new Error("Unimplemented");
     }
 
-    private void addSpliceable(Spliceable spl)
+    public void addSplicerListener(SplicerListener x0)
     {
-        synchronized (rope) {
-            rope.add(spl);
-            if (rope.size() > 5 &&
-                (state == Splicer.STARTED || state == Splicer.STOPPING))
-            {
-                int oldDec = ropeDec;
-                ropeDec = 0;
-                analysis.execute(rope, oldDec);
-            }
-        }
-    }
-
-    public void addSplicerListener(SplicerListener listener)
-    {
-        listeners.add(listener);
+        // do nothing
     }
 
     public void analyze()
@@ -135,9 +32,7 @@ public class MockSplicer
 
     public StrandTail beginStrand()
     {
-        MockStrandTail strand = new MockStrandTail(this);
-        strands.add(strand);
-        return strand;
+        throw new Error("Unimplemented");
     }
 
     public void dispose()
@@ -152,43 +47,12 @@ public class MockSplicer
 
     public SplicedAnalysis getAnalysis()
     {
-        return analysis;
+        throw new Error("Unimplemented");
     }
 
-    public int getState()
+    public State getState()
     {
-        return state;
-    }
-
-    public String getStateString()
-    {
-        return getStateString(state);
-    }
-
-    public String getStateString(int i0)
-    {
-        String str;
-        switch (state) {
-        case FAILED:
-            str = "FAILED";
-            break;
-        case STOPPED:
-            str = "STOPPED";
-            break;
-        case STARTING:
-            str = "STARTING";
-            break;
-        case STARTED:
-            str = "STARTED";
-            break;
-        case DISPOSED:
-            str = "DISPOSED";
-            break;
-        default:
-            str = "UNKNOWN";
-            break;
-        }
-        return str;
+        throw new Error("Unimplemented");
     }
 
     public int getStrandCount()
@@ -206,122 +70,34 @@ public class MockSplicer
         throw new Error("Unimplemented");
     }
 
-    public void removeSpliceableChannel(SelectableChannel selChan)
+    public void removeSpliceableChannel(SelectableChannel x0)
     {
         throw new Error("Unimplemented");
     }
 
-    public void removeSplicerListener(SplicerListener listener)
+    public void removeSplicerListener(SplicerListener x0)
     {
         throw new Error("Unimplemented");
     }
 
     public void start()
     {
+        throw new Error("Unimplemented");
     }
 
-    public synchronized void start(Spliceable spliceable)
-    {
-        if (state == STARTED) {
-            return;
-        }
-
-        ArrayList empty = new ArrayList();
-
-        if (listeners.size() > 0) {
-            SplicerChangedEvent evt =
-                new SplicerChangedEvent(this, STARTING, spliceable, empty);
-            for (SplicerListener l : listeners) {
-                l.starting(evt);
-            }
-        }
-
-        state = STARTED;
-
-        if (listeners.size() > 0) {
-            SplicerChangedEvent evt =
-                new SplicerChangedEvent(this, STARTED, spliceable, empty);
-            for (SplicerListener l : listeners) {
-                l.started(evt);
-            }
-        }
-    }
-
-    public void stop()
-    {
-        for (MockStrandTail strand : strands) {
-            if (strand.tailState != STOPPING) {
-                try {
-                    strand.push(LAST_POSSIBLE_SPLICEABLE);
-                } catch (SplicerException sex) {
-                    LOG.error("Couldn't push last spliceable", sex);
-                }
-            }
-        }
-    }
-
-    public void stop(Spliceable spliceable)
-        throws OrderingException
+    public void start(Spliceable x0)
     {
         throw new Error("Unimplemented");
     }
 
-    private void tailStateChanged()
+    public void stop()
     {
-        boolean allStopped = true;
-        for (MockStrandTail strand : strands) {
-            if (strand.tailState != STOPPING) {
-                allStopped = false;
-                break;
-            }
-        }
-
-        if (allStopped) {
-            ArrayList empty = new ArrayList();
-
-            if (listeners.size() > 0) {
-                SplicerChangedEvent evt =
-                    new SplicerChangedEvent(this, STOPPING,
-                                            LAST_POSSIBLE_SPLICEABLE, empty);
-                for (SplicerListener l : listeners) {
-                    l.stopping(evt);
-                }
-            }
-
-            analysis.execute(rope, ropeDec);
-            truncate(LAST_POSSIBLE_SPLICEABLE);
-            state = STOPPED;
-
-            if (listeners.size() > 0) {
-                SplicerChangedEvent evt =
-                    new SplicerChangedEvent(this, STOPPED,
-                                            LAST_POSSIBLE_SPLICEABLE, empty);
-                for (SplicerListener l : listeners) {
-                    l.stopped(evt);
-                }
-            }
-        }
+        throw new Error("Unimplemented");
     }
 
-    public void truncate(Spliceable spliceable)
+    public void stop(Spliceable x0)
+        throws OrderingException
     {
-        ArrayList<Spliceable> cutRope = new ArrayList<Spliceable>();
-
-        synchronized (rope) {
-            int truncIdx = -1;
-
-            while (rope.size() > 0 &&
-                   rope.get(0).compareSpliceable(spliceable) <= 0)
-            {
-                Spliceable cutSpl = rope.remove(0);
-                cutRope.add(cutSpl);
-            }
-            ropeDec += cutRope.size();
-        }
-
-        for (SplicerListener listener : listeners) {
-            listener.truncated(new SplicerChangedEvent(this, state, spliceable,
-                                                       cutRope));
-        }
+        throw new Error("Unimplemented");
     }
 }

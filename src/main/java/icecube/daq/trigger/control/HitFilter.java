@@ -93,4 +93,12 @@ public class HitFilter
         return domSet.inSet(hit.getDOMID());
     }
 
+    /**
+     * Debugging string
+     * @return debugging string
+     */
+    public String toString()
+    {
+        return "HitFilter[" + domSet + "]";
+    }
 }

@@ -15,7 +15,7 @@ public class DomSetTest
     {
         final String name = "foo";
 
-        DomSet ds = new DomSet(name, new ArrayList<String>());
+        DomSet ds = new DomSet(name, new ArrayList<Long>());
         assertEquals("Bad name", name, ds.getName());
         assertEquals("Bad string", name + "*0", ds.toString());
         assertFalse("Null DOM should not be in empty set", ds.inSet(null));
@@ -29,11 +29,11 @@ public class DomSetTest
         final String name = "foo";
 
         ArrayList<IDOMID> doms = new ArrayList<IDOMID>();
-        ArrayList<String> ids = new ArrayList<String>();
+        ArrayList<Long> ids = new ArrayList<Long>();
         for (int i = 100; i < 200; i += 10) {
             IDOMID dom = new MockDOMID(i);
             doms.add(dom);
-            ids.add(dom.toString().toLowerCase());
+            ids.add(Long.valueOf((long) i));
         }
 
         DomSet ds = new DomSet(name, ids);
@@ -50,7 +50,7 @@ public class DomSetTest
         assertFalse("Compare with string should not succeed",
                     ds.equals("foo"));
         assertFalse("Compare with empty DomSet should not succeed",
-                    ds.equals(new DomSet("xxx", new ArrayList<String>())));
+                    ds.equals(new DomSet("xxx", new ArrayList<Long>())));
         assertTrue("Compare with self should succeed", ds.equals(ds));
     }
 }

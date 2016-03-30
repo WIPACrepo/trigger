@@ -1,7 +1,7 @@
 package icecube.daq.trigger.config;
 
 import icecube.daq.trigger.exceptions.ConfigException;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.IDOMRegistry;
 import icecube.daq.util.DeployedDOM;
 import icecube.daq.util.JAXPUtil;
 import icecube.daq.util.JAXPUtilException;
@@ -9,6 +9,7 @@ import icecube.daq.util.JAXPUtilException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
@@ -27,14 +28,14 @@ import org.w3c.dom.NodeList;
 public abstract class DomSetFactory
 {
     /**
+     * Name of the DomSet definitions file
+     */
+    public static final String DOMSET_DEFS_FILE = "domset-definitions.xml";
+
+    /**
      * logging object
      */
     private static final Log LOG = LogFactory.getLog(DomSetFactory.class);
-
-    /**
-     * Name of the DomSet definitions file
-     */
-    private static final String DOMSET_DEFS_FILE = "domset-definitions.xml";
 
     /**
      * Trigger configuration directory
@@ -43,19 +44,19 @@ public abstract class DomSetFactory
     private static File triggerConfigDir;
 
     /** DOMRegistry */
-    private static DOMRegistry domRegistry;
+    private static IDOMRegistry domRegistry;
 
     /**
      * Add all DOMs from <tt>hub</tt> within the range
      * [<tt>low</tt>-<tt>high</tt>] to the <tt>domIds</tt> list.
      */
-    private static void addAllDoms(List<String>domIds, int hub, int low,
+    private static void addAllDoms(List<Long> domIds, int hub, int low,
                                    int high)
     {
         for (DeployedDOM dom : domRegistry.getDomsOnHub(hub)) {
             int pos = dom.getStringMinor();
             if (pos >= low && pos <= high) {
-                domIds.add(dom.getMainboardId());
+                domIds.add(dom.getNumericMainboardId());
             }
         }
     }
@@ -224,7 +225,9 @@ public abstract class DomSetFactory
             return null;
         }
 
-        ArrayList<String> domIds = new ArrayList<String>();
+        ArrayList<Long> domIds = new ArrayList<Long>();
+
+        loadSets(name, domIds, topNode);
 
         loadOuterStrings(name, domIds, topNode);
 
@@ -356,7 +359,7 @@ public abstract class DomSetFactory
         return new DomSet(name, domIds);
     }
 
-    private static void loadOuterStrings(String name, List<String> domIds,
+    private static void loadOuterStrings(String name, List<Long> domIds,
                                          Node topNode)
         throws ConfigException
     {
@@ -374,28 +377,191 @@ public abstract class DomSetFactory
                 continue;
             }
 
-            Element s = (Element) n;
+            Element elem = (Element) n;
 
             int hub;
             try {
-                hub = Integer.parseInt(s.getAttribute("hub"));
+                hub = Integer.parseInt(elem.getAttribute("hub"));
             } catch (NumberFormatException nfe) {
                 throw new ConfigException("Bad string hub \"" +
-                                          s.getAttribute("hub") +
+                                          elem.getAttribute("hub") +
                                           "\" for DomSet " + name);
             }
 
             int pos;
             try {
-                pos = Integer.parseInt(s.getAttribute("position"));
+                pos = Integer.parseInt(elem.getAttribute("position"));
             } catch (NumberFormatException nfe) {
                 throw new ConfigException("Bad string position \"" +
-                                          s.getAttribute("position") +
+                                          elem.getAttribute("position") +
                                           "\" for DomSet " + name);
             }
 
             addAllDoms(domIds, hub, pos, pos);
         }
+    }
+
+    private static void loadSets(String name, List<Long> domIds, Node topNode)
+        throws ConfigException
+    {
+        NodeList list;
+        try {
+            list = JAXPUtil.extractNodeList(topNode, "set");
+        } catch (JAXPUtilException jux) {
+            throw new ConfigException(jux);
+        }
+
+        for (int i = 0; i < list.getLength(); i++) {
+            Node n = list.item(i);
+
+            if (n.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+
+            Element elem = (Element) n;
+
+            List<Integer> positions = parseAlternatives(name, elem,
+                                                        "position");
+            if (positions == null) {
+                throw new ConfigException("DomSet " + name + " contains a" +
+                                          " <string> which is missing" +
+                                          " a \"position\" attribute");
+            }
+
+            List<Integer> hubs = parseAlternatives(name, elem, "hub");
+            List<Integer> strings = parseAlternatives(name, elem, "string");
+            if (hubs == null && strings == null) {
+                throw new ConfigException("DomSet " + name + " contains a" +
+                                          " <string> which is missing" +
+                                          " either a \"hub\" or \"string\"" +
+                                          " attribute");
+            } else if (hubs != null && strings != null) {
+                throw new ConfigException("DomSet " + name + " contains a" +
+                                          " <string> with both \"hub\" and" +
+                                          " \"string\" attributes");
+            }
+
+            // at this point either 'hubs' or 'strings' is non-null
+
+            final List<Integer> values;
+            final boolean getHubs;
+            if (hubs != null) {
+                values = hubs;
+                getHubs = true;
+            } else {
+                values = strings;
+                getHubs = false;
+            }
+
+            // loop through a list of either hubIds or string numbers
+            for (Integer num : values) {
+                // get the list of DOMs on this hub/string
+                Set<DeployedDOM> doms;
+                if (getHubs) {
+                    doms = domRegistry.getDomsOnHub(num);
+                } else {
+                    doms = domRegistry.getDomsOnString(num);
+                }
+
+                // add DOMs from the 'doms' list at the specified positions
+                for (Integer pos : positions) {
+                    for (DeployedDOM dom : doms) {
+                        if (dom.getStringMinor() == pos) {
+                            domIds.add(dom.getNumericMainboardId());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Extract all integers from the singular and plural forms of an attribute
+     * (e.g. both <tt>"hub"</tt> and <tt>"hubs"</tt>)
+     * @param name DomSet name
+     * @param elem element which may contain the attributes
+     * @param attr attribute name
+     * @return Either <tt>null</tt> if no values were found, or a list of
+     *         all values in both the singular and plural attributes
+     */
+    private static List<Integer> parseAlternatives(String name, Element elem,
+                                                   String attr)
+        throws ConfigException
+    {
+        List<Integer> values = null;
+        if (elem.hasAttribute(attr)) {
+            values = parseList(name, elem.getAttribute(attr), values);
+        }
+
+        final String plural = attr + "s";
+        if (elem.hasAttribute(plural)) {
+            values = parseList(name, elem.getAttribute(plural), values);
+        }
+
+        return values;
+    }
+
+    /**
+     * Translate a string like "1,3,7-9,17" into a list of Integers.
+     * @param name DomSet name
+     * @param listStr string containing one or more values and/or ranges
+     * @param values list of which new Integer values are added.
+     *        If <tt>null</tt> and <tt>listStr</tt> contains one or more
+     *        values, a new list is created and returned.
+     * @return <tt>values</tt> parameter (or newly created list)
+     * @throws ConfigException if the list is badly formatted
+     */
+    public static final List<Integer> parseList(String name, String listStr,
+                                                List<Integer> values)
+        throws ConfigException
+    {
+        for (String piece : listStr.split(",")) {
+            final int dash = piece.indexOf("-");
+            if (dash < 0) {
+                final Integer val;
+                try {
+                    val = Integer.valueOf(piece);
+                } catch (NumberFormatException nfe) {
+                    throw new ConfigException("Bad DomSet " + name +
+                                              " value \"" + piece +
+                                              "\" in \"" + listStr + "\"");
+                }
+
+                if (values == null) {
+                    values = new ArrayList<Integer>();
+                }
+                values.add(val);
+            } else {
+                String rString[] = piece.split("-");
+                if (rString.length > 2) {
+                    throw new ConfigException("Bad DomSet " + name +
+                                              " range \"" + piece +
+                                              "\" in \"" + listStr + "\"");
+                }
+
+                Integer range[] = new Integer[2];
+                for (int i = 0; i < 2; i++) {
+                    try {
+                        range[i] = Integer.valueOf(rString[i]);
+                    } catch (NumberFormatException nfe) {
+                        throw new ConfigException("Bad DomSet " + name +
+                                                  " range value \"" +
+                                                  rString[i] + "\" in \"" +
+                                                  listStr + "\"");
+                    }
+                }
+
+                if (values == null && range[1] > range[0]) {
+                    values = new ArrayList<Integer>();
+                }
+
+                for (Integer i = range[0]; i <= range[1]; i++) {
+                    values.add(i);
+                }
+            }
+        }
+
+        return values;
     }
 
     /**
@@ -427,7 +593,7 @@ public abstract class DomSetFactory
      *
      * @param dr DOM registry
      */
-    public static void setDomRegistry(DOMRegistry dr)
+    public static void setDomRegistry(IDOMRegistry dr)
     {
         domRegistry = dr;
     }

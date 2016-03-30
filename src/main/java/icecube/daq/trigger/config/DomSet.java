@@ -38,21 +38,10 @@ public class DomSet
      * @param name name of domset
      * @param set list of domIds, must be lowercase hex
      */
-    public DomSet(String name, Collection<String> set)
+    public DomSet(String name, Collection<Long> set)
     {
         this.name = name;
-        this.set = new HashSet<Long>(7500);
-        for (String idstr : set) {
-            long domid;
-            try {
-                domid = Long.parseLong(idstr, 16);
-            } catch (NumberFormatException nfe) {
-                LOG.error("Cannot convert \"" + idstr + "\" to long value");
-                continue;
-            }
-
-            this.set.add(domid);
-        }
+        this.set = new HashSet<Long>(set);
     }
 
     /**
@@ -119,6 +108,16 @@ public class DomSet
         }
 
         return set.contains(dom.longValue());
+    }
+
+    /**
+     * Return the number of DOMs in this set.
+     *
+     * @return number of DOMs
+     */
+    public int size()
+    {
+        return set.size();
     }
 
     /**

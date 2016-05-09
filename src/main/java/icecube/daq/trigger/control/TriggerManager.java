@@ -760,6 +760,11 @@ public class TriggerManager
 
         ArrayList<Object[]> triplets = new ArrayList<Object[]>();
         for (INewAlgorithm a : algorithms) {
+            if (a.getTriggerConfigId() < 0) {
+                // Live doesn't care about Throughput trigger
+                continue;
+            }
+
             Object[] data = new Object[4];
             data[0] = Integer.valueOf(a.getTriggerConfigId());
             data[1] = Integer.valueOf(a.getTriggerType());

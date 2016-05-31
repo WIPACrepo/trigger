@@ -16,6 +16,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * The VolumeTrigger is based on the ClusterTrigger, with a slight modifications to
  * allow clusters to span neighboring strings.  The VolumeTrigger
@@ -52,6 +55,9 @@ import java.util.LinkedList;
  */
 public class CylinderTrigger extends AbstractTrigger
 {
+    /** Log object for this class */
+    private static final Log LOG = LogFactory.getLog(CylinderTrigger.class);
+
     private long timeWindow;
     private int multiplicity;
     private int simpleMultiplicity;
@@ -215,6 +221,13 @@ public class CylinderTrigger extends AbstractTrigger
         }
     }
 
+    /**
+     * Note that triggerQueue can only be truncated if the number of hits
+     * within the cylinder is &gt;= multiplicity.  If we never reach that
+     * threshold before triggerQueue.size() &gt;= simpleMultiplicity, the
+     * hits in triggerQueue will never have passed the volume-checking test
+     * and this trigger will behave like an SMTx trigger
+     */
     private boolean processHitQueue()
     {
         if (triggerQueue.size() >= simpleMultiplicity) return true;
@@ -264,6 +277,14 @@ public class CylinderTrigger extends AbstractTrigger
 
     public boolean isConfigured()
     {
+        if (simpleMultiplicity < multiplicity) {
+            // if this is true, the volume checking code will never be run!
+            LOG.error("simpleMultiplicity (" + simpleMultiplicity +
+                      ") must be less than multiplicity (" + multiplicity +
+                      ")");
+            return false;
+        }
+
         return true;
     }
 

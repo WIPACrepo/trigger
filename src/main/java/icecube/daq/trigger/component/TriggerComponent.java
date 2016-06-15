@@ -304,7 +304,7 @@ public class TriggerComponent
      *
      * @return list of algorithms
      */
-    public List<ITriggerAlgorithm> getAlgorithms()
+    public Iterable<ITriggerAlgorithm> getAlgorithms()
     {
         return algorithms;
     }
@@ -406,7 +406,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 16141 2016-06-15 21:38:01Z dglo $";
+        return "$Id: TriggerComponent.java 16143 2016-06-15 22:39:09Z dglo $";
     }
 
     /**

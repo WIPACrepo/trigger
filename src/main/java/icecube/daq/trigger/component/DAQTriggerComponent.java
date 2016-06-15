@@ -26,7 +26,7 @@ public interface DAQTriggerComponent
      *
      * @return list of algorithms
      */
-    List<ITriggerAlgorithm> getAlgorithms();
+    Iterable<ITriggerAlgorithm> getAlgorithms();
 
     /**
      * Get the ByteBufferCache used to track the incoming hit payloads

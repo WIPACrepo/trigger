@@ -450,8 +450,8 @@ public class MultiplicityDataManager
      *
      * @return <tt>null</tt> if there are not enough bins to summarize
      */
-    public List<Map<String, Object>> getSummary(int numBins,
-                                                boolean allowPartial)
+    public Iterable<Map<String, Object>> getSummary(int numBins,
+                                                    boolean allowPartial)
         throws MultiplicityDataException
     {
         if (binmap == null) {
@@ -654,13 +654,13 @@ public class MultiplicityDataManager
                                                 " been set");
         }
 
-        List<Map<String, Object>> mapList = getSummary(10, isFinal);
-        if (mapList == null) {
+        Iterable<Map<String, Object>> mapper = getSummary(10, isFinal);
+        if (mapper == null) {
             // if there's no data, we're done
             return false;
         }
 
-        for (Map<String, Object> values : mapList) {
+        for (Map<String, Object> values : mapper) {
             try {
                 alertQueue.push("trigger_rate", Alerter.Priority.EMAIL,
                                 values);

@@ -97,7 +97,7 @@ public abstract class TriggerCollection
         return trig;
     }
 
-    public List<AbstractTrigger> get()
+    public Iterable<AbstractTrigger> get()
     {
         return list;
     }

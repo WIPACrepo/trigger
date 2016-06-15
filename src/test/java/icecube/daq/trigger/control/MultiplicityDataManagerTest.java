@@ -118,9 +118,10 @@ public class MultiplicityDataManagerTest
 
         mgr.add(new MockTriggerRequest(1, srcId, type, cfgId, 4, 5));
 
-        List<Map<String, Object>> histo = mgr.getSummary(10, true);
+        Iterable<Map<String, Object>> histo = mgr.getSummary(10, true);
         assertNotNull("Histogram should not be null", histo);
-        assertEquals("Unexpected histogram list " + histo, 0, histo.size());
+        assertFalse("Unexpected histogram list " + histo,
+                    histo.iterator().hasNext());
     }
 
     @Test
@@ -221,15 +222,22 @@ public class MultiplicityDataManagerTest
         mgr.add(new MockTriggerRequest(uid++, srcId, type, cfgId,
                                        nextBin + 4, nextBin + 5));
 
-        List<Map<String, Object>> histo = mgr.getSummary(10, true);
+        Iterable<Map<String, Object>> histo = mgr.getSummary(10, true);
         assertNotNull("Histogram should not be null", histo);
-        assertEquals("Unexpected histogram list " + histo, 1, histo.size());
 
-        Map<String, Object> map = histo.get(0);
-        assertEquals("Bad type", type, map.get("trigid"));
-        assertEquals("Bad config ID", cfgId, map.get("configid"));
-        assertEquals("Bad source ID", srcId, map.get("sourceid"));
-        assertEquals("Bad count", 1, map.get("value"));
+        boolean found = false;
+        for (Map<String, Object> map : histo) {
+            if (found) {
+                fail("Found more than one histogram");
+            }
+            found = true;
+
+            assertEquals("Bad type", type, map.get("trigid"));
+            assertEquals("Bad config ID", cfgId, map.get("configid"));
+            assertEquals("Bad source ID", srcId, map.get("sourceid"));
+            assertEquals("Bad count", 1, map.get("value"));
+        }
+        assertTrue("Didn't find any histograms", found);
     }
 
     @Test
@@ -262,18 +270,23 @@ public class MultiplicityDataManagerTest
             binTime += Bins.WIDTH;
         }
 
-        List<Map<String, Object>> histo = mgr.getSummary(10, true);
+        Iterable<Map<String, Object>> histo = mgr.getSummary(10, true);
         assertNotNull("Histogram should not be null", histo);
-        assertEquals("Unexpected histogram list " + histo, 2, histo.size());
 
-        for (int i = 0; i < 2; i++) {
-            Map<String, Object> map = histo.get(i);
+        int count = 0;
+        for (Map<String, Object> map : histo) {
+            if (count >= 2) {
+                fail("Too many histograms!");
+            }
+            count++;
+
             assertEquals("Bad type", type, map.get("trigid"));
             assertEquals("Bad config ID", cfgId, map.get("configid"));
             assertEquals("Bad source ID", srcId, map.get("sourceid"));
-            assertEquals("Bad count", (i == 0 ? numBins : extraBins - 1),
+            assertEquals("Bad count", (count == 1 ? numBins : extraBins - 1),
                          map.get("value"));
         }
+        assertEquals("Expected 2 histograms, only got " + count, 2, count);
     }
 
     @Test
@@ -306,7 +319,7 @@ public class MultiplicityDataManagerTest
 
         mgr.start(123);
 
-        List<Map<String, Object>> histo = mgr.getSummary(10, true);
+        Iterable<Map<String, Object>> histo = mgr.getSummary(10, true);
         assertNull("Unexpected histogram list " + histo, histo);
     }
 

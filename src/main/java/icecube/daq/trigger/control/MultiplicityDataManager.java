@@ -7,7 +7,7 @@ import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadFormatException;
 import icecube.daq.payload.impl.UTCTime;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 
 import java.io.IOException;
@@ -314,7 +314,7 @@ public class MultiplicityDataManager
     private static final int NO_NUMBER = Integer.MIN_VALUE;
 
     /** Complete list of all configured algorithms for <b>all</b> handlers */
-    private List<INewAlgorithm> algorithms;
+    private List<ITriggerAlgorithm> algorithms;
 
     private AlertQueue alertQueue;
     private HashMap<HashKey, Bins> binmap;
@@ -328,7 +328,7 @@ public class MultiplicityDataManager
 
     public MultiplicityDataManager()
     {
-        algorithms = new ArrayList<INewAlgorithm>();
+        algorithms = new ArrayList<ITriggerAlgorithm>();
     }
 
     public void add(ITriggerRequestPayload req)
@@ -436,7 +436,7 @@ public class MultiplicityDataManager
      *
      * @param algorithm trigger algorithm
      */
-    public void addAlgorithm(INewAlgorithm algorithm)
+    public void addAlgorithm(ITriggerAlgorithm algorithm)
     {
         algorithms.add(algorithm);
     }
@@ -496,7 +496,7 @@ public class MultiplicityDataManager
      */
     private boolean hasValidMultiplicity(ITriggerRequestPayload req)
     {
-        for (INewAlgorithm a : algorithms) {
+        for (ITriggerAlgorithm a : algorithms) {
             if (req.getTriggerConfigID() == a.getTriggerConfigId() &&
                 req.getTriggerType() == a.getTriggerType() &&
                 req.getSourceID().getSourceID() == a.getSourceId())

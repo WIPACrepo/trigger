@@ -4,7 +4,7 @@ import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.Splicer;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.algorithm.FlushRequest;
 import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.test.MockAlgorithm;
@@ -124,7 +124,7 @@ class MyCollector
 {
     private MockCollectorThread thrd;
 
-    MyCollector(int srcId, List<INewAlgorithm> algorithms,
+    MyCollector(int srcId, List<ITriggerAlgorithm> algorithms,
                 DAQComponentOutputProcess outputEngine,
                 IByteBufferCache outCache,
                 IMonitoringDataManager multiDataMgr,
@@ -135,7 +135,7 @@ class MyCollector
 
     @Override
     public ICollectorThread createCollectorThread(String name, int srcId,
-                                                  List<INewAlgorithm> algo,
+                                                  List<ITriggerAlgorithm> algo,
                                                   IMonitoringDataManager mdm,
                                                   IOutputThread outThrd,
                                                   SubscriptionManager subMgr)
@@ -210,8 +210,8 @@ public class TriggerCollectorTest
             // expect this to fail
         }
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
 
         try {
             new TriggerCollector(INICE_ID, algorithms, null, null, null, null);
@@ -253,8 +253,8 @@ public class TriggerCollectorTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("foo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockBufferCache bufCache = new MockBufferCache("foo");
@@ -280,8 +280,8 @@ public class TriggerCollectorTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("foo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockBufferCache bufCache = new MockBufferCache("foo");

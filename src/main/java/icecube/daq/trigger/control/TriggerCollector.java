@@ -15,7 +15,7 @@ import icecube.daq.payload.impl.TriggerRequest;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.trigger.algorithm.FlushRequest;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 
 import java.io.IOException;
@@ -53,7 +53,7 @@ public class TriggerCollector
      * @param outputEngine object which writes out requests
      * @param outCache output payload cache
      */
-    public TriggerCollector(int srcId, List<INewAlgorithm> algorithms,
+    public TriggerCollector(int srcId, List<ITriggerAlgorithm> algorithms,
                             DAQComponentOutputProcess outputEngine,
                             IByteBufferCache outCache,
                             IMonitoringDataManager moniDataMgr,
@@ -71,7 +71,7 @@ public class TriggerCollector
             throw new Error("Output cache is not set");
         }
 
-        for (INewAlgorithm a : algorithms) {
+        for (ITriggerAlgorithm a : algorithms) {
             a.setTriggerCollector(this);
         }
 
@@ -83,7 +83,7 @@ public class TriggerCollector
     }
 
     public ICollectorThread createCollectorThread(String name, int srcId,
-                                                  List<INewAlgorithm> algo,
+                                                  List<ITriggerAlgorithm> algo,
                                                   IMonitoringDataManager mdm,
                                                   IOutputThread outThrd,
                                                   SubscriptionManager subMgr)
@@ -252,7 +252,7 @@ class CollectorThread
     private static final long MILLIS_PER_SECOND = 1000L;
 
     int srcId;
-    private List<INewAlgorithm> algorithms;
+    private List<ITriggerAlgorithm> algorithms;
 
     private SubscriptionManager subMgr;
 
@@ -286,7 +286,7 @@ class CollectorThread
     private Timer moniTimer;
 
     public CollectorThread(String name, int srcId,
-                           List<INewAlgorithm> algorithms,
+                           List<ITriggerAlgorithm> algorithms,
                            IMonitoringDataManager moniDataMgr,
                            IOutputThread outThrd, SubscriptionManager subMgr)
     {
@@ -294,7 +294,7 @@ class CollectorThread
         thread.setName(name);
 
         this.srcId = srcId;
-        this.algorithms = new ArrayList<INewAlgorithm>(algorithms);
+        this.algorithms = new ArrayList<ITriggerAlgorithm>(algorithms);
         this.moniDataMgr = moniDataMgr;
 
         this.outThrd = outThrd;
@@ -317,15 +317,15 @@ class CollectorThread
     public void addRequests(Interval interval,
                             List<ITriggerRequestPayload> list)
     {
-        for (INewAlgorithm a : algorithms) {
+        for (ITriggerAlgorithm a : algorithms) {
             released += a.release(interval, list);
         }
     }
 
-    private void createTriggerThreads(List<INewAlgorithm> algorithms)
+    private void createTriggerThreads(List<ITriggerAlgorithm> algorithms)
     {
         int id = 0;
-        for (INewAlgorithm algo : algorithms) {
+        for (ITriggerAlgorithm algo : algorithms) {
             TriggerThread thread = new TriggerThread(id, algo);
 
             trigThreads.add(thread);
@@ -339,7 +339,7 @@ class CollectorThread
         Interval interval = new Interval();
         while (interval != null) {
             boolean sameInterval = true;
-            for (INewAlgorithm a : algorithms) {
+            for (ITriggerAlgorithm a : algorithms) {
                 Interval i2 = a.getInterval(interval);
                 if (!interval.equals(i2)) {
                     sameInterval = false;
@@ -389,7 +389,7 @@ class CollectorThread
         return alerter.getNumSent();
     }
 
-    private void initializeSNDAQAlerter(List<INewAlgorithm> algorithms)
+    private void initializeSNDAQAlerter(List<ITriggerAlgorithm> algorithms)
     {
         try {
             alerter = new SNDAQAlerter(algorithms);
@@ -495,7 +495,7 @@ class CollectorThread
         while (true) {
             if (stopping) {
                 boolean algoStopped = true;
-                for (INewAlgorithm a : algorithms) {
+                for (ITriggerAlgorithm a : algorithms) {
                     if (a.hasData() || a.hasCachedRequests()) {
                         algoStopped = false;
                         break;
@@ -583,7 +583,7 @@ class CollectorThread
         }
 
         // recycle all unused requests still held by the algorithms.
-        for (INewAlgorithm a : algorithms) {
+        for (ITriggerAlgorithm a : algorithms) {
             a.recycleUnusedRequests();
         }
 

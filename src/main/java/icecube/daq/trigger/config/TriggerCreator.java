@@ -2,8 +2,7 @@ package icecube.daq.trigger.config;
 
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
-import icecube.daq.trigger.common.ITriggerAlgorithm;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.util.JAXPUtil;
@@ -32,7 +31,7 @@ public abstract class TriggerCreator
      */
     public static void buildTriggers(Document doc, int compId,
                                      List<ITriggerAlgorithm> trigList,
-                                     List<INewAlgorithm> extraList)
+                                     List<ITriggerAlgorithm> extraList)
         throws TriggerException
     {
         NodeList nodeList;
@@ -55,11 +54,11 @@ public abstract class TriggerCreator
 
             String name = getElementText(n, "triggerName");
 
-            INewAlgorithm trig;
+            ITriggerAlgorithm trig;
             try {
                 Class trigClass =
                     Class.forName("icecube.daq.trigger.algorithm." + name);
-                trig = (INewAlgorithm) trigClass.newInstance();
+                trig = (ITriggerAlgorithm) trigClass.newInstance();
             } catch (Exception ex) {
                 throw new ConfigException("Cannot load trigger \"" + name +
                                           "\"", ex);

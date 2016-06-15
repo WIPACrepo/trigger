@@ -21,10 +21,9 @@ import icecube.daq.splicer.SpliceableComparator;
 import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
-import icecube.daq.trigger.common.DAQTriggerComponent;
-import icecube.daq.trigger.common.ITriggerAlgorithm;
-import icecube.daq.trigger.common.ITriggerManager;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
+import icecube.daq.trigger.component.DAQTriggerComponent;
+import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.config.TriggerCreator;
 import icecube.daq.trigger.control.TriggerManager;
@@ -259,11 +258,11 @@ public class TriggerComponent
 
         // the global trigger needs to know about all configured algorithms
         //  so it can monitor individual algorithm rates
-        ArrayList<INewAlgorithm> extraAlgorithms;
+        ArrayList<ITriggerAlgorithm> extraAlgorithms;
         if (sourceId.getSourceID() ==
             SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID)
         {
-            extraAlgorithms = new ArrayList<INewAlgorithm>();
+            extraAlgorithms = new ArrayList<ITriggerAlgorithm>();
         } else {
             extraAlgorithms = null;
         }
@@ -407,7 +406,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 15570 2015-06-12 16:19:32Z dglo $";
+        return "$Id: TriggerComponent.java 16141 2016-06-15 21:38:01Z dglo $";
     }
 
     /**

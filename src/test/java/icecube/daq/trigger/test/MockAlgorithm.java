@@ -4,9 +4,9 @@ import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.TriggerRequestFactory;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
-import icecube.daq.trigger.common.ITriggerManager;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.control.ITriggerCollector;
+import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.control.PayloadSubscriber;
 import icecube.daq.trigger.control.SubscribedList;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MockAlgorithm
-    implements INewAlgorithm
+    implements ITriggerAlgorithm
 {
     private String name;
     private boolean sawFlush;
@@ -97,7 +97,7 @@ public class MockAlgorithm
         trigMoniMap.put(key, value);
     }
 
-    public int compareTo(INewAlgorithm a)
+    public int compareTo(ITriggerAlgorithm a)
     {
         int val = getTriggerName().compareTo(a.getTriggerName());
         if (val == 0) {

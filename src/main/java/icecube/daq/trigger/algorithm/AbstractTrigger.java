@@ -14,13 +14,13 @@ import icecube.daq.payload.impl.ReadoutRequest;
 import icecube.daq.payload.impl.ReadoutRequestElement;
 import icecube.daq.payload.impl.TriggerRequest;
 import icecube.daq.payload.impl.TriggerRequestFactory;
-import icecube.daq.trigger.common.ITriggerManager;
+import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.HitFilter;
-import icecube.daq.trigger.control.INewManager;
 import icecube.daq.trigger.control.ITriggerCollector;
+import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.control.PayloadSubscriber;
 import icecube.daq.trigger.control.SubscribedList;
@@ -43,7 +43,7 @@ import org.apache.commons.logging.LogFactory;
  * Base class for trigger algorithms.
  */
 public abstract class AbstractTrigger
-    implements AbstractTriggerMBean, INewAlgorithm
+    implements AbstractTriggerMBean, ITriggerAlgorithm
 {
     /** Log object for this class */
     private static final Log LOG = LogFactory.getLog(AbstractTrigger.class);
@@ -114,7 +114,7 @@ public abstract class AbstractTrigger
         readouts.add(new TriggerReadout(rdoutType, offset, minus, plus));
     }
 
-    public int compareTo(INewAlgorithm a)
+    public int compareTo(ITriggerAlgorithm a)
     {
         int val = getTriggerName().compareTo(a.getTriggerName());
         if (val == 0) {
@@ -697,9 +697,9 @@ public abstract class AbstractTrigger
      * @return trigger handler
      * @deprecated use getTriggerManager()
      */
-    public INewManager getTriggerHandler()
+    public ITriggerManager getTriggerHandler()
     {
-        return (INewManager) mgr;
+        return mgr;
     }
 
     /**

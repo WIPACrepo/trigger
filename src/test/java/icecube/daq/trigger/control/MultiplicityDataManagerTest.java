@@ -3,7 +3,7 @@ package icecube.daq.trigger.control;
 import icecube.daq.juggler.alert.AlertQueue;
 import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 import icecube.daq.trigger.test.MockAlerter;
 import icecube.daq.trigger.test.MockAlgorithm;
@@ -107,8 +107,6 @@ public class MultiplicityDataManagerTest
         final int srcId = SourceIdRegistry.INICE_TRIGGER_SOURCE_ID;
         final int cfgId = 2;
         final int type = 3;
-
-        //List<INewAlgorithm> algorithms = new ArrayList<INewAlgorithm>();
 
         MultiplicityDataManager mgr = new MultiplicityDataManager();
         mgr.setAlertQueue(new AlertQueue(alerter));

@@ -22,8 +22,7 @@ import icecube.daq.splicer.SplicedAnalysis;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
 import icecube.daq.splicer.SplicerListener;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
-import icecube.daq.trigger.common.ITriggerAlgorithm;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -115,7 +114,7 @@ class TriggerRequestComparator
  * Read in hits from the splicer and send them to the algorithms.
  */
 public class TriggerManager
-    implements INewManager, SplicedAnalysis<Spliceable>,
+    implements ITriggerManager, SplicedAnalysis<Spliceable>,
                SplicerListener<Spliceable>, SubscriptionManager,
                TriggerManagerMBean
 {
@@ -131,8 +130,8 @@ public class TriggerManager
 
     private TriggerRequestFactory trFactory;
     private DAQComponentOutputProcess outputEngine;
-    private List<INewAlgorithm> algorithms =
-        new ArrayList<INewAlgorithm>();
+    private List<ITriggerAlgorithm> algorithms =
+        new ArrayList<ITriggerAlgorithm>();
 
     private SubscribedList inputList = new SubscribedList();
 
@@ -188,17 +187,10 @@ public class TriggerManager
      *
      * @param val algorithm being added
      */
-    public void addTrigger(ITriggerAlgorithm val)
+    public void addTrigger(ITriggerAlgorithm trig)
     {
-        if (!(val instanceof INewAlgorithm)) {
-            throw new Error("Algorithm " + val +
-                            " must implement INewAlgorithm");
-        }
-
-        INewAlgorithm trig = (INewAlgorithm) val;
-
         boolean good = true;
-        for (INewAlgorithm t : algorithms) {
+        for (ITriggerAlgorithm t : algorithms) {
             if ((trig.getTriggerType() == t.getTriggerType()) &&
                 trig.getTriggerConfigId() == t.getTriggerConfigId() &&
                 trig.getSourceId() == t.getSourceId())
@@ -229,16 +221,6 @@ public class TriggerManager
     }
 
     /**
-     * XXX Unimplemented.
-     *
-     * @param payload ignored
-     */
-    public void addTriggerRequest(ITriggerRequestPayload payload)
-    {
-        throw new UnimplementedError();
-    }
-
-    /**
      * Add a list of algorithms for this handler
      *
      * @param list list of trigger algorithms to add
@@ -256,9 +238,9 @@ public class TriggerManager
      *
      * @param extra list of additional trigger algorithms to add
      */
-    public void addExtraAlgorithms(List<INewAlgorithm> extra)
+    public void addExtraAlgorithms(List<ITriggerAlgorithm> extra)
     {
-        for (INewAlgorithm trig: extra) {
+        for (ITriggerAlgorithm trig: extra) {
             multiDataMgr.addAlgorithm(trig);
         }
     }
@@ -427,7 +409,7 @@ public class TriggerManager
     public Map<String, Integer> getQueuedRequestsMap()
     {
         HashMap map = new HashMap<String, Integer>();
-        for (INewAlgorithm a : algorithms) {
+        for (ITriggerAlgorithm a : algorithms) {
             map.put(a.getTriggerName(), a.getNumberOfCachedRequests());
         }
         return map;
@@ -486,16 +468,6 @@ public class TriggerManager
     }
 
     /**
-     * XXX Unimplemented
-     *
-     * @return UnimplementedError
-     */
-    public TreeMap<Integer, TreeSet<Integer>> getStringMap()
-    {
-        throw new UnimplementedError();
-    }
-
-    /**
      * Get the total number of hits pushed onto the input queue
      *
      * @return total number of hits received from the splicer
@@ -514,7 +486,7 @@ public class TriggerManager
     {
         HashMap<String, Long> map = new HashMap<String, Long>();
 
-        for (INewAlgorithm trigger : algorithms) {
+        for (ITriggerAlgorithm trigger : algorithms) {
             map.put(trigger.getTriggerName(),
                     Long.valueOf(trigger.getTriggerCounter()));
         }
@@ -531,7 +503,7 @@ public class TriggerManager
     {
         HashMap<String, Object> map = new HashMap<String, Object>();
 
-        for (INewAlgorithm trigger : algorithms) {
+        for (ITriggerAlgorithm trigger : algorithms) {
             Map<String, Object> moniMap = trigger.getTriggerMonitorMap();
             if (moniMap != null && moniMap.size() > 0) {
                 String trigName = trigger.getTriggerName() + "-" +
@@ -705,7 +677,7 @@ public class TriggerManager
 
     public void resetUIDs()
     {
-        for (INewAlgorithm a : algorithms) {
+        for (ITriggerAlgorithm a : algorithms) {
             a.resetUID();
         }
         collector.resetUID();
@@ -759,7 +731,7 @@ public class TriggerManager
         }
 
         ArrayList<Object[]> triplets = new ArrayList<Object[]>();
-        for (INewAlgorithm a : algorithms) {
+        for (ITriggerAlgorithm a : algorithms) {
             if (a.getTriggerConfigId() < 0) {
                 // Live doesn't care about Throughput trigger
                 continue;
@@ -948,7 +920,7 @@ public class TriggerManager
 
     public void subscribeAll()
     {
-        for (INewAlgorithm algo : algorithms) {
+        for (ITriggerAlgorithm algo : algorithms) {
             PayloadSubscriber subscriber =
                 inputList.subscribe(algo.getTriggerName());
             algo.setSubscriber(subscriber);
@@ -986,7 +958,7 @@ public class TriggerManager
     public void unsubscribeAll()
     {
         if (inputList.getNumSubscribers() > 0) {
-            for (INewAlgorithm a : algorithms) {
+            for (ITriggerAlgorithm a : algorithms) {
                 a.unsubscribe(inputList);
                 a.resetAlgorithm();
             }

@@ -12,8 +12,8 @@ import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
-import icecube.daq.trigger.common.ITriggerAlgorithm;
-import icecube.daq.trigger.common.ITriggerManager;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
+import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.MockAlerter;
 import icecube.daq.trigger.test.MockAlgorithm;
@@ -38,93 +38,6 @@ import static org.junit.Assert.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
-
-class MockOldAlgorithm
-    implements ITriggerAlgorithm
-{
-    private String name;
-
-    public MockOldAlgorithm(String name)
-    {
-        this.name = name;
-    }
-
-    public IPayload getEarliestPayloadOfInterest()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public int getSourceId()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public int getTriggerConfigId()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public int getTriggerCounter()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public Map getTriggerMonitorMap()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public String getTriggerName()
-    {
-        return name;
-    }
-
-    public int getTriggerType()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public boolean isConfigured()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void runTrigger(IPayload pay)
-        throws TriggerException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void setSourceId(int srcId)
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void setTriggerConfigId(int cfgId)
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void setTriggerManager(ITriggerManager mgr)
-    {
-        // do nothing
-    }
-
-    public void setTriggerName(String name)
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void setTriggerType(int type)
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public String toString()
-    {
-        return "OldAlgo[" + name + "]";
-    }
-}
 
 public class TriggerManagerTest
 {
@@ -192,27 +105,6 @@ public class TriggerManagerTest
                      0, mgr.getNumOutputsQueued());
         assertEquals("Bad total processed",
                      0L, mgr.getTotalProcessed());
-    }
-
-    @Test
-    public void testAddAlgoBad()
-    {
-        MockSourceID src = new MockSourceID(INICE_ID);
-        MockBufferCache bufCache = new MockBufferCache("foo");
-
-        TriggerManager mgr = new TriggerManager(src, bufCache);
-
-        MockOldAlgorithm bad = new MockOldAlgorithm("addAlgoBad");
-        try {
-            mgr.addTrigger(bad);
-            fail("This should not succeed");
-        } catch (Error err) {
-            assertNotNull("Error message should not be null",
-                          err.getMessage());
-            final String msg = "Algorithm " + bad +
-                " must implement INewAlgorithm";
-            assertEquals("Bad message", msg, err.getMessage());
-        }
     }
 
     @Test

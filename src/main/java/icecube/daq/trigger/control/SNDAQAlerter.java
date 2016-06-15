@@ -6,7 +6,7 @@ import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.juggler.alert.ZMQAlerter;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.PayloadFormatException;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.algorithm.SimpleMajorityTrigger;
 
 import java.util.HashMap;
@@ -41,7 +41,7 @@ public class SNDAQAlerter
      *
      * @throws AlertException if there is a problem
      */
-    public SNDAQAlerter(List<INewAlgorithm> algorithms)
+    public SNDAQAlerter(List<ITriggerAlgorithm> algorithms)
         throws AlertException
     {
         String address = System.getProperty(PROPERTY, null);
@@ -171,9 +171,9 @@ public class SNDAQAlerter
      *
      * @param algorithms trigger algorithms
      */
-    private void loadAlgorithms(List<INewAlgorithm> algorithms)
+    private void loadAlgorithms(List<ITriggerAlgorithm> algorithms)
     {
-        for (INewAlgorithm a : algorithms) {
+        for (ITriggerAlgorithm a : algorithms) {
             if (!a.getTriggerName().startsWith("SimpleMajorityTrigger")) {
                 continue;
             }

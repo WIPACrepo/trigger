@@ -6,7 +6,7 @@ import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.trigger.algorithm.FlushRequest;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 import icecube.daq.trigger.test.MockAlgorithm;
 import icecube.daq.trigger.test.MockAppender;
@@ -261,8 +261,8 @@ public class CollectorThreadTest
         MockAlgorithm fooAlgo = new MockAlgorithm("creAlgo");
         fooAlgo.setSubscriber(new MockSubscriber());
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -279,8 +279,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("apiAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -298,8 +298,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("findAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -326,8 +326,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("pushIIAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -357,8 +357,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("pushGAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -400,8 +400,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("pushGAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -434,8 +434,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("pushGAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -471,8 +471,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("pushGAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -507,8 +507,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("pushGAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -553,8 +553,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("sendReqEmpty");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -591,8 +591,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("sendReqII1");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -634,8 +634,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("sendReqGT1");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -678,8 +678,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("sendReqIIMany");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -726,8 +726,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("sendReqGTMany");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -773,8 +773,8 @@ public class CollectorThreadTest
     @Test
     public void testSetChangedNoAlgo()
     {
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
 
         MockOutputProcess out = new MockOutputProcess();
 
@@ -794,8 +794,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("setChgNoFlush");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -816,8 +816,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("setChgFlush");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -842,8 +842,8 @@ public class CollectorThreadTest
         MockRunAlgorithm fooAlgo = new MockRunAlgorithm(name + "Algo");
         fooAlgo.setSubscriber(new MockSubscriber());
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         fooAlgo.addInterval(oldStart, oldEnd);

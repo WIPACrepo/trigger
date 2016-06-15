@@ -3,7 +3,7 @@ package icecube.daq.trigger.control;
 import icecube.daq.juggler.alert.AlertException;
 import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.payload.impl.UTCTime;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.algorithm.SimpleMajorityTrigger;
 import icecube.daq.trigger.test.MockAlerter;
 import icecube.daq.trigger.test.MockAlgorithm;
@@ -167,7 +167,7 @@ class MySNDAQAlerter
 {
     private MyMockAlerter mockAlerter;
 
-    public MySNDAQAlerter(List<INewAlgorithm> algorithms)
+    public MySNDAQAlerter(List<ITriggerAlgorithm> algorithms)
         throws AlertException
     {
         super(algorithms);
@@ -219,8 +219,8 @@ public class SNDAQAlerterTest
     public void testOpenClose()
         throws AlertException
     {
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
 
         //algorithms.add(new MockAlgorithm("foo"));
 
@@ -232,8 +232,8 @@ public class SNDAQAlerterTest
     public void testSMT8()
         throws AlertException
     {
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
 
         final int cfgId = 123;
         final int trigType = 456;

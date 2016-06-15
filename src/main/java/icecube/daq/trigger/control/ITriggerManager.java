@@ -40,7 +40,7 @@ public interface ITriggerManager
      *
      * @param list list of trigger algorithms to add
      */
-    void addTriggers(List<ITriggerAlgorithm> list);
+    void addTriggers(Iterable<ITriggerAlgorithm> list);
 
     /**
      * Old method used to flush algorithms.

@@ -7,8 +7,8 @@ import icecube.daq.payload.impl.SourceID;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
 import icecube.daq.trigger.algorithm.AbstractTrigger;
-import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.config.TriggerReadout;
+import icecube.daq.trigger.control.ITriggerManager;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

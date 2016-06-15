@@ -23,9 +23,9 @@ import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.component.DAQTriggerComponent;
-import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.config.TriggerCreator;
+import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.util.DOMRegistry;
@@ -406,7 +406,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 16143 2016-06-15 22:39:09Z dglo $";
+        return "$Id: TriggerComponent.java 16144 2016-06-15 23:56:19Z dglo $";
     }
 
     /**

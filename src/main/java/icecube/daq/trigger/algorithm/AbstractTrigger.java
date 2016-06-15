@@ -14,7 +14,6 @@ import icecube.daq.payload.impl.ReadoutRequest;
 import icecube.daq.payload.impl.ReadoutRequestElement;
 import icecube.daq.payload.impl.TriggerRequest;
 import icecube.daq.payload.impl.TriggerRequestFactory;
-import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.control.DummyPayload;

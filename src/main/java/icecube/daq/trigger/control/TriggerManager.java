@@ -225,7 +225,7 @@ public class TriggerManager
      *
      * @param list list of trigger algorithms to add
      */
-    public void addTriggers(List<ITriggerAlgorithm> list)
+    public void addTriggers(Iterable<ITriggerAlgorithm> list)
     {
         for (ITriggerAlgorithm trig: list) {
             addTrigger(trig);

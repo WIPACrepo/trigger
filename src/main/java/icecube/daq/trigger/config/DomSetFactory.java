@@ -92,6 +92,8 @@ public abstract class DomSetFactory
         if (triggerConfigDir == null) {
             throw new ConfigException("Trigger configuration directory" +
                                       " has not been set");
+        } else if (domRegistry == null) {
+            throw new ConfigException("DOM registry has not been set");
         }
 
         String realname;

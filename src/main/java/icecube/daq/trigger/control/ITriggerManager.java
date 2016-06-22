@@ -11,14 +11,13 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.io.DAQComponentOutputProcess;
+import icecube.daq.juggler.alert.AlertQueue;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.splicer.Splicer;
+import icecube.daq.trigger.algorithm.AlgorithmStatistics;
 import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.util.DOMRegistry;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * This interface defines the behavior of a TriggerManager
@@ -47,6 +46,20 @@ public interface ITriggerManager
      * @deprecated
      */
     void flush();
+
+    /**
+     * Get the alert queue for messages sent to I3Live
+     *
+     * @return alert queue
+     */
+    AlertQueue getAlertQueue();
+
+    /**
+     * Get list of objects which can return trigger algorithm statistics
+     *
+     * @return list of trigger statistics objects
+     */
+    Iterable<AlgorithmStatistics> getAlgorithmStatistics();
 
     /**
      * Get the DOM registry.
@@ -91,11 +104,11 @@ public interface ITriggerManager
     long getTotalProcessed();
 
     /**
-     * Get map of trigger names to number of issued requests
+     * Are all data collection threads stopped?
      *
-     * @return map of {name : numRequests}
+     * @return <tt>true</tt> if the data collection threads are stopped
      */
-    Map<String, Long> getTriggerCounts();
+    boolean isStopped();
 
     /**
      * Set the DOM registry.

@@ -22,6 +22,7 @@ import icecube.daq.splicer.SplicedAnalysis;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
 import icecube.daq.splicer.SplicerListener;
+import icecube.daq.trigger.algorithm.AlgorithmStatistics;
 import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
@@ -304,7 +305,13 @@ public class TriggerManager
      */
     public void flush()
     {
-        inputList.push(FLUSH_PAYLOAD);
+        if (inputList.getNumSubscribers() > 0) {
+            try {
+                inputList.push(FLUSH_PAYLOAD);
+            } catch (Error err) {
+                LOG.error("Failed to flush input list", err);
+            }
+        }
     }
 
     /**
@@ -478,20 +485,20 @@ public class TriggerManager
     }
 
     /**
-     * Get map of trigger names to number of issued requests
+     * Get list of algorithm I/O statistics
      *
-     * @return map of {name : numRequests}
+     * @return list of ITriggerStatistics
      */
-    public Map<String, Long> getTriggerCounts()
+    public Iterable<AlgorithmStatistics> getAlgorithmStatistics()
     {
-        HashMap<String, Long> map = new HashMap<String, Long>();
+        ArrayList<AlgorithmStatistics> list =
+            new ArrayList<AlgorithmStatistics>(algorithms.size());
 
         for (ITriggerAlgorithm trigger : algorithms) {
-            map.put(trigger.getTriggerName(),
-                    Long.valueOf(trigger.getTriggerCounter()));
+            list.add(new AlgorithmStatistics(trigger));
         }
 
-        return map;
+        return list;
     }
 
     /**

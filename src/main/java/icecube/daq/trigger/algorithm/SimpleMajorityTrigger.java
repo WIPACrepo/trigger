@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 15433 2015-02-20 20:41:21Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 16155 2016-06-22 17:12:54Z dglo $
  *
  * Date: August 19 2005
  *
@@ -11,6 +11,7 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
@@ -21,6 +22,8 @@ import icecube.daq.trigger.exceptions.TimeOutOfOrderException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,15 +31,90 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+class HitCollection
+    implements Iterable<IHitPayload>
+{
+    private static final HitComparator COMPARATOR = new HitComparator();
+
+    private ArrayList<IHitPayload> hits = new ArrayList<IHitPayload>();
+
+    public void addAll(List<IHitPayload> list) {
+        hits.addAll(list);
+    }
+
+    public void add(IHitPayload hit)
+    {
+        hits.add(hit);
+    }
+
+    public void clear()
+    {
+        hits.clear();
+    }
+
+    public boolean contains(IHitPayload hit)
+    {
+        if (hits.size() < 100) {
+            return hits.contains(hit);
+        }
+
+        return Collections.binarySearch(hits, hit, COMPARATOR) >= 0;
+    }
+
+    public List<IHitPayload> copy()
+    {
+        return (List<IHitPayload>) hits.clone();
+    }
+
+    public IHitPayload getFirst()
+    {
+        return hits.get(0);
+    }
+
+    public IHitPayload getLast()
+    {
+        return hits.get(hits.size() - 1);
+    }
+
+    public Iterator<IHitPayload> iterator()
+    {
+        return hits.iterator();
+    }
+
+    public List<IHitPayload> list()
+    {
+        return hits;
+    }
+
+    public boolean overlaps(HitCollection coll)
+    {
+        for (IHitPayload hit : hits) {
+            if (coll.contains(hit)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public IHitPayload removeFirst()
+    {
+        return hits.remove(0);
+    }
+
+    public int size()
+    {
+        return hits.size();
+    }
+}
+
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 15433 2015-02-20 20:41:21Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 16155 2016-06-22 17:12:54Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
 {
-
     /**
      * Log object for this class
      */
@@ -60,7 +138,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
     /**
      * list of hits in current trigger
      */
-    private LinkedList hitsWithinTriggerWindow = new LinkedList();
+    private HitCollection hitsWithinTriggerWindow = new HitCollection();
 
     private boolean configThreshold = false;
     private boolean configTimeWindow = false;
@@ -196,13 +274,13 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
              * Check for out-of-time hits
              * hitTime < slidingTimeWindowStart
              */
-            if (hitTimeUTC.compareTo(slidingTimeWindow.startTime()) < 0)
+            if (hitTimeUTC.compareTo(slidingTimeWindow.startTime()) < 0) {
                 throw new TimeOutOfOrderException(
                         "Hit comes before start of sliding time window:" +
                         " Window is at " + slidingTimeWindow.startTime() +
                         " Hit is at " + hitTimeUTC + " DOMId = " +
                         hit.getDOMID());
-
+            }
 
             /*
              * Hit falls within the slidingTimeWindow
@@ -222,14 +300,12 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
                                   " equals " + slidingTimeWindow.size());
                     }
                 }
-
             }
             /*
              * Hits falls outside the slidingTimeWindow
              *   First see if we have a trigger, then slide the window
              */
             else {
-
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Hit falls outside slidingTimeWindow," +
                               " numberOfHitsInSlidingTimeWindow is "
@@ -266,7 +342,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
                     // turn trigger on
                     onTrigger = true;
-
                 }
 
                 if (LOG.isDebugEnabled()) {
@@ -277,13 +352,12 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
                 // or there is only 1 hit left in window
                 while ( (!slidingTimeWindow.inTimeWindow(hitTimeUTC)) &&
                         (slidingTimeWindow.size() > 1) ) {
-
                     IHitPayload oldHit = slidingTimeWindow.slide();
 
                     // if this hit is not part of the trigger, update the
                     // earliest time of interest
-                    if ( (hitsWithinTriggerWindow == null) ||
-                         (!hitsWithinTriggerWindow.contains(oldHit)))
+                    if (hitsWithinTriggerWindow == null ||
+                        !hitsWithinTriggerWindow.contains(oldHit))
                     {
                         IPayload oldHitPlus =
                             new DummyPayload(oldHit.getHitTimeUTC().getOffsetUTCTime(0.1));
@@ -296,7 +370,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
                                   + " slidingTimeWindowStart is now " +
                                   slidingTimeWindow.startTime());
                     }
-
                 }
 
                 if (LOG.isDebugEnabled()) {
@@ -310,9 +383,8 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
                     IHitPayload oldHit = slidingTimeWindow.slide();
 
-                    if ( (hitsWithinTriggerWindow == null) ||
-                         ((hitsWithinTriggerWindow != null) &&
-                          (!hitsWithinTriggerWindow.contains(oldHit))) )
+                    if (hitsWithinTriggerWindow == null ||
+                        !hitsWithinTriggerWindow.contains(oldHit))
                     {
                         IPayload oldHitPlus =
                             new DummyPayload(oldHit.getHitTimeUTC().getOffsetUTCTime(0.1));
@@ -365,16 +437,16 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
                         }
 
                         // form trigger and reset
-                        for (int i=0; i<hitsWithinTriggerWindow.size(); i++) {
-                            IHitPayload h =
-                                (IHitPayload) hitsWithinTriggerWindow.get(i);
-                            if (slidingTimeWindow.contains(h)) {
-                                LOG.error("Hit at time " + h.getPayloadTimeUTC()
+                        for (IHitPayload h2 : hitsWithinTriggerWindow) {
+                            if (slidingTimeWindow.contains(h2)) {
+                                LOG.error("Hit at time " +
+                                          h2.getPayloadTimeUTC()
                                           + " is part of new trigger but is" +
                                           " still in SlidingTimeWindow");
                             }
                         }
-                        formTrigger(hitsWithinTriggerWindow, null, null);
+                        formTrigger(hitsWithinTriggerWindow.list(), null,
+                                    null);
 
                         onTrigger = false;
                         hitsWithinTriggerWindow.clear();
@@ -430,10 +502,9 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
         // form last trigger
         if (hitsWithinTriggerWindow.size() > 0 && formLast) {
-            formTrigger(hitsWithinTriggerWindow, null, null);
+            formTrigger(hitsWithinTriggerWindow.list(), null, null);
         }
 
-        // todo: Pat is this right?
         reset();
     }
 
@@ -463,7 +534,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      */
     private void addHitToTriggerWindow(IHitPayload triggerPrimitive)
     {
-        hitsWithinTriggerWindow.addLast(triggerPrimitive);
+        hitsWithinTriggerWindow.add(triggerPrimitive);
     }
 
     /**
@@ -472,7 +543,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      */
     private IUTCTime getTriggerWindowStart()
     {
-        return ((IHitPayload) hitsWithinTriggerWindow.getFirst()).getHitTimeUTC();
+        return hitsWithinTriggerWindow.getFirst().getHitTimeUTC();
     }
 
     /**
@@ -481,7 +552,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      */
     private IUTCTime getTriggerWindowStop()
     {
-        return ((IHitPayload) hitsWithinTriggerWindow.getLast()).getHitTimeUTC();
+        return hitsWithinTriggerWindow.getLast().getHitTimeUTC();
     }
 
     public int getNumberOfHitsWithinSlidingTimeWindow()
@@ -494,10 +565,9 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         return hitsWithinTriggerWindow.size();
     }
 
-    // todo: Pat is this right?
     private void reset()
     {
-        slidingTimeWindow = new SlidingTimeWindow();
+        slidingTimeWindow.clear();
         hitsWithinTriggerWindow.clear();
     }
 
@@ -511,33 +581,12 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         super.resetAlgorithm();
     }
 
-    private final class SlidingTimeWindow {
-
-        private LinkedList hits;
-
-        private SlidingTimeWindow()
+    final class SlidingTimeWindow
+        extends HitCollection
+    {
+        private boolean aboveThreshold()
         {
-            hits = new LinkedList();
-        }
-
-        private void add(IHitPayload hit)
-        {
-            hits.addLast(hit);
-        }
-
-        private int size()
-        {
-            return hits.size();
-        }
-
-        private IHitPayload slide()
-        {
-            return (IHitPayload) hits.removeFirst();
-        }
-
-        private IUTCTime startTime()
-        {
-            return ((IHitPayload) hits.getFirst()).getHitTimeUTC();
+            return (size() >= threshold);
         }
 
         private IUTCTime endTime()
@@ -547,44 +596,27 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
         private boolean inTimeWindow(IUTCTime hitTime)
         {
-            return (hitTime.compareTo(startTime()) >= 0) &&
-                   (hitTime.compareTo(endTime()) <= 0);
+            return hitTime.compareTo(startTime()) >= 0 &&
+                hitTime.compareTo(endTime()) <= 0;
         }
 
-        private LinkedList copy()
+        private IHitPayload slide()
         {
-            return (LinkedList) hits.clone();
+            return removeFirst();
         }
 
-        private boolean contains(Object object)
+        private IUTCTime startTime()
         {
-            return hits.contains(object);
-        }
-
-        private boolean overlaps(List list)
-        {
-            Iterator iter = list.iterator();
-            while (iter.hasNext()) {
-                if (contains(iter.next())) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private boolean aboveThreshold()
-        {
-            return (hits.size() >= threshold);
+            return getFirst().getHitTimeUTC();
         }
 
         public String toString()
         {
-            if (hits.size() == 0) {
+            if (size() == 0) {
                 return "Window[]*0";
             }
 
-            return "Window[" + startTime() + "-" + endTime() + "]*" +
-                hits.size();
+            return "Window[" + startTime() + "-" + endTime() + "]*" + size();
         }
     }
 

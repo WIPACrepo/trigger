@@ -22,7 +22,7 @@ public class TriggerThread
     private boolean stopped;
     private long numSent;
 
-    TriggerThread(int id, ITriggerAlgorithm algorithm)
+    public TriggerThread(int id, ITriggerAlgorithm algorithm)
     {
         if (algorithm == null) {
             throw new Error("Algorithm cannot be null");

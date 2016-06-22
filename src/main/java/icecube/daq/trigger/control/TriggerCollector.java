@@ -246,6 +246,11 @@ interface ICollectorThread
 class CollectorThread
     implements ICollectorThread, Runnable
 {
+    /**
+     * Pass in <tt>-Dicecube.sndaq.ignore</tt> to avoid sending data to SNDAQ
+     */
+    public static final String IGNORE_SNDAQ_PROPERTY = "icecube.sndaq.ignore";
+
     private static final Log LOG = LogFactory.getLog(CollectorThread.class);
 
     /** Number of milliseconds in a second */
@@ -302,7 +307,9 @@ class CollectorThread
 
         // in-ice trigger should try to send SMT8 alerts to SNDAQ
         if (srcId / 1000 == SourceIdRegistry.INICE_TRIGGER_SOURCE_ID / 1000) {
-            initializeSNDAQAlerter(algorithms);
+            if (System.getProperty(IGNORE_SNDAQ_PROPERTY, null) == null) {
+                initializeSNDAQAlerter(algorithms);
+            }
         }
 
         createTriggerThreads(algorithms);

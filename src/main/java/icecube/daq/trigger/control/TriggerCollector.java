@@ -12,7 +12,6 @@ import icecube.daq.payload.PayloadFormatException;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.ReadoutRequest;
 import icecube.daq.payload.impl.TriggerRequest;
-import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.trigger.algorithm.FlushRequest;
 import icecube.daq.trigger.algorithm.ITriggerAlgorithm;

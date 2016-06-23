@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 16155 2016-06-22 17:12:54Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 16158 2016-06-23 20:35:31Z dglo $
  *
  * Date: August 19 2005
  *
@@ -11,7 +11,6 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.PayloadInterfaceRegistry;
-import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
@@ -25,7 +24,6 @@ import icecube.daq.trigger.exceptions.UnknownParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -110,7 +108,7 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 16155 2016-06-22 17:12:54Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 16158 2016-06-23 20:35:31Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger

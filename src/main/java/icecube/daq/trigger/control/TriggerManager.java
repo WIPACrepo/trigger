@@ -17,7 +17,6 @@ import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.TriggerRequestFactory;
 import icecube.daq.payload.impl.UTCTime;
 import icecube.daq.splicer.Spliceable;
-import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.SplicedAnalysis;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
@@ -37,8 +36,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -151,8 +148,6 @@ public class TriggerManager
     /** spliceable input count */
     private long inputCount;
 
-    private long recycleCount;
-
     /**
      * source of last hit, used for monitoring
      */
@@ -186,7 +181,7 @@ public class TriggerManager
     /**
      * Add a trigger algorithm.
      *
-     * @param val algorithm being added
+     * @param trig algorithm being added
      */
     public void addTrigger(ITriggerAlgorithm trig)
     {
@@ -263,9 +258,6 @@ public class TriggerManager
      */
     public void analyze(List<Spliceable> splicedObjects)
     {
-        // Loop over the new objects in the splicer
-        int numberOfObjectsInSplicer = splicedObjects.size();
-
         for (Spliceable spl : splicedObjects) {
             ILoadablePayload payload = (ILoadablePayload) spl;
 

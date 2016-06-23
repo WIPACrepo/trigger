@@ -13,7 +13,6 @@ package icecube.daq.trigger.control;
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.juggler.alert.AlertQueue;
 import icecube.daq.payload.IPayload;
-import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.trigger.algorithm.AlgorithmStatistics;
 import icecube.daq.trigger.algorithm.ITriggerAlgorithm;

@@ -22,7 +22,6 @@ import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
-import icecube.daq.trigger.component.DAQTriggerComponent;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.config.TriggerCreator;
 import icecube.daq.trigger.control.ITriggerManager;
@@ -36,7 +35,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -406,7 +404,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 16150 2016-06-22 16:45:44Z dglo $";
+        return "$Id: TriggerComponent.java 16158 2016-06-23 20:35:31Z dglo $";
     }
 
     /**

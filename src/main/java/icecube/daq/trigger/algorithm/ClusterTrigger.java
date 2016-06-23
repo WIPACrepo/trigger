@@ -1,6 +1,5 @@
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
@@ -14,8 +13,6 @@ import icecube.daq.util.DeployedDOM;
 
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 

@@ -534,14 +534,14 @@ public abstract class DomSetFactory
                 }
                 values.add(val);
             } else {
-                String rString[] = piece.split("-");
+                String[] rString = piece.split("-");
                 if (rString.length > 2) {
                     throw new ConfigException("Bad DomSet " + name +
                                               " range \"" + piece +
                                               "\" in \"" + listStr + "\"");
                 }
 
-                Integer range[] = new Integer[2];
+                Integer[] range = new Integer[2];
                 for (int i = 0; i < 2; i++) {
                     try {
                         range[i] = Integer.valueOf(rString[i]);

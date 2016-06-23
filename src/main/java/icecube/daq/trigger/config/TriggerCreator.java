@@ -1,14 +1,11 @@
 package icecube.daq.trigger.config;
 
-import icecube.daq.payload.ISourceID;
-import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.util.JAXPUtil;
 import icecube.daq.util.JAXPUtilException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.w3c.dom.Document;

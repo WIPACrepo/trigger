@@ -21,8 +21,6 @@ import org.apache.log4j.Logger;
  */
 public class DomSet
 {
-    private static final Logger LOG = Logger.getLogger(DomSet.class);
-
     /**
      * Name of this DomSet
      */

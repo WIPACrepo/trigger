@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 16158 2016-06-23 20:35:31Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 16161 2016-07-01 19:02:34Z dglo $
  *
  * Date: August 19 2005
  *
@@ -11,6 +11,7 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
@@ -24,6 +25,7 @@ import icecube.daq.trigger.exceptions.UnknownParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -108,7 +110,7 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 16158 2016-06-23 20:35:31Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 16161 2016-07-01 19:02:34Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -140,6 +142,11 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
     private boolean configThreshold = false;
     private boolean configTimeWindow = false;
+
+    /**
+     * Time of previous hit, used to ensure strict time ordering
+     */
+    private IUTCTime lastHitTime = null;
 
     public SimpleMajorityTrigger()
     {
@@ -230,237 +237,94 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         }
         IHitPayload hit = (IHitPayload) payload;
 
-        // Check hit type and perhaps pre-screen DOMs based on channel
-        boolean usableHit =
-            getHitType(hit) == AbstractTrigger.SPE_HIT &&
-            hitFilter.useHit(hit);
-
         IUTCTime hitTimeUTC = hit.getHitTimeUTC();
         if (hitTimeUTC == null) {
             throw new TriggerException("Hit time was null");
         }
 
-        /*
-         * Initialization for first hit
-         */
+        // verify strict time ordering
+        if (lastHitTime != null && hitTimeUTC.compareTo(lastHitTime) < 0) {
+            throw new TimeOutOfOrderException(
+                    "Hit comes before previous hit:" +
+                    " Previous hit is at " + lastHitTime +
+                    " Hit is at " + hitTimeUTC + " DOMId = " +
+                    hit.getDOMID());
+        }
+        lastHitTime = hitTimeUTC;
+
         if (slidingTimeWindow.size() == 0) {
 
-            if (usableHit) {
-                // initialize slidingTimeWindow
-                slidingTimeWindow.add(hit);
-
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("This is the first hit, initializing...");
-                    LOG.debug("slidingTimeWindowStart set to " +
-                              slidingTimeWindow.startTime());
-                }
-            }
-
-            // initialize earliest time of interest
+            // Initialize earliest payload of interst
             setEarliestPayloadOfInterest(hit);
         }
+
         /*
-         * Try to add another hit
+         * Skip hits that we don't use.
+         * Check hit type and perhaps pre-screen DOMs based on channel.
          */
-        else {
+        boolean usableHit =
+            getHitType(hit) == AbstractTrigger.SPE_HIT &&
+            hitFilter.useHit(hit);
+        if (!usableHit) {
+            return;
+        }
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Processing hit at time " + hitTimeUTC);
-            }
+        /*
+         * Set the window front to the current hit time and slide the window
+         * tail forward, removing hits no longer in the window.
+         */
+        while (slidingTimeWindow.size() > 0 && 
+               !slidingTimeWindow.inTimeWindow(hitTimeUTC)) {
 
-            /*
-             * Check for out-of-time hits
-             * hitTime < slidingTimeWindowStart
-             */
-            if (hitTimeUTC.compareTo(slidingTimeWindow.startTime()) < 0) {
-                throw new TimeOutOfOrderException(
-                        "Hit comes before start of sliding time window:" +
-                        " Window is at " + slidingTimeWindow.startTime() +
-                        " Hit is at " + hitTimeUTC + " DOMId = " +
-                        hit.getDOMID());
-            }
+            IHitPayload oldHit = slidingTimeWindow.slide();
 
             /*
-             * Hit falls within the slidingTimeWindow
+             * If this hit is not part of the trigger, update the
+             * Earliest time of interest.  If the trigger is on, the
+             * hit, by definition, is part of the trigger.
              */
-            if (slidingTimeWindow.inTimeWindow(hitTimeUTC)) {
-                if (usableHit) {
-                    slidingTimeWindow.add(hit);
-
-                    // If onTrigger, add hit to list
-                    if (onTrigger) {
-                        addHitToTriggerWindow(hit);
-                    }
-
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Hit falls within slidingTimeWindow" +
-                                  " numberOfHitsInSlidingTimeWindow now" +
-                                  " equals " + slidingTimeWindow.size());
-                    }
-                }
-            }
-            /*
-             * Hits falls outside the slidingTimeWindow
-             *   First see if we have a trigger, then slide the window
-             */
-            else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Hit falls outside slidingTimeWindow," +
-                              " numberOfHitsInSlidingTimeWindow is "
-                              + slidingTimeWindow.size());
-                }
-
-                // Do we have a trigger?
-                if (slidingTimeWindow.aboveThreshold()) {
-
-                    // onTrigger?
-                    if (onTrigger) {
-
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Trigger is already on. Changing" +
-                                      " triggerWindowStop to "
-                                      + getTriggerWindowStop());
-                        }
-
-                    } else {
-
-                        // We now have the start of a new trigger
-                        hitsWithinTriggerWindow.addAll(slidingTimeWindow.copy());
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Trigger is now on," +
-                                      " numberOfHitsInTriggerWindow = "
-                                      + hitsWithinTriggerWindow.size() +
-                                      " triggerWindowStart = "
-                                      + getTriggerWindowStart() +
-                                      " triggerWindowStop = "
-                                      + getTriggerWindowStop());
-                        }
-
-                    }
-
-                    // turn trigger on
-                    onTrigger = true;
-                }
-
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Now slide the window...");
-                }
-
-                // Now advance the slidingTimeWindow until the hit is inside
-                // or there is only 1 hit left in window
-                while ( (!slidingTimeWindow.inTimeWindow(hitTimeUTC)) &&
-                        (slidingTimeWindow.size() > 1) ) {
-                    IHitPayload oldHit = slidingTimeWindow.slide();
-
-                    // if this hit is not part of the trigger, update the
-                    // earliest time of interest
-                    if (hitsWithinTriggerWindow == null ||
-                        !hitsWithinTriggerWindow.contains(oldHit))
-                    {
-                        IPayload oldHitPlus =
-                            new DummyPayload(oldHit.getHitTimeUTC().getOffsetUTCTime(0.1));
-                        setEarliestPayloadOfInterest(oldHitPlus);
-                    }
-
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("numberOfHitsInSlidingTimeWindow is now " +
-                                  slidingTimeWindow.size()
-                                  + " slidingTimeWindowStart is now " +
-                                  slidingTimeWindow.startTime());
-                    }
-                }
-
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Done sliding");
-                }
-
-                /*
-                 * Does it fall in new slidingTimeWindow?
-                 */
-                if (!slidingTimeWindow.inTimeWindow(hitTimeUTC)) {
-
-                    IHitPayload oldHit = slidingTimeWindow.slide();
-
-                    if (hitsWithinTriggerWindow == null ||
-                        !hitsWithinTriggerWindow.contains(oldHit))
-                    {
-                        IPayload oldHitPlus =
-                            new DummyPayload(oldHit.getHitTimeUTC().getOffsetUTCTime(0.1));
-                        setEarliestPayloadOfInterest(oldHitPlus);
-                    }
-
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Hit still outside slidingTimeWindow," +
-                                  " start a new one");
-                    }
-
-                }
-
-                if (usableHit) {
-                    slidingTimeWindow.add(hit);
-                }
-
-                if (LOG.isDebugEnabled()) {
-                    if (slidingTimeWindow.size() == 0) {
-                        LOG.debug("Empty sliding time window");
-                    } else {
-                        LOG.debug("NumberOfHitsInSlidingTimeWindow = " +
-                                  slidingTimeWindow.size() +
-                                  " slidingTimeWindowStart = " +
-                                  slidingTimeWindow.startTime());
-                    }
-                }
-
-                /*
-                 * If onTrigger, check for finished trigger
-                 */
-                if (onTrigger) {
-
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Trigger is on," +
-                                  " numberOfHitsInSlidingTimeWindow = "
-                                  + slidingTimeWindow.size());
-                    }
-
-                    // todo - also need to check if any hits still in STW are
-                    // also in TW
-                    if ( ( (!slidingTimeWindow.aboveThreshold()) &&
-                           (!slidingTimeWindow.overlaps(hitsWithinTriggerWindow)) ) ||
-                         ( (slidingTimeWindow.size() == 1) &&
-                           (threshold == 1) ) )
-                    {
-
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Report trigger and reset");
-                        }
-
-                        // form trigger and reset
-                        for (IHitPayload h2 : hitsWithinTriggerWindow) {
-                            if (slidingTimeWindow.contains(h2)) {
-                                LOG.error("Hit at time " +
-                                          h2.getPayloadTimeUTC()
-                                          + " is part of new trigger but is" +
-                                          " still in SlidingTimeWindow");
-                            }
-                        }
-                        formTrigger(hitsWithinTriggerWindow.list(), null,
-                                    null);
-
-                        onTrigger = false;
-                        hitsWithinTriggerWindow.clear();
-
-                    } else if (usableHit) {
-                        addHitToTriggerWindow(hit);
-
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Still on trigger," +
-                                      " numberOfHitsInTriggerWindow = "
-                                      + hitsWithinTriggerWindow.size());
-                        }
-                    }
-                }
+            if (!haveTrigger()) {
+                IPayload oldHitPlus =
+                    new DummyPayload(oldHit.getHitTimeUTC().getOffsetUTCTime(0.1));
+                setEarliestPayloadOfInterest(oldHitPlus);
             }
         }
+
+        // Add hit to the sliding window
+        slidingTimeWindow.add(hit);
+
+        // Quit if we're below threshold and we don't currently have a trigger
+        if (!slidingTimeWindow.aboveThreshold() && !haveTrigger()) {
+            return;
+        }
+
+        /*
+         * We're either above threshold, currently have a trigger, or both.
+         * Check if we have reached the trigger ending condition.
+         *
+         * N.B. Ending condition is defined as a time period the
+         * length of the trigger window with no hits. (i.e.
+         * the sliding time window only has one hit).
+         *
+         * N.B. We also have to explicitly check haveTrigger() to correctly
+         * handle the threshold == 1 case, because we may not have a
+         * trigger at this point in this case.
+         */
+        if (slidingTimeWindow.size() == 1 && haveTrigger()) {
+            flushTrigger();
+            return;
+        }
+
+        /* 
+         * Trigger condition satisfied.  If trigger is new,
+         * we need to copy the trigger window hits
+         */
+         if (!haveTrigger()) {
+             hitsWithinTriggerWindow.addAll(slidingTimeWindow.copy());
+         } else {
+             // We only need to copy the current hit
+             hitsWithinTriggerWindow.add(hit);
+         }
     }
 
     /**
@@ -469,40 +333,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      */
     public void flush()
     {
-        boolean formLast = true;
-
-        // see if we're above threshold, if so form a trigger
-        if (onTrigger) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Last Trigger is on, numberOfHitsInTriggerWindow = "
-                          + hitsWithinTriggerWindow.size());
-            }
-        }
-        //see if TimeWindow has enough hits to form a trigger before
-        // an out of bounds hit
-        else if(slidingTimeWindow.aboveThreshold()) {
-
-            hitsWithinTriggerWindow.addAll(slidingTimeWindow.copy());
-
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(" Last Trigger is now on," +
-                          " numberOfHitsInTriggerWindow = " +
-                          hitsWithinTriggerWindow.size() +
-                          (hitsWithinTriggerWindow.size() == 0 ? "" :
-                           " triggerWindowStart = " +
-                           getTriggerWindowStart() + " triggerWindowStop = "+
-                           getTriggerWindowStop()));
-            }
-        }
-        else {
-            formLast = false;
-        }
-
-        // form last trigger
-        if (hitsWithinTriggerWindow.size() > 0 && formLast) {
-            formTrigger(hitsWithinTriggerWindow.list(), null, null);
-        }
-
+        flushTrigger();
         reset();
     }
 
@@ -527,12 +358,21 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
     }
 
     /**
-     * add a hit to the trigger time window
-     * @param triggerPrimitive hit to add
+     * Do we currently have a trigger?
      */
-    private void addHitToTriggerWindow(IHitPayload triggerPrimitive)
+    private boolean haveTrigger()
     {
-        hitsWithinTriggerWindow.add(triggerPrimitive);
+        return hitsWithinTriggerWindow.size() > 0;
+    }
+
+     /**
+     * Form any pending triggers if we have them
+     */
+    private void flushTrigger() {
+        if (haveTrigger()) {
+            formTrigger(hitsWithinTriggerWindow.list(), null, null);
+            hitsWithinTriggerWindow.clear();
+        }
     }
 
     /**
@@ -567,6 +407,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
     {
         slidingTimeWindow.clear();
         hitsWithinTriggerWindow.clear();
+        lastHitTime = null;
     }
 
     /**

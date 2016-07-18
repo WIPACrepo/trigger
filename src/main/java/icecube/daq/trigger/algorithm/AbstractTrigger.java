@@ -395,9 +395,6 @@ public abstract class AbstractTrigger
                       lastTime);
         }
 
-        // set earliest payload of interest to 1/10 ns after the last hit
-        IUTCTime lastHitTime = lastHit.getHitTimeUTC();
-
         final int uid = getNextUID();
 
         // create readout requests
@@ -437,6 +434,9 @@ public abstract class AbstractTrigger
 
         // report it
         reportTrigger(triggerPayload);
+
+        // set earliest payload of interest to 1/10 ns after the last hit
+        IUTCTime lastHitTime = lastHit.getHitTimeUTC();
 
         // update earliest hit time
         IPayload dummy = new DummyPayload(lastHitTime.getOffsetUTCTime(0.1));

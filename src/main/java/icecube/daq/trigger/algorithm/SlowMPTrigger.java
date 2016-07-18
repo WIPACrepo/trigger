@@ -63,7 +63,7 @@ public class SlowMPTrigger extends AbstractTrigger
         {
             hit  = new_hit;
 
-            utc_time = hit.getHitTimeUTC().longValue();
+            utc_time = hit.getUTCTime();
             mb_id = hit.getDOMID().longValue();
         }
 
@@ -475,7 +475,6 @@ public class SlowMPTrigger extends AbstractTrigger
                                        );
         // This upcast should be safe now
         IHitPayload hitPayload = (IHitPayload) payload;
-        //LOG.warn("HITTIME: " + hitPayload.getHitTimeUTC() + "PAYLOADTIME: " + hitPayload.getPayloadTimeUTC());
         // Check hit type and perhaps pre-screen DOMs based on channel
         boolean usableHit =
             getHitType(hitPayload) == AbstractTrigger.SPE_HIT &&
@@ -671,7 +670,7 @@ public class SlowMPTrigger extends AbstractTrigger
             if(info.get_num_tuples() >= min_n_tuples)
             {
                 //System.out.format("FOUND TRIGGER: start: %d, end :%d with %d tuples%n",info.get_first_hit().get_time(), info.get_last_hit().get_time(), info.get_num_tuples() );
-                //LOG.warn("FOUND TRIGGER: length: " + (info.get_last_hit().getHitTimeUTC().longValue()-info.get_first_hit().getHitTimeUTC().longValue()) + " with " + info.get_num_tuples());
+                //LOG.warn("FOUND TRIGGER: length: " + (info.get_last_hit().getUTCTime()-info.get_first_hit().getUTCTime()) + " with " + info.get_num_tuples());
                 // form trigger here for each trigger_info
                 formTrigger(info.get_hit_list(), null, null);
 
@@ -755,8 +754,8 @@ public class SlowMPTrigger extends AbstractTrigger
                     }
                     else
                     {
-                        long trigger_start_temp = trigger_list.getLast().get_first_hit().getHitTimeUTC().longValue();
-                        long trigger_end_temp = trigger_list.getLast().get_last_hit().getHitTimeUTC().longValue();
+                        long trigger_start_temp = trigger_list.getLast().get_first_hit().getUTCTime();
+                        long trigger_end_temp = trigger_list.getLast().get_last_hit().getUTCTime();
 
                         //System.out.format("TEMP: %d %d%n", trigger_start_temp, trigger_end_temp);
 

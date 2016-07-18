@@ -184,6 +184,6 @@ public class MockHit
 
     public String toString()
     {
-        return "MockHit*" + getHitTimeUTC().longValue();
+        return "MockHit*" + getUTCTime();
     }
 }

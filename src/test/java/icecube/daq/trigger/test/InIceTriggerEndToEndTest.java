@@ -19,6 +19,7 @@ import icecube.daq.trigger.control.SNDAQAlerter;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.IDOMRegistry;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -120,7 +121,7 @@ public class InIceTriggerEndToEndTest
                 configDir.substring(breakPt);
         }
 
-        DOMRegistry domReg;
+        IDOMRegistry domReg;
         try {
             domReg = DOMRegistry.loadRegistry(configDir);
             trigMgr.setDOMRegistry(domReg);

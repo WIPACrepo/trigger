@@ -8,7 +8,7 @@ import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.IDOMRegistry;
 import icecube.daq.util.DeployedDOM;
 
 import java.util.Iterator;
@@ -255,7 +255,7 @@ public class ClusterTrigger extends AbstractTrigger
 
     private boolean processHitQueue()
     {
-        final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
+        final IDOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
         boolean trigger = false;
 
         // clear coherence array

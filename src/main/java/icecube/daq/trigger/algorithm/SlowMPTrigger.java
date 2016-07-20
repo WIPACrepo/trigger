@@ -6,7 +6,7 @@ import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.IDOMRegistry;
 import icecube.daq.util.DeployedDOM;
 
 import java.util.HashMap;
@@ -55,7 +55,7 @@ public class SlowMPTrigger extends AbstractTrigger
     private boolean min_n_tuples_configured = false;
     private boolean max_event_length_configured = false;
 
-    private DOMRegistry domRegistry;
+    private IDOMRegistry domRegistry;
 
     private class min_hit_info
     {

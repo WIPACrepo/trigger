@@ -8,7 +8,7 @@ import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.IDOMRegistry;
 import icecube.daq.util.DeployedDOM;
 
 import java.util.ArrayList;
@@ -233,7 +233,7 @@ public class CylinderTrigger extends AbstractTrigger
         if (triggerQueue.size() >= simpleMultiplicity) return true;
         IHitPayload[] q = triggerQueue.toArray(new IHitPayload[0]);
 
-        final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
+        final IDOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
 
         ArrayList<IHitPayload> hitsInCylinder =
             new ArrayList<IHitPayload>(q.length*(q.length-1));

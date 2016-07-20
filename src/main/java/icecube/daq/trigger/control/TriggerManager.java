@@ -27,7 +27,7 @@ import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnimplementedError;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.IDOMRegistry;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -143,7 +143,7 @@ public class TriggerManager
     /** splicer associated with this manager */
     private Splicer splicer;
 
-    private DOMRegistry domRegistry;
+    private IDOMRegistry domRegistry;
 
     /** spliceable input count */
     private long inputCount;
@@ -331,7 +331,7 @@ public class TriggerManager
      *
      * @return DOM registry
      */
-    public DOMRegistry getDOMRegistry()
+    public IDOMRegistry getDOMRegistry()
     {
         return domRegistry;
     }
@@ -780,7 +780,7 @@ public class TriggerManager
      *
      * @param domRegistry DOM registry
      */
-    public void setDOMRegistry(DOMRegistry domRegistry)
+    public void setDOMRegistry(IDOMRegistry domRegistry)
     {
         this.domRegistry = domRegistry;
         DomSetFactory.setDomRegistry(domRegistry);

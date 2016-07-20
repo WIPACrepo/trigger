@@ -4,7 +4,7 @@ import icecube.daq.payload.IHitPayload;
 import icecube.daq.trigger.config.DomSet;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.exceptions.ConfigException;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.IDOMRegistry;
 
 /**
  * Created by IntelliJ IDEA.
@@ -59,7 +59,7 @@ public class HitFilter
      *
      * @param dr DOM registry
      */
-    public void setDomRegistry(DOMRegistry dr)
+    public void setDomRegistry(IDOMRegistry dr)
     {
         DomSetFactory.setDomRegistry(dr);
     }

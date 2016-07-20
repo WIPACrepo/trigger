@@ -16,7 +16,7 @@ import icecube.daq.payload.IPayload;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.trigger.algorithm.AlgorithmStatistics;
 import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.IDOMRegistry;
 
 /**
  * This interface defines the behavior of a TriggerManager
@@ -65,7 +65,7 @@ public interface ITriggerManager
      *
      * @return DOM registry
      */
-    DOMRegistry getDOMRegistry();
+    IDOMRegistry getDOMRegistry();
 
     /**
      * Get number of triggers queued for input.
@@ -115,7 +115,7 @@ public interface ITriggerManager
      * @param registry DOM registry
      * @deprecated
      */
-    void setDOMRegistry(DOMRegistry registry);
+    void setDOMRegistry(IDOMRegistry registry);
 
     /**
      * Notify the thread of the earliest payload of interest

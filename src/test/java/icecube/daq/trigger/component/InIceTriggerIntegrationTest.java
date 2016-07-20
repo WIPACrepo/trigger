@@ -26,6 +26,7 @@ import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.util.DOMRegistry;
 import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.IDOMRegistry;
 
 import java.io.File;
 import java.io.IOException;
@@ -113,7 +114,8 @@ public class InIceTriggerIntegrationTest
         }
     }
 
-    private void sendInIceData(Pipe[] tails, int numObjs, DOMRegistry registry)
+    private void sendInIceData(Pipe[] tails, int numObjs,
+                               IDOMRegistry registry)
         throws IOException
     {
         java.util.Iterator<Long> domIter = registry.keys().iterator();
@@ -149,7 +151,7 @@ public class InIceTriggerIntegrationTest
         System.getProperties().setProperty(SNDAQAlerter.PROPERTY, ":12345");
     }
 
-    private void startAndRun(IniceTriggerComponent comp, DOMRegistry domReg,
+    private void startAndRun(IniceTriggerComponent comp, IDOMRegistry domReg,
                              int runInstance)
         throws DAQCompException, IOException
     {
@@ -227,7 +229,7 @@ public class InIceTriggerIntegrationTest
             DAQTestUtil.buildConfigFile(getClass().getResource("/").getPath(),
                                         "sps-2012-013");
 
-        DOMRegistry domReg;
+        IDOMRegistry domReg;
         try {
             domReg = DOMRegistry.loadRegistry(cfgFile.getParent());
         } catch (Exception ex) {

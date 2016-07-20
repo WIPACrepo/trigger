@@ -21,6 +21,7 @@ import icecube.daq.trigger.exceptions.TimeOutOfOrderException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.IDOMRegistry;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -459,6 +460,8 @@ public class IniceVolumeTrigger extends AbstractTrigger {
             LOG.debug("Counting hits which meet volume trigger criteria");
         }
 
+        IDOMRegistry registry = getTriggerHandler().getDOMRegistry();
+
 	// loop over all hits and use each as the center of a volume element
 	Iterator iter1 = hitsWithinTriggerWindow.iterator();
 	while (iter1.hasNext()) {
@@ -466,17 +469,19 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	    int numberOfHits = 1;
 
 	    // get neighboring doms
-	    long centerId = center.getDOMID().longValue();
-	    ArrayList<String> neighbors = getNeighboringDoms(centerId);
+            DeployedDOM centerDom =
+                registry.getDom(center.getDOMID().longValue());
+	    ArrayList<DeployedDOM> neighbors = getNeighboringDoms(centerDom);
 
 	    // loop over all other hits and check to see if they are in the volume element
 	    Iterator iter2 = hitsWithinTriggerWindow.iterator();
 	    while (iter2.hasNext()) {
 		if (iter2 == iter1) continue;
 		IHitPayload neighbor = (IHitPayload) iter2.next();
-		String neighborId = neighbor.getDOMID().toString();
+                DeployedDOM neighborDom =
+                    registry.getDom(neighbor.getDOMID().longValue());
 
-		if (neighbors.contains(neighborId)) {
+		if (neighbors.contains(neighborDom)) {
 		    // we have a hit in the volume element
 		    numberOfHits++;
 
@@ -489,13 +494,13 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	}
     }
 
-    private ArrayList<String> getNeighboringDoms(long centerDom)
+    private ArrayList<DeployedDOM> getNeighboringDoms(DeployedDOM centerDom)
     {
-	ArrayList<String> neighbors = new ArrayList<String>();
+	ArrayList<DeployedDOM> neighbors = new ArrayList<DeployedDOM>();
 
 	// get the string and position of the center dom
-	int centerString = getTriggerHandler().getDOMRegistry().getStringMajor(centerDom);
-	int centerPosition = getTriggerHandler().getDOMRegistry().getStringMinor(centerDom);
+	int centerString = centerDom.getStringMajor();
+	int centerPosition = centerDom.getStringMinor();
 
 	// get the vertical shift of the center string
 	int vShift = stringMap.getVerticalOffset(centerString);
@@ -507,12 +512,13 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	if (maxPos > 60) maxPos = 60;
 
 	// add doms on center string, skipping center om
-	Collection<DeployedDOM> allDoms = getTriggerHandler().getDOMRegistry().getDomsOnHub(centerString);
+	Collection<DeployedDOM> allDoms =
+            getTriggerHandler().getDOMRegistry().getDomsOnHub(centerString);
 	for (DeployedDOM dom : allDoms) {
 	    int position = dom.getStringMinor();
 	    if (position != centerPosition) {
 		if ( (position >= minPos) && (position <= maxPos) ) {
-		    neighbors.add(dom.getDomId());
+		    neighbors.add(dom);
 		}
 	    }
 	}
@@ -537,7 +543,7 @@ public class IniceVolumeTrigger extends AbstractTrigger {
 	    for (DeployedDOM dom : allDoms) {
 		int position = dom.getStringMinor();
 		if ( (position >= minPos) && (position <= maxPos) ) {
-		    neighbors.add(dom.getDomId());
+		    neighbors.add(dom);
 		}
 
 	    }

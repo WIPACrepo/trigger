@@ -86,7 +86,8 @@ public class AlgorithmStatistics
         StringBuilder buf = new StringBuilder(getName());
         buf.append(':').append(getNumberOfQueuedInputs());
         buf.append("->").append(getNumberOfCreatedRequests());
-        buf.append("->").append(getNumberOfCachedRequests());
+        buf.append(" (").append(getNumberOfCachedRequests());
+        buf.append(" cached)");
 
         String extra = getExtra();
         if (extra.length() > 0) {

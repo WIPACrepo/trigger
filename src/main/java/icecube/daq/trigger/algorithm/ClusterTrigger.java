@@ -8,8 +8,8 @@ import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.util.IDOMRegistry;
 import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.IDOMRegistry;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -185,9 +185,10 @@ public class ClusterTrigger extends AbstractTrigger
 
         if (logger.isDebugEnabled())
         {
-            long mbid = hitPayload.getDOMID().longValue();
-            DeployedDOM dom =
-                getTriggerHandler().getDOMRegistry().getDom(mbid);
+            IDOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
+
+            DeployedDOM dom = getDOMFromHit(domRegistry, hitPayload);
+
             String chanStr;
             if (dom == null) {
                 chanStr = "<null>";
@@ -264,10 +265,9 @@ public class ClusterTrigger extends AbstractTrigger
         }
 
         for (IHitPayload hit : triggerQueue) {
-            long mbid = hit.getDOMID().longValue();
-            DeployedDOM dom = domRegistry.getDom(mbid);
+            DeployedDOM dom = getDOMFromHit(domRegistry, hit);
             if (dom == null) {
-                logger.error(String.format("Cannot find DOM %012x from %s", mbid, hit.toString()));
+                logger.error("Cannot find DOM for " + hit.toString());
                 continue;
             }
 
@@ -305,8 +305,7 @@ public class ClusterTrigger extends AbstractTrigger
              hitIt.hasNext(); )
         {
             IHitPayload hit = hitIt.next();
-            long mbid = hit.getDOMID().longValue();
-            DeployedDOM dom = domRegistry.getDom(mbid);
+            DeployedDOM dom = getDOMFromHit(domRegistry, hit);
             int[] string = coherence[dom.getStringMajor() - 1];
 
             int top = Math.max( 1, dom.getStringMinor() - coherenceUp) - 1;

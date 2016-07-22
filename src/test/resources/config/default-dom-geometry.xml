@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <domGeometry>
   <string>
-    <number>00</number>
+    <number>0</number>
     <dom>
       <position>91</position>
       <mainBoardId>1e5b72775d19</mainBoardId>
@@ -16,7 +16,7 @@
     </dom>
   </string>
   <string>
-    <number>02</number>
+    <number>2</number>
     <dom>
       <position>01</position>
       <channelId>128</channelId>

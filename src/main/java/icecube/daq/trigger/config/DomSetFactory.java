@@ -48,15 +48,14 @@ public abstract class DomSetFactory
 
     /**
      * Add all DOMs from <tt>hub</tt> within the range
-     * [<tt>low</tt>-<tt>high</tt>] to the <tt>domIds</tt> list.
+     * [<tt>low</tt>-<tt>high</tt>] to the DOM set.
      */
-    private static void addAllDoms(List<Long> domIds, int hub, int low,
-                                   int high)
+    private static void addAllDoms(DomSet domSet, int hub, int low, int high)
     {
         for (DeployedDOM dom : domRegistry.getDomsOnHub(hub)) {
             int pos = dom.getStringMinor();
             if (pos >= low && pos <= high) {
-                domIds.add(dom.getNumericMainboardId());
+                domSet.add(dom);
             }
         }
     }
@@ -227,11 +226,11 @@ public abstract class DomSetFactory
             return null;
         }
 
-        ArrayList<Long> domIds = new ArrayList<Long>();
+        DomSet domSet = new DomSet(name);
 
-        loadSets(name, domIds, topNode);
+        loadSets(domSet, topNode);
 
-        loadOuterStrings(name, domIds, topNode);
+        loadOuterStrings(domSet, topNode);
 
         XPath xpath = XPathFactory.newInstance().newXPath();
 
@@ -308,7 +307,7 @@ public abstract class DomSetFactory
                               " position " + pos);
                 }
 
-                addAllDoms(domIds, hub, low, high);
+                addAllDoms(domSet, hub, low, high);
             }
 
             NodeList strsList;
@@ -353,16 +352,15 @@ public abstract class DomSetFactory
                 }
 
                 for (int hub = lowhub; hub <= highhub; hub++) {
-                    addAllDoms(domIds, hub, low, high);
+                    addAllDoms(domSet, hub, low, high);
                 }
             }
         }
 
-        return new DomSet(name, domIds);
+        return domSet;
     }
 
-    private static void loadOuterStrings(String name, List<Long> domIds,
-                                         Node topNode)
+    private static void loadOuterStrings(DomSet domSet, Node topNode)
         throws ConfigException
     {
         NodeList list;
@@ -387,7 +385,7 @@ public abstract class DomSetFactory
             } catch (NumberFormatException nfe) {
                 throw new ConfigException("Bad string hub \"" +
                                           elem.getAttribute("hub") +
-                                          "\" for DomSet " + name);
+                                          "\" for DomSet " + domSet.getName());
             }
 
             int pos;
@@ -396,14 +394,14 @@ public abstract class DomSetFactory
             } catch (NumberFormatException nfe) {
                 throw new ConfigException("Bad string position \"" +
                                           elem.getAttribute("position") +
-                                          "\" for DomSet " + name);
+                                          "\" for DomSet " + domSet.getName());
             }
 
-            addAllDoms(domIds, hub, pos, pos);
+            addAllDoms(domSet, hub, pos, pos);
         }
     }
 
-    private static void loadSets(String name, List<Long> domIds, Node topNode)
+    private static void loadSets(DomSet domSet, Node topNode)
         throws ConfigException
     {
         NodeList list;
@@ -422,25 +420,28 @@ public abstract class DomSetFactory
 
             Element elem = (Element) n;
 
-            List<Integer> positions = parseAlternatives(name, elem,
-                                                        "position");
+            List<Integer> positions =
+                parseAlternatives(domSet.getName(), elem, "position");
             if (positions == null) {
-                throw new ConfigException("DomSet " + name + " contains a" +
-                                          " <string> which is missing" +
-                                          " a \"position\" attribute");
+                throw new ConfigException("DomSet " + domSet.getName() +
+                                          " contains a <string> which is" +
+                                          " missing a \"position\" attribute");
             }
 
-            List<Integer> hubs = parseAlternatives(name, elem, "hub");
-            List<Integer> strings = parseAlternatives(name, elem, "string");
+            List<Integer> hubs =
+                parseAlternatives(domSet.getName(), elem, "hub");
+            List<Integer> strings =
+                parseAlternatives(domSet.getName(), elem, "string");
             if (hubs == null && strings == null) {
-                throw new ConfigException("DomSet " + name + " contains a" +
-                                          " <string> which is missing" +
-                                          " either a \"hub\" or \"string\"" +
-                                          " attribute");
+                throw new ConfigException("DomSet " + domSet.getName() +
+                                          " contains a <string> which is" +
+                                          " missing either a \"hub\" or" +
+                                          " \"string\" attribute");
             } else if (hubs != null && strings != null) {
-                throw new ConfigException("DomSet " + name + " contains a" +
-                                          " <string> with both \"hub\" and" +
-                                          " \"string\" attributes");
+                throw new ConfigException("DomSet " + domSet.getName() +
+                                          " contains a <string> with both" +
+                                          " \"hub\" and \"string\"" +
+                                          " attributes");
             }
 
             // at this point either 'hubs' or 'strings' is non-null
@@ -469,7 +470,7 @@ public abstract class DomSetFactory
                 for (Integer pos : positions) {
                     for (DeployedDOM dom : doms) {
                         if (dom.getStringMinor() == pos) {
-                            domIds.add(dom.getNumericMainboardId());
+                            domSet.add(dom);
                         }
                     }
                 }

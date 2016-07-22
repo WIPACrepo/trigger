@@ -28,6 +28,8 @@ import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnimplementedError;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
+import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.IDOMRegistry;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -441,6 +443,15 @@ public abstract class AbstractTrigger
         // update earliest hit time
         IPayload dummy = new DummyPayload(lastHitTime.getOffsetUTCTime(0.1));
         setEarliestPayloadOfInterest(dummy);
+    }
+
+    static DeployedDOM getDOMFromHit(IDOMRegistry registry, IHitPayload hit)
+    {
+        if (hit.hasChannelID()) {
+            return registry.getDom(hit.getChannelID());
+        }
+
+        return registry.getDom(hit.getDOMID().longValue());
     }
 
     /**

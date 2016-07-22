@@ -64,6 +64,11 @@ public class MockHit
         return compareTo(obj) == 0;
     }
 
+    public short getChannelID()
+    {
+        throw new Error("Unimplemented");
+    }
+
     public IDOMID getDOMID()
     {
         if (domObj == null) {
@@ -122,6 +127,11 @@ public class MockHit
     public int getTriggerType()
     {
         throw new Error("Unimplemented");
+    }
+
+    public boolean hasChannelID()
+    {
+        return false;
     }
 
     public int length()

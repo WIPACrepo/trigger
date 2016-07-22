@@ -898,6 +898,11 @@ public class TriggerManagerTest
             return new MyHit(srcId, getUTCTime());
         }
 
+        public short getChannelID()
+        {
+            throw new Error("Unimplemented");
+        }
+
         public IDOMID getDOMID()
         {
             throw new Error("Unimplemented");
@@ -937,6 +942,11 @@ public class TriggerManagerTest
         }
 
         public int getTriggerType()
+        {
+            throw new Error("Unimplemented");
+        }
+
+        public boolean hasChannelID()
         {
             throw new Error("Unimplemented");
         }

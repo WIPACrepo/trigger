@@ -90,6 +90,10 @@ public class HitFilter
         }
 
         // if the dom is in the domSet, use the hit
+        if (hit.hasChannelID()) {
+            return domSet.inSet(hit.getChannelID());
+        }
+
         return domSet.inSet(hit.getDOMID());
     }
 

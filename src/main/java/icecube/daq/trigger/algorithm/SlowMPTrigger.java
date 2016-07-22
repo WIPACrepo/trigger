@@ -59,29 +59,17 @@ public class SlowMPTrigger extends AbstractTrigger
 
     private class min_hit_info
     {
+        private IHitPayload hit;
+        private DeployedDOM dom;
+
         min_hit_info(IHitPayload new_hit)
         {
             hit  = new_hit;
-
-            utc_time = hit.getUTCTime();
-            mb_id = hit.getDOMID().longValue();
-        }
-
-        private IHitPayload hit;
-
-        private long mb_id;
-        private long utc_time;
-
-        private DeployedDOM dom;
-
-        public long get_mb_id()
-        {
-            return mb_id;
         }
 
         public long get_time()
         {
-            return utc_time;
+            return hit.getUTCTime();
         }
 
         public IHitPayload get_hit()
@@ -96,10 +84,23 @@ public class SlowMPTrigger extends AbstractTrigger
                     domRegistry = getTriggerHandler().getDOMRegistry();
                 }
 
-                dom = domRegistry.getDom(mb_id);
+                if (hit.hasChannelID()) {
+                    dom = domRegistry.getDom(hit.getChannelID());
+                } else {
+                    dom = domRegistry.getDom(hit.getDOMID().longValue());
+                }
             }
 
             return dom;
+        }
+
+        public String toString()
+        {
+            if (dom == null) {
+                return hit.toString();
+            }
+
+            return hit.toString() + "[" + dom + "]";
         }
     }
 
@@ -702,9 +703,9 @@ public class SlowMPTrigger extends AbstractTrigger
                 domRegistry = getTriggerHandler().getDOMRegistry();
             }
 
-            double p_diff1 = domRegistry.distanceBetweenDOMs(hit1.get_mb_id(), hit2.get_mb_id());
-            double p_diff2 = domRegistry.distanceBetweenDOMs(hit2.get_mb_id(), hit3.get_mb_id());
-            double p_diff3 = domRegistry.distanceBetweenDOMs(hit1.get_mb_id(), hit3.get_mb_id());
+            double p_diff1 = domRegistry.distanceBetweenDOMs(hit1.get_dom(), hit2.get_dom());
+            double p_diff2 = domRegistry.distanceBetweenDOMs(hit2.get_dom(), hit3.get_dom());
+            double p_diff3 = domRegistry.distanceBetweenDOMs(hit1.get_dom(), hit3.get_dom());
             double cos_alpha = 1.0;
             //LOG.warn("    ->step2 - p_diff1: " + p_diff1 + " p_diff2: " + p_diff2 + " pdiff3: " + p_diff3);
 
@@ -793,17 +794,19 @@ public class SlowMPTrigger extends AbstractTrigger
     {
         if (domRegistry == null) {
             domRegistry = getTriggerHandler().getDOMRegistry();
+            if (domRegistry == null) {
+                throw new Error("DOM registry has not been set in " +
+                                getTriggerHandler());
+            }
         }
 
         DeployedDOM dom1 = hit1.get_dom();
         if (dom1 == null) {
-            throw new Error(String.format("Cannot find %012x",
-                                          hit1.get_mb_id()));
+            throw new Error("Cannot find " + hit1);
         }
         DeployedDOM dom2 = hit2.get_dom();
         if (dom2 == null) {
-            throw new Error(String.format("Cannot find %012x",
-                                          hit1.get_mb_id()));
+            throw new Error("Cannot find " + hit2);
         }
 
         int string_nr1 = dom1.getStringMajor();

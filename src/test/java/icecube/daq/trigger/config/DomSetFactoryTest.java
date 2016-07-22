@@ -33,7 +33,7 @@ class MyRegistry
     {
         final long mbid = (long) (hubId + 1) * 0x1000L + (long) pos;
         DeployedDOM dom = new DeployedDOM(mbid, originalString, pos, hubId);
-        addDom(mbid, hubId, pos);
+        addDom(mbid, originalString, pos, hubId);
         return dom;
     }
 
@@ -47,14 +47,14 @@ class MyRegistry
     final void addInIce(int hub)
     {
         for (int pos = 1; pos <= 60; pos++) {
-            addDom(hub, pos);
+            addDom(hub, pos, hub);
         }
     }
 
     final void addScintillators(int hub, int originalString)
     {
         for (int pos = 65; pos <= 66; pos++) {
-            addDom(hub, pos, originalString);
+            addDom(originalString, pos, hub);
         }
     }
 }
@@ -69,8 +69,8 @@ public class DomSetFactoryTest
     private static final MockDOMRegistry buildRegistry()
     {
         MyRegistry reg = new MyRegistry();
-        reg.addDom(0, 91);
-        reg.addDom(0, 92);
+        reg.addDom(0, 65);
+        reg.addDom(0, 66);
 
         // add string 1 with icetop DOMs on hub 203 and scintillors on hub 211
         reg.addInIce(1);

@@ -15,14 +15,29 @@ public class MockDOMRegistry
     private HashMap<Integer, HashSet<DeployedDOM>> hubDOMs =
         new HashMap<Integer, HashSet<DeployedDOM>>();
 
-    public void addDom(long mbId, int hub, int position)
+    public void addDom(long mbId, int string, int position)
     {
-        DeployedDOM dom = new DeployedDOM(mbId, hub, position);
+        addDom(mbId, string, position, string);
+    }
+
+    public void addDom(long mbId, int string, int position, int hub)
+    {
+        DeployedDOM dom = new DeployedDOM(mbId, string, position, hub);
         doms.put(mbId, dom);
         if (!hubDOMs.containsKey(hub)) {
             hubDOMs.put(Integer.valueOf(hub), new HashSet<DeployedDOM>());
         }
         hubDOMs.get(hub).add(dom);
+    }
+
+    public double distanceBetweenDOMs(DeployedDOM dom0, DeployedDOM dom1)
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public double distanceBetweenDOMs(long mbid0, long mbid1)
+    {
+        throw new Error("Unimplemented");
     }
 
     public short getChannelId(long mbId)
@@ -80,11 +95,6 @@ public class MockDOMRegistry
     }
 
     public int size()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public double distanceBetweenDOMs(long mbid0, long mbid1)
     {
         throw new Error("Unimplemented");
     }

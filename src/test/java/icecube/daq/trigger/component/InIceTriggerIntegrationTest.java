@@ -243,6 +243,7 @@ public class InIceTriggerIntegrationTest
         comp = new IniceTriggerComponent();
         comp.setGlobalConfigurationDir(cfgFile.getParent());
         comp.setAlerter(alerter);
+        comp.initialize();
         comp.start(false);
 
         comp.configuring(cfgFile.getName());

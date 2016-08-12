@@ -86,30 +86,35 @@ public class TriggerComponent
 
         // Create the source id of this component
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
+    }
 
+    public void initialize()
+        throws DAQCompException
+    {
         // Get input and output types
         String inputType;
         String outputType;
         String shortName;
         int totChannels;
-        if (name.equals(DAQCmdInterface.DAQ_GLOBAL_TRIGGER)) {
+        // XXX use a `switch` statement in Java 1.7
+        if (getName().equals(DAQCmdInterface.DAQ_GLOBAL_TRIGGER)) {
             isGlobalTrigger = true;
             inputType = DAQConnector.TYPE_TRIGGER;
             outputType = DAQConnector.TYPE_GLOBAL_TRIGGER;
             shortName = "GTrig";
             totChannels = 2;
-        } else if (name.equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
+        } else if (getName().equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
             inputType = DAQConnector.TYPE_STRING_HIT;
             outputType = DAQConnector.TYPE_TRIGGER;
             shortName = "IITrig";
             totChannels = DAQCmdInterface.DAQ_MAX_NUM_STRINGS;
-        } else if (name.equals(DAQCmdInterface.DAQ_ICETOP_TRIGGER)) {
+        } else if (getName().equals(DAQCmdInterface.DAQ_ICETOP_TRIGGER)) {
             inputType = DAQConnector.TYPE_ICETOP_HIT;
             outputType = DAQConnector.TYPE_TRIGGER;
             shortName = "ITTrig";
             totChannels = DAQCmdInterface.DAQ_MAX_NUM_IDH;
         } else {
-            throw new Error("Unknown trigger " + name);
+            throw new Error("Unknown trigger " + getName());
         }
 
         inCache = new VitreousBufferCache(shortName + "IN", Long.MAX_VALUE);
@@ -149,8 +154,8 @@ public class TriggerComponent
 
         // Create and register input engine
         try {
-            inputEngine = new SpliceablePayloadReader(name, 25000, splicer,
-                                                      factory);
+            inputEngine = new SpliceablePayloadReader(getName(), 25000,
+                                                      splicer, factory);
         } catch (IOException ioe) {
             LOG.error("Couldn't create input reader");
             System.exit(1);
@@ -159,7 +164,8 @@ public class TriggerComponent
         addMonitoredEngine(inputType, inputEngine);
 
         // Create and register output engine
-        outputEngine = new SimpleOutputEngine(name, id, name + "OutputEngine");
+        outputEngine = new SimpleOutputEngine(getName(), getNumber(),
+                                              getName() + "OutputEngine");
         triggerManager.setOutputEngine(outputEngine);
         addMonitoredEngine(outputType, outputEngine);
     }
@@ -405,7 +411,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 16182 2016-07-20 19:48:53Z dglo $";
+        return "$Id: TriggerComponent.java 16198 2016-08-12 20:48:03Z dglo $";
     }
 
     /**

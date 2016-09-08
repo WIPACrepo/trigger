@@ -193,8 +193,7 @@ public class ClusterTrigger extends AbstractTrigger
             if (dom == null) {
                 chanStr = "<null>";
             } else {
-                chanStr = String.format("(%d, %d)", dom.getStringMajor(),
-                                        dom.getStringMinor());
+                chanStr = dom.getDeploymentLocation();
             }
             logger.debug("Received hit at UTC " + hitPayload.getUTCTime() +
                          " - logical channel " + chanStr +
@@ -288,7 +287,7 @@ public class ClusterTrigger extends AbstractTrigger
                 for (int p = 0; p < coherence[s].length; p++) {
                     if (coherence[s][p] > 0) {
                         final String str =
-                            String.format("(%d, %d): %s", s + 1, p + 1,
+                            String.format("%d-%d: %s", s + 1, p + 1,
                                           coherence[s][p]);
                         logger.debug(str);
                     }

@@ -1,7 +1,7 @@
 package icecube.daq.trigger.config;
 
 import icecube.daq.payload.IDOMID;
-import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.DOMInfo;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -49,7 +49,7 @@ public class DomSet
         this.chanIds = new HashSet<Short>();
     }
 
-    public void add(DeployedDOM dom)
+    public void add(DOMInfo dom)
     {
         domIds.add(dom.getNumericMainboardId());
         chanIds.add(dom.getChannelId());

@@ -1,7 +1,7 @@
 package icecube.daq.trigger.test;
 
 import icecube.daq.util.IDOMRegistry;
-import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.DOMInfo;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,10 +10,10 @@ import java.util.Set;
 public class MockDOMRegistry
     implements IDOMRegistry
 {
-    private HashMap<Long, DeployedDOM> doms =
-        new HashMap<Long, DeployedDOM>();
-    private HashMap<Integer, HashSet<DeployedDOM>> hubDOMs =
-        new HashMap<Integer, HashSet<DeployedDOM>>();
+    private HashMap<Long, DOMInfo> doms =
+        new HashMap<Long, DOMInfo>();
+    private HashMap<Integer, HashSet<DOMInfo>> hubDOMs =
+        new HashMap<Integer, HashSet<DOMInfo>>();
 
     public void addDom(long mbId, int string, int position)
     {
@@ -22,15 +22,15 @@ public class MockDOMRegistry
 
     public void addDom(long mbId, int string, int position, int hub)
     {
-        DeployedDOM dom = new DeployedDOM(mbId, string, position, hub);
+        DOMInfo dom = new DOMInfo(mbId, string, position, hub);
         doms.put(mbId, dom);
         if (!hubDOMs.containsKey(hub)) {
-            hubDOMs.put(Integer.valueOf(hub), new HashSet<DeployedDOM>());
+            hubDOMs.put(Integer.valueOf(hub), new HashSet<DOMInfo>());
         }
         hubDOMs.get(hub).add(dom);
     }
 
-    public double distanceBetweenDOMs(DeployedDOM dom0, DeployedDOM dom1)
+    public double distanceBetweenDOMs(DOMInfo dom0, DOMInfo dom1)
     {
         throw new Error("Unimplemented");
     }
@@ -45,31 +45,31 @@ public class MockDOMRegistry
         throw new Error("Unimplemented");
     }
 
-    public DeployedDOM getDom(long mbId)
+    public DOMInfo getDom(long mbId)
     {
         return doms.get(mbId);
     }
 
-    public DeployedDOM getDom(int major, int minor)
+    public DOMInfo getDom(int major, int minor)
     {
         throw new Error("Unimplemented");
     }
 
-    public DeployedDOM getDom(short chanid)
+    public DOMInfo getDom(short chanid)
     {
         throw new Error("Unimplemented");
     }
 
-    public Set<DeployedDOM> getDomsOnHub(int hubId)
+    public Set<DOMInfo> getDomsOnHub(int hubId)
     {
         if (!hubDOMs.containsKey(hubId)) {
-            return new HashSet<DeployedDOM>();
+            return new HashSet<DOMInfo>();
         }
 
         return hubDOMs.get(hubId);
     }
 
-    public Set<DeployedDOM> getDomsOnString(int string)
+    public Set<DOMInfo> getDomsOnString(int string)
     {
         throw new Error("Unimplemented");
     }

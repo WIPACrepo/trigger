@@ -2,7 +2,7 @@ package icecube.daq.trigger.config;
 
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.util.IDOMRegistry;
-import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.DOMInfo;
 import icecube.daq.util.JAXPUtil;
 import icecube.daq.util.JAXPUtilException;
 
@@ -52,7 +52,7 @@ public abstract class DomSetFactory
      */
     private static void addAllDoms(DomSet domSet, int hub, int low, int high)
     {
-        for (DeployedDOM dom : domRegistry.getDomsOnHub(hub)) {
+        for (DOMInfo dom : domRegistry.getDomsOnHub(hub)) {
             int pos = dom.getStringMinor();
             if (pos >= low && pos <= high) {
                 domSet.add(dom);
@@ -459,7 +459,7 @@ public abstract class DomSetFactory
             // loop through a list of either hubIds or string numbers
             for (Integer num : values) {
                 // get the list of DOMs on this hub/string
-                Set<DeployedDOM> doms;
+                Set<DOMInfo> doms;
                 if (getHubs) {
                     doms = domRegistry.getDomsOnHub(num);
                 } else {
@@ -468,7 +468,7 @@ public abstract class DomSetFactory
 
                 // add DOMs from the 'doms' list at the specified positions
                 for (Integer pos : positions) {
-                    for (DeployedDOM dom : doms) {
+                    for (DOMInfo dom : doms) {
                         if (dom.getStringMinor() == pos) {
                             domSet.add(dom);
                         }

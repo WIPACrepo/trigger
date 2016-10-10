@@ -7,8 +7,8 @@ import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
 import icecube.daq.trigger.algorithm.AbstractTrigger;
 import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.util.DOMInfo;
 import icecube.daq.util.IDOMRegistry;
-import icecube.daq.util.DeployedDOM;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -177,7 +177,7 @@ public class SPS2012Triggers
                     (timeStep * i);
             }
 
-            DeployedDOM dom = registry.getDom(domIter.next());
+            DOMInfo dom = registry.getDom(domIter.next());
 
             final int tailIndex = i % tails.length;
             sendHit(tails[tailIndex], time, tailIndex,

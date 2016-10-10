@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 16188 2016-07-22 18:56:49Z dglo $
+ * Version $Id: CalibrationTrigger.java 16245 2016-10-10 19:39:14Z dglo $
  *
  * Date: August 27 2005
  *
@@ -22,7 +22,7 @@ import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.DOMInfo;
 import icecube.daq.util.IDOMRegistry;
 
 import org.apache.commons.logging.Log;
@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 16188 2016-07-22 18:56:49Z dglo $
+ * @version $Id: CalibrationTrigger.java 16245 2016-10-10 19:39:14Z dglo $
  * @author pat
  */
 public class CalibrationTrigger extends AbstractTrigger
@@ -140,7 +140,7 @@ public class CalibrationTrigger extends AbstractTrigger
             ISourceID srcId;
             if (hit.hasChannelID()) {
                 IDOMRegistry registry = getTriggerHandler().getDOMRegistry();
-                DeployedDOM dom = getDOMFromHit(registry, hit);
+                DOMInfo dom = getDOMFromHit(registry, hit);
                 if (dom == null) {
                     LOG.error("Cannot find DOM for " + hit);
                     return;

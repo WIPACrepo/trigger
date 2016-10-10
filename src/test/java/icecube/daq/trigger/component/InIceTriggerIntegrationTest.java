@@ -24,8 +24,8 @@ import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
+import icecube.daq.util.DOMInfo;
 import icecube.daq.util.DOMRegistry;
-import icecube.daq.util.DeployedDOM;
 import icecube.daq.util.IDOMRegistry;
 
 import java.io.File;
@@ -129,7 +129,7 @@ public class InIceTriggerIntegrationTest
                     (TIME_STEP * i);
             }
 
-            DeployedDOM dom = registry.getDom(domIter.next());
+            DOMInfo dom = registry.getDom(domIter.next());
 
             final int tailIndex = i % tails.length;
             sendHit(tails[tailIndex].sink(), time, tailIndex,

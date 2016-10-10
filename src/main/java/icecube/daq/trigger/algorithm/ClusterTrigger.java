@@ -8,7 +8,7 @@ import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.DOMInfo;
 import icecube.daq.util.IDOMRegistry;
 
 import java.util.Iterator;
@@ -187,7 +187,7 @@ public class ClusterTrigger extends AbstractTrigger
         {
             IDOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
 
-            DeployedDOM dom = getDOMFromHit(domRegistry, hitPayload);
+            DOMInfo dom = getDOMFromHit(domRegistry, hitPayload);
 
             String chanStr;
             if (dom == null) {
@@ -264,7 +264,7 @@ public class ClusterTrigger extends AbstractTrigger
         }
 
         for (IHitPayload hit : triggerQueue) {
-            DeployedDOM dom = getDOMFromHit(domRegistry, hit);
+            DOMInfo dom = getDOMFromHit(domRegistry, hit);
             if (dom == null) {
                 logger.error("Cannot find DOM for " + hit.toString());
                 continue;
@@ -304,7 +304,7 @@ public class ClusterTrigger extends AbstractTrigger
              hitIt.hasNext(); )
         {
             IHitPayload hit = hitIt.next();
-            DeployedDOM dom = getDOMFromHit(domRegistry, hit);
+            DOMInfo dom = getDOMFromHit(domRegistry, hit);
             int[] string = coherence[dom.getStringMajor() - 1];
 
             int top = Math.max( 1, dom.getStringMinor() - coherenceUp) - 1;

@@ -2,7 +2,7 @@ package icecube.daq.trigger.config;
 
 import icecube.daq.payload.IDOMID;
 import icecube.daq.trigger.test.MockDOMID;
-import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.DOMInfo;
 
 import java.util.ArrayList;
 
@@ -36,7 +36,7 @@ public class DomSetTest
         for (int i = 100; i < 200; i += 10) {
             IDOMID dom = new MockDOMID(i);
             doms.add(dom);
-            ds.add(new DeployedDOM(i, i / 50, (i % 50) + 1, i / 50));
+            ds.add(new DOMInfo(i, i / 50, (i % 50) + 1, i / 50));
         }
 
         assertEquals("Bad name", name, ds.getName());

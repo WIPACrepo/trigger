@@ -7,7 +7,7 @@ import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.util.IDOMRegistry;
-import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.DOMInfo;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -60,7 +60,7 @@ public class SlowMPTrigger extends AbstractTrigger
     private class min_hit_info
     {
         private IHitPayload hit;
-        private DeployedDOM dom;
+        private DOMInfo dom;
 
         min_hit_info(IHitPayload new_hit)
         {
@@ -77,7 +77,7 @@ public class SlowMPTrigger extends AbstractTrigger
             return hit;
         }
 
-        public DeployedDOM get_dom()
+        public DOMInfo get_dom()
         {
             if (dom == null) {
                 if (domRegistry == null) {
@@ -800,11 +800,11 @@ public class SlowMPTrigger extends AbstractTrigger
             }
         }
 
-        DeployedDOM dom1 = hit1.get_dom();
+        DOMInfo dom1 = hit1.get_dom();
         if (dom1 == null) {
             throw new Error("Cannot find " + hit1);
         }
-        DeployedDOM dom2 = hit2.get_dom();
+        DOMInfo dom2 = hit2.get_dom();
         if (dom2 == null) {
             throw new Error("Cannot find " + hit2);
         }

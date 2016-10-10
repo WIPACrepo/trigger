@@ -9,7 +9,7 @@ import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.util.IDOMRegistry;
-import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.DOMInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -241,7 +241,7 @@ public class CylinderTrigger extends AbstractTrigger
         // Loop over hit pairs
         for (int ihit = 0; ihit < q.length; ihit++)
         {
-            DeployedDOM d0 = getDOMFromHit(domRegistry, q[ihit]);
+            DOMInfo d0 = getDOMFromHit(domRegistry, q[ihit]);
             if (d0 == null) {
                 throw new Error("Cannot find DOM for " + q[ihit]);
             }
@@ -251,7 +251,7 @@ public class CylinderTrigger extends AbstractTrigger
             for (int jhit = 0; jhit < q.length; jhit++)
             {
                 if (ihit == jhit) continue;
-                DeployedDOM d1 = getDOMFromHit(domRegistry, q[jhit]);
+                DOMInfo d1 = getDOMFromHit(domRegistry, q[jhit]);
                 if (d1 == null) {
                     throw new Error("Cannot find DOM for " + q[jhit]);
                 }

@@ -23,7 +23,8 @@ import icecube.daq.trigger.test.MockOutputChannel;
 import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockSourceID;
 import icecube.daq.trigger.test.TriggerCollection;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.DOMRegistryException;
+import icecube.daq.util.DOMRegistryFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -105,7 +106,8 @@ public class CylinderTriggerTest
     }
 
     public void testEndToEnd()
-        throws IOException, SplicerException, TriggerException
+        throws DOMRegistryException, IOException, SplicerException,
+               TriggerException
     {
         final int numTails = 4;
         final int numObjs = numTails * 10;
@@ -131,7 +133,7 @@ public class CylinderTriggerTest
         DomSetFactory.setConfigurationDirectory(configDir);
 
         try {
-            trigMgr.setDOMRegistry(DOMRegistry.loadRegistry(configDir));
+            trigMgr.setDOMRegistry(DOMRegistryFactory.load(configDir));
         } catch (Exception ex) {
             throw new Error("Cannot set DOM registry", ex);
         }

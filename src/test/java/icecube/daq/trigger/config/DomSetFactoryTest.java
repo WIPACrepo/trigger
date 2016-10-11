@@ -119,9 +119,7 @@ public class DomSetFactoryTest
     {
         HashSet<DOMInfo> domset = new HashSet<DOMInfo>();
 
-        for (Long mbid : registry.keys()) {
-            DOMInfo dom = registry.getDom(mbid);
-
+        for (DOMInfo dom : registry.allDOMs()) {
             switch (setId) {
             case 0: // AMANDA_SYNC
                 if (dom.getStringMajor() == 0 && dom.getStringMinor() == 91) {

@@ -27,7 +27,7 @@ import icecube.daq.trigger.config.TriggerCreator;
 import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.DOMRegistryFactory;
 import icecube.daq.util.IDOMRegistry;
 import icecube.daq.util.JAXPUtil;
 import icecube.daq.util.JAXPUtilException;
@@ -203,7 +203,7 @@ public class TriggerComponent
         // Initialize DOMRegistry
         IDOMRegistry registry;
         try {
-            registry = DOMRegistry.loadRegistry(configDir);
+            registry = DOMRegistryFactory.load(configDir);
             LOG.info("loaded DOM registry");
         } catch (Exception ex) {
             throw new DAQCompException("Error loading DOM registry", ex);
@@ -411,7 +411,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 16198 2016-08-12 20:48:03Z dglo $";
+        return "$Id: TriggerComponent.java 16247 2016-10-11 14:26:24Z dglo $";
     }
 
     /**

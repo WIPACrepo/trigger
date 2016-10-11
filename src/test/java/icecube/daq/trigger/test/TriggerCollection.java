@@ -9,6 +9,7 @@ import icecube.daq.splicer.StrandTail;
 import icecube.daq.trigger.algorithm.AbstractTrigger;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.control.ITriggerManager;
+import icecube.daq.util.DOMRegistryException;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -166,7 +167,7 @@ public abstract class TriggerCollection
 
     public abstract void sendInIceData(WritableByteChannel[] tails,
                                        int numObjs)
-        throws IOException;
+        throws DOMRegistryException, IOException;
 
     public abstract void sendInIceStops(WritableByteChannel[] tails)
         throws IOException;

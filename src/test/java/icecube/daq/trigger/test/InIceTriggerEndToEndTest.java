@@ -18,7 +18,8 @@ import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.control.SNDAQAlerter;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.DOMRegistryException;
+import icecube.daq.util.DOMRegistryFactory;
 import icecube.daq.util.IDOMRegistry;
 
 import java.io.IOException;
@@ -101,7 +102,8 @@ public class InIceTriggerEndToEndTest
     }
 
     public void testEndToEnd()
-        throws IOException, SplicerException, TriggerException
+        throws DOMRegistryException, IOException, SplicerException,
+               TriggerException
     {
         final int numTails = 10;
         final int numObjs = numTails * 10;
@@ -123,7 +125,7 @@ public class InIceTriggerEndToEndTest
 
         IDOMRegistry domReg;
         try {
-            domReg = DOMRegistry.loadRegistry(configDir);
+            domReg = DOMRegistryFactory.load(configDir);
             trigMgr.setDOMRegistry(domReg);
         } catch (Exception ex) {
             throw new Error("Cannot set DOM registry", ex);

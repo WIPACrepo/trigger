@@ -25,7 +25,8 @@ import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.util.DOMInfo;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.DOMRegistryException;
+import icecube.daq.util.DOMRegistryFactory;
 import icecube.daq.util.IDOMRegistry;
 
 import java.io.File;
@@ -116,24 +117,30 @@ public class InIceTriggerIntegrationTest
 
     private void sendInIceData(Pipe[] tails, int numObjs,
                                IDOMRegistry registry)
-        throws IOException
+        throws DOMRegistryException, IOException
     {
-        java.util.Iterator<Long> domIter = registry.keys().iterator();
-
-        for (int i = 0; i < numObjs; i++) {
-            final long time;
-            if (i == 0) {
-                time = TIME_BASE;
-            } else {
-                time = (TIME_BASE * (((i - 1) / NUM_HITS_PER_TRIGGER) + 1)) +
-                    (TIME_STEP * i);
+        int numSent = 0;
+        for (DOMInfo dom : registry.allDOMs()) {
+            if (!dom.isRealDOM()) {
+                continue;
             }
 
-            DOMInfo dom = registry.getDom(domIter.next());
+            final long time;
+            if (numSent == 0) {
+                time = TIME_BASE;
+            } else {
+                time = (TIME_BASE * (((numSent - 1) /
+                                      NUM_HITS_PER_TRIGGER) + 1)) +
+                    (TIME_STEP * numSent);
+            }
 
-            final int tailIndex = i % tails.length;
+            final int tailIndex = numSent % tails.length;
             sendHit(tails[tailIndex].sink(), time, tailIndex,
                     dom.getNumericMainboardId());
+
+            if (++numSent == numObjs) {
+                break;
+            }
         }
     }
 
@@ -153,7 +160,7 @@ public class InIceTriggerIntegrationTest
 
     private void startAndRun(IniceTriggerComponent comp, IDOMRegistry domReg,
                              int runInstance)
-        throws DAQCompException, IOException
+        throws DAQCompException, DOMRegistryException, IOException
     {
         final int numTails = 10;
         final int numObjs = numTails * 10;
@@ -222,8 +229,8 @@ public class InIceTriggerIntegrationTest
     }
 
     public void testIntegration()
-        throws DAQCompException, IOException, SplicerException,
-               TriggerException
+        throws DAQCompException, DOMRegistryException, IOException,
+               SplicerException, TriggerException
     {
         File cfgFile =
             DAQTestUtil.buildConfigFile(getClass().getResource("/").getPath(),
@@ -231,7 +238,7 @@ public class InIceTriggerIntegrationTest
 
         IDOMRegistry domReg;
         try {
-            domReg = DOMRegistry.loadRegistry(cfgFile.getParent());
+            domReg = DOMRegistryFactory.load(cfgFile.getParent());
         } catch (Exception ex) {
             throw new Error("Cannot load DOM registry", ex);
         }

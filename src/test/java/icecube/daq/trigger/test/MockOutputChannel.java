@@ -15,11 +15,6 @@ public class MockOutputChannel
     {
     }
 
-    public void destinationClosed()
-    {
-        throw new Error("Unimplemented");
-    }
-
     public void flushOutQueue()
     {
         throw new Error("Unimplemented");

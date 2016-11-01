@@ -697,10 +697,8 @@ public class TriggerManagerTest
             try { Thread.sleep(100); } catch (Exception ex) { }
         }
 
-        List<Map<String, Object>> counts;
-
 /*
-        counts = mgr.getMoniCounts();
+        List<Map<String, Object>> counts = mgr.getMoniCounts();
         for (Map<String, Object> map : counts) {
             if (!map.containsKey("runNumber")) {
                 fail("Count map " + map + " does not contain run number");
@@ -721,10 +719,23 @@ public class TriggerManagerTest
             try { Thread.sleep(100); } catch (Exception ex) { }
         }
 
+        for (int i = 0; i < 100; i++) {
+            boolean waiting = false;
+            for (MockAlgorithm a : algo) {
+                if (a.hasCachedRequests()) {
+                    waiting = true;
+                }
+            }
+            if (!waiting) {
+                break;
+            }
+            try { Thread.sleep(100); } catch (Exception ex) { }
+        }
+
 /*
         boolean pastOldNum = false;
-        counts = mgr.getMoniCounts();
-        for (Map<String, Object> map : counts) {
+        List<Map<String, Object>> counts2 = mgr.getMoniCounts();
+        for (Map<String, Object> map : counts2) {
             if (!map.containsKey("runNumber")) {
                 fail("Count map " + map + " does not contain run number");
             } else if (((Integer) map.get("runNumber")) == newNum) {

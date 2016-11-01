@@ -13,7 +13,11 @@ import icecube.daq.trigger.test.MockTriggerRequest;
 
 import java.util.ArrayList;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
 import static org.junit.Assert.*;
 
 import org.apache.commons.logging.Log;
@@ -29,6 +33,9 @@ public class OutputThreadTest
     private static final MockAppender appender =
         new MockAppender(/*org.apache.log4j.Level.ALL*/)/*.setVerbose(true)*/;
 
+    @Rule
+    public TestName testName = new TestName();
+
     @Before
     public void setUp()
         throws Exception
@@ -43,8 +50,60 @@ public class OutputThreadTest
     public void tearDown()
         throws Exception
     {
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        try {
+            if (appender.getNumberOfMessages() > 0) {
+                System.err.println("Extra " + testName.getMethodName() +
+                                   " log messages");
+                for (int i = 0; i < appender.getNumberOfMessages(); i++) {
+                    appender.dumpEvent(i);
+                }
+                fail("Found " +  appender.getNumberOfMessages() +
+                     " unexpected log messages");
+            }
+        } finally {
+            appender.clear();
+        }
+    }
+
+    private static void waitForOutput(MockOutputProcess outProc)
+    {
+        for (int i = 0; outProc.getNumberWritten() == 0 && i < 10; i++) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException ex) {
+                // ignore interrupts
+            }
+        }
+
+        assertEquals("No data written", 1, outProc.getNumberWritten());
+    }
+
+    private static void waitForStopped(OutputThread thrd)
+    {
+        for (int i = 0; !thrd.isStopped() && i < 100; i++) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                // ignore interrupts
+            }
+        }
+
+        assertTrue("OutputThread should be stopped", thrd.isStopped());
+        assertFalse("OutputThread should not be waiting", thrd.isWaiting());
+    }
+
+    private static void waitForWaiting(OutputThread thrd)
+    {
+        for (int i = 0; !thrd.isWaiting() && i < 100; i++) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                // ignore interrupts
+            }
+        }
+
+        assertFalse("OutputThread should not be stopped", thrd.isStopped());
+        assertTrue("OutputThread should be waiting", thrd.isWaiting());
     }
 
     @Test
@@ -223,16 +282,7 @@ public class OutputThreadTest
         MockSplicer spl = new MockSplicer();
         thrd.start(spl);
 
-        for (int i = 0; !thrd.isWaiting() && i < 10; i++) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex) {
-                // ignore interrupts
-            }
-        }
-
-        assertFalse("OutputThread should not be stopped", thrd.isStopped());
-        assertTrue("OutputThread should be waiting", thrd.isWaiting());
+        waitForWaiting(thrd);
 
         MockOutputChannel outChan = new MockOutputChannel();
         outProc.setOutputChannel(outChan);
@@ -243,29 +293,12 @@ public class OutputThreadTest
         MockTriggerRequest req = new MockTriggerRequest(1, 2, 3, 4, 5);
         thrd.push(req);
 
-        for (int i = 0; outProc.getNumberWritten() == 0 && i < 10; i++) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex) {
-                // ignore interrupts
-            }
-        }
-
+        waitForOutput(outProc);
         assertEquals("Found queued data", 0L, thrd.getNumQueued());
-        assertEquals("No data written", 1, outProc.getNumberWritten());
 
         thrd.stop();
 
-        for (int i = 0; !thrd.isStopped() && i < 10; i++) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex) {
-                // ignore interrupts
-            }
-        }
-
-        assertTrue("OutputThread should be stopped", thrd.isStopped());
-        assertFalse("OutputThread should not be waiting", thrd.isWaiting());
+        waitForStopped(thrd);
     }
 
     @Test
@@ -283,16 +316,7 @@ public class OutputThreadTest
         MockSplicer spl = new MockSplicer();
         thrd.start(spl);
 
-        for (int i = 0; !thrd.isWaiting() && i < 10; i++) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex) {
-                // ignore interrupts
-            }
-        }
-
-        assertFalse("OutputThread should not be stopped", thrd.isStopped());
-        assertTrue("OutputThread should be waiting", thrd.isWaiting());
+        waitForWaiting(thrd);
 
         MockOutputChannel outChan = new MockOutputChannel();
         outProc.setOutputChannel(outChan);
@@ -303,29 +327,12 @@ public class OutputThreadTest
         MockTriggerRequest req = new MockTriggerRequest(1, 2, 3, 4, 5);
         thrd.push(req);
 
-        for (int i = 0; outProc.getNumberWritten() == 0 && i < 10; i++) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex) {
-                // ignore interrupts
-            }
-        }
-
+        waitForOutput(outProc);
         assertEquals("Found queued data", 0L, thrd.getNumQueued());
-        assertEquals("No data written", 1, outProc.getNumberWritten());
 
         thrd.stop();
 
-        for (int i = 0; !thrd.isStopped() && i < 10; i++) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex) {
-                // ignore interrupts
-            }
-        }
-
-        assertTrue("OutputThread should be stopped", thrd.isStopped());
-        assertFalse("OutputThread should not be waiting", thrd.isWaiting());
+        waitForStopped(thrd);
     }
 
     @Test
@@ -343,16 +350,7 @@ public class OutputThreadTest
         MockSplicer spl = new MockSplicer();
         thrd.start(spl);
 
-        for (int i = 0; !thrd.isWaiting() && i < 10; i++) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex) {
-                // ignore interrupts
-            }
-        }
-
-        assertFalse("OutputThread should not be stopped", thrd.isStopped());
-        assertTrue("OutputThread should be waiting", thrd.isWaiting());
+        waitForWaiting(thrd);
 
 /*
         MockOutputChannel outChan = new MockOutputChannel();
@@ -364,40 +362,25 @@ public class OutputThreadTest
         MockTriggerRequest req = new MockTriggerRequest(1, 2, 3, 4, 5);
         thrd.push(req);
 
-        for (int i = 0; thrd.getNumQueued() == 1 && i < 10; i++) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex) {
-                // ignore interrupts
-            }
-        }
-
+        waitForOutput(outProc);
         assertEquals("Found queued data", 0L, thrd.getNumQueued());
-        assertEquals("No data written", 1, outProc.getNumberWritten());
 */
 
         thrd.stop();
 
-        for (int i = 0; !thrd.isStopped() && i < 10; i++) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex) {
-                // ignore interrupts
-            }
+        waitForStopped(thrd);
+
+        try {
+            assertEquals("Bad number of log messages",
+                         1, appender.getNumberOfMessages());
+
+            final String errMsg = "Output channel has not been set in ";
+            final String logMsg = (String) appender.getMessage(0);
+            assertTrue("Bad log message \"" + logMsg + "\"",
+                       logMsg.startsWith(errMsg));
+        } finally {
+            appender.clear();
         }
-
-        assertTrue("OutputThread should be stopped", thrd.isStopped());
-        assertFalse("OutputThread should not be waiting", thrd.isWaiting());
-
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
-        final String errMsg = "Output channel has not been set in ";
-        final String logMsg = (String) appender.getMessage(0);
-        assertTrue("Bad log message \"" + logMsg + "\"",
-                   logMsg.startsWith(errMsg));
-
-        appender.clear();
     }
 
     @Test
@@ -415,16 +398,7 @@ public class OutputThreadTest
         MockSplicer spl = new MockSplicer();
         thrd.start(spl);
 
-        for (int i = 0; !thrd.isWaiting() && i < 10; i++) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex) {
-                // ignore interrupts
-            }
-        }
-
-        assertFalse("OutputThread should not be stopped", thrd.isStopped());
-        assertTrue("OutputThread should be waiting", thrd.isWaiting());
+        waitForWaiting(thrd);
 
         assertEquals("Found unexpected output payloads",
                      0, outProc.getNumberWritten());
@@ -433,9 +407,9 @@ public class OutputThreadTest
         MockTriggerRequest req = new MockTriggerRequest(1, 2, 3, 4, 5);
         thrd.push(req);
 
-        for (int i = 0; thrd.isAlive() && i < 10; i++) {
+        for (int i = 0; thrd.isAlive() && i < 100; i++) {
             try {
-                Thread.sleep(1);
+                Thread.sleep(100);
             } catch (InterruptedException ex) {
                 // ignore interrupts
             }

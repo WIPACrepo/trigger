@@ -187,12 +187,12 @@ public class InIceTriggerIntegrationTest
         final boolean dumpSplicers = false;
         final boolean dumpBEStats = false;
 
-        activity.waitForStasis(10, 100, expTriggers, dumpActivity,
+        activity.waitForStasis(10, 1000, expTriggers, dumpActivity,
                                dumpSplicers);
 
         DAQTestUtil.sendStops(tails);
 
-        activity.waitForStasis(10, 100, expTriggers, dumpActivity,
+        activity.waitForStasis(10, 1000, expTriggers, dumpActivity,
                                dumpSplicers);
 
         //assertEquals("Bad number of payloads written",

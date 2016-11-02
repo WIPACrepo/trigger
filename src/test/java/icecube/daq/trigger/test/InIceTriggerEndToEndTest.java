@@ -209,7 +209,7 @@ public class InIceTriggerEndToEndTest
         }
     }
 
-    private static final int REPS = 100;
+    private static final int REPS = 1000;
     private static final int SLEEP_TIME = 100;
 
     public static final void waitForStasis(SpliceablePayloadReader rdr,

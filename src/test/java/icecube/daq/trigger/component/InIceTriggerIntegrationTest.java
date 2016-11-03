@@ -153,8 +153,6 @@ public class InIceTriggerIntegrationTest
     {
         super.setUp();
 
-        appender.clear();
-
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
 
@@ -220,13 +218,19 @@ public class InIceTriggerIntegrationTest
         // remove SNDAQ ZMQ address
         System.clearProperty(SNDAQAlerter.PROPERTY);
 
-        if (comp != null) comp.closeAll();
+        if (comp != null) {
+            try {
+                comp.closeAll();
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
+
+        appender.assertNoLogMessages();
 
         if (tails != null) {
             DAQTestUtil.closePipeList(tails);
         }
-
-        appender.assertNoLogMessages();
 
         super.tearDown();
     }

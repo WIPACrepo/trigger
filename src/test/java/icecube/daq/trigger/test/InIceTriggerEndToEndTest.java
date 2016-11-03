@@ -80,8 +80,6 @@ public class InIceTriggerEndToEndTest
     {
         super.setUp();
 
-        appender.clear();
-
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
 

@@ -230,8 +230,6 @@ public class CollectorThreadTest
     public void setUp()
         throws Exception
     {
-        appender.clear();
-
         outThrd.clear();
 
         BasicConfigurator.resetConfiguration();

@@ -40,8 +40,6 @@ public class OutputThreadTest
     public void setUp()
         throws Exception
     {
-        appender.clear();
-
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
     }
@@ -50,19 +48,7 @@ public class OutputThreadTest
     public void tearDown()
         throws Exception
     {
-        try {
-            if (appender.getNumberOfMessages() > 0) {
-                System.err.println("Extra " + testName.getMethodName() +
-                                   " log messages");
-                for (int i = 0; i < appender.getNumberOfMessages(); i++) {
-                    appender.dumpEvent(i);
-                }
-                fail("Found " +  appender.getNumberOfMessages() +
-                     " unexpected log messages");
-            }
-        } finally {
-            appender.clear();
-        }
+        appender.assertNoLogMessages();
     }
 
     private static void waitForOutput(MockOutputProcess outProc)
@@ -191,15 +177,14 @@ public class OutputThreadTest
         assertFalse("makeBackwardCompatible should fail",
                    OutputThread.makeBackwardCompatible(glblReq));
 
-        assertEquals("Bad number of log messages",
-                     logMsgs.size(), appender.getNumberOfMessages());
-
-        for (int i = 0; i < logMsgs.size(); i++) {
-            assertEquals("Bad log message",
-                         logMsgs.get(i), appender.getMessage(i));
+        try {
+            for (int i = 0; i < logMsgs.size(); i++) {
+                appender.assertLogMessage(logMsgs.get(i));
+            }
+            appender.assertNoLogMessages();
+        } finally {
+            appender.clear();
         }
-
-        appender.clear();
     }
 
     @Test
@@ -221,14 +206,9 @@ public class OutputThreadTest
         assertFalse("makeBackwardCompatible should fail",
                     OutputThread.makeBackwardCompatible(glblReq));
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
-        final String errMsg =
-            "Cannot find readout request for request " + glblReq;
-        assertEquals("Bad log message", errMsg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage("Cannot find readout request for request " +
+                                  glblReq);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -370,17 +350,7 @@ public class OutputThreadTest
 
         waitForStopped(thrd);
 
-        try {
-            assertEquals("Bad number of log messages",
-                         1, appender.getNumberOfMessages());
-
-            final String errMsg = "Output channel has not been set in ";
-            final String logMsg = (String) appender.getMessage(0);
-            assertTrue("Bad log message \"" + logMsg + "\"",
-                       logMsg.startsWith(errMsg));
-        } finally {
-            appender.clear();
-        }
+        appender.assertLogMessage("Output channel has not been set in ");
     }
 
     @Test
@@ -419,14 +389,6 @@ public class OutputThreadTest
         assertEquals("Found queued data", 0L, thrd.getNumQueued());
         assertEquals("Data was written", 0, outProc.getNumberWritten());
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
-        final String errMsg = "Output channel has not been set in ";
-        final String logMsg = (String) appender.getMessage(0);
-        assertTrue("Bad log message \"" + logMsg + "\"",
-                   logMsg.startsWith(errMsg));
-
-        appender.clear();
+        appender.assertLogMessage("Output channel has not been set in ");
     }
 }

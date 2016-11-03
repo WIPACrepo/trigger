@@ -231,8 +231,6 @@ public class DomSetFactoryTest
     public void setUp()
         throws Exception
     {
-        appender.clear();
-
         DomSetFactory.setConfigurationDirectory(findTestConfig());
     }
 

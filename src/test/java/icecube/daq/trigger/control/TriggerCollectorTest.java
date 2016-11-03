@@ -181,8 +181,6 @@ public class TriggerCollectorTest
     public void setUp()
         throws Exception
     {
-        appender.clear();
-
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
         // initialize SNDAQ ZMQ address to nonsense

@@ -77,8 +77,6 @@ public class ElementMergerTest
     public void setUp()
         throws Exception
     {
-        appender.clear();
-
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
     }
@@ -373,16 +371,17 @@ public class ElementMergerTest
         try {
             assertEquals("Bad number of log messages",
                          2, appender.getNumberOfMessages());
+
+            final String front = "Not merging ReadoutRequestElement type#" +
+                OTHER + " (range ";
+            String[] back = new String[] { "[2-6])", "[8-9])" };
             for (int i = 0; i < 2; i++) {
                 final String msg = (String) appender.getMessage(i);
 
-                final String front = "Not merging ReadoutRequestElement" +
-                    " type#" + OTHER + " (range ";
                 assertTrue("Bad log message " + msg, msg.startsWith(front));
 
                 boolean found = false;
 
-                String[] back = new String[] { "[2-6])", "[8-9])" };
                 for (int r = 0; r < back.length; r++) {
                     if (msg.endsWith(back[r])) {
                         found = true;

@@ -1,5 +1,6 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ITriggerRequestPayload;
@@ -9,7 +10,6 @@ import icecube.daq.trigger.algorithm.FlushRequest;
 import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 import icecube.daq.trigger.test.MockAlgorithm;
-import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockBufferCache;
 import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockSubscriber;
@@ -248,8 +248,7 @@ public class CollectorThreadTest
         // remove SNDAQ ZMQ address
         System.clearProperty(SNDAQAlerter.PROPERTY);
 
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
 
         assertEquals("Found unexpected output requests", 0L,
                      outThrd.getNumQueued());
@@ -386,13 +385,9 @@ public class CollectorThreadTest
         }
         outThrd.clear();
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "Cannot add multiplicity data";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -539,13 +534,9 @@ public class CollectorThreadTest
         }
         outThrd.clear();
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "Failed to reset multiplicity data";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -577,13 +568,9 @@ public class CollectorThreadTest
         assertFalse("Should not have added anything to data manager",
                     mgr.wasAdded());
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "No requests found for interval " + ival;
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -882,14 +869,10 @@ public class CollectorThreadTest
         outThrd.clear();
 
         if (reqList.length == 0) {
-            assertEquals("Bad number of log messages",
-                         1, appender.getNumberOfMessages());
-
             final String expMsg = "New interval [" + newStart + "-" + newEnd +
                 "] precedes old interval [" + oldStart + "-" + oldEnd + "]";
-            assertEquals("Bad log message", expMsg, appender.getMessage(0));
-
-            appender.clear();
+            appender.assertLogMessage(expMsg);
+            appender.assertNoLogMessages();
         }
     }
 

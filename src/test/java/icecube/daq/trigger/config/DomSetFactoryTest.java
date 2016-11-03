@@ -1,7 +1,7 @@
 package icecube.daq.trigger.config;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.trigger.exceptions.ConfigException;
-import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockDOMID;
 import icecube.daq.trigger.test.MockDOMRegistry;
 import icecube.daq.util.DOMInfo;
@@ -240,8 +240,7 @@ public class DomSetFactoryTest
     public void tearDown()
         throws Exception
     {
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
     }
 
     private String findTestConfig()

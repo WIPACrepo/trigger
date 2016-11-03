@@ -1,5 +1,6 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.IReadoutRequestElement;
@@ -8,7 +9,6 @@ import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadException;
 import icecube.daq.payload.SourceIdRegistry;
-import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockDOMID;
 import icecube.daq.trigger.test.MockReadoutRequest;
 import icecube.daq.trigger.test.MockReadoutRequestElement;
@@ -87,8 +87,7 @@ public class ElementMergerTest
     public void tearDown()
         throws Exception
     {
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
     }
 
     private static final void assertDOMId(long domId, IDOMID domObj)
@@ -145,12 +144,10 @@ public class ElementMergerTest
 
         compareElements("MergeMany", expElems, elems);
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-        assertEquals("Bad log message",
-                     "Not merging ReadoutRequestElement type#" + OTHER +
-                     " (range [3-4])", appender.getMessage(0));
-        appender.clear();
+        final String msg = "Not merging ReadoutRequestElement type#" + OTHER +
+            " (range [3-4])";
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     private List<IReadoutRequestElement>
@@ -373,28 +370,31 @@ public class ElementMergerTest
 
         compareElements(permName, expElems, elems);
 
-        assertEquals("Bad number of log messages",
-                     2, appender.getNumberOfMessages());
-        for (int i = 0; i < 2; i++) {
-            final String msg = (String) appender.getMessage(i);
+        try {
+            assertEquals("Bad number of log messages",
+                         2, appender.getNumberOfMessages());
+            for (int i = 0; i < 2; i++) {
+                final String msg = (String) appender.getMessage(i);
 
-            final String front =
-                "Not merging ReadoutRequestElement type#" + OTHER + " (range ";
-            assertTrue("Bad log message " + msg, msg.startsWith(front));
+                final String front = "Not merging ReadoutRequestElement" +
+                    " type#" + OTHER + " (range ";
+                assertTrue("Bad log message " + msg, msg.startsWith(front));
 
-            boolean found = false;
+                boolean found = false;
 
-            String[] back = new String[] { "[2-6])", "[8-9])" };
-            for (int r = 0; r < back.length; r++) {
-                if (msg.endsWith(back[r])) {
-                    found = true;
-                    break;
+                String[] back = new String[] { "[2-6])", "[8-9])" };
+                for (int r = 0; r < back.length; r++) {
+                    if (msg.endsWith(back[r])) {
+                        found = true;
+                        break;
+                    }
                 }
-            }
 
-            assertTrue("Bad log message " + msg, found);
+                assertTrue("Bad log message " + msg, found);
+            }
+        } finally {
+            appender.clear();
         }
-        appender.clear();
     }
 
     @Test

@@ -1,5 +1,6 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.SourceIdRegistry;
@@ -8,7 +9,6 @@ import icecube.daq.trigger.algorithm.FlushRequest;
 import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.test.MockAlgorithm;
-import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockBufferCache;
 import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockReadoutRequest;
@@ -196,8 +196,7 @@ public class TriggerCollectorTest
         // remove SNDAQ ZMQ address
         System.clearProperty(SNDAQAlerter.PROPERTY);
 
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -266,13 +265,9 @@ public class TriggerCollectorTest
 
         tc.startThreads(null);
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String nullMsg = "Splicer cannot be null";
-        assertEquals("Bad log message", nullMsg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(nullMsg);
+        appender.assertNoLogMessages();
     }
 
     @Test

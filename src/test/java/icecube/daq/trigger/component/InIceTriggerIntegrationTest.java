@@ -1,19 +1,10 @@
 package icecube.daq.trigger.component;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.alert.Alerter.Priority;
-import icecube.daq.trigger.algorithm.AbstractTrigger;
-import icecube.daq.trigger.control.SNDAQAlerter;
-import icecube.daq.trigger.control.TriggerManager;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.test.ActivityMonitor;
-import icecube.daq.trigger.test.BaseValidator;
-import icecube.daq.trigger.test.DAQTestUtil;
-import icecube.daq.trigger.test.MockAlerter;
-import icecube.daq.trigger.test.MockAppender;
-import icecube.daq.trigger.test.MockSourceID;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IWriteablePayload;
@@ -24,6 +15,15 @@ import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
+import icecube.daq.trigger.algorithm.AbstractTrigger;
+import icecube.daq.trigger.control.SNDAQAlerter;
+import icecube.daq.trigger.control.TriggerManager;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.test.ActivityMonitor;
+import icecube.daq.trigger.test.BaseValidator;
+import icecube.daq.trigger.test.DAQTestUtil;
+import icecube.daq.trigger.test.MockAlerter;
+import icecube.daq.trigger.test.MockSourceID;
 import icecube.daq.util.DOMInfo;
 import icecube.daq.util.DOMRegistryException;
 import icecube.daq.util.DOMRegistryFactory;
@@ -70,18 +70,22 @@ public class InIceTriggerIntegrationTest
 
     private void checkLogMessages()
     {
-        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
-            String msg = (String) appender.getMessage(i);
+        try {
+            for (int i = 0; i < appender.getNumberOfMessages(); i++) {
+                String msg = (String) appender.getMessage(i);
 
-            if (!(msg.startsWith("Clearing ") &&
-                  msg.endsWith(" rope entries")) &&
-                !msg.startsWith("Resetting counter ") &&
-                !msg.startsWith("No match for timegate "))
-            {
-                fail("Bad log message#" + i + ": " + appender.getMessage(i));
+                if (!(msg.startsWith("Clearing ") &&
+                      msg.endsWith(" rope entries")) &&
+                    !msg.startsWith("Resetting counter ") &&
+                    !msg.startsWith("No match for timegate "))
+                {
+                    fail("Bad log message#" + i + ": " +
+                         appender.getMessage(i));
+                }
             }
+        } finally {
+            appender.clear();
         }
-        appender.clear();
     }
 
     private void sendHit(WritableByteChannel chan, long time, int tailIndex,
@@ -222,8 +226,7 @@ public class InIceTriggerIntegrationTest
             DAQTestUtil.closePipeList(tails);
         }
 
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
 
         super.tearDown();
     }

@@ -1,5 +1,6 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.juggler.alert.AlertQueue;
 import icecube.daq.juggler.alert.Alerter.Priority;
 import icecube.daq.payload.IDOMID;
@@ -17,7 +18,6 @@ import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.MockAlerter;
 import icecube.daq.trigger.test.MockAlgorithm;
-import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockBufferCache;
 import icecube.daq.trigger.test.MockOutputChannel;
 import icecube.daq.trigger.test.MockOutputProcess;
@@ -84,8 +84,7 @@ public class TriggerManagerTest
     public void tearDown()
         throws Exception
     {
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -157,18 +156,14 @@ public class TriggerManagerTest
 
         mgr.addTriggers(list);
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg =
             String.format("Attempt to add duplicate trigger with type %d" +
                           " cfgId %d srcId %d (old %s, new %s)",
                           algo.getTriggerType(), algo.getTriggerConfigId(),
                           algo.getSourceId(), algo.getTriggerName(),
                           algo.getTriggerName());
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -221,22 +216,14 @@ public class TriggerManagerTest
         mgr.analyze(splObjs);
         splObjs.clear();
 
-        assertEquals("Bad number of log messages",
-                     2, appender.getNumberOfMessages());
+        final String msg1 = "TriggerHandler only knows about either" +
+            " HitPayloads or TriggerRequestPayloads!";
+        appender.assertLogMessage(msg1);
 
-        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
-            final String msg;
-            if (i == 0) {
-                msg = "TriggerHandler only knows about either" +
-                    " HitPayloads or TriggerRequestPayloads!";
-            } else {
-                msg = "Ignoring invalid payload ";
-            }
-            assertTrue("Bad log message " + msg,
-                       ((String) appender.getMessage(i)).startsWith(msg));
-        }
+        final String msg2 = "Ignoring invalid payload ";
+        appender.assertLogMessage(msg2);
 
-        appender.clear();
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -265,24 +252,16 @@ public class TriggerManagerTest
         mgr.analyze(splObjs);
         splObjs.clear();
 
-        assertEquals("Bad number of log messages",
-                     2, appender.getNumberOfMessages());
-
         final double diff = (badOrder.getUTCTime() - goodOrder.getUTCTime());
-        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
-            final String msg;
-            if (i == 0) {
-                msg = "Hit from " + badOrder.getSourceID() +
-                    " out of order! This time - Last time = " + diff +
-                    ", src of last hit = " + goodOrder.getSourceID();
-            } else {
-                msg = "Ignoring invalid payload ";
-            }
-            assertTrue("Bad log message " + msg,
-                       ((String) appender.getMessage(i)).startsWith(msg));
-        }
+        final String msg1 = "Hit from " + badOrder.getSourceID() +
+            " out of order! This time - Last time = " + diff +
+            ", src of last hit = " + goodOrder.getSourceID();
+        appender.assertLogMessage(msg1);
 
-        appender.clear();
+        final String msg2 = "Ignoring invalid payload ";
+        appender.assertLogMessage(msg2);
+
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -326,22 +305,14 @@ public class TriggerManagerTest
         mgr.analyze(splObjs);
         splObjs.clear();
 
-        assertEquals("Bad number of log messages",
-                     2, appender.getNumberOfMessages());
+        final String msg1 = "Source #" + INICE_ID +
+            " cannot process trigger requests";
+        appender.assertLogMessage(msg1);
 
-        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
-            final String msg;
-            if (i == 0) {
-                msg = "Source #" + INICE_ID +
-                    " cannot process trigger requests";
-            } else {
-                msg = "Ignoring invalid payload ";
-            }
-            assertTrue("Bad log message " + msg,
-                       ((String) appender.getMessage(i)).startsWith(msg));
-        }
+        final String msg2 = "Ignoring invalid payload ";
+        appender.assertLogMessage(msg2);
 
-        appender.clear();
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -394,13 +365,9 @@ public class TriggerManagerTest
         mgr.analyze(splObjs);
         splObjs.clear();
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "No subtriggers found in " + merged;
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -443,13 +410,9 @@ public class TriggerManagerTest
 
         List list = mgr.getMoniCounts();
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "Cannot get trigger counts for monitoring";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -477,13 +440,9 @@ public class TriggerManagerTest
 
         mgr.sendFinalMoni();
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "Cannot send multiplicity data";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -512,13 +471,9 @@ public class TriggerManagerTest
 
         mgr.switchToNewRun(456);
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "Collector has not been created before run switch";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -571,18 +526,13 @@ public class TriggerManagerTest
 
         mgr.switchToNewRun(456);
 
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
 
         mgr.switchToNewRun(789);
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "Cannot set next run number";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test

@@ -1,12 +1,12 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.MockAlgorithm;
-import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockSubscriber;
 
 import java.nio.ByteBuffer;
@@ -87,8 +87,7 @@ public class TriggerThreadTest
     public void tearDown()
         throws Exception
     {
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -124,10 +123,7 @@ public class TriggerThreadTest
         thrd.run();
         assertTrue("Thread is not stopped", thrd.isStopped());
 
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
-
-        appender.clear();
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -148,13 +144,9 @@ public class TriggerThreadTest
         thrd.run();
         assertTrue("Thread is not stopped", thrd.isStopped());
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String exMsg = "Trigger " + algo + " failed for " + pay;
-        assertEquals("Bad log message", exMsg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(exMsg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -175,11 +167,6 @@ public class TriggerThreadTest
         thrd.start();
         thrd.join();
         assertTrue("Thread is not stopped", thrd.isStopped());
-
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
-
-        appender.clear();
     }
 
     @Test

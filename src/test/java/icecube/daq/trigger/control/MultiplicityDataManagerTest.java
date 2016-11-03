@@ -1,5 +1,6 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.juggler.alert.AlertQueue;
 import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.payload.SourceIdRegistry;
@@ -7,7 +8,6 @@ import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 import icecube.daq.trigger.test.MockAlerter;
 import icecube.daq.trigger.test.MockAlgorithm;
-import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockTriggerRequest;
 import icecube.daq.util.Leapseconds;
 
@@ -75,8 +75,7 @@ public class MultiplicityDataManagerTest
     public void tearDown()
         throws Exception
     {
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -147,13 +146,9 @@ public class MultiplicityDataManagerTest
 
         mgr.add(req);
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "No subtriggers found in " + req;
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test

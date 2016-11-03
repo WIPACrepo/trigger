@@ -1,5 +1,6 @@
 package icecube.daq.trigger.test;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.SpliceablePayloadReader;
@@ -55,19 +56,23 @@ public class InIceTriggerEndToEndTest
 
     private void checkLogMessages()
     {
-        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
-            String msg = (String) appender.getMessage(i);
+        try {
+            for (int i = 0; i < appender.getNumberOfMessages(); i++) {
+                String msg = (String) appender.getMessage(i);
 
-            if (!(msg.startsWith("Clearing ") &&
-                  msg.endsWith(" rope entries")) &&
-                !msg.startsWith("Resetting counter ") &&
-                !msg.startsWith("Resetting decrement ") &&
-                !msg.startsWith("No match for timegate "))
-            {
-                fail("Bad log message#" + i + ": " + appender.getMessage(i));
+                if (!(msg.startsWith("Clearing ") &&
+                      msg.endsWith(" rope entries")) &&
+                    !msg.startsWith("Resetting counter ") &&
+                    !msg.startsWith("Resetting decrement ") &&
+                    !msg.startsWith("No match for timegate "))
+                {
+                    fail("Bad log message#" + i + ": " +
+                         appender.getMessage(i));
+                }
             }
+        } finally {
+            appender.clear();
         }
-        appender.clear();
     }
 
     protected void setUp()
@@ -95,8 +100,7 @@ public class InIceTriggerEndToEndTest
         // remove SNDAQ ZMQ address
         System.clearProperty(SNDAQAlerter.PROPERTY);
 
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
 
         super.tearDown();
     }

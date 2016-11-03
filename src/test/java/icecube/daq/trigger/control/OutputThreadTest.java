@@ -1,9 +1,9 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.Splicer;
-import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockBufferCache;
 import icecube.daq.trigger.test.MockOutputChannel;
 import icecube.daq.trigger.test.MockOutputProcess;

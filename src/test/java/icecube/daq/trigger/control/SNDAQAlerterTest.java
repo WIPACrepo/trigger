@@ -1,5 +1,6 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.juggler.alert.AlertException;
 import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.payload.impl.UTCTime;
@@ -7,7 +8,6 @@ import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.algorithm.SimpleMajorityTrigger;
 import icecube.daq.trigger.test.MockAlerter;
 import icecube.daq.trigger.test.MockAlgorithm;
-import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.test.MockTriggerRequest;
 
@@ -211,8 +211,7 @@ public class SNDAQAlerterTest
         // remove SNDAQ ZMQ address
         System.clearProperty(SNDAQAlerter.PROPERTY);
 
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
     }
 
     @Test

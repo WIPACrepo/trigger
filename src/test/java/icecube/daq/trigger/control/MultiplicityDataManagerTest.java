@@ -424,8 +424,8 @@ public class MultiplicityDataManagerTest
         flushQueue(aq);
         aq.stopAndWait();
 
+        alerter.waitForAlerts(100);
         assertEquals("Unexpected send", 2, alerter.getNumSent());
-        alerter.check();
     }
 
     @Test

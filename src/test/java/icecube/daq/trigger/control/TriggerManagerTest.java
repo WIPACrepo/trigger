@@ -696,7 +696,7 @@ public class TriggerManagerTest
         }
 */
 
-        alerter.check();
+        alerter.waitForAlerts(100);
     }
 
 /*
@@ -827,8 +827,7 @@ public class TriggerManagerTest
         mgr.getAlertQueue().stopAndWait();
 
         // XXX this doesn't validate the body of the alert
-        assertEquals("Unexpected number of alerts", 1, alerter.getNumSent());
-        alerter.check();
+        alerter.waitForAlerts(100);
     }
 
     class MyHit

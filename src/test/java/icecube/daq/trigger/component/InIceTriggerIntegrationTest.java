@@ -268,7 +268,7 @@ public class InIceTriggerIntegrationTest
 
         DAQTestUtil.destroyComponentIO(comp);
 
-        alerter.check();
+        alerter.waitForAlerts(100);
 
         if (appender.getLevel().equals(org.apache.log4j.Level.ALL)) {
             appender.clear();

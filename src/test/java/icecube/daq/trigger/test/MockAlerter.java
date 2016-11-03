@@ -44,6 +44,11 @@ class ExpectedAlertCount
         }
     }
 
+    boolean isComplete()
+    {
+        return expected == count;
+    }
+
     boolean matches(String varName, Alerter.Priority prio)
     {
         return this.varName.equals(varName) && this.prio.equals(prio);
@@ -66,13 +71,6 @@ public class MockAlerter
     public void addExpected(String varName, Priority prio, int count)
     {
         expected.add(new ExpectedAlertCount(varName, prio, count));
-    }
-
-    public void check()
-    {
-        for (ExpectedAlertCount e : expected) {
-            e.check();
-        }
     }
 
     public void close()
@@ -181,5 +179,36 @@ public class MockAlerter
         throws AlertException
     {
         throw new Error("Unimplemented");
+    }
+
+    public void waitForAlerts(int maxReps)
+    {
+        final int sleepTime = 100;
+
+        for (int i = 0; i < maxReps; i++) {
+            boolean complete = true;
+            for (ExpectedAlertCount e : expected) {
+                if (!e.isComplete()) {
+                    complete = false;
+                    break;
+                }
+            }
+            if (complete) {
+                // we've seen all expected alerts
+                break;
+            }
+
+            // wait for more alerts
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException ie) {
+                // ignore interrupts
+            }
+        }
+
+        // do final check, failing if there are missing alerts
+        for (ExpectedAlertCount e : expected) {
+            e.check();
+        }
     }
 }

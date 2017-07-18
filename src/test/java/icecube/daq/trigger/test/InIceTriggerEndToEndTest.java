@@ -22,7 +22,9 @@ import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.util.DOMRegistryException;
 import icecube.daq.util.DOMRegistryFactory;
 import icecube.daq.util.IDOMRegistry;
+import icecube.daq.util.LocatePDAQ;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Pipe;
@@ -85,6 +87,18 @@ public class InIceTriggerEndToEndTest
 
         // initialize SNDAQ ZMQ address to nonsense
         System.getProperties().setProperty(SNDAQAlerter.PROPERTY, ":12345");
+
+        // ensure LocatePDAQ uses the test version of the config directory
+        File configDir =
+            new File(getClass().getResource("/config").getPath());
+        if (!configDir.exists()) {
+            throw new IllegalArgumentException("Cannot find config" +
+                                               " directory under " +
+                                               getClass().getResource("/"));
+        }
+
+        System.setProperty(LocatePDAQ.CONFIG_DIR_PROPERTY,
+                           configDir.getAbsolutePath());
     }
 
     public static Test suite()
@@ -97,6 +111,8 @@ public class InIceTriggerEndToEndTest
     {
         // remove SNDAQ ZMQ address
         System.clearProperty(SNDAQAlerter.PROPERTY);
+
+        System.clearProperty(LocatePDAQ.CONFIG_DIR_PROPERTY);
 
         appender.assertNoLogMessages();
 

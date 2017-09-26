@@ -317,16 +317,6 @@ public class TriggerManager
     }
 
     /**
-     * @deprecated
-     *
-     * @return total number of hits read from splicer
-     */
-    public long getCount()
-    {
-        return getTotalProcessed();
-    }
-
-    /**
      * Get the DOM registry.
      *
      * @return DOM registry
@@ -337,43 +327,31 @@ public class TriggerManager
     }
 
     /**
-     * XXX Use getQueuedInputsMap instead
+     * Get the number of requests collected from all algorithms
      *
-     * @return number of queued inputs
-     * @deprecated use getQueuedInputsMap()
+     * @return number of collected requests
      */
-    public int getNumInputsQueued()
+    public int getTotalRequestsCollected()
     {
-        Map<String, Integer> map = getQueuedInputsMap();
-
-        int num = 0;
-        if (map != null) {
-            for (Map.Entry<String, Integer> entry : map.entrySet()) {
-                num += entry.getValue();
-            }
+        if (collector == null) {
+            return 0;
         }
 
-        return num;
+        return (int) collector.getTotalCollected();
     }
 
     /**
-     * XXX Use getQueuedRequestsMap instead
+     * Get the number of requests released by all algorithms
      *
-     * @return number of queued requests
-     * @deprecated use getQueuedRequestsMap()
+     * @return number of collected requests
      */
-    public int getNumRequestsQueued()
+    public int getTotalRequestsReleased()
     {
-        Map<String, Integer> map = getQueuedRequestsMap();
-
-        int num = 0;
-        if (map != null) {
-            for (Map.Entry<String, Integer> entry : map.entrySet()) {
-                num += entry.getValue();
-            }
+        if (collector == null) {
+            return 0;
         }
 
-        return num;
+        return (int) collector.getTotalReleased();
     }
 
     /**
@@ -395,7 +373,7 @@ public class TriggerManager
      *
      * @return map of {name : numQueuedHits}
      */
-    public Map<String, Integer> getQueuedInputsMap()
+    public Map<String, Integer> getQueuedInputs()
     {
         return inputList.getLengths();
     }
@@ -405,11 +383,27 @@ public class TriggerManager
      *
      * @return map of {name : numQueuedRequests}
      */
-    public Map<String, Integer> getQueuedRequestsMap()
+    public Map<String, Integer> getQueuedRequests()
     {
         HashMap map = new HashMap<String, Integer>();
         for (ITriggerAlgorithm a : algorithms) {
             map.put(a.getTriggerName(), a.getNumberOfCachedRequests());
+        }
+        return map;
+    }
+
+    /**
+     * Return a map of algorithm names to the time of their most recently
+     * released request.  This can be useful for determining which algorithm
+     * is causing the trigger output stream to stall.
+     *
+     * @return map of names to times
+     */
+    public Map<String, Long> getReleaseTimes()
+    {
+        HashMap<String, Long> map = new HashMap<String, Long>();
+        for (ITriggerAlgorithm a : algorithms) {
+            map.put(a.getTriggerName(), a.getReleaseTime());
         }
         return map;
     }
@@ -971,7 +965,12 @@ public class TriggerManager
 
     public String toString()
     {
-        return "TrigMgr[in#" + inputList.size() + ",req#" +
-            getNumRequestsQueued() + "," + collector + "]";
+        int numQueued = 0;
+        for (ITriggerAlgorithm a : algorithms) {
+            numQueued += a.getNumberOfCachedRequests();
+        }
+
+        return "TrigMgr[in#" + inputList.size() + ",req#" + numQueued +
+            "," + collector + "]";
     }
 }

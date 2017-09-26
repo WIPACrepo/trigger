@@ -23,6 +23,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -99,6 +100,16 @@ public class TriggerCollector
     }
 
     /**
+     * Return the number of requests queued for writing.
+     *
+     * @return output queue size
+     */
+    public long getNumQueued()
+    {
+        return outThrd.getNumQueued();
+    }
+
+    /**
      * Return the number of dropped SNDAQ alerts
      *
      * @return number of dropped alerts
@@ -129,13 +140,23 @@ public class TriggerCollector
     }
 
     /**
-     * Return the number of requests queued for writing.
+     * Get the number of requests collected from all algorithms
      *
-     * @return output queue size
+     * @return total number of collected requests
      */
-    public long getNumQueued()
+    public long getTotalCollected()
     {
-        return outThrd.getNumQueued();
+        return collThrd.getTotalCollected();
+    }
+
+    /**
+     * Get the number of requests released for collection
+     *
+     * @return total number of released requests
+     */
+    public long getTotalReleased()
+    {
+        return collThrd.getTotalReleased();
     }
 
     /**
@@ -231,6 +252,10 @@ interface ICollectorThread
 
     long getSNDAQAlertsSent();
 
+    long getTotalCollected();
+
+    long getTotalReleased();
+
     void resetUID();
 
     void setChanged();
@@ -274,8 +299,8 @@ class CollectorThread
 
     private boolean changed;
 
-    private long released;
-    private long collected;
+    private long totalReleased;
+    private long totalCollected;
     private long pushed;
 
     private IOutputThread outThrd;
@@ -324,7 +349,7 @@ class CollectorThread
                             List<ITriggerRequestPayload> list)
     {
         for (ITriggerAlgorithm a : algorithms) {
-            released += a.release(interval, list);
+            totalReleased += a.release(interval, list);
         }
     }
 
@@ -365,19 +390,9 @@ class CollectorThread
         return interval;
     }
 
-    public long getNumCollected()
-    {
-        return collected;
-    }
-
     public long getNumPushed()
     {
         return pushed;
-    }
-
-    public long getNumReleased()
-    {
-        return released;
     }
 
     public long getSNDAQAlertsDropped()
@@ -393,6 +408,26 @@ class CollectorThread
     public long getSNDAQAlertsSent()
     {
         return alerter.getNumSent();
+    }
+
+    /**
+     * Get the number of requests collected from all algorithms
+     *
+     * @return total number of collected requests
+     */
+    public long getTotalCollected()
+    {
+        return totalCollected;
+    }
+
+    /**
+     * Get the number of requests released for collection
+     *
+     * @return total number of released requests
+     */
+    public long getTotalReleased()
+    {
+        return totalReleased;
     }
 
     private void initializeSNDAQAlerter(List<ITriggerAlgorithm> algorithms)
@@ -609,7 +644,7 @@ class CollectorThread
         } else if (list.size() == 1) {
             pushTrigger(list.get(0));
 
-            collected++;
+            totalCollected++;
             pushed++;
         } else {
             TriggerRequestComparator trigReqCmp =
@@ -631,7 +666,7 @@ class CollectorThread
                                    interval.end, rReq, hack);
             pushTrigger(mergedReq);
 
-            collected += list.size();
+            totalCollected += list.size();
             pushed++;
         }
     }
@@ -710,8 +745,8 @@ class CollectorThread
 
         return "CollThrd[" + stateStr +
             ",uid=" + mergedUID +
-            ",rel=" + released +
-            ",coll=" + collected +
+            ",rel=" + totalReleased +
+            ",coll=" + totalCollected +
             ",push=" + pushed + "]";
     }
 }

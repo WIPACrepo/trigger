@@ -77,12 +77,14 @@ public class MockAlgorithm
         }
     }
 
+    @Override
     public void addParameter(String name, String value)
         throws UnknownParameterException, IllegalParameterValueException
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void addReadout(int rdoutType, int offset, int minus, int plus)
     {
         throw new Error("Unimplemented");
@@ -113,11 +115,13 @@ public class MockAlgorithm
         return val;
     }
 
+    @Override
     public void flush()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public IPayload getEarliestPayloadOfInterest()
     {
         throw new Error("Unimplemented");
@@ -128,11 +132,13 @@ public class MockAlgorithm
      *
      * @return input queue size
      */
+    @Override
     public int getInputQueueSize()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public Interval getInterval(Interval interval)
     {
         if (intervals.size() == 0) {
@@ -142,6 +148,7 @@ public class MockAlgorithm
         return intervals.get(0);
     }
 
+    @Override
     public String getMonitoringName()
     {
         return "MOCK";
@@ -152,6 +159,7 @@ public class MockAlgorithm
      *
      * @return number of cached requests
      */
+    @Override
     public int getNumberOfCachedRequests()
     {
         return intervals.size();
@@ -162,76 +170,91 @@ public class MockAlgorithm
         return intervals.size();
     }
 
+    @Override
     public long getReleaseTime()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public long getSentTriggerCount()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int getSourceId()
     {
         return srcId;
     }
 
+    @Override
     public PayloadSubscriber getSubscriber()
     {
         return sub;
     }
 
+    @Override
     public int getTriggerConfigId()
     {
         return cfgId;
     }
 
+    @Override
     public int getTriggerCounter()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public Map<String, Object> getTriggerMonitorMap()
     {
         return trigMoniMap;
     }
 
+    @Override
     public String getTriggerName()
     {
         return name;
     }
 
+    @Override
     public int getTriggerType()
     {
         return type;
     }
 
-    public boolean hasData()
-    {
-        return sub.hasData();
-    }
-
+    @Override
     public boolean hasCachedRequests()
     {
         return intervals.size() > 0 && !intervals.get(0).isFlush();
     }
 
+    @Override
+    public boolean hasData()
+    {
+        return sub.hasData();
+    }
+
+    @Override
     public boolean hasValidMultiplicity()
     {
         return validMultiplicity;
     }
 
+    @Override
     public boolean isConfigured()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void recycleUnusedRequests()
     {
         intervals.clear();
     }
 
+    @Override
     public int release(Interval interval,
                        List<ITriggerRequestPayload> released)
     {
@@ -270,16 +293,19 @@ public class MockAlgorithm
         return rtnval;
     }
 
+    @Override
     public void resetAlgorithm()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void resetUID()
     {
         nextUID = 0;
     }
 
+    @Override
     public void runTrigger(IPayload pay)
         throws TriggerException
     {
@@ -299,6 +325,7 @@ public class MockAlgorithm
         return sawFlush;
     }
 
+    @Override
     public void sendLast()
     {
         sentLast = true;
@@ -319,46 +346,55 @@ public class MockAlgorithm
         sawFlush = true;
     }
 
+    @Override
     public void setSourceId(int srcId)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void setSubscriber(PayloadSubscriber sub)
     {
         this.sub = sub;
     }
 
+    @Override
     public void setTriggerCollector(ITriggerCollector coll)
     {
         this.coll = coll;
     }
 
+    @Override
     public void setTriggerConfigId(int cfgId)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void setTriggerFactory(TriggerRequestFactory factory)
     {
         // do nothing
     }
 
+    @Override
     public void setTriggerManager(ITriggerManager mgr)
     {
         // do nothing
     }
 
+    @Override
     public void setTriggerName(String name)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void setTriggerType(int type)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void unsubscribe(SubscribedList list)
     {
         if (!list.unsubscribe(sub)) {

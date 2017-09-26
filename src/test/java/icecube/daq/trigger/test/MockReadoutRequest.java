@@ -54,6 +54,7 @@ public class MockReadoutRequest
         elemList.add(elem);
     }
 
+    @Override
     public void addElement(int type, int srcId, long firstTime, long lastTime,
                            long domId)
     {
@@ -61,36 +62,43 @@ public class MockReadoutRequest
                                                  domId, srcId));
     }
 
+    @Override
     public Object deepCopy()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int getEmbeddedLength()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public ByteBuffer getPayloadBacking()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int getPayloadInterfaceType()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public IUTCTime getPayloadTimeUTC()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int getPayloadType()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public List getReadoutRequestElements()
     {
         if (elemList == null) {
@@ -100,6 +108,7 @@ public class MockReadoutRequest
         return elemList;
     }
 
+    @Override
     public ISourceID getSourceID()
     {
         if (srcObj == null && srcId != IReadoutRequestElement.NO_STRING) {
@@ -109,36 +118,43 @@ public class MockReadoutRequest
         return srcObj;
     }
 
+    @Override
     public int getUID()
     {
         return uid;
     }
 
+    @Override
     public long getUTCTime()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int length()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void loadPayload()
     {
         // do nothing
     }
 
+    @Override
     public int putBody(ByteBuffer buf, int offset)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void recycle()
     {
         // do nothing
     }
 
+    @Override
     public void setCache(IByteBufferCache cache)
     {
         throw new Error("Unimplemented");
@@ -150,6 +166,7 @@ public class MockReadoutRequest
      *
      * @param srcId new source ID
      */
+    @Override
     public void setSourceID(ISourceID srcId)
     {
         if (srcId == null) {
@@ -167,11 +184,13 @@ public class MockReadoutRequest
      *
      * @param uid new UID
      */
+    @Override
     public void setUID(int uid)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public String toString()
     {
         return "MockRdoutReq[" + uid +

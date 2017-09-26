@@ -49,6 +49,7 @@ class MockOutputThread
         pushed.clear();
     }
 
+    @Override
     public long getNumQueued()
     {
         return pushed.size();
@@ -64,6 +65,7 @@ class MockOutputThread
         return pushed.get(idx);
     }
 
+    @Override
     public boolean isStopped()
     {
         calledIsStopped = true;
@@ -71,26 +73,31 @@ class MockOutputThread
         return stopped;
     }
 
+    @Override
     public void notifyThread()
     {
         // do nothing
     }
 
+    @Override
     public void push(ITriggerRequestPayload req)
     {
         pushed.add(req);
     }
 
+    @Override
     public void resetUID()
     {
         // do nothing
     }
 
+    @Override
     public void start(Splicer splicer)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void stop()
     {
         stopped = true;
@@ -109,6 +116,7 @@ class MockDataManager
     private boolean wasReset;
     private boolean wasSent;
 
+    @Override
     public void add(ITriggerRequestPayload req)
         throws MultiplicityDataException
     {
@@ -119,6 +127,7 @@ class MockDataManager
         wasAdded = true;
     }
 
+    @Override
     public void reset()
         throws MultiplicityDataException
     {
@@ -129,6 +138,7 @@ class MockDataManager
         wasReset = true;
     }
 
+    @Override
     public boolean sendFinal()
         throws MultiplicityDataException
     {
@@ -141,6 +151,7 @@ class MockDataManager
         return doReset;
     }
 
+    @Override
     public boolean sendSingleBin(boolean isFinal)
         throws MultiplicityDataException
     {
@@ -186,11 +197,13 @@ class MockDataManager
 class MockSubscriptionManager
     implements SubscriptionManager
 {
+    @Override
     public void subscribeAll()
     {
         // do nothing
     }
 
+    @Override
     public void unsubscribeAll()
     {
         // do nothing

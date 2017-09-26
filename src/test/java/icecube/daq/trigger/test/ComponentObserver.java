@@ -21,6 +21,7 @@ public class ComponentObserver
         return sinkStopNotificationCalled;
     }
 
+    @Override
     public synchronized void update(Object object, String notificationID)
     {
         if (object instanceof NormalState){

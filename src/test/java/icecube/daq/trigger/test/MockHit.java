@@ -43,6 +43,7 @@ public class MockHit
         this.domId = domId;
     }
 
+    @Override
     public int compareSpliceable(Spliceable spl)
     {
         if (spl == null) {
@@ -54,21 +55,25 @@ public class MockHit
         return getHitTimeUTC().compareTo(((IHitPayload) spl).getHitTimeUTC());
     }
 
+    @Override
     public Object deepCopy()
     {
         return new MockHit(getPayloadTimeUTC().longValue());
     }
 
+    @Override
     public boolean equals(Object obj)
     {
         return compareTo(obj) == 0;
     }
 
+    @Override
     public short getChannelID()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public IDOMID getDOMID()
     {
         if (domObj == null) {
@@ -78,16 +83,19 @@ public class MockHit
         return domObj;
     }
 
+    @Override
     public IUTCTime getHitTimeUTC()
     {
         return getPayloadTimeUTC();
     }
 
+    @Override
     public double getIntegratedCharge()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public ByteBuffer getPayloadBacking()
     {
         if (backingBuf == null) {
@@ -100,16 +108,19 @@ public class MockHit
         return backingBuf;
     }
 
+    @Override
     public int getPayloadInterfaceType()
     {
         return PayloadInterfaceRegistry.I_HIT_PAYLOAD;
     }
 
+    @Override
     public int getPayloadType()
     {
         return PayloadRegistry.PAYLOAD_ID_SIMPLE_HIT;
     }
 
+    @Override
     public ISourceID getSourceID()
     {
         if (srcObj == null) {
@@ -119,37 +130,37 @@ public class MockHit
         return srcObj;
     }
 
+    @Override
     public int getTriggerConfigID()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int getTriggerType()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public boolean hasChannelID()
     {
         return false;
     }
 
+    @Override
     public int length()
     {
         return LENGTH;
     }
 
+    @Override
     public void setCache(IByteBufferCache cache)
     {
         throw new Error("Unimplemented");
     }
 
-    public void setSourceID(int srcId)
-    {
-        this.srcId = srcId;
-        srcObj = null;
-    }
-
+    @Override
     public int writePayload(boolean writeLoaded, int offset, ByteBuffer buf)
         throws IOException
     {
@@ -192,6 +203,7 @@ public class MockHit
         buf.putShort(offset + 36, trigMode);
     }
 
+    @Override
     public String toString()
     {
         return "MockHit*" + getUTCTime();

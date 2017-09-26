@@ -33,66 +33,61 @@ class MockCollectorThread
     private boolean started;
     private boolean stopped;
 
-    public long getCollectorLoopCount()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public long getIntervalSearchCount()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public long getFoundIntervalCount()
-    {
-        throw new Error("Unimplemented");
-    }
-
+    @Override
     public long getSNDAQAlertsDropped()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int getSNDAQAlertsQueued()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public long getSNDAQAlertsSent()
     {
         throw new Error("Unimplemented");
     }
 
-    public long getNumQueued()
+    @Override
+    public long getTotalCollected()
     {
         throw new Error("Unimplemented");
     }
 
-    public boolean isOutputStopped()
+    @Override
+    public long getTotalReleased()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void resetUID()
     {
         reset = true;
     }
 
+    @Override
     public void setChanged()
     {
         changed = true;
     }
 
+    @Override
     public void setRunNumber(int runNumber, boolean isSwitched)
     {
         // do nothing
     }
 
+    @Override
     public void start(Splicer splicer)
     {
         started = true;
     }
 
+    @Override
     public void stop()
     {
         stopped = true;

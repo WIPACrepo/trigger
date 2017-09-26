@@ -18,6 +18,8 @@ import icecube.daq.trigger.algorithm.AlgorithmStatistics;
 import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.util.IDOMRegistry;
 
+import java.util.Map;
+
 /**
  * This interface defines the behavior of a TriggerManager
  *
@@ -72,14 +74,7 @@ public interface ITriggerManager
      *
      * @return number of triggers queued
      */
-    int getNumInputsQueued();
-
-    /**
-     * Get number of requests queued for processing.
-     *
-     * @return number of requests queued
-     */
-    int getNumRequestsQueued();
+    Map<String, Integer> getQueuedInputs();
 
     /**
      * Get the number of requests queued for writing

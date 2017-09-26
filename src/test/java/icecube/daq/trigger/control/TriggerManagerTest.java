@@ -70,6 +70,18 @@ public class TriggerManagerTest
         }
     }
 
+    private static long getNumInputsQueued(TriggerManager mgr)
+    {
+        Map<String, Integer> map = mgr.getQueuedInputs();
+
+        long total = 0;
+        for (Integer val : map.values()) {
+            total += val;
+        }
+
+        return total;
+    }
+
     @Before
     public void setUp()
         throws Exception
@@ -95,9 +107,9 @@ public class TriggerManagerTest
         assertEquals("Bad source ID", src.getSourceID(), mgr.getSourceId());
 
         assertNull("Registry should be null", mgr.getDOMRegistry());
-        assertEquals("Bad count", 0L, mgr.getCount());
+        assertEquals("Bad count", 0L, mgr.getTotalProcessed());
         assertEquals("Bad number of inputs queued",
-                     0, mgr.getNumInputsQueued());
+                     0, getNumInputsQueued(mgr));
         assertEquals("Bad number of outputs queued",
                      0, mgr.getNumOutputsQueued());
         assertEquals("Bad total processed",
@@ -846,26 +858,31 @@ public class TriggerManagerTest
             this.srcId = srcId;
         }
 
+        @Override
         public int compareSpliceable(Spliceable spl)
         {
             throw new Error("Unimplemented");
         }
 
+        @Override
         public Object deepCopy()
         {
             return new MyHit(srcId, getUTCTime());
         }
 
+        @Override
         public short getChannelID()
         {
             throw new Error("Unimplemented");
         }
 
+        @Override
         public IDOMID getDOMID()
         {
             throw new Error("Unimplemented");
         }
 
+        @Override
         public IUTCTime getHitTimeUTC()
         {
             if (timeObj == null) {
@@ -875,16 +892,19 @@ public class TriggerManagerTest
             return timeObj;
         }
 
+        @Override
         public double getIntegratedCharge()
         {
             throw new Error("Unimplemented");
         }
 
+        @Override
         public int getPayloadInterfaceType()
         {
             return PayloadInterfaceRegistry.I_HIT_PAYLOAD;
         }
 
+        @Override
         public ISourceID getSourceID()
         {
             if (srcObj == null) {
@@ -894,16 +914,19 @@ public class TriggerManagerTest
             return srcObj;
         }
 
+        @Override
         public int getTriggerConfigID()
         {
             throw new Error("Unimplemented");
         }
 
+        @Override
         public int getTriggerType()
         {
             throw new Error("Unimplemented");
         }
 
+        @Override
         public boolean hasChannelID()
         {
             throw new Error("Unimplemented");
@@ -918,6 +941,7 @@ public class TriggerManagerTest
             super(srcId, timeVal);
         }
 
+        @Override
         public int getPayloadInterfaceType()
         {
             return Integer.MIN_VALUE;

@@ -80,6 +80,7 @@ class TriggerMonitor
         this.prefix = prefix;
     }
 
+    @Override
     public boolean check()
     {
         if (stopped != summarized) {
@@ -155,6 +156,7 @@ class TriggerMonitor
         return changed;
     }
 
+    @Override
     public String getPrefix()
     {
         return prefix;
@@ -165,11 +167,13 @@ class TriggerMonitor
         return sent;
     }
 
+    @Override
     public Splicer getSplicer()
     {
         return comp.getSplicer();
     }
 
+    @Override
     public boolean isStopped()
     {
         return stopped;

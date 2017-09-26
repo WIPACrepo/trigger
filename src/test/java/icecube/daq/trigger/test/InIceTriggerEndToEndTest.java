@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Pipe;
 import java.nio.channels.WritableByteChannel;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -230,6 +231,18 @@ public class InIceTriggerEndToEndTest
     private static final int REPS = 1000;
     private static final int SLEEP_TIME = 100;
 
+    private static long getNumInputsQueued(TriggerManager mgr)
+    {
+        Map<String, Integer> map = mgr.getQueuedInputs();
+
+        long total = 0;
+        for (Integer val : map.values()) {
+            total += val;
+        }
+
+        return total;
+    }
+
     public static final void waitForStasis(SpliceablePayloadReader rdr,
                                            TriggerManager mgr,
                                            DAQComponentOutputProcess out,
@@ -252,8 +265,9 @@ public class InIceTriggerEndToEndTest
                 received = rdr.getTotalRecordsReceived();
                 changed = true;
             }
-            if (queuedIn != mgr.getNumInputsQueued()) {
-                queuedIn = mgr.getNumInputsQueued();
+            final long mgrQueued = getNumInputsQueued(mgr);
+            if (queuedIn != mgrQueued) {
+                queuedIn = getNumInputsQueued(mgr);
                 changed = true;
             }
             if (processed != mgr.getTotalProcessed()) {
@@ -300,8 +314,9 @@ public class InIceTriggerEndToEndTest
                                  rdr.getTotalRecordsReceived()),
                    mgr.getTotalProcessed() >= rdr.getTotalRecordsReceived());
 
-        assertEquals("Input queue is not empty", 0, mgr.getNumInputsQueued());
-        assertEquals("Output queue is not empty", 0, mgr.getNumOutputsQueued());
+        assertEquals("Input queue is not empty", 0, getNumInputsQueued(mgr));
+        assertEquals("Output queue is not empty", 0,
+                     mgr.getNumOutputsQueued());
     }
 
     public static final void waitUntilRunning(DAQComponentIOProcess proc)

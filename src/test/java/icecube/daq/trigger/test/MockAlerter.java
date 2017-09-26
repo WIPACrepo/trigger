@@ -73,6 +73,7 @@ public class MockAlerter
         expected.add(new ExpectedAlertCount(varName, prio, count));
     }
 
+    @Override
     public void close()
     {
         closed = true;
@@ -88,11 +89,13 @@ public class MockAlerter
         return numSent;
     }
 
+    @Override
     public String getService()
     {
         return DEFAULT_SERVICE;
     }
 
+    @Override
     public boolean isActive()
     {
         return !inactive;
@@ -103,6 +106,7 @@ public class MockAlerter
         return closed;
     }
 
+    @Override
     public void sendObject(Object obj)
         throws AlertException
     {
@@ -175,6 +179,7 @@ public class MockAlerter
         numSent++;
     }
 
+    @Override
     public void setAddress(String host, int port)
         throws AlertException
     {

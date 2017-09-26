@@ -162,7 +162,7 @@ public class MockAlgorithm
         return intervals.size();
     }
 
-    public IPayload getReleaseTime()
+    public long getReleaseTime()
     {
         throw new Error("Unimplemented");
     }

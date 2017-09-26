@@ -77,7 +77,7 @@ public abstract class AbstractTrigger
 
     private IPayload earliestPayloadOfInterest;
 
-    private IPayload releaseTime;
+    private long releaseTime = Long.MIN_VALUE;
 
     private ArrayList<ITriggerRequestPayload> requests =
         new ArrayList<ITriggerRequestPayload>();
@@ -651,7 +651,7 @@ public abstract class AbstractTrigger
      *
      * @return release time
      */
-    public IPayload getReleaseTime()
+    public long getReleaseTime()
     {
         return releaseTime;
     }
@@ -851,9 +851,14 @@ public abstract class AbstractTrigger
                 // save the last released time
                 ITriggerRequestPayload req = sub.get(i-1);
                 if (req instanceof FlushRequest) {
-                    releaseTime = req;
+                    releaseTime = req.getUTCTime();
                 } else {
-                    releaseTime = new DummyPayload(req.getLastTimeUTC());
+                    IUTCTime lastTime = req.getLastTimeUTC();
+                    if (lastTime == null) {
+                        LOG.error("Last time is not set for " + req);
+                    } else {
+                        releaseTime = lastTime.longValue();
+                    }
                 }
 
                 // add released requests to the list and remove from the cache
@@ -886,13 +891,11 @@ public abstract class AbstractTrigger
         } else {
             synchronized (requests) {
                 requests.add(trigReq);
-                if (releaseTime != null &&
-                    trigReq.getFirstTimeUTC().longValue() <
-                    releaseTime.getUTCTime())
+                if (releaseTime != Long.MIN_VALUE &&
+                    trigReq.getFirstTimeUTC().longValue() < releaseTime)
                 {
                     LOG.error(triggerName + " added " + trigReq +
-                              " preceding release time " +
-                              releaseTime.getUTCTime());
+                              " preceding release time " + releaseTime);
                 }
                 sentTriggerCounter++;
             }
@@ -910,7 +913,7 @@ public abstract class AbstractTrigger
 
         onTrigger = false;
         earliestPayloadOfInterest = null;
-        releaseTime = null;
+        releaseTime = Long.MIN_VALUE;
     }
 
     /**

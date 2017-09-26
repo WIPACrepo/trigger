@@ -90,7 +90,7 @@ public interface ITriggerAlgorithm
      *
      * @return release time
      */
-    IPayload getReleaseTime();
+    long getReleaseTime();
 
     /**
      * Get the number of trigger intervals sent to the collector.

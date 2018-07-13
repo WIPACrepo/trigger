@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17047 2018-07-13 17:28:58Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17048 2018-07-13 18:14:12Z dglo $
  *
  * Date: August 19 2005
  *
@@ -105,12 +105,17 @@ class HitCollection
     {
         return hits.size();
     }
+
+    public String toString()
+    {
+        return "HitCollection*" + hits.size();
+    }
 }
 
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17047 2018-07-13 17:28:58Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17048 2018-07-13 18:14:12Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -221,12 +226,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         }
     }
 
-    /*
-    *
-    * Methods of ITriggerControl
-    *
-    */
-
     /**
      * Run the trigger algorithm on a payload.
      *
@@ -256,7 +255,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      * @throws icecube.daq.trigger.exceptions.TriggerException
      *          if the algorithm doesn't like this payload
      */
-    public void runTrigger(IPayload payload, boolean rerunHit)
+    private void runTrigger(IPayload payload, boolean rerunHit)
         throws TriggerException
     {
         // check that this is a hit
@@ -348,7 +347,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
             return;
         }
 
-        /* 
+        /*
          * Trigger condition satisfied.  If trigger is new,
          * we need to copy the trigger window hits
          */
@@ -366,7 +365,10 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      */
     public void flush()
     {
-        flushTrigger();
+        if (haveTrigger()) {
+            flushTrigger();
+        }
+
         reset();
     }
 
@@ -402,10 +404,8 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      * Form any pending triggers if we have them
      */
     private void flushTrigger() {
-        if (haveTrigger()) {
-            formTrigger(hitsWithinTriggerWindow.list(), null, null);
-            hitsWithinTriggerWindow.clear();
-        }
+        formTrigger(hitsWithinTriggerWindow.list(), null, null);
+        hitsWithinTriggerWindow.clear();
     }
 
     /**
@@ -468,6 +468,10 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
         private boolean inTimeWindow(IUTCTime hitTime)
         {
+            if (size() == 0) {
+                return false;
+            }
+
             return hitTime.compareTo(startTime()) >= 0 &&
                 hitTime.compareTo(endTime()) <= 0;
         }

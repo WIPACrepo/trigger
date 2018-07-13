@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 16161 2016-07-01 19:02:34Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17047 2018-07-13 17:28:58Z dglo $
  *
  * Date: August 19 2005
  *
@@ -110,7 +110,7 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 16161 2016-07-01 19:02:34Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17047 2018-07-13 17:28:58Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -120,6 +120,12 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      */
     private static final Log LOG =
         LogFactory.getLog(SimpleMajorityTrigger.class);
+
+    /**
+     * If the 'allowSMTRerun' property is set, hits are no longer dropped
+     * after a request has been created.
+     */
+    private static final boolean allowRerun = checkRerunProperty();
 
     private static int nextTriggerNumber;
     private int triggerNumber;
@@ -147,6 +153,9 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      * Time of previous hit, used to ensure strict time ordering
      */
     private IUTCTime lastHitTime = null;
+
+    /** If 'allowSMTRerun' was not set, log a warning */
+    private boolean loggedBuggy = false;
 
     public SimpleMajorityTrigger()
     {
@@ -227,6 +236,27 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      *          if the algorithm doesn't like this payload
      */
     public void runTrigger(IPayload payload)
+        throws TriggerException
+    {
+        if (!allowRerun && !loggedBuggy) {
+            loggedBuggy = true;
+            // XXX when this is deleted, remove this phrase from all unit tests
+            LOG.error("Using buggy SMT algorithm");
+        }
+
+        runTrigger(payload, true);
+    }
+
+    /**
+     * Run the trigger algorithm on a payload.
+     *
+     * @param payload payload to process
+     * @param rerunHit if a request is created, run the hit again
+     *
+     * @throws icecube.daq.trigger.exceptions.TriggerException
+     *          if the algorithm doesn't like this payload
+     */
+    public void runTrigger(IPayload payload, boolean rerunHit)
         throws TriggerException
     {
         // check that this is a hit
@@ -312,6 +342,9 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
          */
         if (slidingTimeWindow.size() == 1 && haveTrigger()) {
             flushTrigger();
+            if (allowRerun && rerunHit) {
+                runTrigger(hit, false);
+            }
             return;
         }
 
@@ -478,5 +511,11 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
     public boolean hasValidMultiplicity()
     {
         return true;
+    }
+
+    private static final boolean checkRerunProperty()
+    {
+        final String prop = System.getProperty("allowSMTRerun");
+        return prop != null && prop.length() > 0;
     }
 }

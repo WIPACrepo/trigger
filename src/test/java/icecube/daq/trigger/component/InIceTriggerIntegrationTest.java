@@ -77,10 +77,10 @@ public class InIceTriggerIntegrationTest
                 if (!(msg.startsWith("Clearing ") &&
                       msg.endsWith(" rope entries")) &&
                     !msg.startsWith("Resetting counter ") &&
-                    !msg.startsWith("No match for timegate "))
+                    !msg.startsWith("No match for timegate ") &&
+                    !msg.startsWith("Using buggy SMT algorithm"))
                 {
-                    fail("Bad log message#" + i + ": " +
-                         appender.getMessage(i));
+                    fail("Bad log message#" + i + ": " + msg);
                 }
             }
         } finally {

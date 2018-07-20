@@ -1,14 +1,14 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.Splicer;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
 import icecube.daq.trigger.algorithm.FlushRequest;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.test.MockAlgorithm;
-import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockBufferCache;
 import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockReadoutRequest;
@@ -33,66 +33,61 @@ class MockCollectorThread
     private boolean started;
     private boolean stopped;
 
-    public long getCollectorLoopCount()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public long getIntervalSearchCount()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public long getFoundIntervalCount()
-    {
-        throw new Error("Unimplemented");
-    }
-
+    @Override
     public long getSNDAQAlertsDropped()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int getSNDAQAlertsQueued()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public long getSNDAQAlertsSent()
     {
         throw new Error("Unimplemented");
     }
 
-    public long getNumQueued()
+    @Override
+    public long getTotalCollected()
     {
         throw new Error("Unimplemented");
     }
 
-    public boolean isOutputStopped()
+    @Override
+    public long getTotalReleased()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void resetUID()
     {
         reset = true;
     }
 
+    @Override
     public void setChanged()
     {
         changed = true;
     }
 
+    @Override
     public void setRunNumber(int runNumber, boolean isSwitched)
     {
         // do nothing
     }
 
+    @Override
     public void start(Splicer splicer)
     {
         started = true;
     }
 
+    @Override
     public void stop()
     {
         stopped = true;
@@ -124,7 +119,7 @@ class MyCollector
 {
     private MockCollectorThread thrd;
 
-    MyCollector(int srcId, List<INewAlgorithm> algorithms,
+    MyCollector(int srcId, List<ITriggerAlgorithm> algorithms,
                 DAQComponentOutputProcess outputEngine,
                 IByteBufferCache outCache,
                 IMonitoringDataManager multiDataMgr,
@@ -135,7 +130,7 @@ class MyCollector
 
     @Override
     public ICollectorThread createCollectorThread(String name, int srcId,
-                                                  List<INewAlgorithm> algo,
+                                                  List<ITriggerAlgorithm> algo,
                                                   IMonitoringDataManager mdm,
                                                   IOutputThread outThrd,
                                                   SubscriptionManager subMgr)
@@ -181,8 +176,6 @@ public class TriggerCollectorTest
     public void setUp()
         throws Exception
     {
-        appender.clear();
-
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
         // initialize SNDAQ ZMQ address to nonsense
@@ -196,8 +189,7 @@ public class TriggerCollectorTest
         // remove SNDAQ ZMQ address
         System.clearProperty(SNDAQAlerter.PROPERTY);
 
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -210,8 +202,8 @@ public class TriggerCollectorTest
             // expect this to fail
         }
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
 
         try {
             new TriggerCollector(INICE_ID, algorithms, null, null, null, null);
@@ -253,8 +245,8 @@ public class TriggerCollectorTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("foo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockBufferCache bufCache = new MockBufferCache("foo");
@@ -266,13 +258,9 @@ public class TriggerCollectorTest
 
         tc.startThreads(null);
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String nullMsg = "Splicer cannot be null";
-        assertEquals("Bad log message", nullMsg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(nullMsg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -280,8 +268,8 @@ public class TriggerCollectorTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("foo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockBufferCache bufCache = new MockBufferCache("foo");

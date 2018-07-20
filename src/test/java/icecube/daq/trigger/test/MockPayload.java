@@ -24,6 +24,7 @@ public abstract class MockPayload
         time = timeVal;
     }
 
+    @Override
     public int compareTo(Object obj)
     {
         if (obj == null) {
@@ -38,26 +39,31 @@ public abstract class MockPayload
         return (int) (mp.time - time);
     }
 
+    @Override
     public Object deepCopy()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void dispose()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public boolean equals(Object obj)
     {
         return compareTo(obj) == 0;
     }
 
+    @Override
     public ByteBuffer getPayloadBacking()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public IUTCTime getPayloadTimeUTC()
     {
         if (timeObj == null) {
@@ -67,16 +73,19 @@ public abstract class MockPayload
         return timeObj;
     }
 
+    @Override
     public int getPayloadType()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public long getUTCTime()
     {
         return time;
     }
 
+    @Override
     public int hashCode()
     {
         final long modValue = Integer.MAX_VALUE / 256;
@@ -87,11 +96,13 @@ public abstract class MockPayload
             (int) (time % modValue);
     }
 
+    @Override
     public int length()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void loadPayload()
         throws IOException, PayloadFormatException
     {
@@ -104,11 +115,13 @@ public abstract class MockPayload
         // do nothing
     }
 
+    @Override
     public void recycle()
     {
         // do nothing
     }
 
+    @Override
     public void setCache(IByteBufferCache bufCache)
     {
         throw new Error("Unimplemented");
@@ -126,6 +139,7 @@ public abstract class MockPayload
         }
     }
 
+    @Override
     public int writePayload(boolean writeLoaded, int offset, ByteBuffer buf)
         throws IOException
     {

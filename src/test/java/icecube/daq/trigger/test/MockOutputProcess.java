@@ -26,12 +26,14 @@ public class MockOutputProcess
         this.name = name;
     }
 
+    @Override
     public QueuedOutputChannel addDataChannel(WritableByteChannel chan,
                                               IByteBufferCache bufCache)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public QueuedOutputChannel connect(IByteBufferCache bufCache,
                                        WritableByteChannel chan, int srcId)
         throws IOException
@@ -39,27 +41,32 @@ public class MockOutputProcess
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void destroyProcessor()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void disconnect()
         throws IOException
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void forcedStopProcessing()
     {
         outChan.sendLastAndStop();
     }
 
+    @Override
     public OutputChannel getChannel()
     {
         return outChan;
     }
 
+    @Override
     public int getNumberOfChannels()
     {
         throw new Error("Unimplemented");
@@ -74,46 +81,55 @@ public class MockOutputProcess
         return outChan.getNumberWritten();
     }
 
+    @Override
     public String getPresentState()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public long getRecordsSent()
     {
         return outChan.getNumberWritten();
     }
 
+    @Override
     public long getTotalRecordsSent()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public boolean isConnected()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public boolean isDestroyed()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public boolean isRunning()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public boolean isStopped()
     {
         return outChan.isStopped();
     }
 
+    @Override
     public void registerComponentObserver(DAQComponentObserver observer)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void sendLastAndStop()
     {
         if (outChan == null) {
@@ -145,16 +161,19 @@ public class MockOutputProcess
         }
     }
 
+    @Override
     public void start()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void startProcessing()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public String toString()
     {
         if (name == null) {

@@ -1,13 +1,12 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
-import icecube.daq.trigger.common.ITriggerManager;
+import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.MockAlgorithm;
-import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockSubscriber;
 
 import java.nio.ByteBuffer;
@@ -28,41 +27,49 @@ class MyPayload
     {
     }
 
+    @Override
     public Object deepCopy()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public ByteBuffer getPayloadBacking()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int getPayloadInterfaceType()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public IUTCTime getPayloadTimeUTC()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int getPayloadType()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public long getUTCTime()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int length()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void setCache(IByteBufferCache x0)
     {
         throw new Error("Unimplemented");
@@ -78,8 +85,6 @@ public class TriggerThreadTest
     public void setUp()
         throws Exception
     {
-        appender.clear();
-
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
     }
@@ -88,8 +93,7 @@ public class TriggerThreadTest
     public void tearDown()
         throws Exception
     {
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -125,10 +129,7 @@ public class TriggerThreadTest
         thrd.run();
         assertTrue("Thread is not stopped", thrd.isStopped());
 
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
-
-        appender.clear();
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -149,13 +150,9 @@ public class TriggerThreadTest
         thrd.run();
         assertTrue("Thread is not stopped", thrd.isStopped());
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String exMsg = "Trigger " + algo + " failed for " + pay;
-        assertEquals("Bad log message", exMsg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(exMsg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -176,11 +173,6 @@ public class TriggerThreadTest
         thrd.start();
         thrd.join();
         assertTrue("Thread is not stopped", thrd.isStopped());
-
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
-
-        appender.clear();
     }
 
     @Test

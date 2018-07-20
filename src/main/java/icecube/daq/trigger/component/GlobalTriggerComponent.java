@@ -28,7 +28,7 @@ public class GlobalTriggerComponent
         try {
             srvr = new DAQCompServer(new GlobalTriggerComponent(), args);
         } catch (IllegalArgumentException ex) {
-            System.err.println(ex.getMessage());
+            ex.printStackTrace();
             System.exit(1);
             return; // without this, compiler whines about uninitialized 'srvr'
         }

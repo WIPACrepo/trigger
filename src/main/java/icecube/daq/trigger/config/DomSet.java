@@ -1,6 +1,7 @@
 package icecube.daq.trigger.config;
 
 import icecube.daq.payload.IDOMID;
+import icecube.daq.util.DOMInfo;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -21,27 +22,37 @@ import org.apache.log4j.Logger;
  */
 public class DomSet
 {
-    private static final Logger LOG = Logger.getLogger(DomSet.class);
-
     /**
      * Name of this DomSet
      */
     private final String name;
 
     /**
-     * List of doms in this DomSet
+     * List of dom IDs in this DomSet
      */
-    private final HashSet<Long> set;
+    private final HashSet<Long> domIds;
+
+    /**
+     * List of channel IDs in this DomSet
+     */
+    private final HashSet<Short> chanIds;
 
     /**
      * Constructor, takes the name of the set and the list of domid's
      * @param name name of domset
      * @param set list of domIds, must be lowercase hex
      */
-    public DomSet(String name, Collection<Long> set)
+    public DomSet(String name)
     {
         this.name = name;
-        this.set = new HashSet<Long>(set);
+        this.domIds = new HashSet<Long>();
+        this.chanIds = new HashSet<Short>();
+    }
+
+    public void add(DOMInfo dom)
+    {
+        domIds.add(dom.getNumericMainboardId());
+        chanIds.add(dom.getChannelId());
     }
 
     /**
@@ -73,8 +84,11 @@ public class DomSet
      */
     public boolean equals(DomSet other)
     {
-        return other != null && set.size() == other.set.size() &&
-            set.containsAll(other.set);
+        return other != null &&
+            domIds.size() == other.domIds.size() &&
+            domIds.containsAll(other.domIds) &&
+            chanIds.size() == other.chanIds.size() &&
+            chanIds.containsAll(other.chanIds);
     }
 
     /**
@@ -93,7 +107,7 @@ public class DomSet
      */
     public int hashCode()
     {
-        return name.hashCode() + set.hashCode();
+        return name.hashCode() + domIds.hashCode() + chanIds.hashCode();
     }
 
     /**
@@ -107,7 +121,17 @@ public class DomSet
             return false;
         }
 
-        return set.contains(dom.longValue());
+        return domIds.contains(dom.longValue());
+    }
+
+    /**
+     * Check if a given channel ID is in the DomSet
+     * @param chanId channel ID to check
+     * @return true if dom is in set, false otherwise
+     */
+    public boolean inSet(short chanId)
+    {
+        return chanIds.contains(chanId);
     }
 
     /**
@@ -117,7 +141,7 @@ public class DomSet
      */
     public int size()
     {
-        return set.size();
+        return chanIds.size();
     }
 
     /**
@@ -127,6 +151,6 @@ public class DomSet
      */
     public String toString()
     {
-        return name + "*" + set.size();
+        return name + "*" + chanIds.size();
     }
 }

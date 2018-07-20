@@ -19,21 +19,25 @@ public class MockSubscriber
         payloads.add(pay);
     }
 
+    @Override
     public String getName()
     {
         return "MockSubscriber";
     }
 
+    @Override
     public boolean hasData()
     {
         return payloads.size() > 0;
     }
 
+    @Override
     public boolean isStopped()
     {
         return stopping && payloads.size() == 0;
     }
 
+    @Override
     public IPayload pop()
     {
         if (payloads.size() <= 1 && thrd != null) {
@@ -47,11 +51,13 @@ public class MockSubscriber
         return payloads.remove(0);
     }
 
+    @Override
     public void push(IPayload pay)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int size()
     {
         return payloads.size();
@@ -62,6 +68,7 @@ public class MockSubscriber
         this.thrd = thrd;
     }
 
+    @Override
     public void stop()
     {
         stopping = true;

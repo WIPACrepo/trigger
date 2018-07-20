@@ -6,8 +6,8 @@ import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.util.DOMRegistry;
-import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.IDOMRegistry;
+import icecube.daq.util.DOMInfo;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -55,33 +55,21 @@ public class SlowMPTrigger extends AbstractTrigger
     private boolean min_n_tuples_configured = false;
     private boolean max_event_length_configured = false;
 
-    private DOMRegistry domRegistry;
+    private IDOMRegistry domRegistry;
 
     private class min_hit_info
     {
+        private IHitPayload hit;
+        private DOMInfo dom;
+
         min_hit_info(IHitPayload new_hit)
         {
             hit  = new_hit;
-
-            utc_time = hit.getHitTimeUTC().longValue();
-            mb_id = hit.getDOMID().longValue();
-        }
-
-        private IHitPayload hit;
-
-        private long mb_id;
-        private long utc_time;
-
-        private DeployedDOM dom;
-
-        public long get_mb_id()
-        {
-            return mb_id;
         }
 
         public long get_time()
         {
-            return utc_time;
+            return hit.getUTCTime();
         }
 
         public IHitPayload get_hit()
@@ -89,17 +77,30 @@ public class SlowMPTrigger extends AbstractTrigger
             return hit;
         }
 
-        public DeployedDOM get_dom()
+        public DOMInfo get_dom()
         {
             if (dom == null) {
                 if (domRegistry == null) {
                     domRegistry = getTriggerHandler().getDOMRegistry();
                 }
 
-                dom = domRegistry.getDom(mb_id);
+                if (hit.hasChannelID()) {
+                    dom = domRegistry.getDom(hit.getChannelID());
+                } else {
+                    dom = domRegistry.getDom(hit.getDOMID().longValue());
+                }
             }
 
             return dom;
+        }
+
+        public String toString()
+        {
+            if (dom == null) {
+                return hit.toString();
+            }
+
+            return hit.toString() + "[" + dom + "]";
         }
     }
 
@@ -475,7 +476,6 @@ public class SlowMPTrigger extends AbstractTrigger
                                        );
         // This upcast should be safe now
         IHitPayload hitPayload = (IHitPayload) payload;
-        //LOG.warn("HITTIME: " + hitPayload.getHitTimeUTC() + "PAYLOADTIME: " + hitPayload.getPayloadTimeUTC());
         // Check hit type and perhaps pre-screen DOMs based on channel
         boolean usableHit =
             getHitType(hitPayload) == AbstractTrigger.SPE_HIT &&
@@ -671,7 +671,7 @@ public class SlowMPTrigger extends AbstractTrigger
             if(info.get_num_tuples() >= min_n_tuples)
             {
                 //System.out.format("FOUND TRIGGER: start: %d, end :%d with %d tuples%n",info.get_first_hit().get_time(), info.get_last_hit().get_time(), info.get_num_tuples() );
-                //LOG.warn("FOUND TRIGGER: length: " + (info.get_last_hit().getHitTimeUTC().longValue()-info.get_first_hit().getHitTimeUTC().longValue()) + " with " + info.get_num_tuples());
+                //LOG.warn("FOUND TRIGGER: length: " + (info.get_last_hit().getUTCTime()-info.get_first_hit().getUTCTime()) + " with " + info.get_num_tuples());
                 // form trigger here for each trigger_info
                 formTrigger(info.get_hit_list(), null, null);
 
@@ -703,9 +703,9 @@ public class SlowMPTrigger extends AbstractTrigger
                 domRegistry = getTriggerHandler().getDOMRegistry();
             }
 
-            double p_diff1 = domRegistry.distanceBetweenDOMs(hit1.get_mb_id(), hit2.get_mb_id());
-            double p_diff2 = domRegistry.distanceBetweenDOMs(hit2.get_mb_id(), hit3.get_mb_id());
-            double p_diff3 = domRegistry.distanceBetweenDOMs(hit1.get_mb_id(), hit3.get_mb_id());
+            double p_diff1 = domRegistry.distanceBetweenDOMs(hit1.get_dom(), hit2.get_dom());
+            double p_diff2 = domRegistry.distanceBetweenDOMs(hit2.get_dom(), hit3.get_dom());
+            double p_diff3 = domRegistry.distanceBetweenDOMs(hit1.get_dom(), hit3.get_dom());
             double cos_alpha = 1.0;
             //LOG.warn("    ->step2 - p_diff1: " + p_diff1 + " p_diff2: " + p_diff2 + " pdiff3: " + p_diff3);
 
@@ -755,8 +755,8 @@ public class SlowMPTrigger extends AbstractTrigger
                     }
                     else
                     {
-                        long trigger_start_temp = trigger_list.getLast().get_first_hit().getHitTimeUTC().longValue();
-                        long trigger_end_temp = trigger_list.getLast().get_last_hit().getHitTimeUTC().longValue();
+                        long trigger_start_temp = trigger_list.getLast().get_first_hit().getUTCTime();
+                        long trigger_end_temp = trigger_list.getLast().get_last_hit().getUTCTime();
 
                         //System.out.format("TEMP: %d %d%n", trigger_start_temp, trigger_end_temp);
 
@@ -794,17 +794,19 @@ public class SlowMPTrigger extends AbstractTrigger
     {
         if (domRegistry == null) {
             domRegistry = getTriggerHandler().getDOMRegistry();
+            if (domRegistry == null) {
+                throw new Error("DOM registry has not been set in " +
+                                getTriggerHandler());
+            }
         }
 
-        DeployedDOM dom1 = hit1.get_dom();
+        DOMInfo dom1 = hit1.get_dom();
         if (dom1 == null) {
-            throw new Error(String.format("Cannot find %012x",
-                                          hit1.get_mb_id()));
+            throw new Error("Cannot find " + hit1);
         }
-        DeployedDOM dom2 = hit2.get_dom();
+        DOMInfo dom2 = hit2.get_dom();
         if (dom2 == null) {
-            throw new Error(String.format("Cannot find %012x",
-                                          hit1.get_mb_id()));
+            throw new Error("Cannot find " + hit2);
         }
 
         int string_nr1 = dom1.getStringMajor();

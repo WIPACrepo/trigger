@@ -21,15 +21,14 @@ import icecube.daq.splicer.SpliceableComparator;
 import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
-import icecube.daq.trigger.common.DAQTriggerComponent;
-import icecube.daq.trigger.common.ITriggerAlgorithm;
-import icecube.daq.trigger.common.ITriggerManager;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.config.TriggerCreator;
+import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.DOMRegistryFactory;
+import icecube.daq.util.IDOMRegistry;
 import icecube.daq.util.JAXPUtil;
 import icecube.daq.util.JAXPUtilException;
 
@@ -37,7 +36,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -88,30 +86,35 @@ public class TriggerComponent
 
         // Create the source id of this component
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
+    }
 
+    public void initialize()
+        throws DAQCompException
+    {
         // Get input and output types
         String inputType;
         String outputType;
         String shortName;
         int totChannels;
-        if (name.equals(DAQCmdInterface.DAQ_GLOBAL_TRIGGER)) {
+        // XXX use a `switch` statement in Java 1.7
+        if (getName().equals(DAQCmdInterface.DAQ_GLOBAL_TRIGGER)) {
             isGlobalTrigger = true;
             inputType = DAQConnector.TYPE_TRIGGER;
             outputType = DAQConnector.TYPE_GLOBAL_TRIGGER;
             shortName = "GTrig";
             totChannels = 2;
-        } else if (name.equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
+        } else if (getName().equals(DAQCmdInterface.DAQ_INICE_TRIGGER)) {
             inputType = DAQConnector.TYPE_STRING_HIT;
             outputType = DAQConnector.TYPE_TRIGGER;
             shortName = "IITrig";
             totChannels = DAQCmdInterface.DAQ_MAX_NUM_STRINGS;
-        } else if (name.equals(DAQCmdInterface.DAQ_ICETOP_TRIGGER)) {
+        } else if (getName().equals(DAQCmdInterface.DAQ_ICETOP_TRIGGER)) {
             inputType = DAQConnector.TYPE_ICETOP_HIT;
             outputType = DAQConnector.TYPE_TRIGGER;
             shortName = "ITTrig";
             totChannels = DAQCmdInterface.DAQ_MAX_NUM_IDH;
         } else {
-            throw new Error("Unknown trigger " + name);
+            throw new Error("Unknown trigger " + getName());
         }
 
         inCache = new VitreousBufferCache(shortName + "IN", Long.MAX_VALUE);
@@ -151,8 +154,8 @@ public class TriggerComponent
 
         // Create and register input engine
         try {
-            inputEngine = new SpliceablePayloadReader(name, 25000, splicer,
-                                                      factory);
+            inputEngine = new SpliceablePayloadReader(getName(), 25000,
+                                                      splicer, factory);
         } catch (IOException ioe) {
             LOG.error("Couldn't create input reader");
             System.exit(1);
@@ -161,7 +164,8 @@ public class TriggerComponent
         addMonitoredEngine(inputType, inputEngine);
 
         // Create and register output engine
-        outputEngine = new SimpleOutputEngine(name, id, name + "OutputEngine");
+        outputEngine = new SimpleOutputEngine(getName(), getNumber(),
+                                              getName() + "OutputEngine");
         triggerManager.setOutputEngine(outputEngine);
         addMonitoredEngine(outputType, outputEngine);
     }
@@ -197,9 +201,9 @@ public class TriggerComponent
         }
 
         // Initialize DOMRegistry
-        DOMRegistry registry;
+        IDOMRegistry registry;
         try {
-            registry = DOMRegistry.loadRegistry(configDir);
+            registry = DOMRegistryFactory.load(configDir);
             LOG.info("loaded DOM registry");
         } catch (Exception ex) {
             throw new DAQCompException("Error loading DOM registry", ex);
@@ -259,11 +263,11 @@ public class TriggerComponent
 
         // the global trigger needs to know about all configured algorithms
         //  so it can monitor individual algorithm rates
-        ArrayList<INewAlgorithm> extraAlgorithms;
+        ArrayList<ITriggerAlgorithm> extraAlgorithms;
         if (sourceId.getSourceID() ==
             SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID)
         {
-            extraAlgorithms = new ArrayList<INewAlgorithm>();
+            extraAlgorithms = new ArrayList<ITriggerAlgorithm>();
         } else {
             extraAlgorithms = null;
         }
@@ -407,7 +411,7 @@ public class TriggerComponent
      */
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 15570 2015-06-12 16:19:32Z dglo $";
+        return "$Id: TriggerComponent.java 16247 2016-10-11 14:26:24Z dglo $";
     }
 
     /**

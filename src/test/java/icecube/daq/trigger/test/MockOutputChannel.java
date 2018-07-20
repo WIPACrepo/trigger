@@ -15,24 +15,9 @@ public class MockOutputChannel
     {
     }
 
-    public void destinationClosed()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void flushOutQueue()
-    {
-        throw new Error("Unimplemented");
-    }
-
     int getNumberWritten()
     {
         return numWritten;
-    }
-
-    public boolean isOutputQueued()
-    {
-        throw new Error("Unimplemented");
     }
 
     public boolean isStopped()
@@ -40,6 +25,7 @@ public class MockOutputChannel
         return stopped;
     }
 
+    @Override
     public void receiveByteBuffer(ByteBuffer buf)
     {
         numWritten++;
@@ -48,12 +34,7 @@ public class MockOutputChannel
         }
     }
 
-    public void registerComponentObserver(DAQComponentObserver observer,
-                                          String id)
-    {
-        throw new Error("Unimplemented");
-    }
-
+    @Override
     public void sendLastAndStop()
     {
         stopped = true;
@@ -64,6 +45,7 @@ public class MockOutputChannel
         this.validator = validator;
     }
 
+    @Override
     public String toString()
     {
         return String.format("MockOutChan[wrote %d%s]", numWritten,

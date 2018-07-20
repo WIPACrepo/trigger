@@ -1,19 +1,10 @@
 package icecube.daq.trigger.component;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.alert.Alerter.Priority;
-import icecube.daq.trigger.algorithm.AbstractTrigger;
-import icecube.daq.trigger.control.SNDAQAlerter;
-import icecube.daq.trigger.control.TriggerManager;
-import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.trigger.test.ActivityMonitor;
-import icecube.daq.trigger.test.BaseValidator;
-import icecube.daq.trigger.test.DAQTestUtil;
-import icecube.daq.trigger.test.MockAlerter;
-import icecube.daq.trigger.test.MockAppender;
-import icecube.daq.trigger.test.MockSourceID;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IWriteablePayload;
@@ -24,8 +15,19 @@ import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
-import icecube.daq.util.DOMRegistry;
-import icecube.daq.util.DeployedDOM;
+import icecube.daq.trigger.algorithm.AbstractTrigger;
+import icecube.daq.trigger.control.SNDAQAlerter;
+import icecube.daq.trigger.control.TriggerManager;
+import icecube.daq.trigger.exceptions.TriggerException;
+import icecube.daq.trigger.test.ActivityMonitor;
+import icecube.daq.trigger.test.BaseValidator;
+import icecube.daq.trigger.test.DAQTestUtil;
+import icecube.daq.trigger.test.MockAlerter;
+import icecube.daq.trigger.test.MockSourceID;
+import icecube.daq.util.DOMInfo;
+import icecube.daq.util.DOMRegistryException;
+import icecube.daq.util.DOMRegistryFactory;
+import icecube.daq.util.IDOMRegistry;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,18 +70,22 @@ public class InIceTriggerIntegrationTest
 
     private void checkLogMessages()
     {
-        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
-            String msg = (String) appender.getMessage(i);
+        try {
+            for (int i = 0; i < appender.getNumberOfMessages(); i++) {
+                String msg = (String) appender.getMessage(i);
 
-            if (!(msg.startsWith("Clearing ") &&
-                  msg.endsWith(" rope entries")) &&
-                !msg.startsWith("Resetting counter ") &&
-                !msg.startsWith("No match for timegate "))
-            {
-                fail("Bad log message#" + i + ": " + appender.getMessage(i));
+                if (!(msg.startsWith("Clearing ") &&
+                      msg.endsWith(" rope entries")) &&
+                    !msg.startsWith("Resetting counter ") &&
+                    !msg.startsWith("No match for timegate "))
+                {
+                    fail("Bad log message#" + i + ": " +
+                         appender.getMessage(i));
+                }
             }
+        } finally {
+            appender.clear();
         }
-        appender.clear();
     }
 
     private void sendHit(WritableByteChannel chan, long time, int tailIndex,
@@ -113,25 +119,32 @@ public class InIceTriggerIntegrationTest
         }
     }
 
-    private void sendInIceData(Pipe[] tails, int numObjs, DOMRegistry registry)
-        throws IOException
+    private void sendInIceData(Pipe[] tails, int numObjs,
+                               IDOMRegistry registry)
+        throws DOMRegistryException, IOException
     {
-        java.util.Iterator<Long> domIter = registry.keys().iterator();
-
-        for (int i = 0; i < numObjs; i++) {
-            final long time;
-            if (i == 0) {
-                time = TIME_BASE;
-            } else {
-                time = (TIME_BASE * (((i - 1) / NUM_HITS_PER_TRIGGER) + 1)) +
-                    (TIME_STEP * i);
+        int numSent = 0;
+        for (DOMInfo dom : registry.allDOMs()) {
+            if (!dom.isRealDOM()) {
+                continue;
             }
 
-            DeployedDOM dom = registry.getDom(domIter.next());
+            final long time;
+            if (numSent == 0) {
+                time = TIME_BASE;
+            } else {
+                time = (TIME_BASE * (((numSent - 1) /
+                                      NUM_HITS_PER_TRIGGER) + 1)) +
+                    (TIME_STEP * numSent);
+            }
 
-            final int tailIndex = i % tails.length;
+            final int tailIndex = numSent % tails.length;
             sendHit(tails[tailIndex].sink(), time, tailIndex,
                     dom.getNumericMainboardId());
+
+            if (++numSent == numObjs) {
+                break;
+            }
         }
     }
 
@@ -140,8 +153,6 @@ public class InIceTriggerIntegrationTest
     {
         super.setUp();
 
-        appender.clear();
-
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
 
@@ -149,9 +160,9 @@ public class InIceTriggerIntegrationTest
         System.getProperties().setProperty(SNDAQAlerter.PROPERTY, ":12345");
     }
 
-    private void startAndRun(IniceTriggerComponent comp, DOMRegistry domReg,
+    private void startAndRun(IniceTriggerComponent comp, IDOMRegistry domReg,
                              int runInstance)
-        throws DAQCompException, IOException
+        throws DAQCompException, DOMRegistryException, IOException
     {
         final int numTails = 10;
         final int numObjs = numTails * 10;
@@ -178,12 +189,12 @@ public class InIceTriggerIntegrationTest
         final boolean dumpSplicers = false;
         final boolean dumpBEStats = false;
 
-        activity.waitForStasis(10, 100, expTriggers, dumpActivity,
+        activity.waitForStasis(10, 1000, expTriggers, dumpActivity,
                                dumpSplicers);
 
         DAQTestUtil.sendStops(tails);
 
-        activity.waitForStasis(10, 100, expTriggers, dumpActivity,
+        activity.waitForStasis(10, 1000, expTriggers, dumpActivity,
                                dumpSplicers);
 
         //assertEquals("Bad number of payloads written",
@@ -207,29 +218,34 @@ public class InIceTriggerIntegrationTest
         // remove SNDAQ ZMQ address
         System.clearProperty(SNDAQAlerter.PROPERTY);
 
-        if (comp != null) comp.closeAll();
+        if (comp != null) {
+            try {
+                comp.closeAll();
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
+
+        appender.assertNoLogMessages();
 
         if (tails != null) {
             DAQTestUtil.closePipeList(tails);
         }
 
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
-
         super.tearDown();
     }
 
     public void testIntegration()
-        throws DAQCompException, IOException, SplicerException,
-               TriggerException
+        throws DAQCompException, DOMRegistryException, IOException,
+               SplicerException, TriggerException
     {
         File cfgFile =
             DAQTestUtil.buildConfigFile(getClass().getResource("/").getPath(),
                                         "sps-2012-013");
 
-        DOMRegistry domReg;
+        IDOMRegistry domReg;
         try {
-            domReg = DOMRegistry.loadRegistry(cfgFile.getParent());
+            domReg = DOMRegistryFactory.load(cfgFile.getParent());
         } catch (Exception ex) {
             throw new Error("Cannot load DOM registry", ex);
         }
@@ -241,6 +257,7 @@ public class InIceTriggerIntegrationTest
         comp = new IniceTriggerComponent();
         comp.setGlobalConfigurationDir(cfgFile.getParent());
         comp.setAlerter(alerter);
+        comp.initialize();
         comp.start(false);
 
         comp.configuring(cfgFile.getName());
@@ -251,7 +268,7 @@ public class InIceTriggerIntegrationTest
 
         DAQTestUtil.destroyComponentIO(comp);
 
-        alerter.check();
+        alerter.waitForAlerts(100);
 
         if (appender.getLevel().equals(org.apache.log4j.Level.ALL)) {
             appender.clear();

@@ -1,15 +1,15 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.trigger.algorithm.FlushRequest;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 import icecube.daq.trigger.test.MockAlgorithm;
-import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockBufferCache;
 import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockSubscriber;
@@ -49,6 +49,7 @@ class MockOutputThread
         pushed.clear();
     }
 
+    @Override
     public long getNumQueued()
     {
         return pushed.size();
@@ -64,6 +65,7 @@ class MockOutputThread
         return pushed.get(idx);
     }
 
+    @Override
     public boolean isStopped()
     {
         calledIsStopped = true;
@@ -71,26 +73,31 @@ class MockOutputThread
         return stopped;
     }
 
+    @Override
     public void notifyThread()
     {
         // do nothing
     }
 
+    @Override
     public void push(ITriggerRequestPayload req)
     {
         pushed.add(req);
     }
 
+    @Override
     public void resetUID()
     {
         // do nothing
     }
 
+    @Override
     public void start(Splicer splicer)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void stop()
     {
         stopped = true;
@@ -109,6 +116,7 @@ class MockDataManager
     private boolean wasReset;
     private boolean wasSent;
 
+    @Override
     public void add(ITriggerRequestPayload req)
         throws MultiplicityDataException
     {
@@ -119,6 +127,7 @@ class MockDataManager
         wasAdded = true;
     }
 
+    @Override
     public void reset()
         throws MultiplicityDataException
     {
@@ -129,6 +138,7 @@ class MockDataManager
         wasReset = true;
     }
 
+    @Override
     public boolean sendFinal()
         throws MultiplicityDataException
     {
@@ -141,6 +151,7 @@ class MockDataManager
         return doReset;
     }
 
+    @Override
     public boolean sendSingleBin(boolean isFinal)
         throws MultiplicityDataException
     {
@@ -186,11 +197,13 @@ class MockDataManager
 class MockSubscriptionManager
     implements SubscriptionManager
 {
+    @Override
     public void subscribeAll()
     {
         // do nothing
     }
 
+    @Override
     public void unsubscribeAll()
     {
         // do nothing
@@ -230,8 +243,6 @@ public class CollectorThreadTest
     public void setUp()
         throws Exception
     {
-        appender.clear();
-
         outThrd.clear();
 
         BasicConfigurator.resetConfiguration();
@@ -248,8 +259,7 @@ public class CollectorThreadTest
         // remove SNDAQ ZMQ address
         System.clearProperty(SNDAQAlerter.PROPERTY);
 
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
 
         assertEquals("Found unexpected output requests", 0L,
                      outThrd.getNumQueued());
@@ -261,8 +271,8 @@ public class CollectorThreadTest
         MockAlgorithm fooAlgo = new MockAlgorithm("creAlgo");
         fooAlgo.setSubscriber(new MockSubscriber());
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -279,8 +289,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("apiAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -298,8 +308,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("findAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -326,8 +336,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("pushIIAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -357,8 +367,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("pushGAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -386,13 +396,9 @@ public class CollectorThreadTest
         }
         outThrd.clear();
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "Cannot add multiplicity data";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -400,8 +406,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("pushGAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -434,8 +440,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("pushGAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -471,8 +477,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("pushGAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -507,8 +513,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("pushGAlgo");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -539,13 +545,9 @@ public class CollectorThreadTest
         }
         outThrd.clear();
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "Failed to reset multiplicity data";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -553,8 +555,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("sendReqEmpty");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -577,13 +579,9 @@ public class CollectorThreadTest
         assertFalse("Should not have added anything to data manager",
                     mgr.wasAdded());
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "No requests found for interval " + ival;
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -591,8 +589,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("sendReqII1");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -634,8 +632,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("sendReqGT1");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -678,8 +676,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("sendReqIIMany");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -726,8 +724,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("sendReqGTMany");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -773,8 +771,8 @@ public class CollectorThreadTest
     @Test
     public void testSetChangedNoAlgo()
     {
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
 
         MockOutputProcess out = new MockOutputProcess();
 
@@ -794,8 +792,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("setChgNoFlush");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -816,8 +814,8 @@ public class CollectorThreadTest
     {
         MockAlgorithm fooAlgo = new MockAlgorithm("setChgFlush");
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         MockOutputProcess out = new MockOutputProcess();
@@ -842,8 +840,8 @@ public class CollectorThreadTest
         MockRunAlgorithm fooAlgo = new MockRunAlgorithm(name + "Algo");
         fooAlgo.setSubscriber(new MockSubscriber());
 
-        ArrayList<INewAlgorithm> algorithms =
-            new ArrayList<INewAlgorithm>();
+        ArrayList<ITriggerAlgorithm> algorithms =
+            new ArrayList<ITriggerAlgorithm>();
         algorithms.add(fooAlgo);
 
         fooAlgo.addInterval(oldStart, oldEnd);
@@ -882,14 +880,10 @@ public class CollectorThreadTest
         outThrd.clear();
 
         if (reqList.length == 0) {
-            assertEquals("Bad number of log messages",
-                         1, appender.getNumberOfMessages());
-
             final String expMsg = "New interval [" + newStart + "-" + newEnd +
                 "] precedes old interval [" + oldStart + "-" + oldEnd + "]";
-            assertEquals("Bad log message", expMsg, appender.getMessage(0));
-
-            appender.clear();
+            appender.assertLogMessage(expMsg);
+            appender.assertNoLogMessages();
         }
     }
 

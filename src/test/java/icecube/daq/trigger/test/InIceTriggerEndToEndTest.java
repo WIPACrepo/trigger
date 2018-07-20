@@ -1,5 +1,6 @@
 package icecube.daq.trigger.test;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.SpliceablePayloadReader;
@@ -18,12 +19,17 @@ import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.control.SNDAQAlerter;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.DOMRegistryException;
+import icecube.daq.util.DOMRegistryFactory;
+import icecube.daq.util.IDOMRegistry;
+import icecube.daq.util.LocatePDAQ;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Pipe;
 import java.nio.channels.WritableByteChannel;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -53,19 +59,23 @@ public class InIceTriggerEndToEndTest
 
     private void checkLogMessages()
     {
-        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
-            String msg = (String) appender.getMessage(i);
+        try {
+            for (int i = 0; i < appender.getNumberOfMessages(); i++) {
+                String msg = (String) appender.getMessage(i);
 
-            if (!(msg.startsWith("Clearing ") &&
-                  msg.endsWith(" rope entries")) &&
-                !msg.startsWith("Resetting counter ") &&
-                !msg.startsWith("Resetting decrement ") &&
-                !msg.startsWith("No match for timegate "))
-            {
-                fail("Bad log message#" + i + ": " + appender.getMessage(i));
+                if (!(msg.startsWith("Clearing ") &&
+                      msg.endsWith(" rope entries")) &&
+                    !msg.startsWith("Resetting counter ") &&
+                    !msg.startsWith("Resetting decrement ") &&
+                    !msg.startsWith("No match for timegate "))
+                {
+                    fail("Bad log message#" + i + ": " +
+                         appender.getMessage(i));
+                }
             }
+        } finally {
+            appender.clear();
         }
-        appender.clear();
     }
 
     protected void setUp()
@@ -73,13 +83,23 @@ public class InIceTriggerEndToEndTest
     {
         super.setUp();
 
-        appender.clear();
-
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
 
         // initialize SNDAQ ZMQ address to nonsense
         System.getProperties().setProperty(SNDAQAlerter.PROPERTY, ":12345");
+
+        // ensure LocatePDAQ uses the test version of the config directory
+        File configDir =
+            new File(getClass().getResource("/config").getPath());
+        if (!configDir.exists()) {
+            throw new IllegalArgumentException("Cannot find config" +
+                                               " directory under " +
+                                               getClass().getResource("/"));
+        }
+
+        System.setProperty(LocatePDAQ.CONFIG_DIR_PROPERTY,
+                           configDir.getAbsolutePath());
     }
 
     public static Test suite()
@@ -93,14 +113,16 @@ public class InIceTriggerEndToEndTest
         // remove SNDAQ ZMQ address
         System.clearProperty(SNDAQAlerter.PROPERTY);
 
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        System.clearProperty(LocatePDAQ.CONFIG_DIR_PROPERTY);
+
+        appender.assertNoLogMessages();
 
         super.tearDown();
     }
 
     public void testEndToEnd()
-        throws IOException, SplicerException, TriggerException
+        throws DOMRegistryException, IOException, SplicerException,
+               TriggerException
     {
         final int numTails = 10;
         final int numObjs = numTails * 10;
@@ -120,9 +142,9 @@ public class InIceTriggerEndToEndTest
                 configDir.substring(breakPt);
         }
 
-        DOMRegistry domReg;
+        IDOMRegistry domReg;
         try {
-            domReg = DOMRegistry.loadRegistry(configDir);
+            domReg = DOMRegistryFactory.load(configDir);
             trigMgr.setDOMRegistry(domReg);
         } catch (Exception ex) {
             throw new Error("Cannot set DOM registry", ex);
@@ -206,8 +228,20 @@ public class InIceTriggerEndToEndTest
         }
     }
 
-    private static final int REPS = 100;
+    private static final int REPS = 1000;
     private static final int SLEEP_TIME = 100;
+
+    private static long getNumInputsQueued(TriggerManager mgr)
+    {
+        Map<String, Integer> map = mgr.getQueuedInputs();
+
+        long total = 0;
+        for (Integer val : map.values()) {
+            total += val;
+        }
+
+        return total;
+    }
 
     public static final void waitForStasis(SpliceablePayloadReader rdr,
                                            TriggerManager mgr,
@@ -231,8 +265,9 @@ public class InIceTriggerEndToEndTest
                 received = rdr.getTotalRecordsReceived();
                 changed = true;
             }
-            if (queuedIn != mgr.getNumInputsQueued()) {
-                queuedIn = mgr.getNumInputsQueued();
+            final long mgrQueued = getNumInputsQueued(mgr);
+            if (queuedIn != mgrQueued) {
+                queuedIn = getNumInputsQueued(mgr);
                 changed = true;
             }
             if (processed != mgr.getTotalProcessed()) {
@@ -279,8 +314,9 @@ public class InIceTriggerEndToEndTest
                                  rdr.getTotalRecordsReceived()),
                    mgr.getTotalProcessed() >= rdr.getTotalRecordsReceived());
 
-        assertEquals("Input queue is not empty", 0, mgr.getNumInputsQueued());
-        assertEquals("Output queue is not empty", 0, mgr.getNumOutputsQueued());
+        assertEquals("Input queue is not empty", 0, getNumInputsQueued(mgr));
+        assertEquals("Output queue is not empty", 0,
+                     mgr.getNumOutputsQueued());
     }
 
     public static final void waitUntilRunning(DAQComponentIOProcess proc)

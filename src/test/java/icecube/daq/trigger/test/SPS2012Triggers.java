@@ -7,8 +7,9 @@ import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
 import icecube.daq.trigger.algorithm.AbstractTrigger;
 import icecube.daq.trigger.exceptions.TriggerException;
-import icecube.daq.util.DOMRegistry;
-import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.DOMInfo;
+import icecube.daq.util.DOMRegistryException;
+import icecube.daq.util.IDOMRegistry;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -20,19 +21,20 @@ import java.nio.channels.WritableByteChannel;
 public class SPS2012Triggers
     extends TriggerCollection
 {
-    private DOMRegistry registry;
+    private IDOMRegistry registry;
     private boolean checkSequentialTimes;
     private int numHitsPerTrigger;
     private long timeBase;
     private long timeStep;
 
-    public SPS2012Triggers(DOMRegistry registry)
+    public SPS2012Triggers(IDOMRegistry registry)
         throws TriggerException
     {
         this(registry, true);
     }
 
-    public SPS2012Triggers(DOMRegistry registry, boolean checkSequentialTimes)
+    public SPS2012Triggers(IDOMRegistry registry,
+                           boolean checkSequentialTimes)
         throws TriggerException
     {
         this.registry = registry;
@@ -163,24 +165,25 @@ public class SPS2012Triggers
     }
 
     public void sendInIceData(WritableByteChannel[] tails, int numObjs)
-        throws IOException
+        throws DOMRegistryException, IOException
     {
-        java.util.Iterator<Long> domIter = registry.keys().iterator();
-
-        for (int i = 0; i < numObjs; i++) {
+        int numSent = 0;
+        for (DOMInfo dom : registry.allDOMs()) {
             final long time;
-            if (i == 0) {
+            if (numSent == 0) {
                 time = timeBase;
             } else {
-                time = (timeBase * (((i - 1) / numHitsPerTrigger) + 1)) +
-                    (timeStep * i);
+                time = (timeBase * (((numSent - 1) / numHitsPerTrigger) + 1)) +
+                    (timeStep * numSent);
             }
 
-            DeployedDOM dom = registry.getDom(domIter.next());
-
-            final int tailIndex = i % tails.length;
+            final int tailIndex = numSent % tails.length;
             sendHit(tails[tailIndex], time, tailIndex,
                     dom.getNumericMainboardId());
+
+            if (++numSent == numObjs) {
+                break;
+            }
         }
     }
 

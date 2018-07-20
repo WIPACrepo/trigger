@@ -1,10 +1,11 @@
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.payload.impl.PayloadFactory;
+import icecube.daq.common.MockAppender;
 import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
+import icecube.daq.payload.impl.PayloadFactory;
 import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Spliceable;
@@ -18,12 +19,12 @@ import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.ComponentObserver;
 import icecube.daq.trigger.test.CylinderTriggerConfig;
-import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockOutputChannel;
 import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockSourceID;
 import icecube.daq.trigger.test.TriggerCollection;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.DOMRegistryException;
+import icecube.daq.util.DOMRegistryFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -58,27 +59,29 @@ public class CylinderTriggerTest
 
     private void checkLogMessages()
     {
-        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
-            String msg = (String) appender.getMessage(i);
+        try {
+            for (int i = 0; i < appender.getNumberOfMessages(); i++) {
+                String msg = (String) appender.getMessage(i);
 
-            if (!(msg.startsWith("Clearing ") &&
-                  msg.endsWith(" rope entries")) &&
-                !msg.startsWith("Resetting counter ") &&
-                !msg.startsWith("Resetting decrement ") &&
-                !msg.startsWith("No match for timegate "))
-            {
-                fail("Bad log message#" + i + ": " + appender.getMessage(i));
+                if (!(msg.startsWith("Clearing ") &&
+                      msg.endsWith(" rope entries")) &&
+                    !msg.startsWith("Resetting counter ") &&
+                    !msg.startsWith("Resetting decrement ") &&
+                    !msg.startsWith("No match for timegate "))
+                {
+                    fail("Bad log message#" + i + ": " +
+                         appender.getMessage(i));
+                }
             }
+        } finally {
+            appender.clear();
         }
-        appender.clear();
     }
 
     protected void setUp()
         throws Exception
     {
         super.setUp();
-
-        appender.clear();
 
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
@@ -98,14 +101,14 @@ public class CylinderTriggerTest
         // remove SNDAQ ZMQ address
         System.clearProperty(SNDAQAlerter.PROPERTY);
 
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
 
         super.tearDown();
     }
 
     public void testEndToEnd()
-        throws IOException, SplicerException, TriggerException
+        throws DOMRegistryException, IOException, SplicerException,
+               TriggerException
     {
         final int numTails = 4;
         final int numObjs = numTails * 10;
@@ -131,7 +134,7 @@ public class CylinderTriggerTest
         DomSetFactory.setConfigurationDirectory(configDir);
 
         try {
-            trigMgr.setDOMRegistry(DOMRegistry.loadRegistry(configDir));
+            trigMgr.setDOMRegistry(DOMRegistryFactory.load(configDir));
         } catch (Exception ex) {
             throw new Error("Cannot set DOM registry", ex);
         }

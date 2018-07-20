@@ -1,5 +1,6 @@
 package icecube.daq.trigger.control;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.juggler.alert.AlertQueue;
 import icecube.daq.juggler.alert.Alerter.Priority;
 import icecube.daq.payload.IDOMID;
@@ -12,12 +13,11 @@ import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
-import icecube.daq.trigger.common.ITriggerAlgorithm;
-import icecube.daq.trigger.common.ITriggerManager;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
+import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.MockAlerter;
 import icecube.daq.trigger.test.MockAlgorithm;
-import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockBufferCache;
 import icecube.daq.trigger.test.MockOutputChannel;
 import icecube.daq.trigger.test.MockOutputProcess;
@@ -38,93 +38,6 @@ import static org.junit.Assert.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
-
-class MockOldAlgorithm
-    implements ITriggerAlgorithm
-{
-    private String name;
-
-    public MockOldAlgorithm(String name)
-    {
-        this.name = name;
-    }
-
-    public IPayload getEarliestPayloadOfInterest()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public int getSourceId()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public int getTriggerConfigId()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public int getTriggerCounter()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public Map getTriggerMonitorMap()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public String getTriggerName()
-    {
-        return name;
-    }
-
-    public int getTriggerType()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public boolean isConfigured()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void runTrigger(IPayload pay)
-        throws TriggerException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void setSourceId(int srcId)
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void setTriggerConfigId(int cfgId)
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void setTriggerManager(ITriggerManager mgr)
-    {
-        // do nothing
-    }
-
-    public void setTriggerName(String name)
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public void setTriggerType(int type)
-    {
-        throw new Error("Unimplemented");
-    }
-
-    public String toString()
-    {
-        return "OldAlgo[" + name + "]";
-    }
-}
 
 public class TriggerManagerTest
 {
@@ -157,12 +70,22 @@ public class TriggerManagerTest
         }
     }
 
+    private static long getNumInputsQueued(TriggerManager mgr)
+    {
+        Map<String, Integer> map = mgr.getQueuedInputs();
+
+        long total = 0;
+        for (Integer val : map.values()) {
+            total += val;
+        }
+
+        return total;
+    }
+
     @Before
     public void setUp()
         throws Exception
     {
-        appender.clear();
-
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
     }
@@ -171,8 +94,7 @@ public class TriggerManagerTest
     public void tearDown()
         throws Exception
     {
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -185,34 +107,13 @@ public class TriggerManagerTest
         assertEquals("Bad source ID", src.getSourceID(), mgr.getSourceId());
 
         assertNull("Registry should be null", mgr.getDOMRegistry());
-        assertEquals("Bad count", 0L, mgr.getCount());
+        assertEquals("Bad count", 0L, mgr.getTotalProcessed());
         assertEquals("Bad number of inputs queued",
-                     0, mgr.getNumInputsQueued());
+                     0, getNumInputsQueued(mgr));
         assertEquals("Bad number of outputs queued",
                      0, mgr.getNumOutputsQueued());
         assertEquals("Bad total processed",
                      0L, mgr.getTotalProcessed());
-    }
-
-    @Test
-    public void testAddAlgoBad()
-    {
-        MockSourceID src = new MockSourceID(INICE_ID);
-        MockBufferCache bufCache = new MockBufferCache("foo");
-
-        TriggerManager mgr = new TriggerManager(src, bufCache);
-
-        MockOldAlgorithm bad = new MockOldAlgorithm("addAlgoBad");
-        try {
-            mgr.addTrigger(bad);
-            fail("This should not succeed");
-        } catch (Error err) {
-            assertNotNull("Error message should not be null",
-                          err.getMessage());
-            final String msg = "Algorithm " + bad +
-                " must implement INewAlgorithm";
-            assertEquals("Bad message", msg, err.getMessage());
-        }
     }
 
     @Test
@@ -265,18 +166,14 @@ public class TriggerManagerTest
 
         mgr.addTriggers(list);
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg =
             String.format("Attempt to add duplicate trigger with type %d" +
                           " cfgId %d srcId %d (old %s, new %s)",
                           algo.getTriggerType(), algo.getTriggerConfigId(),
                           algo.getSourceId(), algo.getTriggerName(),
                           algo.getTriggerName());
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -329,22 +226,14 @@ public class TriggerManagerTest
         mgr.analyze(splObjs);
         splObjs.clear();
 
-        assertEquals("Bad number of log messages",
-                     2, appender.getNumberOfMessages());
+        final String msg1 = "TriggerHandler only knows about either" +
+            " HitPayloads or TriggerRequestPayloads!";
+        appender.assertLogMessage(msg1);
 
-        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
-            final String msg;
-            if (i == 0) {
-                msg = "TriggerHandler only knows about either" +
-                    " HitPayloads or TriggerRequestPayloads!";
-            } else {
-                msg = "Ignoring invalid payload ";
-            }
-            assertTrue("Bad log message " + msg,
-                       ((String) appender.getMessage(i)).startsWith(msg));
-        }
+        final String msg2 = "Ignoring invalid payload ";
+        appender.assertLogMessage(msg2);
 
-        appender.clear();
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -373,24 +262,16 @@ public class TriggerManagerTest
         mgr.analyze(splObjs);
         splObjs.clear();
 
-        assertEquals("Bad number of log messages",
-                     2, appender.getNumberOfMessages());
-
         final double diff = (badOrder.getUTCTime() - goodOrder.getUTCTime());
-        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
-            final String msg;
-            if (i == 0) {
-                msg = "Hit from " + badOrder.getSourceID() +
-                    " out of order! This time - Last time = " + diff +
-                    ", src of last hit = " + goodOrder.getSourceID();
-            } else {
-                msg = "Ignoring invalid payload ";
-            }
-            assertTrue("Bad log message " + msg,
-                       ((String) appender.getMessage(i)).startsWith(msg));
-        }
+        final String msg1 = "Hit from " + badOrder.getSourceID() +
+            " out of order! This time - Last time = " + diff +
+            ", src of last hit = " + goodOrder.getSourceID();
+        appender.assertLogMessage(msg1);
 
-        appender.clear();
+        final String msg2 = "Ignoring invalid payload ";
+        appender.assertLogMessage(msg2);
+
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -434,22 +315,14 @@ public class TriggerManagerTest
         mgr.analyze(splObjs);
         splObjs.clear();
 
-        assertEquals("Bad number of log messages",
-                     2, appender.getNumberOfMessages());
+        final String msg1 = "Source #" + INICE_ID +
+            " cannot process trigger requests";
+        appender.assertLogMessage(msg1);
 
-        for (int i = 0; i < appender.getNumberOfMessages(); i++) {
-            final String msg;
-            if (i == 0) {
-                msg = "Source #" + INICE_ID +
-                    " cannot process trigger requests";
-            } else {
-                msg = "Ignoring invalid payload ";
-            }
-            assertTrue("Bad log message " + msg,
-                       ((String) appender.getMessage(i)).startsWith(msg));
-        }
+        final String msg2 = "Ignoring invalid payload ";
+        appender.assertLogMessage(msg2);
 
-        appender.clear();
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -502,13 +375,9 @@ public class TriggerManagerTest
         mgr.analyze(splObjs);
         splObjs.clear();
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "No subtriggers found in " + merged;
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -551,13 +420,9 @@ public class TriggerManagerTest
 
         List list = mgr.getMoniCounts();
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "Cannot get trigger counts for monitoring";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -585,13 +450,9 @@ public class TriggerManagerTest
 
         mgr.sendFinalMoni();
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "Cannot send multiplicity data";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -620,13 +481,9 @@ public class TriggerManagerTest
 
         mgr.switchToNewRun(456);
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "Collector has not been created before run switch";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -679,18 +536,13 @@ public class TriggerManagerTest
 
         mgr.switchToNewRun(456);
 
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
 
         mgr.switchToNewRun(789);
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "Cannot set next run number";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
-
-        appender.clear();
+        appender.assertLogMessage(msg);
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -805,10 +657,8 @@ public class TriggerManagerTest
             try { Thread.sleep(100); } catch (Exception ex) { }
         }
 
-        List<Map<String, Object>> counts;
-
 /*
-        counts = mgr.getMoniCounts();
+        List<Map<String, Object>> counts = mgr.getMoniCounts();
         for (Map<String, Object> map : counts) {
             if (!map.containsKey("runNumber")) {
                 fail("Count map " + map + " does not contain run number");
@@ -829,10 +679,23 @@ public class TriggerManagerTest
             try { Thread.sleep(100); } catch (Exception ex) { }
         }
 
+        for (int i = 0; i < 100; i++) {
+            boolean waiting = false;
+            for (MockAlgorithm a : algo) {
+                if (a.hasCachedRequests()) {
+                    waiting = true;
+                }
+            }
+            if (!waiting) {
+                break;
+            }
+            try { Thread.sleep(100); } catch (Exception ex) { }
+        }
+
 /*
         boolean pastOldNum = false;
-        counts = mgr.getMoniCounts();
-        for (Map<String, Object> map : counts) {
+        List<Map<String, Object>> counts2 = mgr.getMoniCounts();
+        for (Map<String, Object> map : counts2) {
             if (!map.containsKey("runNumber")) {
                 fail("Count map " + map + " does not contain run number");
             } else if (((Integer) map.get("runNumber")) == newNum) {
@@ -845,7 +708,7 @@ public class TriggerManagerTest
         }
 */
 
-        alerter.check();
+        alerter.waitForAlerts(100);
     }
 
 /*
@@ -976,8 +839,7 @@ public class TriggerManagerTest
         mgr.getAlertQueue().stopAndWait();
 
         // XXX this doesn't validate the body of the alert
-        assertEquals("Unexpected number of alerts", 1, alerter.getNumSent());
-        alerter.check();
+        alerter.waitForAlerts(100);
     }
 
     class MyHit
@@ -996,21 +858,31 @@ public class TriggerManagerTest
             this.srcId = srcId;
         }
 
+        @Override
         public int compareSpliceable(Spliceable spl)
         {
             throw new Error("Unimplemented");
         }
 
+        @Override
         public Object deepCopy()
         {
             return new MyHit(srcId, getUTCTime());
         }
 
+        @Override
+        public short getChannelID()
+        {
+            throw new Error("Unimplemented");
+        }
+
+        @Override
         public IDOMID getDOMID()
         {
             throw new Error("Unimplemented");
         }
 
+        @Override
         public IUTCTime getHitTimeUTC()
         {
             if (timeObj == null) {
@@ -1020,16 +892,19 @@ public class TriggerManagerTest
             return timeObj;
         }
 
+        @Override
         public double getIntegratedCharge()
         {
             throw new Error("Unimplemented");
         }
 
+        @Override
         public int getPayloadInterfaceType()
         {
             return PayloadInterfaceRegistry.I_HIT_PAYLOAD;
         }
 
+        @Override
         public ISourceID getSourceID()
         {
             if (srcObj == null) {
@@ -1039,12 +914,20 @@ public class TriggerManagerTest
             return srcObj;
         }
 
+        @Override
         public int getTriggerConfigID()
         {
             throw new Error("Unimplemented");
         }
 
+        @Override
         public int getTriggerType()
+        {
+            throw new Error("Unimplemented");
+        }
+
+        @Override
+        public boolean hasChannelID()
         {
             throw new Error("Unimplemented");
         }
@@ -1058,6 +941,7 @@ public class TriggerManagerTest
             super(srcId, timeVal);
         }
 
+        @Override
         public int getPayloadInterfaceType()
         {
             return Integer.MIN_VALUE;

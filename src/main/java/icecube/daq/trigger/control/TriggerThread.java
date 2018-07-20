@@ -1,7 +1,7 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.payload.IPayload;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,13 +16,13 @@ public class TriggerThread
     private static final Log LOG = LogFactory.getLog(TriggerThread.class);
 
     private int id;
-    private INewAlgorithm algorithm;
+    private ITriggerAlgorithm algorithm;
     private Thread thread;
     private boolean stopping;
     private boolean stopped;
     private long numSent;
 
-    TriggerThread(int id, INewAlgorithm algorithm)
+    public TriggerThread(int id, ITriggerAlgorithm algorithm)
     {
         if (algorithm == null) {
             throw new Error("Algorithm cannot be null");

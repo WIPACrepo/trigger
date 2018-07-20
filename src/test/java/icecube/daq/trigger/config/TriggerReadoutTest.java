@@ -1,6 +1,6 @@
 package icecube.daq.trigger.config;
 
-import icecube.daq.trigger.test.MockAppender;
+import icecube.daq.common.MockAppender;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,8 +18,6 @@ public class TriggerReadoutTest
     public void setUp()
         throws Exception
     {
-        appender.clear();
-
         BasicConfigurator.resetConfiguration();
         BasicConfigurator.configure(appender);
     }
@@ -28,8 +26,7 @@ public class TriggerReadoutTest
     public void tearDown()
         throws Exception
     {
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -87,16 +84,13 @@ public class TriggerReadoutTest
         assertEquals("Bad minus", minus, tr.getMinus());
         assertEquals("Bad plus", plus, tr.getPlus());
 
-        assertEquals("Bad number of log messages",
-                     2, appender.getNumberOfMessages());
-
         final String msg1 = "Readout time minus should be non-negative";
-        assertEquals("Bad log message", msg1, appender.getMessage(0));
+        appender.assertLogMessage(msg1);
 
         final String msg2 = "Readout time plus should be non-negative";
-        assertEquals("Bad log message", msg2, appender.getMessage(1));
+        appender.assertLogMessage(msg2);
 
-        appender.clear();
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -106,13 +100,10 @@ public class TriggerReadoutTest
         tr.setMinus(-5);
         assertEquals("Bad minus", 5, tr.getMinus());
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "Readout time minus should be non-negative";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
+        appender.assertLogMessage(msg);
 
-        appender.clear();
+        appender.assertNoLogMessages();
     }
 
     @Test
@@ -122,12 +113,9 @@ public class TriggerReadoutTest
         tr.setPlus(-5);
         assertEquals("Bad plus", 5, tr.getPlus());
 
-        assertEquals("Bad number of log messages",
-                     1, appender.getNumberOfMessages());
-
         final String msg = "Readout time plus should be non-negative";
-        assertEquals("Bad log message", msg, appender.getMessage(0));
+        appender.assertLogMessage(msg);
 
-        appender.clear();
+        appender.assertNoLogMessages();
     }
 }

@@ -2,6 +2,7 @@ package icecube.daq.trigger.config;
 
 import icecube.daq.payload.IDOMID;
 import icecube.daq.trigger.test.MockDOMID;
+import icecube.daq.util.DOMInfo;
 
 import java.util.ArrayList;
 
@@ -15,7 +16,7 @@ public class DomSetTest
     {
         final String name = "foo";
 
-        DomSet ds = new DomSet(name, new ArrayList<Long>());
+        DomSet ds = new DomSet(name);
         assertEquals("Bad name", name, ds.getName());
         assertEquals("Bad string", name + "*0", ds.toString());
         assertFalse("Null DOM should not be in empty set", ds.inSet(null));
@@ -28,15 +29,15 @@ public class DomSetTest
     {
         final String name = "foo";
 
+        DomSet ds = new DomSet(name);
+
         ArrayList<IDOMID> doms = new ArrayList<IDOMID>();
         ArrayList<Long> ids = new ArrayList<Long>();
         for (int i = 100; i < 200; i += 10) {
             IDOMID dom = new MockDOMID(i);
             doms.add(dom);
-            ids.add(Long.valueOf((long) i));
+            ds.add(new DOMInfo(i, i / 50, (i % 50) + 1, i / 50));
         }
-
-        DomSet ds = new DomSet(name, ids);
 
         assertEquals("Bad name", name, ds.getName());
         assertEquals("Bad string", name + "*" + doms.size(), ds.toString());
@@ -50,7 +51,7 @@ public class DomSetTest
         assertFalse("Compare with string should not succeed",
                     ds.equals("foo"));
         assertFalse("Compare with empty DomSet should not succeed",
-                    ds.equals(new DomSet("xxx", new ArrayList<Long>())));
+                    ds.equals(new DomSet("xxx")));
         assertTrue("Compare with self should succeed", ds.equals(ds));
     }
 }

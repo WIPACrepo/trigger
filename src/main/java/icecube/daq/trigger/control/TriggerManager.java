@@ -17,18 +17,17 @@ import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.TriggerRequestFactory;
 import icecube.daq.payload.impl.UTCTime;
 import icecube.daq.splicer.Spliceable;
-import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.SplicedAnalysis;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerChangedEvent;
 import icecube.daq.splicer.SplicerListener;
-import icecube.daq.trigger.algorithm.INewAlgorithm;
-import icecube.daq.trigger.common.ITriggerAlgorithm;
+import icecube.daq.trigger.algorithm.AlgorithmStatistics;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.exceptions.MultiplicityDataException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnimplementedError;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.IDOMRegistry;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -37,8 +36,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -115,7 +112,7 @@ class TriggerRequestComparator
  * Read in hits from the splicer and send them to the algorithms.
  */
 public class TriggerManager
-    implements INewManager, SplicedAnalysis<Spliceable>,
+    implements ITriggerManager, SplicedAnalysis<Spliceable>,
                SplicerListener<Spliceable>, SubscriptionManager,
                TriggerManagerMBean
 {
@@ -131,8 +128,8 @@ public class TriggerManager
 
     private TriggerRequestFactory trFactory;
     private DAQComponentOutputProcess outputEngine;
-    private List<INewAlgorithm> algorithms =
-        new ArrayList<INewAlgorithm>();
+    private List<ITriggerAlgorithm> algorithms =
+        new ArrayList<ITriggerAlgorithm>();
 
     private SubscribedList inputList = new SubscribedList();
 
@@ -146,12 +143,10 @@ public class TriggerManager
     /** splicer associated with this manager */
     private Splicer splicer;
 
-    private DOMRegistry domRegistry;
+    private IDOMRegistry domRegistry;
 
     /** spliceable input count */
     private long inputCount;
-
-    private long recycleCount;
 
     /**
      * source of last hit, used for monitoring
@@ -186,19 +181,12 @@ public class TriggerManager
     /**
      * Add a trigger algorithm.
      *
-     * @param val algorithm being added
+     * @param trig algorithm being added
      */
-    public void addTrigger(ITriggerAlgorithm val)
+    public void addTrigger(ITriggerAlgorithm trig)
     {
-        if (!(val instanceof INewAlgorithm)) {
-            throw new Error("Algorithm " + val +
-                            " must implement INewAlgorithm");
-        }
-
-        INewAlgorithm trig = (INewAlgorithm) val;
-
         boolean good = true;
-        for (INewAlgorithm t : algorithms) {
+        for (ITriggerAlgorithm t : algorithms) {
             if ((trig.getTriggerType() == t.getTriggerType()) &&
                 trig.getTriggerConfigId() == t.getTriggerConfigId() &&
                 trig.getSourceId() == t.getSourceId())
@@ -229,21 +217,11 @@ public class TriggerManager
     }
 
     /**
-     * XXX Unimplemented.
-     *
-     * @param payload ignored
-     */
-    public void addTriggerRequest(ITriggerRequestPayload payload)
-    {
-        throw new UnimplementedError();
-    }
-
-    /**
      * Add a list of algorithms for this handler
      *
      * @param list list of trigger algorithms to add
      */
-    public void addTriggers(List<ITriggerAlgorithm> list)
+    public void addTriggers(Iterable<ITriggerAlgorithm> list)
     {
         for (ITriggerAlgorithm trig: list) {
             addTrigger(trig);
@@ -256,9 +234,9 @@ public class TriggerManager
      *
      * @param extra list of additional trigger algorithms to add
      */
-    public void addExtraAlgorithms(List<INewAlgorithm> extra)
+    public void addExtraAlgorithms(List<ITriggerAlgorithm> extra)
     {
-        for (INewAlgorithm trig: extra) {
+        for (ITriggerAlgorithm trig: extra) {
             multiDataMgr.addAlgorithm(trig);
         }
     }
@@ -280,9 +258,6 @@ public class TriggerManager
      */
     public void analyze(List<Spliceable> splicedObjects)
     {
-        // Loop over the new objects in the splicer
-        int numberOfObjectsInSplicer = splicedObjects.size();
-
         for (Spliceable spl : splicedObjects) {
             ILoadablePayload payload = (ILoadablePayload) spl;
 
@@ -322,7 +297,13 @@ public class TriggerManager
      */
     public void flush()
     {
-        inputList.push(FLUSH_PAYLOAD);
+        if (inputList.getNumSubscribers() > 0) {
+            try {
+                inputList.push(FLUSH_PAYLOAD);
+            } catch (Error err) {
+                LOG.error("Failed to flush input list", err);
+            }
+        }
     }
 
     /**
@@ -336,63 +317,41 @@ public class TriggerManager
     }
 
     /**
-     * @deprecated
-     *
-     * @return total number of hits read from splicer
-     */
-    public long getCount()
-    {
-        return getTotalProcessed();
-    }
-
-    /**
      * Get the DOM registry.
      *
      * @return DOM registry
      */
-    public DOMRegistry getDOMRegistry()
+    public IDOMRegistry getDOMRegistry()
     {
         return domRegistry;
     }
 
     /**
-     * XXX Use getQueuedInputsMap instead
+     * Get the number of requests collected from all algorithms
      *
-     * @return number of queued inputs
-     * @deprecated use getQueuedInputsMap()
+     * @return number of collected requests
      */
-    public int getNumInputsQueued()
+    public int getTotalRequestsCollected()
     {
-        Map<String, Integer> map = getQueuedInputsMap();
-
-        int num = 0;
-        if (map != null) {
-            for (Map.Entry<String, Integer> entry : map.entrySet()) {
-                num += entry.getValue();
-            }
+        if (collector == null) {
+            return 0;
         }
 
-        return num;
+        return (int) collector.getTotalCollected();
     }
 
     /**
-     * XXX Use getQueuedRequestsMap instead
+     * Get the number of requests released by all algorithms
      *
-     * @return number of queued requests
-     * @deprecated use getQueuedRequestsMap()
+     * @return number of collected requests
      */
-    public int getNumRequestsQueued()
+    public int getTotalRequestsReleased()
     {
-        Map<String, Integer> map = getQueuedRequestsMap();
-
-        int num = 0;
-        if (map != null) {
-            for (Map.Entry<String, Integer> entry : map.entrySet()) {
-                num += entry.getValue();
-            }
+        if (collector == null) {
+            return 0;
         }
 
-        return num;
+        return (int) collector.getTotalReleased();
     }
 
     /**
@@ -414,7 +373,7 @@ public class TriggerManager
      *
      * @return map of {name : numQueuedHits}
      */
-    public Map<String, Integer> getQueuedInputsMap()
+    public Map<String, Integer> getQueuedInputs()
     {
         return inputList.getLengths();
     }
@@ -424,11 +383,27 @@ public class TriggerManager
      *
      * @return map of {name : numQueuedRequests}
      */
-    public Map<String, Integer> getQueuedRequestsMap()
+    public Map<String, Integer> getQueuedRequests()
     {
         HashMap map = new HashMap<String, Integer>();
-        for (INewAlgorithm a : algorithms) {
+        for (ITriggerAlgorithm a : algorithms) {
             map.put(a.getTriggerName(), a.getNumberOfCachedRequests());
+        }
+        return map;
+    }
+
+    /**
+     * Return a map of algorithm names to the time of their most recently
+     * released request.  This can be useful for determining which algorithm
+     * is causing the trigger output stream to stall.
+     *
+     * @return map of names to times
+     */
+    public Map<String, Long> getReleaseTimes()
+    {
+        HashMap<String, Long> map = new HashMap<String, Long>();
+        for (ITriggerAlgorithm a : algorithms) {
+            map.put(a.getTriggerName(), a.getReleaseTime());
         }
         return map;
     }
@@ -486,16 +461,6 @@ public class TriggerManager
     }
 
     /**
-     * XXX Unimplemented
-     *
-     * @return UnimplementedError
-     */
-    public TreeMap<Integer, TreeSet<Integer>> getStringMap()
-    {
-        throw new UnimplementedError();
-    }
-
-    /**
      * Get the total number of hits pushed onto the input queue
      *
      * @return total number of hits received from the splicer
@@ -506,20 +471,20 @@ public class TriggerManager
     }
 
     /**
-     * Get map of trigger names to number of issued requests
+     * Get list of algorithm I/O statistics
      *
-     * @return map of {name : numRequests}
+     * @return list of ITriggerStatistics
      */
-    public Map<String, Long> getTriggerCounts()
+    public Iterable<AlgorithmStatistics> getAlgorithmStatistics()
     {
-        HashMap<String, Long> map = new HashMap<String, Long>();
+        ArrayList<AlgorithmStatistics> list =
+            new ArrayList<AlgorithmStatistics>(algorithms.size());
 
-        for (INewAlgorithm trigger : algorithms) {
-            map.put(trigger.getTriggerName(),
-                    Long.valueOf(trigger.getTriggerCounter()));
+        for (ITriggerAlgorithm trigger : algorithms) {
+            list.add(new AlgorithmStatistics(trigger));
         }
 
-        return map;
+        return list;
     }
 
     /**
@@ -531,7 +496,7 @@ public class TriggerManager
     {
         HashMap<String, Object> map = new HashMap<String, Object>();
 
-        for (INewAlgorithm trigger : algorithms) {
+        for (ITriggerAlgorithm trigger : algorithms) {
             Map<String, Object> moniMap = trigger.getTriggerMonitorMap();
             if (moniMap != null && moniMap.size() > 0) {
                 String trigName = trigger.getTriggerName() + "-" +
@@ -705,7 +670,7 @@ public class TriggerManager
 
     public void resetUIDs()
     {
-        for (INewAlgorithm a : algorithms) {
+        for (ITriggerAlgorithm a : algorithms) {
             a.resetUID();
         }
         collector.resetUID();
@@ -759,7 +724,12 @@ public class TriggerManager
         }
 
         ArrayList<Object[]> triplets = new ArrayList<Object[]>();
-        for (INewAlgorithm a : algorithms) {
+        for (ITriggerAlgorithm a : algorithms) {
+            if (a.getTriggerConfigId() < 0) {
+                // Live doesn't care about Throughput trigger
+                continue;
+            }
+
             Object[] data = new Object[4];
             data[0] = Integer.valueOf(a.getTriggerConfigId());
             data[1] = Integer.valueOf(a.getTriggerType());
@@ -804,7 +774,7 @@ public class TriggerManager
      *
      * @param domRegistry DOM registry
      */
-    public void setDOMRegistry(DOMRegistry domRegistry)
+    public void setDOMRegistry(IDOMRegistry domRegistry)
     {
         this.domRegistry = domRegistry;
         DomSetFactory.setDomRegistry(domRegistry);
@@ -943,7 +913,7 @@ public class TriggerManager
 
     public void subscribeAll()
     {
-        for (INewAlgorithm algo : algorithms) {
+        for (ITriggerAlgorithm algo : algorithms) {
             PayloadSubscriber subscriber =
                 inputList.subscribe(algo.getTriggerName());
             algo.setSubscriber(subscriber);
@@ -981,7 +951,7 @@ public class TriggerManager
     public void unsubscribeAll()
     {
         if (inputList.getNumSubscribers() > 0) {
-            for (INewAlgorithm a : algorithms) {
+            for (ITriggerAlgorithm a : algorithms) {
                 a.unsubscribe(inputList);
                 a.resetAlgorithm();
             }
@@ -995,7 +965,12 @@ public class TriggerManager
 
     public String toString()
     {
-        return "TrigMgr[in#" + inputList.size() + ",req#" +
-            getNumRequestsQueued() + "," + collector + "]";
+        int numQueued = 0;
+        for (ITriggerAlgorithm a : algorithms) {
+            numQueued += a.getNumberOfCachedRequests();
+        }
+
+        return "TrigMgr[in#" + inputList.size() + ",req#" + numQueued +
+            "," + collector + "]";
     }
 }

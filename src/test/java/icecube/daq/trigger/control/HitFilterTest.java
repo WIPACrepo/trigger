@@ -3,7 +3,7 @@ package icecube.daq.trigger.control;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.exceptions.ConfigException;
-import icecube.daq.util.DOMRegistry;
+import icecube.daq.util.DOMRegistryFactory;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -64,7 +64,7 @@ public class HitFilterTest
         DomSetFactory.setConfigurationDirectory(configDir);
 
         try {
-            DomSetFactory.setDomRegistry(DOMRegistry.loadRegistry(configDir));
+            DomSetFactory.setDomRegistry(DOMRegistryFactory.load(configDir));
         } catch (Exception ex) {
             throw new Error("Cannot set DOM registry", ex);
         }

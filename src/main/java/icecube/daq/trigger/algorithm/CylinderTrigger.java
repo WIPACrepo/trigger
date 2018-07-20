@@ -8,13 +8,16 @@ import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
-import icecube.daq.util.DOMRegistry;
-import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.IDOMRegistry;
+import icecube.daq.util.DOMInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * The VolumeTrigger is based on the ClusterTrigger, with a slight modifications to
@@ -52,6 +55,9 @@ import java.util.LinkedList;
  */
 public class CylinderTrigger extends AbstractTrigger
 {
+    /** Log object for this class */
+    private static final Log LOG = LogFactory.getLog(CylinderTrigger.class);
+
     private long timeWindow;
     private int multiplicity;
     private int simpleMultiplicity;
@@ -215,12 +221,19 @@ public class CylinderTrigger extends AbstractTrigger
         }
     }
 
+    /**
+     * Note that triggerQueue can only be truncated if the number of hits
+     * within the cylinder is &gt;= multiplicity.  If we never reach that
+     * threshold before triggerQueue.size() &gt;= simpleMultiplicity, the
+     * hits in triggerQueue will never have passed the volume-checking test
+     * and this trigger will behave like an SMTx trigger
+     */
     private boolean processHitQueue()
     {
         if (triggerQueue.size() >= simpleMultiplicity) return true;
         IHitPayload[] q = triggerQueue.toArray(new IHitPayload[0]);
 
-        final DOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
+        final IDOMRegistry domRegistry = getTriggerHandler().getDOMRegistry();
 
         ArrayList<IHitPayload> hitsInCylinder =
             new ArrayList<IHitPayload>(q.length*(q.length-1));
@@ -228,10 +241,9 @@ public class CylinderTrigger extends AbstractTrigger
         // Loop over hit pairs
         for (int ihit = 0; ihit < q.length; ihit++)
         {
-            DeployedDOM d0 =
-                domRegistry.getDom(q[ihit].getDOMID().longValue());
+            DOMInfo d0 = getDOMFromHit(domRegistry, q[ihit]);
             if (d0 == null) {
-                throw new Error("Cannot find DOM " + q[ihit].getDOMID());
+                throw new Error("Cannot find DOM for " + q[ihit]);
             }
 
             hitsInCylinder.clear();
@@ -239,10 +251,9 @@ public class CylinderTrigger extends AbstractTrigger
             for (int jhit = 0; jhit < q.length; jhit++)
             {
                 if (ihit == jhit) continue;
-                DeployedDOM d1 =
-                    domRegistry.getDom(q[jhit].getDOMID().longValue());
+                DOMInfo d1 = getDOMFromHit(domRegistry, q[jhit]);
                 if (d1 == null) {
-                    throw new Error("Cannot find DOM " + q[jhit].getDOMID());
+                    throw new Error("Cannot find DOM for " + q[jhit]);
                 }
 
                 double dx = d1.getX() - d0.getX();
@@ -264,6 +275,14 @@ public class CylinderTrigger extends AbstractTrigger
 
     public boolean isConfigured()
     {
+        if (simpleMultiplicity < multiplicity) {
+            // if this is true, the volume checking code will never be run!
+            LOG.error("simpleMultiplicity (" + simpleMultiplicity +
+                      ") must be less than multiplicity (" + multiplicity +
+                      ")");
+            return false;
+        }
+
         return true;
     }
 
@@ -286,50 +305,5 @@ public class CylinderTrigger extends AbstractTrigger
     public boolean hasValidMultiplicity()
     {
         return true;
-    }
-}
-
-class HitComparator
-    implements Comparator
-{
-    public int compare(Object o1, Object o2)
-    {
-        if (o1 == null || !(o1 instanceof IHitPayload)) {
-            if (o2 == null || !(o2 instanceof IHitPayload)) {
-                return 0;
-            }
-
-            return 1;
-        } else if (o2 == null || !(o2 instanceof IHitPayload)) {
-            return -1;
-        }
-
-        IHitPayload h1 = (IHitPayload) o1;
-        IHitPayload h2 = (IHitPayload) o2;
-
-        if (h1.getHitTimeUTC() == null) {
-            if (h2.getHitTimeUTC() == null) {
-                return 0;
-            }
-
-            return 1;
-        } else if (h2.getHitTimeUTC() == null) {
-            return -1;
-        }
-
-        long val = h1.getHitTimeUTC().longValue() -
-            h2.getHitTimeUTC().longValue();
-        if (val > 0) {
-            return 1;
-        } else if (val < 0) {
-            return -1;
-        }
-
-        return 0;
-    }
-
-    public boolean equals(Object obj)
-    {
-        return obj instanceof HitComparator;
     }
 }

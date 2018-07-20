@@ -14,13 +14,12 @@ import icecube.daq.payload.impl.ReadoutRequest;
 import icecube.daq.payload.impl.ReadoutRequestElement;
 import icecube.daq.payload.impl.TriggerRequest;
 import icecube.daq.payload.impl.TriggerRequestFactory;
-import icecube.daq.trigger.common.ITriggerManager;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.control.HitFilter;
-import icecube.daq.trigger.control.INewManager;
 import icecube.daq.trigger.control.ITriggerCollector;
+import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.control.PayloadSubscriber;
 import icecube.daq.trigger.control.SubscribedList;
@@ -29,6 +28,8 @@ import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnimplementedError;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
+import icecube.daq.util.DOMInfo;
+import icecube.daq.util.IDOMRegistry;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,7 +44,7 @@ import org.apache.commons.logging.LogFactory;
  * Base class for trigger algorithms.
  */
 public abstract class AbstractTrigger
-    implements AbstractTriggerMBean, INewAlgorithm
+    implements AbstractTriggerMBean, ITriggerAlgorithm
 {
     /** Log object for this class */
     private static final Log LOG = LogFactory.getLog(AbstractTrigger.class);
@@ -76,7 +77,7 @@ public abstract class AbstractTrigger
 
     private IPayload earliestPayloadOfInterest;
 
-    private IPayload releaseTime;
+    private long releaseTime = Long.MIN_VALUE;
 
     private ArrayList<ITriggerRequestPayload> requests =
         new ArrayList<ITriggerRequestPayload>();
@@ -114,7 +115,7 @@ public abstract class AbstractTrigger
         readouts.add(new TriggerReadout(rdoutType, offset, minus, plus));
     }
 
-    public int compareTo(INewAlgorithm a)
+    public int compareTo(ITriggerAlgorithm a)
     {
         int val = getTriggerName().compareTo(a.getTriggerName());
         if (val == 0) {
@@ -396,9 +397,6 @@ public abstract class AbstractTrigger
                       lastTime);
         }
 
-        // set earliest payload of interest to 1/10 ns after the last hit
-        IUTCTime lastHitTime = lastHit.getHitTimeUTC();
-
         final int uid = getNextUID();
 
         // create readout requests
@@ -439,9 +437,21 @@ public abstract class AbstractTrigger
         // report it
         reportTrigger(triggerPayload);
 
+        // set earliest payload of interest to 1/10 ns after the last hit
+        IUTCTime lastHitTime = lastHit.getHitTimeUTC();
+
         // update earliest hit time
         IPayload dummy = new DummyPayload(lastHitTime.getOffsetUTCTime(0.1));
         setEarliestPayloadOfInterest(dummy);
+    }
+
+    static DOMInfo getDOMFromHit(IDOMRegistry registry, IHitPayload hit)
+    {
+        if (hit.hasChannelID()) {
+            return registry.getDom(hit.getChannelID());
+        }
+
+        return registry.getDom(hit.getDOMID().longValue());
     }
 
     /**
@@ -641,7 +651,7 @@ public abstract class AbstractTrigger
      *
      * @return release time
      */
-    public IPayload getReleaseTime()
+    public long getReleaseTime()
     {
         return releaseTime;
     }
@@ -697,9 +707,9 @@ public abstract class AbstractTrigger
      * @return trigger handler
      * @deprecated use getTriggerManager()
      */
-    public INewManager getTriggerHandler()
+    public ITriggerManager getTriggerHandler()
     {
-        return (INewManager) mgr;
+        return mgr;
     }
 
     /**
@@ -841,9 +851,14 @@ public abstract class AbstractTrigger
                 // save the last released time
                 ITriggerRequestPayload req = sub.get(i-1);
                 if (req instanceof FlushRequest) {
-                    releaseTime = req;
+                    releaseTime = req.getUTCTime();
                 } else {
-                    releaseTime = new DummyPayload(req.getLastTimeUTC());
+                    IUTCTime lastTime = req.getLastTimeUTC();
+                    if (lastTime == null) {
+                        LOG.error("Last time is not set for " + req);
+                    } else {
+                        releaseTime = lastTime.longValue();
+                    }
                 }
 
                 // add released requests to the list and remove from the cache
@@ -876,13 +891,11 @@ public abstract class AbstractTrigger
         } else {
             synchronized (requests) {
                 requests.add(trigReq);
-                if (releaseTime != null &&
-                    trigReq.getFirstTimeUTC().longValue() <
-                    releaseTime.getUTCTime())
+                if (releaseTime != Long.MIN_VALUE &&
+                    trigReq.getFirstTimeUTC().longValue() < releaseTime)
                 {
                     LOG.error(triggerName + " added " + trigReq +
-                              " preceding release time " +
-                              releaseTime.getUTCTime());
+                              " preceding release time " + releaseTime);
                 }
                 sentTriggerCounter++;
             }
@@ -900,7 +913,7 @@ public abstract class AbstractTrigger
 
         onTrigger = false;
         earliestPayloadOfInterest = null;
-        releaseTime = null;
+        releaseTime = Long.MIN_VALUE;
     }
 
     /**

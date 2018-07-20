@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 15429 2015-02-20 19:22:20Z dglo $
+ * Version $Id: CalibrationTrigger.java 16245 2016-10-10 19:39:14Z dglo $
  *
  * Date: August 27 2005
  *
@@ -11,13 +11,19 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.payload.PayloadInterfaceRegistry;
+import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.ISourceID;
+import icecube.daq.payload.impl.DOMID;
+import icecube.daq.payload.impl.SourceID;
 import icecube.daq.trigger.control.DummyPayload;
 import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
+import icecube.daq.util.DOMInfo;
+import icecube.daq.util.IDOMRegistry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 15429 2015-02-20 19:22:20Z dglo $
+ * @version $Id: CalibrationTrigger.java 16245 2016-10-10 19:39:14Z dglo $
  * @author pat
  */
 public class CalibrationTrigger extends AbstractTrigger
@@ -130,16 +136,34 @@ public class CalibrationTrigger extends AbstractTrigger
 
         if (getHitType(hit) == hitType && hitFilter.useHit(hit)) {
             // this is the correct type, report trigger
-            formTrigger(hit, hit.getDOMID(), hit.getSourceID());
+            IDOMID domId;
+            ISourceID srcId;
+            if (hit.hasChannelID()) {
+                IDOMRegistry registry = getTriggerHandler().getDOMRegistry();
+                DOMInfo dom = getDOMFromHit(registry, hit);
+                if (dom == null) {
+                    LOG.error("Cannot find DOM for " + hit);
+                    return;
+                }
+                domId = new DOMID(dom.getNumericMainboardId());
+                srcId = new SourceID(dom.computeSourceId(hit.getChannelID()));
+            } else {
+                domId = hit.getDOMID();
+                srcId = hit.getSourceID();
+            }
+
+            formTrigger(hit, domId, srcId);
         } else {
             // this is not, update earliest time of interest
-            IPayload earliest = new DummyPayload(hit.getHitTimeUTC().getOffsetUTCTime(0.1));
+            IPayload earliest =
+                new DummyPayload(hit.getHitTimeUTC().getOffsetUTCTime(0.1));
             setEarliestPayloadOfInterest(earliest);
         }
     }
 
     /**
-     * Flush the trigger. Basically indicates that there will be no further payloads to process.
+     * Flush the trigger. Basically indicates that there will be no further
+     * payloads to process.
      */
     public void flush()
     {

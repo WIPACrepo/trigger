@@ -1,10 +1,10 @@
 package icecube.daq.trigger.config;
 
+import icecube.daq.common.MockAppender;
 import icecube.daq.trigger.exceptions.ConfigException;
-import icecube.daq.trigger.test.MockAppender;
 import icecube.daq.trigger.test.MockDOMID;
 import icecube.daq.trigger.test.MockDOMRegistry;
-import icecube.daq.util.DeployedDOM;
+import icecube.daq.util.DOMInfo;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,16 +24,16 @@ import static org.junit.Assert.*;
 class MyRegistry
     extends MockDOMRegistry
 {
-    final DeployedDOM addDom(int hub, int pos)
+    final DOMInfo addDom(int hub, int pos)
     {
         return addDom(hub, pos, hub);
     }
 
-    final DeployedDOM addDom(int hubId, int pos, int originalString)
+    final DOMInfo addDom(int hubId, int pos, int originalString)
     {
         final long mbid = (long) (hubId + 1) * 0x1000L + (long) pos;
-        DeployedDOM dom = new DeployedDOM(mbid, originalString, pos, hubId);
-        addDom(mbid, hubId, pos);
+        DOMInfo dom = new DOMInfo(mbid, originalString, pos, hubId);
+        addDom(mbid, originalString, pos, hubId);
         return dom;
     }
 
@@ -47,14 +47,14 @@ class MyRegistry
     final void addInIce(int hub)
     {
         for (int pos = 1; pos <= 60; pos++) {
-            addDom(hub, pos);
+            addDom(hub, pos, hub);
         }
     }
 
     final void addScintillators(int hub, int originalString)
     {
         for (int pos = 65; pos <= 66; pos++) {
-            addDom(hub, pos, originalString);
+            addDom(originalString, pos, hub);
         }
     }
 }
@@ -69,8 +69,8 @@ public class DomSetFactoryTest
     private static final MockDOMRegistry buildRegistry()
     {
         MyRegistry reg = new MyRegistry();
-        reg.addDom(0, 91);
-        reg.addDom(0, 92);
+        reg.addDom(0, 65);
+        reg.addDom(0, 66);
 
         // add string 1 with icetop DOMs on hub 203 and scintillors on hub 211
         reg.addInIce(1);
@@ -115,13 +115,11 @@ public class DomSetFactoryTest
      * This is a bit ugly; it's the hard-coded rules from the standard
      * domset-definitions.xml file
      */
-    private Set<DeployedDOM> extractDomSet(int setId)
+    private Set<DOMInfo> extractDomSet(int setId)
     {
-        HashSet<DeployedDOM> domset = new HashSet<DeployedDOM>();
+        HashSet<DOMInfo> domset = new HashSet<DOMInfo>();
 
-        for (Long mbid : registry.keys()) {
-            DeployedDOM dom = registry.getDom(mbid);
-
+        for (DOMInfo dom : registry.allDOMs()) {
             switch (setId) {
             case 0: // AMANDA_SYNC
                 if (dom.getStringMajor() == 0 && dom.getStringMinor() == 91) {
@@ -178,13 +176,13 @@ public class DomSetFactoryTest
         return domset;
     }
 
-    private boolean isInnerDeepCore(DeployedDOM dom)
+    private boolean isInnerDeepCore(DOMInfo dom)
     {
         return dom.getHubId() >= 79 && dom.getHubId() <= 86 &&
             dom.getStringMinor() >= 11 && dom.getStringMinor() <= 60;
     }
 
-    private boolean isNewDeepCore(DeployedDOM dom)
+    private boolean isNewDeepCore(DOMInfo dom)
     {
         switch (dom.getHubId()) {
         case 25: return true;
@@ -204,7 +202,7 @@ public class DomSetFactoryTest
         return false;
     }
 
-    private boolean isOldDeepCore(DeployedDOM dom)
+    private boolean isOldDeepCore(DOMInfo dom)
     {
         switch (dom.getHubId()) {
         case 26: return true;
@@ -233,8 +231,6 @@ public class DomSetFactoryTest
     public void setUp()
         throws Exception
     {
-        appender.clear();
-
         DomSetFactory.setConfigurationDirectory(findTestConfig());
     }
 
@@ -242,8 +238,7 @@ public class DomSetFactoryTest
     public void tearDown()
         throws Exception
     {
-        assertEquals("Bad number of log messages",
-                     0, appender.getNumberOfMessages());
+        appender.assertNoLogMessages();
     }
 
     private String findTestConfig()
@@ -322,10 +317,10 @@ public class DomSetFactoryTest
         for (int i = 0; i < oldDefs; i++) {
             DomSet ds = DomSetFactory.getDomSet(i, oldname);
 
-            Set<DeployedDOM> doms = extractDomSet(i);
+            Set<DOMInfo> doms = extractDomSet(i);
             assertEquals("Bad number of DOMs in DomSet " + i, doms.size(),
                          ds.size());
-            for (DeployedDOM dom : doms) {
+            for (DOMInfo dom : doms) {
                 MockDOMID domId = new MockDOMID(dom.getNumericMainboardId());
                 assertTrue("DomSet " + i + " is missing " + dom,
                            ds.inSet(domId));
@@ -340,10 +335,10 @@ public class DomSetFactoryTest
         for (int i = 0; i < 7; i++) {
             DomSet ds = DomSetFactory.getDomSet(i);
 
-            Set<DeployedDOM> doms = extractDomSet(i);
+            Set<DOMInfo> doms = extractDomSet(i);
             assertEquals("Bad number of DOMs in DomSet " + i, doms.size(),
                          ds.size());
-            for (DeployedDOM dom : doms) {
+            for (DOMInfo dom : doms) {
                 MockDOMID domId = new MockDOMID(dom.getNumericMainboardId());
                 assertTrue("DomSet " + i + " is missing " + dom,
                            ds.inSet(domId));

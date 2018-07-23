@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17060 2018-07-20 17:34:50Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17063 2018-07-23 20:06:36Z dglo $
  *
  * Date: August 19 2005
  *
@@ -115,7 +115,7 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17060 2018-07-20 17:34:50Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17063 2018-07-23 20:06:36Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -237,10 +237,14 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
     public void runTrigger(IPayload payload)
         throws TriggerException
     {
-        if (!allowRerun && !loggedBuggy) {
+        // XXX when this is deleted, remove these phrases from all unit tests
+        if (!loggedBuggy) {
             loggedBuggy = true;
-            // XXX when this is deleted, remove this phrase from all unit tests
-            LOG.error("Using buggy SMT algorithm");
+            if (!allowRerun) {
+                LOG.error("Using buggy SMT algorithm");
+            } else {
+                LOG.error("Using fixed SMT algorithm");
+            }
         }
 
         runTrigger(payload, true);

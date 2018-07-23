@@ -68,7 +68,8 @@ public class InIceTriggerEndToEndTest
                     !msg.startsWith("Resetting counter ") &&
                     !msg.startsWith("Resetting decrement ") &&
                     !msg.startsWith("No match for timegate ") &&
-                    !msg.startsWith("Using buggy SMT algorithm"))
+                    !msg.startsWith("Using buggy SMT algorithm") &&
+                    !msg.startsWith("Using fixed SMT algorithm"))
                 {
                     fail("Bad log message#" + i + ": " +
                          appender.getMessage(i));

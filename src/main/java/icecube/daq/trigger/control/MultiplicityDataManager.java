@@ -451,7 +451,8 @@ public class MultiplicityDataManager
      * @return <tt>null</tt> if there are not enough bins to summarize
      */
     public Iterable<Map<String, Object>> getSummary(int numBins,
-                                                    boolean allowPartial)
+                                                    boolean allowPartial,
+                                                    boolean allowEmptyBins)
         throws MultiplicityDataException
     {
         if (binmap == null) {
@@ -462,7 +463,7 @@ public class MultiplicityDataManager
 
         List<Map<String, Object>> list = null;
         synchronized (binmap) {
-            if (binmap.size() == 0) {
+            if (binmap.size() == 0 && !allowEmptyBins) {
                 // don't bother sending empty list
                 list = null;
             } else {
@@ -654,7 +655,7 @@ public class MultiplicityDataManager
                                                 " been set");
         }
 
-        Iterable<Map<String, Object>> mapper = getSummary(10, isFinal);
+        Iterable<Map<String, Object>> mapper = getSummary(10, isFinal, true);
         if (mapper == null) {
             // if there's no data, we're done
             return false;

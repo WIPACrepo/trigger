@@ -19,6 +19,7 @@ import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.ComponentObserver;
 import icecube.daq.trigger.test.CylinderTriggerConfig;
+import icecube.daq.trigger.test.DAQTestUtil;
 import icecube.daq.trigger.test.MockOutputChannel;
 import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockSourceID;
@@ -163,7 +164,7 @@ public class CylinderTriggerTest
         rdr.registerComponentObserver(observer);
 
         rdr.start();
-        waitUntilStopped(rdr, splicer, "creation");
+        DAQTestUtil.waitUntilStopped(rdr, splicer, "creation");
         assertTrue("PayloadReader in " + rdr.getPresentState() +
                    ", not Idle after creation", rdr.isStopped());
 
@@ -181,18 +182,20 @@ public class CylinderTriggerTest
         }
 
         rdr.startProcessing();
-        waitUntilRunning(rdr);
+        DAQTestUtil.waitUntilRunning(rdr);
 
         // load data into input channels
         trigCfg.sendInIceData(tails, numObjs);
         trigCfg.sendInIceStops(tails);
 
-        waitUntilStopped(rdr, splicer, "StopMsg");
+        DAQTestUtil.waitUntilStopped(rdr, splicer, "StopMsg");
 
         // wait for all collection threads to stop
-        for (int i = 0; i < REPS && !trigMgr.isStopped(); i++) {
+        for (int i = 0; i < DAQTestUtil.WAIT_REPS && !trigMgr.isStopped();
+             i++)
+        {
             try {
-                Thread.sleep(SLEEP_TIME);
+                Thread.sleep(DAQTestUtil.WAIT_TIME);
             } catch (InterruptedException ie) {
                 // ignore interrupts
             }
@@ -210,60 +213,6 @@ public class CylinderTriggerTest
         } else {
             checkLogMessages();
         }
-    }
-
-    private static final int REPS = 100;
-    private static final int SLEEP_TIME = 100;
-
-    public static final void waitUntilRunning(DAQComponentIOProcess proc)
-    {
-        waitUntilRunning(proc, "");
-    }
-
-    public static final void waitUntilRunning(DAQComponentIOProcess proc,
-                                              String extra)
-    {
-        for (int i = 0; i < REPS && !proc.isRunning(); i++) {
-            try {
-                Thread.sleep(SLEEP_TIME);
-            } catch (InterruptedException ie) {
-                // ignore interrupts
-            }
-        }
-
-        assertTrue("IOProcess in " + proc.getPresentState() +
-                   ", not Running after StartSig" + extra, proc.isRunning());
-    }
-
-    private static final void waitUntilStopped(DAQComponentIOProcess proc,
-                                               Splicer splicer,
-                                               String action)
-    {
-        waitUntilStopped(proc, splicer, action, "");
-    }
-
-    private static final void waitUntilStopped(DAQComponentIOProcess proc,
-                                               Splicer splicer,
-                                               String action,
-                                               String extra)
-    {
-        for (int i = 0; i < REPS &&
-                 (!proc.isStopped() ||
-                  splicer.getState() != Splicer.State.STOPPED);
-             i++)
-        {
-            try {
-                Thread.sleep(SLEEP_TIME);
-            } catch (InterruptedException ie) {
-                // ignore interrupts
-            }
-        }
-
-        assertTrue("IOProcess in " + proc.getPresentState() +
-                   ", not Idle after " + action + extra, proc.isStopped());
-        assertTrue("Splicer in " + splicer.getState().name() +
-                   ", not STOPPED after " + action + extra,
-                   splicer.getState() == Splicer.State.STOPPED);
     }
 
     public static void main(String[] args)

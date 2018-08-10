@@ -1,20 +1,28 @@
 package icecube.daq.trigger.algorithm;
 
 import icecube.daq.common.MockAppender;
+import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.SpliceablePayloadReader;
+import icecube.daq.juggler.alert.AlertQueue;
+import icecube.daq.payload.IPayload;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.PayloadFactory;
+import icecube.daq.payload.impl.TriggerRequestFactory;
 import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.SpliceableComparator;
 import icecube.daq.splicer.SpliceableFactory;
+import icecube.daq.splicer.Splicer;
 import icecube.daq.trigger.config.DomSetFactory;
+import icecube.daq.trigger.control.ITriggerCollector;
+import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.SNDAQAlerter;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.ComponentObserver;
 import icecube.daq.trigger.test.DAQTestUtil;
+import icecube.daq.trigger.test.MockHit;
 import icecube.daq.trigger.test.MockOutputChannel;
 import icecube.daq.trigger.test.MockOutputProcess;
 import icecube.daq.trigger.test.MockSourceID;
@@ -27,6 +35,7 @@ import icecube.daq.util.IDOMRegistry;
 
 import java.io.IOException;
 import java.nio.channels.Pipe;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,6 +48,108 @@ import junit.textui.TestRunner;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
+
+class MockCollector
+    implements ITriggerCollector
+{
+    private boolean changed;
+
+    public void setChanged()
+    {
+        changed = true;
+    }
+}
+
+class MockManager
+    implements ITriggerManager
+{
+    private long earliest;
+
+    public void addTrigger(ITriggerAlgorithm x0)
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public void addTriggers(Iterable<ITriggerAlgorithm> x0)
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public void flush()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public AlertQueue getAlertQueue()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public Iterable<AlgorithmStatistics> getAlgorithmStatistics()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public IDOMRegistry getDOMRegistry()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public Map<String, Integer> getQueuedInputs()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public int getNumOutputsQueued()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public int getSourceId()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public long getTotalProcessed()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public boolean isStopped()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public void setDOMRegistry(IDOMRegistry req)
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public void setEarliestPayloadOfInterest(IPayload pay)
+    {
+        earliest = pay.getUTCTime();
+    }
+
+    public void setOutputEngine(DAQComponentOutputProcess proc)
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public void setSplicer(Splicer x0)
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public void stopThread()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    public void switchToNewRun(int i0)
+    {
+        throw new Error("Unimplemented");
+    }
+}
 
 public class SimpleMajorityTriggerTest
     extends TestCase
@@ -201,6 +312,77 @@ public class SimpleMajorityTriggerTest
         }
     }
 
+    private void writeClusteredHits(int threshold, int numRequests)
+        throws DOMRegistryException, IOException, TriggerException
+    {
+        writeClusteredHits(threshold, numRequests, numRequests);
+    }
+
+    private void writeClusteredHits(int threshold, int numRequests,
+                                    int expRequests)
+        throws DOMRegistryException, IOException, TriggerException
+    {
+        SimpleMajorityTrigger trig = null;
+        try {
+            final String configDir = getConfigurationDirectory();
+
+            final IDOMRegistry registry = DOMRegistryFactory.load(configDir);
+
+            DomSetFactory.setConfigurationDirectory(configDir);
+            DomSetFactory.setDomRegistry(registry);
+
+            SMTConfig trigCfg = new SMTConfig(registry, threshold);
+
+            for (AbstractTrigger tmpTrig : trigCfg.get()) {
+                if (!(tmpTrig instanceof SimpleMajorityTrigger)) {
+                    fail("Found non-SMT trigger " +
+                         tmpTrig.getClass().getName() + ": " + tmpTrig);
+                } else if (trig != null) {
+                    fail("Found multiple SMT triggers:\n\t" + trig + "\n\t" +
+                         tmpTrig);
+                }
+
+                trig = (SimpleMajorityTrigger) tmpTrig;
+            }
+
+            trig.setTriggerCollector(new MockCollector());
+            trig.setTriggerFactory(new TriggerRequestFactory(null));
+            trig.setTriggerManager(new MockManager());
+
+            final long internalGap = 100L;
+            final long requestGap = 1000000L;
+
+            // send clustered hits to algorithm
+            long currentTime = 100000000000L;
+            for (int reqNum = 0; reqNum < numRequests; reqNum++) {
+                for (int idx = 0; idx < threshold; idx++) {
+                    final DOMInfo dom =
+                        trigCfg.getDOM(reqNum * threshold + idx);
+                    final long domId = dom.getNumericMainboardId();
+                    trig.runTrigger(new MockHit(currentTime, domId));
+                    currentTime += internalGap;
+                }
+
+                // add a gap to break up the stream of hits
+                currentTime += requestGap;
+            }
+
+            // send one last hit to trigger the final request
+            final DOMInfo dom = trigCfg.getDOM(0);
+            final long domId = dom.getNumericMainboardId();
+            trig.runTrigger(new MockHit(currentTime, domId));
+        } finally {
+            if (appender.getLevel().equals(org.apache.log4j.Level.ALL)) {
+                appender.clear();
+            } else {
+                checkLogMessages();
+            }
+        }
+
+        assertEquals("Bad number of requests", expRequests,
+                     trig.getNumberOfCachedRequests());
+    }
+
     private void writeHits(VitreousBufferCache cache,
                            TriggerCollection trigCfg,
                            TriggerManager trigMgr,
@@ -331,6 +513,47 @@ public class SimpleMajorityTriggerTest
         throws DOMRegistryException, IOException, TriggerException
     {
         run(8, true, 24, 1234);
+    }
+
+    public void testDirectSMT1Old()
+        throws DOMRegistryException, IOException, TriggerException
+    {
+        final int numReqs = 200;
+
+        writeClusteredHits(1, numReqs, numReqs / 2);
+    }
+
+    public void testDirectSMT1New()
+        throws DOMRegistryException, IOException, TriggerException
+    {
+        System.setProperty("allowSMTRerun", "1");
+        writeClusteredHits(1, 200);
+    }
+
+    public void testDirectSMT3Old()
+        throws DOMRegistryException, IOException, TriggerException
+    {
+        writeClusteredHits(3, 200);
+    }
+
+    public void testDirectSMT3New()
+        throws DOMRegistryException, IOException, TriggerException
+    {
+        System.setProperty("allowSMTRerun", "1");
+        writeClusteredHits(3, 200);
+    }
+
+    public void testDirectSMT8Old()
+        throws DOMRegistryException, IOException, TriggerException
+    {
+        writeClusteredHits(8, 200);
+    }
+
+    public void testDirectSMT8New()
+        throws DOMRegistryException, IOException, TriggerException
+    {
+        System.setProperty("allowSMTRerun", "1");
+        writeClusteredHits(8, 200);
     }
 
     public static void main(String[] args)

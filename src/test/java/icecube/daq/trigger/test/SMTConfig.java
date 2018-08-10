@@ -134,9 +134,8 @@ public class SMTConfig
 
         SMTParameters params = new SMTParameters(threshold);
 
-        AbstractTrigger trig;
-
-        trig = createTrigger(0, params.cfgId, params.srcId, "SMT" + threshold);
+        final AbstractTrigger trig =
+            createTrigger(0, params.cfgId, params.srcId, "SMT" + threshold);
         params.configure(trig);
         add(trig);
 
@@ -185,21 +184,14 @@ public class SMTConfig
         return allDoms.toArray(emptyArray);
     }
 
-/*
-    public static final Set<DOMInfo> getDoms(IDOMRegistry reg, int hubId)
-        throws DOMRegistryException
+    public DOMInfo getDOM(int idx)
     {
-        Set<DOMInfo> domSet = ;
-
-        DOMInfo[] allDoms = domSet.toArray(emptyArray);
-
-        while (domSet.size() > number) {
-            domSet.remove(allDoms[domSet.size() - 1]);
+        if (idx < 0) {
+            throw new Error("DOM index cannot be negative");
         }
 
-        return domSet;
+        return doms[idx % doms.length];
     }
-*/
 
     public int getExpectedNumberOfAmandaPayloads(int numObjs)
     {
@@ -302,10 +294,6 @@ public class SMTConfig
                                     ", not " + lastTime);
                 }
             }
-/*
-System.err.println("First: EXP "+nextStart+" ACT "+firstTime+" DIFF "+(firstTime-nextStart));
-System.err.println(" Last: EXP "+nextEnd+" ACT "+lastTime+" DIFF "+(lastTime-nextEnd));
-*/
 
             nextStart = firstTime + timeBase + timeSpan;
             if (jumpHack) {

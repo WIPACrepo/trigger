@@ -269,12 +269,6 @@ public abstract class AbstractTrigger
             break;
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Creating readout: Type = " + type +
-                      " FirstTime = " + timeMinus.longValue() / 10.0 +
-                      " LastTime = " + timePlus.longValue() / 10.0);
-        }
-
         int rreSrcId;
         if (stringId == null) {
             rreSrcId = -1;
@@ -433,6 +427,10 @@ public abstract class AbstractTrigger
                                                           lastTime.longValue(),
                                                           readoutRequest,
                                                           hitList);
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Created " + triggerPayload);
+        }
 
         // report it
         reportTrigger(triggerPayload);

@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 16161 2016-07-01 19:02:34Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17087 2018-08-10 20:18:45Z dglo $
  *
  * Date: August 19 2005
  *
@@ -22,6 +22,9 @@ import icecube.daq.trigger.exceptions.TimeOutOfOrderException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -105,12 +108,17 @@ class HitCollection
     {
         return hits.size();
     }
+
+    public String toString()
+    {
+        return "HitCollection*" + hits.size();
+    }
 }
 
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 16161 2016-07-01 19:02:34Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17087 2018-08-10 20:18:45Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -120,6 +128,12 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      */
     private static final Log LOG =
         LogFactory.getLog(SimpleMajorityTrigger.class);
+
+    /**
+     * If the 'allowSMTRerun' property is set, hits are no longer dropped
+     * after a request has been created.
+     */
+    private static boolean allowRerun;
 
     private static int nextTriggerNumber;
     private int triggerNumber;
@@ -148,9 +162,14 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      */
     private IUTCTime lastHitTime = null;
 
+    /** If 'allowSMTRerun' was not set, log a warning */
+    private boolean loggedBuggy = false;
+
     public SimpleMajorityTrigger()
     {
         triggerNumber = ++nextTriggerNumber;
+
+        setRerunProperty();
     }
 
     /*
@@ -212,12 +231,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         }
     }
 
-    /*
-    *
-    * Methods of ITriggerControl
-    *
-    */
-
     /**
      * Run the trigger algorithm on a payload.
      *
@@ -227,6 +240,31 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      *          if the algorithm doesn't like this payload
      */
     public void runTrigger(IPayload payload)
+        throws TriggerException
+    {
+        // XXX when this is deleted, remove these phrases from all unit tests
+        if (!loggedBuggy) {
+            loggedBuggy = true;
+            if (!allowRerun) {
+                LOG.error("Using buggy SMT algorithm");
+            } else {
+                LOG.error("Using fixed SMT algorithm");
+            }
+        }
+
+        runInternal(payload);
+    }
+
+    /**
+     * Run the trigger algorithm on a payload.
+     *
+     * @param payload payload to process
+     * @param rerunHit if a request is created, run the hit again
+     *
+     * @throws icecube.daq.trigger.exceptions.TriggerException
+     *          if the algorithm doesn't like this payload
+     */
+    private void runInternal(IPayload payload)
         throws TriggerException
     {
         // check that this is a hit
@@ -253,7 +291,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         lastHitTime = hitTimeUTC;
 
         if (slidingTimeWindow.size() == 0) {
-
             // Initialize earliest payload of interst
             setEarliestPayloadOfInterest(hit);
         }
@@ -266,64 +303,78 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
             getHitType(hit) == AbstractTrigger.SPE_HIT &&
             hitFilter.useHit(hit);
         if (!usableHit) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Hit " + hit + " isn't usable");
+            }
             return;
         }
 
+        analyzeWindow(hit, true);
+    }
+
+    private void analyzeWindow(IHitPayload hit, boolean rerunHit)
+    {
         /*
          * Set the window front to the current hit time and slide the window
          * tail forward, removing hits no longer in the window.
          */
-        while (slidingTimeWindow.size() > 0 && 
-               !slidingTimeWindow.inTimeWindow(hitTimeUTC)) {
-
-            IHitPayload oldHit = slidingTimeWindow.slide();
-
-            /*
-             * If this hit is not part of the trigger, update the
-             * Earliest time of interest.  If the trigger is on, the
-             * hit, by definition, is part of the trigger.
-             */
-            if (!haveTrigger()) {
-                IPayload oldHitPlus =
-                    new DummyPayload(oldHit.getHitTimeUTC().getOffsetUTCTime(0.1));
-                setEarliestPayloadOfInterest(oldHitPlus);
-            }
-        }
+        updateSlidingWindow(hit.getHitTimeUTC());
 
         // Add hit to the sliding window
-        slidingTimeWindow.add(hit);
-
-        // Quit if we're below threshold and we don't currently have a trigger
-        if (!slidingTimeWindow.aboveThreshold() && !haveTrigger()) {
-            return;
+        if (!slidingTimeWindow.contains(hit)) {
+            slidingTimeWindow.add(hit);
         }
 
         /*
-         * We're either above threshold, currently have a trigger, or both.
-         * Check if we have reached the trigger ending condition.
-         *
-         * N.B. Ending condition is defined as a time period the
-         * length of the trigger window with no hits. (i.e.
-         * the sliding time window only has one hit).
-         *
-         * N.B. We also have to explicitly check haveTrigger() to correctly
-         * handle the threshold == 1 case, because we may not have a
-         * trigger at this point in this case.
-         */
-        if (slidingTimeWindow.size() == 1 && haveTrigger()) {
-            flushTrigger();
-            return;
-        }
-
-        /* 
          * Trigger condition satisfied.  If trigger is new,
-         * we need to copy the trigger window hits
          */
          if (!haveTrigger()) {
-             hitsWithinTriggerWindow.addAll(slidingTimeWindow.copy());
+             // save the hits if we're above threshold and don't have a trigger
+             if (slidingTimeWindow.aboveThreshold()) {
+                 if (LOG.isDebugEnabled()) {
+                     LOG.debug("Add " + slidingTimeWindow.size() +
+                               " hit(s) to trigger window");
+                 }
+                 hitsWithinTriggerWindow.addAll(slidingTimeWindow.copy());
+             } else if (LOG.isDebugEnabled()) {
+                 if (LOG.isDebugEnabled()) {
+                     LOG.debug("Sliding window is below threshold " +
+                               threshold);
+                 }
+             }
          } else {
-             // We only need to copy the current hit
-             hitsWithinTriggerWindow.add(hit);
+             /*
+              * We're either above threshold, currently have a trigger, or
+              * both. Check if we have reached the trigger ending condition.
+              *
+              * N.B. Ending condition is defined as a time period the
+              * length of the trigger window with no hits. (i.e.
+              * the sliding time window only has one hit).
+              *
+              * N.B. We have to explicitly check haveTrigger() to
+              * correctly handle the threshold == 1 case, because we may not
+              * have a trigger at this point in this case.
+              */
+             if (slidingTimeWindow.size() != 1) {
+                 // save the current hit
+                 if (LOG.isDebugEnabled()) {
+                     LOG.debug("Add " + slidingTimeWindow.size() +
+                               " hit(s) to trigger window");
+                 }
+                 hitsWithinTriggerWindow.add(hit);
+             } else {
+                 if (LOG.isDebugEnabled()) {
+                     LOG.debug("Create request from " +
+                               hitsWithinTriggerWindow.size() + " hits");
+                 }
+                 flushTrigger();
+                 if (allowRerun && rerunHit) {
+                     if (LOG.isDebugEnabled()) {
+                         LOG.debug("Rerun analysis");
+                     }
+                     analyzeWindow(hit, false);
+                 }
+             }
          }
     }
 
@@ -333,7 +384,10 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      */
     public void flush()
     {
-        flushTrigger();
+        if (haveTrigger()) {
+            flushTrigger();
+        }
+
         reset();
     }
 
@@ -369,10 +423,8 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      * Form any pending triggers if we have them
      */
     private void flushTrigger() {
-        if (haveTrigger()) {
-            formTrigger(hitsWithinTriggerWindow.list(), null, null);
-            hitsWithinTriggerWindow.clear();
-        }
+        formTrigger(hitsWithinTriggerWindow.list(), null, null);
+        hitsWithinTriggerWindow.clear();
     }
 
     /**
@@ -420,6 +472,34 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         super.resetAlgorithm();
     }
 
+    /*
+     * Set the window front to the current hit time and slide the window
+     * tail forward, removing hits no longer in the window.
+     */
+    private void updateSlidingWindow(IUTCTime hitTimeUTC)
+    {
+        IUTCTime hitTime = null;
+        while (slidingTimeWindow.size() > 0 &&
+               !slidingTimeWindow.inTimeWindow(hitTimeUTC))
+        {
+            IHitPayload oldHit = slidingTimeWindow.slide();
+
+            /*
+             * If this hit is not part of the trigger, update the
+             * Earliest time of interest.  If the trigger is on, the
+             * hit, by definition, is part of the trigger.
+             */
+            if (!haveTrigger()) {
+                hitTime = oldHit.getHitTimeUTC();
+            }
+        }
+
+        if (hitTime != null) {
+            final IUTCTime offsetTime = hitTime.getOffsetUTCTime(0.1);
+            setEarliestPayloadOfInterest(new DummyPayload(offsetTime));
+        }
+    }
+
     final class SlidingTimeWindow
         extends HitCollection
     {
@@ -435,6 +515,10 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
         private boolean inTimeWindow(IUTCTime hitTime)
         {
+            if (size() == 0) {
+                return false;
+            }
+
             return hitTime.compareTo(startTime()) >= 0 &&
                 hitTime.compareTo(endTime()) <= 0;
         }
@@ -478,5 +562,11 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
     public boolean hasValidMultiplicity()
     {
         return true;
+    }
+
+    public static final void setRerunProperty()
+    {
+        final String prop = System.getProperty("allowSMTRerun");
+        allowRerun = prop != null && prop.length() > 0;
     }
 }

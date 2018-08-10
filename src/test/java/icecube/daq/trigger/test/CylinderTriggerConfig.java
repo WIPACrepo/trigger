@@ -72,20 +72,21 @@ public class CylinderTriggerConfig
 
         AbstractTrigger trig;
 
+        numHitsPerTrigger = 8;
+        timeBase = 100000L;
+        timeStep = 10000L / (long) (numHitsPerTrigger + 1);
+
         trig = createTrigger(21, 21001, INICE_TRIGGER, "CylinderTrigger");
         trig.addParameter("multiplicity", "4");
-        trig.addParameter("simpleMultiplicity", "8");
+        trig.addParameter("simpleMultiplicity",
+                          Integer.toString(numHitsPerTrigger));
         trig.addParameter("radius", "175");
         trig.addParameter("height", "75");
         trig.addParameter("timeWindow", "1000");
         trig.addParameter("domSet", "2");
-        trig.addReadout(1, 0, 10000, 10000);
-        trig.addReadout(2, 0, 4000, 6000);
+        trig.addReadout(READOUT_ALL_ICETOP, 0, 10000, 10000);
+        trig.addReadout(READOUT_ALL_INICE, 0, 4000, 6000);
         add(trig);
-
-        numHitsPerTrigger = 8;
-        timeBase = 100000L;
-        timeStep = 10000L / (long) (numHitsPerTrigger + 1);
 
         setSourceId(STRINGHUB);
     }

@@ -4,6 +4,7 @@ import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.PayloadReader;
 import icecube.daq.juggler.component.DAQCompException;
+import icecube.daq.splicer.Splicer;
 import icecube.daq.trigger.component.TriggerComponent;
 import icecube.daq.trigger.exceptions.UnimplementedError;
 import icecube.daq.payload.IByteBufferCache;
@@ -70,8 +71,8 @@ class ChannelData
 public final class DAQTestUtil
     extends Assert
 {
-    private static final int REPS = 100;
-    private static final int SLEEP_TIME = 100;
+    public static final int WAIT_REPS = 100;
+    public static final int WAIT_TIME = 100;
 
     public static ArrayList<ChannelData> chanData =
         new ArrayList<ChannelData>();
@@ -287,17 +288,55 @@ public final class DAQTestUtil
         }
     }
 
-    private static final void waitUntilRunning(DAQComponentIOProcess proc)
+    public static final void waitUntilRunning(DAQComponentIOProcess proc)
     {
-        for (int i = 0; i < REPS && !proc.isRunning(); i++) {
+        waitUntilRunning(proc, "");
+    }
+
+    public static final void waitUntilRunning(DAQComponentIOProcess proc,
+                                              String errorExtra)
+    {
+        for (int i = 0; i < WAIT_REPS && !proc.isRunning(); i++) {
             try {
-                Thread.sleep(SLEEP_TIME);
+                Thread.sleep(WAIT_TIME);
             } catch (InterruptedException ie) {
                 // ignore interrupts
             }
         }
 
         assertTrue("IOProcess in " + proc.getPresentState() +
-                   ", not Running after StartSig", proc.isRunning());
+                   ", not running after StartSig" + errorExtra,
+                   proc.isRunning());
+    }
+
+    public static final void waitUntilStopped(DAQComponentIOProcess proc,
+                                               Splicer splicer,
+                                               String action)
+    {
+        waitUntilStopped(proc, splicer, action, "");
+    }
+
+    public static final void waitUntilStopped(DAQComponentIOProcess proc,
+                                               Splicer splicer,
+                                               String action,
+                                               String extra)
+    {
+        for (int i = 0; i < WAIT_REPS &&
+                 (!proc.isStopped() ||
+                  splicer.getState() != Splicer.State.STOPPED);
+             i++)
+        {
+            try {
+                Thread.sleep(WAIT_TIME);
+            } catch (InterruptedException ie) {
+                // ignore interrupts
+            }
+        }
+
+        assertTrue("IOProcess in " + proc.getPresentState() +
+                   ", not stopped after " + action + extra, proc.isStopped());
+        assertTrue("Splicer in " + splicer.getState().name() +
+                   ", not STOPPED after " + action + extra,
+                   splicer.getState() == Splicer.State.STOPPED);
     }
 }

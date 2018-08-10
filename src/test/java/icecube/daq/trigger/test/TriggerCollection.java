@@ -2,6 +2,7 @@ package icecube.daq.trigger.test;
 
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.PayloadRegistry;
+import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID;
 import icecube.daq.splicer.SplicerException;
@@ -19,12 +20,25 @@ import java.util.List;
 
 public abstract class TriggerCollection
 {
-    static final int AMANDA_TRIGGER = SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID;
-    static final int GLOBAL_TRIGGER = SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID;
-    static final int ICETOP_TRIGGER = SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID;
-    static final int INICE_TRIGGER = SourceIdRegistry.INICE_TRIGGER_SOURCE_ID;
-    static final int SIMHUB = SourceIdRegistry.SIMULATION_HUB_SOURCE_ID;
-    static final int STRINGHUB = SourceIdRegistry.STRING_HUB_SOURCE_ID;
+    public static final int AMANDA_TRIGGER =
+        SourceIdRegistry.AMANDA_TRIGGER_SOURCE_ID;
+    public static final int GLOBAL_TRIGGER =
+        SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID;
+    public static final int ICETOP_TRIGGER =
+        SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID;
+    public static final int INICE_TRIGGER =
+        SourceIdRegistry.INICE_TRIGGER_SOURCE_ID;
+    public static final int SIMHUB =
+        SourceIdRegistry.SIMULATION_HUB_SOURCE_ID;
+    public static final int STRINGHUB =
+        SourceIdRegistry.STRING_HUB_SOURCE_ID;
+
+    public static final int READOUT_ALL =
+        IReadoutRequestElement.READOUT_TYPE_GLOBAL;
+    public static final int READOUT_ALL_ICETOP =
+        IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL;
+    public static final int READOUT_ALL_INICE =
+        IReadoutRequestElement.READOUT_TYPE_II_GLOBAL;
 
     static final int RECORD_TYPE_TRIGGER_REQUEST = 4;
 
@@ -74,13 +88,18 @@ public abstract class TriggerCollection
     static AbstractTrigger createTrigger(int type, int cfgId, int srcId,
                                          String name)
     {
-        String className = PACKAGE_NAME + "." + name;
+        final String className;
+        if (name.startsWith("SMT")) {
+            className = PACKAGE_NAME + ".SimpleMajorityTrigger";
+        } else {
+            className = PACKAGE_NAME + "." + name;
+        }
 
         Class trigClass;
         try {
             trigClass = Class.forName(className);
         } catch (ClassNotFoundException cnfe) {
-            throw new Error("Cannot find " + PACKAGE_NAME + "." + name);
+            throw new Error("Cannot find " + className);
         }
 
         AbstractTrigger trig;

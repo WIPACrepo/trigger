@@ -8,6 +8,7 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.splicer.Spliceable;
+import icecube.daq.trigger.algorithm.AbstractTrigger;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -139,7 +140,7 @@ public class MockHit
     @Override
     public int getTriggerType()
     {
-        throw new Error("Unimplemented");
+        return AbstractTrigger.SPE_HIT;
     }
 
     @Override

@@ -95,12 +95,12 @@ class MockManager
         throw new Error("Unimplemented");
     }
 
-    public Map<String, Integer> getQueuedInputs()
+    public int getNumOutputsQueued()
     {
         throw new Error("Unimplemented");
     }
 
-    public int getNumOutputsQueued()
+    public Map<String, Integer> getQueuedInputs()
     {
         throw new Error("Unimplemented");
     }

@@ -184,6 +184,11 @@ public class SMTConfig
         return allDoms.toArray(emptyArray);
     }
 
+    public BaseValidator getAmandaValidator()
+    {
+        return null;
+    }
+
     public DOMInfo getDOM(int idx)
     {
         if (idx < 0) {
@@ -201,11 +206,6 @@ public class SMTConfig
     public int getExpectedNumberOfInIcePayloads(int numObjs)
     {
         return (numObjs / threshold) - 1;
-    }
-
-    public BaseValidator getAmandaValidator()
-    {
-        return null;
     }
 
     public BaseValidator getInIceValidator()

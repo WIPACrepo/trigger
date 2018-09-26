@@ -242,16 +242,6 @@ public class TriggerManager
     }
 
     /**
-     * XXX Unimplemented.
-     *
-     * @param evt ignored
-     */
-    public void disposed(SplicerChangedEvent<Spliceable> evt)
-    {
-        throw new UnimplementedError();
-    }
-
-    /**
      * Add the new list of hits from the splicer to the input queue.
      *
      * @param splicedObjects list of hits
@@ -279,6 +269,16 @@ public class TriggerManager
             // we're done with this payload
             payload.recycle();
         }
+    }
+
+    /**
+     * XXX Unimplemented.
+     *
+     * @param evt ignored
+     */
+    public void disposed(SplicerChangedEvent<Spliceable> evt)
+    {
+        throw new UnimplementedError();
     }
 
     /**
@@ -317,6 +317,23 @@ public class TriggerManager
     }
 
     /**
+     * Get list of algorithm I/O statistics
+     *
+     * @return list of ITriggerStatistics
+     */
+    public Iterable<AlgorithmStatistics> getAlgorithmStatistics()
+    {
+        ArrayList<AlgorithmStatistics> list =
+            new ArrayList<AlgorithmStatistics>(algorithms.size());
+
+        for (ITriggerAlgorithm trigger : algorithms) {
+            list.add(new AlgorithmStatistics(trigger));
+        }
+
+        return list;
+    }
+
+    /**
      * Get the DOM registry.
      *
      * @return DOM registry
@@ -324,34 +341,6 @@ public class TriggerManager
     public IDOMRegistry getDOMRegistry()
     {
         return domRegistry;
-    }
-
-    /**
-     * Get the number of requests collected from all algorithms
-     *
-     * @return number of collected requests
-     */
-    public int getTotalRequestsCollected()
-    {
-        if (collector == null) {
-            return 0;
-        }
-
-        return (int) collector.getTotalCollected();
-    }
-
-    /**
-     * Get the number of requests released by all algorithms
-     *
-     * @return number of collected requests
-     */
-    public int getTotalRequestsReleased()
-    {
-        if (collector == null) {
-            return 0;
-        }
-
-        return (int) collector.getTotalReleased();
     }
 
     /**
@@ -471,20 +460,31 @@ public class TriggerManager
     }
 
     /**
-     * Get list of algorithm I/O statistics
+     * Get the number of requests collected from all algorithms
      *
-     * @return list of ITriggerStatistics
+     * @return number of collected requests
      */
-    public Iterable<AlgorithmStatistics> getAlgorithmStatistics()
+    public int getTotalRequestsCollected()
     {
-        ArrayList<AlgorithmStatistics> list =
-            new ArrayList<AlgorithmStatistics>(algorithms.size());
-
-        for (ITriggerAlgorithm trigger : algorithms) {
-            list.add(new AlgorithmStatistics(trigger));
+        if (collector == null) {
+            return 0;
         }
 
-        return list;
+        return (int) collector.getTotalCollected();
+    }
+
+    /**
+     * Get the number of requests released by all algorithms
+     *
+     * @return number of collected requests
+     */
+    public int getTotalRequestsReleased()
+    {
+        if (collector == null) {
+            return 0;
+        }
+
+        return (int) collector.getTotalReleased();
     }
 
     /**

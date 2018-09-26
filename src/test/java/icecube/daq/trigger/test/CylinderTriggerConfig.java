@@ -91,6 +91,11 @@ public class CylinderTriggerConfig
         setSourceId(STRINGHUB);
     }
 
+    public BaseValidator getAmandaValidator()
+    {
+        return null;
+    }
+
     public int getExpectedNumberOfAmandaPayloads(int numObjs)
     {
         return 0;
@@ -99,11 +104,6 @@ public class CylinderTriggerConfig
     public int getExpectedNumberOfInIcePayloads(int numObjs)
     {
         return numObjs / numHitsPerTrigger;
-    }
-
-    public BaseValidator getAmandaValidator()
-    {
-        return null;
     }
 
     public BaseValidator getInIceValidator()

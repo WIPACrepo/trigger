@@ -32,6 +32,7 @@ import static org.junit.Assert.*;
 class RdoutReqElemComparator
     implements Comparator<IReadoutRequestElement>
 {
+    @Override
     public int compare(IReadoutRequestElement e1, IReadoutRequestElement e2)
     {
         int val = e2.getReadoutType() - e1.getReadoutType();

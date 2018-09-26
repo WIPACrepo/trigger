@@ -62,6 +62,7 @@ public class DomSet
      *
      * @return <tt>true</tt> if both sets contain the same DOM IDs
      */
+    @Override
     public boolean equals(Object other)
     {
         if (other == null) {
@@ -105,6 +106,7 @@ public class DomSet
      *
      * @return hash code
      */
+    @Override
     public int hashCode()
     {
         return name.hashCode() + domIds.hashCode() + chanIds.hashCode();
@@ -149,6 +151,7 @@ public class DomSet
      *
      * @return debugging string
      */
+    @Override
     public String toString()
     {
         return name + "*" + chanIds.size();

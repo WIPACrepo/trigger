@@ -150,6 +150,7 @@ public class InIceTriggerIntegrationTest
         }
     }
 
+    @Override
     protected void setUp()
         throws Exception
     {
@@ -214,6 +215,7 @@ public class InIceTriggerIntegrationTest
         return new TestSuite(InIceTriggerIntegrationTest.class);
     }
 
+    @Override
     protected void tearDown()
         throws Exception
     {
@@ -304,6 +306,7 @@ public class InIceTriggerIntegrationTest
             nextEnd = nextStart + timeSpan;
         }
 
+        @Override
         public boolean validate(IWriteablePayload payload)
         {
             if (!(payload instanceof ITriggerRequestPayload)) {

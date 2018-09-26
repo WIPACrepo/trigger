@@ -7,6 +7,7 @@ import java.util.Comparator;
 class HitComparator
     implements Comparator<IHitPayload>
 {
+    @Override
     public int compare(IHitPayload h1, IHitPayload h2)
     {
         if (h1.getUTCTime() < h2.getUTCTime()) {

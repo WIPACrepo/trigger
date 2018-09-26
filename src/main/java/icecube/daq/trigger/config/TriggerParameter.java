@@ -1,7 +1,7 @@
 /*
  * class: TriggerParameter
  *
- * Version $Id: TriggerParameter.java 14207 2013-02-11 22:18:48Z dglo $
+ * Version $Id: TriggerParameter.java 17114 2018-09-26 09:51:56Z dglo $
  *
  * Date: November 23 2005
  *
@@ -13,7 +13,7 @@ package icecube.daq.trigger.config;
 /**
  * This class encapsulates a name/value pair that is a trigger parameter.
  *
- * @version $Id: TriggerParameter.java 14207 2013-02-11 22:18:48Z dglo $
+ * @version $Id: TriggerParameter.java 17114 2018-09-26 09:51:56Z dglo $
  * @author pat
  */
 public class TriggerParameter
@@ -56,6 +56,7 @@ public class TriggerParameter
      *
      * @return <tt>true</tt> if the objects are equal
      */
+    @Override
     public boolean equals(Object object)
     {
         return object != null && (object instanceof TriggerParameter) &&
@@ -85,6 +86,7 @@ public class TriggerParameter
      *
      * @return hash code
      */
+    @Override
     public int hashCode()
     {
         return toString().hashCode();
@@ -112,6 +114,7 @@ public class TriggerParameter
      * Override to print out name/value pair.
      * @return parameter as a string
      */
+    @Override
     public String toString()
     {
         return (name + " = " + value);

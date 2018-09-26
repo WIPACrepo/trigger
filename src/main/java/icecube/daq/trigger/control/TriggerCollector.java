@@ -180,6 +180,7 @@ public class TriggerCollector
     /**
      * Notify the collector thread that one or more lists has changed.
      */
+    @Override
     public void setChanged()
     {
         collThrd.setChanged();
@@ -212,6 +213,7 @@ public class TriggerCollector
         collThrd.stop();
     }
 
+    @Override
     public String toString()
     {
         return "TrigColl[" + collThrd + "," + outThrd + "]";
@@ -234,6 +236,7 @@ class MonitoringTask
         this.moniDataMgr = moniDataMgr;
     }
 
+    @Override
     public void run()
     {
         try {
@@ -395,16 +398,19 @@ class CollectorThread
         return pushed;
     }
 
+    @Override
     public long getSNDAQAlertsDropped()
     {
         return alerter.getNumDropped();
     }
 
+    @Override
     public int getSNDAQAlertsQueued()
     {
         return alerter.getNumQueued();
     }
 
+    @Override
     public long getSNDAQAlertsSent()
     {
         return alerter.getNumSent();
@@ -415,6 +421,7 @@ class CollectorThread
      *
      * @return total number of collected requests
      */
+    @Override
     public long getTotalCollected()
     {
         return totalCollected;
@@ -425,6 +432,7 @@ class CollectorThread
      *
      * @return total number of released requests
      */
+    @Override
     public long getTotalReleased()
     {
         return totalReleased;
@@ -508,6 +516,7 @@ class CollectorThread
     /**
      * Reset the UID in order to switch to a new run.
      */
+    @Override
     public void resetUID()
     {
         outThrd.resetUID();
@@ -516,6 +525,7 @@ class CollectorThread
     /**
      * Run the collector thread.
      */
+    @Override
     public void run()
     {
         Interval oldInterval = null;
@@ -674,6 +684,7 @@ class CollectorThread
     /**
      * Notify the collector thread that one or more lists has changed.
      */
+    @Override
     public void setChanged()
     {
         synchronized (threadLock) {
@@ -691,6 +702,7 @@ class CollectorThread
         this.runNumber = runNumber;
     }
 
+    @Override
     public void start(Splicer splicer)
     {
         thread.start();
@@ -703,6 +715,7 @@ class CollectorThread
         }
     }
 
+    @Override
     public void stop()
     {
         stopping = true;
@@ -728,6 +741,7 @@ class CollectorThread
         subMgr.unsubscribeAll();
     }
 
+    @Override
     public String toString()
     {
         String stateStr;
@@ -826,6 +840,7 @@ class OutputThread
      *
      * @return output queue size
      */
+    @Override
     public long getNumQueued()
     {
         return outputQueue.size();
@@ -841,6 +856,7 @@ class OutputThread
         return thread.isAlive();
     }
 
+    @Override
     public boolean isStopped()
     {
         return stopped;
@@ -925,6 +941,7 @@ class OutputThread
         return fixed;
     }
 
+    @Override
     public void notifyThread()
     {
         synchronized (outputQueue) {
@@ -932,6 +949,7 @@ class OutputThread
         }
     }
 
+    @Override
     public void push(ITriggerRequestPayload req)
     {
         if (isGlobalTrigger) {
@@ -964,6 +982,7 @@ class OutputThread
         req.recycle();
     }
 
+    @Override
     public void resetUID()
     {
         eventUID = 1;
@@ -972,6 +991,7 @@ class OutputThread
     /**
      * Main output loop.
      */
+    @Override
     public void run()
     {
         boolean warnedChannel = false;
@@ -1037,11 +1057,13 @@ class OutputThread
         stopped = true;
     }
 
+    @Override
     public void start(Splicer splicer)
     {
         thread.start();
     }
 
+    @Override
     public void stop()
     {
         synchronized (outputQueue) {
@@ -1050,6 +1072,7 @@ class OutputThread
         }
     }
 
+    @Override
     public String toString()
     {
         String stateStr;

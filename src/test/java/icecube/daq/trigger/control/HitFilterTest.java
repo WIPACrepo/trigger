@@ -46,6 +46,7 @@ public class HitFilterTest
                      deepcoreValid, filter.useHit(deepcoreHit));
     }
 
+    @Override
     protected void setUp()
         throws Exception
     {

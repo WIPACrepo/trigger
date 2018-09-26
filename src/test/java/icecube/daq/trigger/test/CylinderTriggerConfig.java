@@ -91,21 +91,25 @@ public class CylinderTriggerConfig
         setSourceId(STRINGHUB);
     }
 
+    @Override
     public BaseValidator getAmandaValidator()
     {
         return null;
     }
 
+    @Override
     public int getExpectedNumberOfAmandaPayloads(int numObjs)
     {
         return 0;
     }
 
+    @Override
     public int getExpectedNumberOfInIcePayloads(int numObjs)
     {
         return numObjs / numHitsPerTrigger;
     }
 
+    @Override
     public BaseValidator getInIceValidator()
     {
         return new InIceValidator();
@@ -116,6 +120,7 @@ public class CylinderTriggerConfig
     {
     }
 
+    @Override
     public void sendAmandaStops(WritableByteChannel[] tails)
         throws IOException
     {
@@ -140,6 +145,7 @@ public class CylinderTriggerConfig
         }
     }
 
+    @Override
     public void sendInIceStops(WritableByteChannel[] tails)
         throws IOException
     {
@@ -164,6 +170,7 @@ public class CylinderTriggerConfig
             nextEnd = nextStart + timeSpan;
         }
 
+        @Override
         public boolean validate(IWriteablePayload payload)
         {
             if (!(payload instanceof ITriggerRequestPayload)) {

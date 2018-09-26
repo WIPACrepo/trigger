@@ -54,6 +54,7 @@ class MockCollector
 {
     private boolean changed;
 
+    @Override
     public void setChanged()
     {
         changed = true;
@@ -65,86 +66,103 @@ class MockManager
 {
     private long earliest;
 
+    @Override
     public void addTrigger(ITriggerAlgorithm x0)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void addTriggers(Iterable<ITriggerAlgorithm> x0)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void flush()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public AlertQueue getAlertQueue()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public Iterable<AlgorithmStatistics> getAlgorithmStatistics()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public IDOMRegistry getDOMRegistry()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int getNumOutputsQueued()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public Map<String, Integer> getQueuedInputs()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int getSourceId()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public long getTotalProcessed()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public boolean isStopped()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void setDOMRegistry(IDOMRegistry req)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void setEarliestPayloadOfInterest(IPayload pay)
     {
         earliest = pay.getUTCTime();
     }
 
+    @Override
     public void setOutputEngine(DAQComponentOutputProcess proc)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void setSplicer(Splicer x0)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void stopThread()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void switchToNewRun(int i0)
     {
         throw new Error("Unimplemented");
@@ -433,6 +451,7 @@ public class SimpleMajorityTriggerTest
                    trigMgr.isStopped());
     }
 
+    @Override
     protected void setUp()
         throws Exception
     {
@@ -455,6 +474,7 @@ public class SimpleMajorityTriggerTest
         return new TestSuite(SimpleMajorityTriggerTest.class);
     }
 
+    @Override
     protected void tearDown()
         throws Exception
     {

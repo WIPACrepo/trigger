@@ -54,6 +54,7 @@ class ChannelData
         }
     }
 
+    @Override
     public String toString()
     {
         StringBuilder buf = new StringBuilder("Channel[");

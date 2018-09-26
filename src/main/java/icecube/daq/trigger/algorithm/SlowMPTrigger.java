@@ -94,6 +94,7 @@ public class SlowMPTrigger extends AbstractTrigger
             return dom;
         }
 
+        @Override
         public String toString()
         {
             if (dom == null) {
@@ -177,6 +178,7 @@ public class SlowMPTrigger extends AbstractTrigger
         //System.out.println("INITIALIZED SLOWMPTRIGGER");
     }
 
+    @Override
     public boolean isConfigured()
     {
     	if (dc_algo_configured)
@@ -456,6 +458,7 @@ public class SlowMPTrigger extends AbstractTrigger
         muon_time_window = -1;
     }
 
+    @Override
     public Map<String, Object> getTriggerMonitorMap() {
         HashMap<String, Object> map = new HashMap<String, Object>();
 
@@ -835,6 +838,7 @@ public class SlowMPTrigger extends AbstractTrigger
      *
      * @return the name used for monitoring this trigger
      */
+    @Override
     public String getMonitoringName()
     {
         return "SLOW_PARTICLE";
@@ -846,6 +850,7 @@ public class SlowMPTrigger extends AbstractTrigger
      *
      * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
      */
+    @Override
     public boolean hasValidMultiplicity()
     {
         return false;

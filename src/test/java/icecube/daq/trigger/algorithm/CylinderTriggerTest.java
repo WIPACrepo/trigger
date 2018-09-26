@@ -79,6 +79,7 @@ public class CylinderTriggerTest
         }
     }
 
+    @Override
     protected void setUp()
         throws Exception
     {
@@ -96,6 +97,7 @@ public class CylinderTriggerTest
         return new TestSuite(CylinderTriggerTest.class);
     }
 
+    @Override
     protected void tearDown()
         throws Exception
     {

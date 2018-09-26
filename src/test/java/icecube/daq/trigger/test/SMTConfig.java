@@ -184,6 +184,7 @@ public class SMTConfig
         return allDoms.toArray(emptyArray);
     }
 
+    @Override
     public BaseValidator getAmandaValidator()
     {
         return null;
@@ -198,16 +199,19 @@ public class SMTConfig
         return doms[idx % doms.length];
     }
 
+    @Override
     public int getExpectedNumberOfAmandaPayloads(int numObjs)
     {
         return 0;
     }
 
+    @Override
     public int getExpectedNumberOfInIcePayloads(int numObjs)
     {
         return (numObjs / threshold) - 1;
     }
 
+    @Override
     public BaseValidator getInIceValidator()
     {
         return new InIceValidator();
@@ -218,6 +222,7 @@ public class SMTConfig
     {
     }
 
+    @Override
     public void sendAmandaStops(WritableByteChannel[] tails)
         throws IOException
     {
@@ -243,6 +248,7 @@ public class SMTConfig
         }
     }
 
+    @Override
     public void sendInIceStops(WritableByteChannel[] tails)
         throws IOException
     {

@@ -88,6 +88,7 @@ public class TriggerComponent
         sourceId = SourceIdRegistry.getISourceIDFromNameAndId(name, id);
     }
 
+    @Override
     public void initialize()
         throws DAQCompException
     {
@@ -175,6 +176,7 @@ public class TriggerComponent
      *
      * @throws IOException if there is a problem
      */
+    @Override
     public void closeAll()
         throws IOException
     {
@@ -192,6 +194,7 @@ public class TriggerComponent
      *
      * @throws DAQCompException if there is a problem
      */
+    @Override
     public void configuring(String configName)
         throws DAQCompException
     {
@@ -299,6 +302,7 @@ public class TriggerComponent
     /**
      * Attempt to send any cached trigger requests.
      */
+    @Override
     public void flushTriggers()
     {
         triggerManager.flush();
@@ -309,6 +313,7 @@ public class TriggerComponent
      *
      * @return list of algorithms
      */
+    @Override
     public List<ITriggerAlgorithm> getAlgorithms()
     {
         return algorithms;
@@ -319,6 +324,7 @@ public class TriggerComponent
      *
      * @return input cache
      */
+    @Override
     public IByteBufferCache getInputCache()
     {
         return inCache;
@@ -329,6 +335,7 @@ public class TriggerComponent
      *
      * @return output cache
      */
+    @Override
     public IByteBufferCache getOutputCache()
     {
         return outCache;
@@ -349,6 +356,7 @@ public class TriggerComponent
      *
      * @return hits/requests received
      */
+    @Override
     public long getPayloadsReceived()
     {
         return inputEngine.getTotalRecordsReceived();
@@ -359,6 +367,7 @@ public class TriggerComponent
      *
      * @return requests sent
      */
+    @Override
     public long getPayloadsSent()
     {
         return outputEngine.getRecordsSent();
@@ -369,6 +378,7 @@ public class TriggerComponent
      *
      * @return input reader
      */
+    @Override
     public SpliceablePayloadReader getReader()
     {
         return inputEngine;
@@ -379,6 +389,7 @@ public class TriggerComponent
      *
      * @return splicer
      */
+    @Override
     public Splicer getSplicer()
     {
         return splicer;
@@ -399,6 +410,7 @@ public class TriggerComponent
      *
      * @return trigger manager
      */
+    @Override
     public ITriggerManager getTriggerManager()
     {
         return triggerManager;
@@ -409,9 +421,10 @@ public class TriggerComponent
      *
      * @return svn version id as a String
      */
+    @Override
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 16247 2016-10-11 14:26:24Z dglo $";
+        return "$Id: TriggerComponent.java 17114 2018-09-26 09:51:56Z dglo $";
     }
 
     /**
@@ -419,6 +432,7 @@ public class TriggerComponent
      *
      * @return output process
      */
+    @Override
     public DAQComponentOutputProcess getWriter()
     {
         return outputEngine;
@@ -429,6 +443,7 @@ public class TriggerComponent
      *
      * @param firstTime first "good" time
      */
+    @Override
     public void setFirstGoodTime(long firstTime)
     {
         triggerManager.setFirstGoodTime(firstTime);
@@ -439,6 +454,7 @@ public class TriggerComponent
      *
      * @param dirName absolute path of configuration directory
      */
+    @Override
     public void setGlobalConfigurationDir(String dirName)
     {
         configDir = new File(dirName);
@@ -454,6 +470,7 @@ public class TriggerComponent
      *
      * @param lastTime last "good" time
      */
+    @Override
     public void setLastGoodTime(long lastTime)
     {
         triggerManager.setLastGoodTime(lastTime);
@@ -462,6 +479,7 @@ public class TriggerComponent
     /**
      * Send trigger triplets before starting.
      */
+    @Override
     public void starting(int runNumber)
     {
         triggerManager.setRunNumber(runNumber);
@@ -479,6 +497,7 @@ public class TriggerComponent
      * @throws DAQCompException if there is a problem sending one or more
      *                          messages
      */
+    @Override
     public void stopped()
         throws DAQCompException
     {
@@ -494,6 +513,7 @@ public class TriggerComponent
      *
      * @throws DAQCompException if there is a problem switching the component
      */
+    @Override
     public void switching(int runNumber)
         throws DAQCompException
     {

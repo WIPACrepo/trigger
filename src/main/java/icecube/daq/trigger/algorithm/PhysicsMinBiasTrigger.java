@@ -63,6 +63,7 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
      *
      * @return true if it is
      */
+    @Override
     public boolean isConfigured()
     {
         return (configPrescale && configDeadtime);
@@ -77,6 +78,7 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
      * @throws UnknownParameterException if the parameter is unknown
      * @throws IllegalParameterValueException if the parameter value is bad
      */
+    @Override
     public void addParameter(String name, String value)
         throws UnknownParameterException, IllegalParameterValueException
     {
@@ -102,6 +104,7 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
         super.addParameter(name, value);
     }
 
+    @Override
     public void setTriggerName(String triggerName)
     {
         super.triggerName = triggerName + triggerNumber;
@@ -118,6 +121,7 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
      * @throws icecube.daq.trigger.exceptions.TriggerException
      *          if the algorithm doesn't like this payload
      */
+    @Override
     public void runTrigger(IPayload payload)
         throws TriggerException
     {
@@ -167,6 +171,7 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
      * Flush the trigger. Basically indicates that there will be no further
      * payloads to process.
      */
+    @Override
     public void flush()
     {
         // nothing to do here
@@ -197,6 +202,7 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
      *
      * @return the name used for monitoring this trigger
      */
+    @Override
     public String getMonitoringName()
     {
         return "MIN_BIAS";
@@ -208,6 +214,7 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
      *
      * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
      */
+    @Override
     public boolean hasValidMultiplicity()
     {
         return true;

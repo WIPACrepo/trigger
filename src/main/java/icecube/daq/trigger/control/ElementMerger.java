@@ -85,6 +85,7 @@ class ElementData
         return true;
     }
 
+    @Override
     public int compareTo(ElementData ed)
     {
         int val = type - ed.type;
@@ -146,6 +147,7 @@ class ElementData
      * Return this object's hash code
      * @return hash code
      */
+    @Override
     public int hashCode()
     {
         int high = type;
@@ -164,6 +166,7 @@ class ElementData
         return type == ed.type && srcId == ed.srcId && domId == ed.domId;
     }
 
+    @Override
     public String toString()
     {
         StringBuilder buf = new StringBuilder("[");

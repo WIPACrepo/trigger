@@ -73,6 +73,7 @@ public class TriggerThread
         }
     }
 
+    @Override
     public void run()
     {
         while (true) {
@@ -100,6 +101,7 @@ public class TriggerThread
         stopped = true;
     }
 
+    @Override
     public String toString()
     {
         PayloadSubscriber sub = algorithm.getSubscriber();

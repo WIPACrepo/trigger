@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17074 2018-08-06 21:54:10Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17114 2018-09-26 09:51:56Z dglo $
  *
  * Date: August 19 2005
  *
@@ -106,6 +106,7 @@ class HitCollection
         return hits.size();
     }
 
+    @Override
     public String toString()
     {
         return "HitCollection*" + hits.size();
@@ -115,7 +116,7 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17074 2018-08-06 21:54:10Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17114 2018-09-26 09:51:56Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -180,6 +181,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      *
      * @return true if it is
      */
+    @Override
     public boolean isConfigured()
     {
         return (configThreshold && configTimeWindow);
@@ -194,6 +196,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      * @throws UnknownParameterException if the parameter is unknown
      * @throws IllegalParameterValueException if the parameter value is bad
      */
+    @Override
     public void addParameter(String name, String value)
         throws UnknownParameterException, IllegalParameterValueException
     {
@@ -220,6 +223,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         super.addParameter(name, value);
     }
 
+    @Override
     public void setTriggerName(String triggerName)
     {
         super.triggerName = triggerName + triggerNumber;
@@ -236,6 +240,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      * @throws icecube.daq.trigger.exceptions.TriggerException
      *          if the algorithm doesn't like this payload
      */
+    @Override
     public void runTrigger(IPayload payload)
         throws TriggerException
     {
@@ -379,6 +384,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      * Flush the trigger. Basically indicates that there will be no further
      * payloads to process and no further calls to runTrigger.
      */
+    @Override
     public void flush()
     {
         if (haveTrigger()) {
@@ -462,6 +468,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
     /**
      * Reset the algorithm to its initial condition.
      */
+    @Override
     public void resetAlgorithm()
     {
         reset();
@@ -545,6 +552,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      *
      * @return the name used for monitoring this trigger
      */
+    @Override
     public String getMonitoringName()
     {
         return "SIMPLE_MULTIPLICITY";
@@ -556,6 +564,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      *
      * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
      */
+    @Override
     public boolean hasValidMultiplicity()
     {
         return true;

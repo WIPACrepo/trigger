@@ -138,6 +138,7 @@ public class SubscribedList
          *
          * @return name
          */
+        @Override
         public String getName()
         {
             return name;
@@ -148,6 +149,7 @@ public class SubscribedList
          *
          * @return <tt>true</tt> if there are more payloads available
          */
+        @Override
         public boolean hasData()
         {
             return list.size() > 0;
@@ -158,6 +160,7 @@ public class SubscribedList
          *
          * @return <tt>true</tt> if the list has been stopped
          */
+        @Override
         public boolean isStopped()
         {
             return stopped;
@@ -169,6 +172,7 @@ public class SubscribedList
          *
          * @return next available payload.
          */
+        @Override
         public IPayload pop()
         {
             synchronized (list) {
@@ -194,6 +198,7 @@ public class SubscribedList
          *
          * @param pay payload
          */
+        @Override
         public void push(IPayload pay)
         {
             synchronized (list) {
@@ -209,6 +214,7 @@ public class SubscribedList
          *
          * @return size of internal queue
          */
+        @Override
         public int size()
         {
             return list.size();
@@ -217,6 +223,7 @@ public class SubscribedList
         /**
          * No more payloads will be collected
          */
+        @Override
         public void stop()
         {
             synchronized (list) {
@@ -230,6 +237,7 @@ public class SubscribedList
          *
          * @return string
          */
+        @Override
         public String toString()
         {
             return name + "@" + list.size() +

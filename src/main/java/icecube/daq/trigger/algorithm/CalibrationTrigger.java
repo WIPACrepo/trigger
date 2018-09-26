@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 16245 2016-10-10 19:39:14Z dglo $
+ * Version $Id: CalibrationTrigger.java 17114 2018-09-26 09:51:56Z dglo $
  *
  * Date: August 27 2005
  *
@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 16245 2016-10-10 19:39:14Z dglo $
+ * @version $Id: CalibrationTrigger.java 17114 2018-09-26 09:51:56Z dglo $
  * @author pat
  */
 public class CalibrationTrigger extends AbstractTrigger
@@ -71,6 +71,7 @@ public class CalibrationTrigger extends AbstractTrigger
      *
      * @return true if it is
      */
+    @Override
     public boolean isConfigured()
     {
         return configHitType;
@@ -85,6 +86,7 @@ public class CalibrationTrigger extends AbstractTrigger
      * @throws UnknownParameterException if the parameter is unknown
      * @throws IllegalParameterValueException if the parameter value is bad
      */
+    @Override
     public void addParameter(String name, String value)
         throws UnknownParameterException, IllegalParameterValueException
     {
@@ -107,6 +109,7 @@ public class CalibrationTrigger extends AbstractTrigger
         super.addParameter(name, value);
     }
 
+    @Override
     public void setTriggerName(String triggerName)
     {
         super.triggerName = triggerName + triggerNumber;
@@ -123,6 +126,7 @@ public class CalibrationTrigger extends AbstractTrigger
      * @throws icecube.daq.trigger.exceptions.TriggerException
      *          if the algorithm doesn't like this payload
      */
+    @Override
     public void runTrigger(IPayload payload)
         throws TriggerException
     {
@@ -165,6 +169,7 @@ public class CalibrationTrigger extends AbstractTrigger
      * Flush the trigger. Basically indicates that there will be no further
      * payloads to process.
      */
+    @Override
     public void flush()
     {
         // nothing has to be done here since this trigger does not buffer anything.
@@ -185,6 +190,7 @@ public class CalibrationTrigger extends AbstractTrigger
      *
      * @return the name used for monitoring this trigger
      */
+    @Override
     public String getMonitoringName()
     {
         return "CALIBRATION";
@@ -196,6 +202,7 @@ public class CalibrationTrigger extends AbstractTrigger
      *
      * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
      */
+    @Override
     public boolean hasValidMultiplicity()
     {
         return true;

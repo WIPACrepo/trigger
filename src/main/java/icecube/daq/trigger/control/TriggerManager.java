@@ -61,6 +61,7 @@ class TriggerRequestComparator
      *
      * @return the usual values
      */
+    @Override
     public int compare(ITriggerRequestPayload tr1, ITriggerRequestPayload tr2)
     {
         long val = tr1.getFirstTimeUTC().longValue() -
@@ -92,6 +93,7 @@ class TriggerRequestComparator
      *
      * @return UnimplementedError
      */
+    @Override
     public boolean equals(Object obj)
     {
         throw new UnimplementedError();
@@ -102,6 +104,7 @@ class TriggerRequestComparator
      *
      * @return UnimplementedError
      */
+    @Override
     public int hashCode()
     {
         throw new UnimplementedError();
@@ -183,6 +186,7 @@ public class TriggerManager
      *
      * @param trig algorithm being added
      */
+    @Override
     public void addTrigger(ITriggerAlgorithm trig)
     {
         boolean good = true;
@@ -221,6 +225,7 @@ public class TriggerManager
      *
      * @param list list of trigger algorithms to add
      */
+    @Override
     public void addTriggers(Iterable<ITriggerAlgorithm> list)
     {
         for (ITriggerAlgorithm trig: list) {
@@ -246,6 +251,7 @@ public class TriggerManager
      *
      * @param splicedObjects list of hits
      */
+    @Override
     public void analyze(List<Spliceable> splicedObjects)
     {
         for (Spliceable spl : splicedObjects) {
@@ -276,6 +282,7 @@ public class TriggerManager
      *
      * @param evt ignored
      */
+    @Override
     public void disposed(SplicerChangedEvent<Spliceable> evt)
     {
         throw new UnimplementedError();
@@ -286,6 +293,7 @@ public class TriggerManager
      *
      * @param evt ignored
      */
+    @Override
     public void failed(SplicerChangedEvent<Spliceable> evt)
     {
         throw new UnimplementedError();
@@ -295,6 +303,7 @@ public class TriggerManager
      * flush the handler
      * including the input buffer, all triggers, and the output bag
      */
+    @Override
     public void flush()
     {
         if (inputList.getNumSubscribers() > 0) {
@@ -311,6 +320,7 @@ public class TriggerManager
      *
      * @return alert queue
      */
+    @Override
     public AlertQueue getAlertQueue()
     {
         return alertQueue;
@@ -321,6 +331,7 @@ public class TriggerManager
      *
      * @return list of ITriggerStatistics
      */
+    @Override
     public Iterable<AlgorithmStatistics> getAlgorithmStatistics()
     {
         ArrayList<AlgorithmStatistics> list =
@@ -338,6 +349,7 @@ public class TriggerManager
      *
      * @return DOM registry
      */
+    @Override
     public IDOMRegistry getDOMRegistry()
     {
         return domRegistry;
@@ -348,6 +360,7 @@ public class TriggerManager
      *
      * @return size of output queue
      */
+    @Override
     public int getNumOutputsQueued()
     {
         if (collector == null) {
@@ -362,6 +375,7 @@ public class TriggerManager
      *
      * @return map of {name : numQueuedHits}
      */
+    @Override
     public Map<String, Integer> getQueuedInputs()
     {
         return inputList.getLengths();
@@ -388,6 +402,7 @@ public class TriggerManager
      *
      * @return map of names to times
      */
+    @Override
     public Map<String, Long> getReleaseTimes()
     {
         HashMap<String, Long> map = new HashMap<String, Long>();
@@ -402,6 +417,7 @@ public class TriggerManager
      *
      * @return number of dropped SNDAQ alerts
      */
+    @Override
     public long getSNDAQAlertsDropped()
     {
         if (collector == null) {
@@ -416,6 +432,7 @@ public class TriggerManager
      *
      * @return number of queued SNDAQ alerts
      */
+    @Override
     public int getSNDAQAlertsQueued()
     {
         if (collector == null) {
@@ -430,6 +447,7 @@ public class TriggerManager
      *
      * @return number of SNDAQ alerts
      */
+    @Override
     public long getSNDAQAlertsSent()
     {
         if (collector == null) {
@@ -444,6 +462,7 @@ public class TriggerManager
      *
      * @return source ID
      */
+    @Override
     public int getSourceId()
     {
         return srcId;
@@ -454,6 +473,7 @@ public class TriggerManager
      *
      * @return total number of hits received from the splicer
      */
+    @Override
     public long getTotalProcessed()
     {
         return inputCount;
@@ -464,6 +484,7 @@ public class TriggerManager
      *
      * @return number of collected requests
      */
+    @Override
     public int getTotalRequestsCollected()
     {
         if (collector == null) {
@@ -478,6 +499,7 @@ public class TriggerManager
      *
      * @return number of collected requests
      */
+    @Override
     public int getTotalRequestsReleased()
     {
         if (collector == null) {
@@ -492,6 +514,7 @@ public class TriggerManager
      *
      * @return map of {name-configID-quantity: quantityObject}
      */
+    @Override
     public Map<String, Object> getTriggerMonitorMap()
     {
         HashMap<String, Object> map = new HashMap<String, Object>();
@@ -520,6 +543,7 @@ public class TriggerManager
      *
      * @return <tt>true</tt> if the data collection threads are stopped
      */
+    @Override
     public boolean isStopped()
     {
         if (collector == null) {
@@ -774,6 +798,7 @@ public class TriggerManager
      *
      * @param domRegistry DOM registry
      */
+    @Override
     public void setDOMRegistry(IDOMRegistry domRegistry)
     {
         this.domRegistry = domRegistry;
@@ -785,6 +810,7 @@ public class TriggerManager
      *
      * @param payload earliest payload
      */
+    @Override
     public void setEarliestPayloadOfInterest(IPayload payload)
     {
     }
@@ -814,6 +840,7 @@ public class TriggerManager
      *
      * @param outputEngine output engine
      */
+    @Override
     public void setOutputEngine(DAQComponentOutputProcess outputEngine)
     {
         this.outputEngine = outputEngine;
@@ -839,6 +866,7 @@ public class TriggerManager
      * setter for splicer
      * @param splicer splicer associated with this object
      */
+    @Override
     public void setSplicer(Splicer splicer)
     {
         this.splicer = splicer;
@@ -850,6 +878,7 @@ public class TriggerManager
      *
      * @param evt ignored
      */
+    @Override
     public void started(SplicerChangedEvent<Spliceable> evt)
     {
         // do nothing
@@ -860,6 +889,7 @@ public class TriggerManager
      *
      * @param evt ignored
      */
+    @Override
     public void starting(SplicerChangedEvent<Spliceable> evt)
     {
         if (collector != null && !collector.isStopped()) {
@@ -879,6 +909,7 @@ public class TriggerManager
     /**
      * Stop the threads
      */
+    @Override
     public void stopThread()
     {
         if (collector != null && !collector.isStopped()) {
@@ -891,6 +922,7 @@ public class TriggerManager
      *
      * @param evt ignored
      */
+    @Override
     public void stopped(SplicerChangedEvent<Spliceable> evt)
     {
         flush();
@@ -906,11 +938,13 @@ public class TriggerManager
      *
      * @param evt ignored
      */
+    @Override
     public void stopping(SplicerChangedEvent<Spliceable> evt)
     {
         // do nothing
     }
 
+    @Override
     public void subscribeAll()
     {
         for (ITriggerAlgorithm algo : algorithms) {
@@ -925,6 +959,7 @@ public class TriggerManager
      *
      * @param runNumber new run number
      */
+    @Override
     public void switchToNewRun(int runNumber)
     {
         if (srcId == SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID) {
@@ -948,6 +983,7 @@ public class TriggerManager
         this.runNumber = runNumber;
     }
 
+    @Override
     public void unsubscribeAll()
     {
         if (inputList.getNumSubscribers() > 0) {
@@ -963,6 +999,7 @@ public class TriggerManager
         }
     }
 
+    @Override
     public String toString()
     {
         int numQueued = 0;

@@ -59,6 +59,7 @@ public class FlushRequest
         this.rReq = rReq;
     }
 
+    @Override
     public int compareSpliceable(Spliceable spl)
     {
         if (!(spl instanceof ILoadablePayload)) {
@@ -76,6 +77,7 @@ public class FlushRequest
         return 0;
     }
 
+    @Override
     public Object deepCopy()
     {
         ArrayList newList;
@@ -100,11 +102,13 @@ public class FlushRequest
                                 firstTime, lastTime, newList, newReq);
     }
 
+    @Override
     public void dispose()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public IUTCTime getFirstTimeUTC()
     {
         if (firstUTC == null) {
@@ -114,11 +118,13 @@ public class FlushRequest
         return firstUTC;
     }
 
+    @Override
     public List getHitList()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public IUTCTime getLastTimeUTC()
     {
         if (lastUTC == null) {
@@ -128,36 +134,43 @@ public class FlushRequest
         return lastUTC;
     }
 
+    @Override
     public ByteBuffer getPayloadBacking()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int getPayloadInterfaceType()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public IUTCTime getPayloadTimeUTC()
     {
         return getFirstTimeUTC();
     }
 
+    @Override
     public int getPayloadType()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public List getPayloads()
     {
         return dataList;
     }
 
+    @Override
     public IReadoutRequest getReadoutRequest()
     {
         return rReq;
     }
 
+    @Override
     public ISourceID getSourceID()
     {
         if (srcObj == null) {
@@ -167,36 +180,43 @@ public class FlushRequest
         return srcObj;
     }
 
+    @Override
     public int getTriggerConfigID()
     {
         return cfgId;
     }
 
+    @Override
     public String getTriggerName()
     {
         return null;
     }
 
+    @Override
     public int getTriggerType()
     {
         return type;
     }
 
+    @Override
     public int getUID()
     {
         return UID;
     }
 
+    @Override
     public long getUTCTime()
     {
         return utcTime;
     }
 
+    @Override
     public boolean isMerged()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int length()
     {
         final int hitLen;
@@ -228,6 +248,7 @@ public class FlushRequest
     /**
      * Initializes Payload from backing so it can be used as an IPayload.
      */
+    @Override
     public void loadPayload()
     {
         // do nothing
@@ -236,11 +257,13 @@ public class FlushRequest
     /**
      * Object knows how to recycle itself
      */
+    @Override
     public void recycle()
     {
         // do nothing
     }
 
+    @Override
     public void setCache(IByteBufferCache cache)
     {
         throw new Error("Unimplemented");
@@ -251,6 +274,7 @@ public class FlushRequest
      *
      * @param uid new UID
      */
+    @Override
     public void setUID(int uid)
     {
         throw new Error("Unimplemented");
@@ -262,6 +286,7 @@ public class FlushRequest
         throw new Error("Unimplemented");
     }
 
+    @Override
     public String toString()
     {
         return String.format("FlushRequest[%d#%d %d-%d]", type, UID, firstTime,

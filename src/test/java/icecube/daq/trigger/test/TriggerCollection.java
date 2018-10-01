@@ -45,7 +45,9 @@ public abstract class TriggerCollection
     private static final String PACKAGE_NAME =
         "icecube.daq.trigger.algorithm";
 
-    private static ByteBuffer hitBuf;
+    private static final int HITBUF_LEN = 38;
+
+    private static ByteBuffer hitBuf = ByteBuffer.allocate(HITBUF_LEN);
     private static ByteBuffer stopMsg;
     private static ByteBuffer trigBuf;
 
@@ -73,6 +75,35 @@ public abstract class TriggerCollection
         if (numAdded == 0) {
             throw new Error("No algorithms added for " + new SourceID(srcId));
         }
+    }
+
+    public static ByteBuffer createHit(long time, int srcId, long domId)
+        throws IOException
+    {
+        return createHit(ByteBuffer.allocate(HITBUF_LEN), time, srcId, domId);
+    }
+
+    public static ByteBuffer createHit(ByteBuffer buf, long time, int srcId,
+                                       long domId)
+        throws IOException
+    {
+        final int recType = AbstractTrigger.SPE_HIT;
+        final int cfgId = 2;
+        final short mode = 0;
+
+        hitBuf.putInt(0, HITBUF_LEN);
+        hitBuf.putInt(4, PayloadRegistry.PAYLOAD_ID_SIMPLE_HIT);
+        hitBuf.putLong(8, time);
+
+        hitBuf.putInt(16, recType);
+        hitBuf.putInt(20, cfgId);
+        hitBuf.putInt(24, srcId);
+        hitBuf.putLong(28, domId);
+        hitBuf.putShort(36, mode);
+
+        hitBuf.position(0);
+
+        return hitBuf;
     }
 
     /**
@@ -154,32 +185,12 @@ public abstract class TriggerCollection
     public abstract void sendAmandaStops(WritableByteChannel[] tails)
         throws IOException;
 
-    void sendHit(WritableByteChannel chan, long time, int tailIndex, long domId)
+    void sendHit(WritableByteChannel chan, long time, int tailIndex,
+                 long domId)
         throws IOException
     {
-        final int bufLen = 38;
-
-        if (hitBuf == null) {
-            hitBuf = ByteBuffer.allocate(bufLen);
-        }
-
         synchronized (hitBuf) {
-            final int recType = AbstractTrigger.SPE_HIT;
-            final int cfgId = 2;
-            final int srcId = hitSrcId + tailIndex;
-            final short mode = 0;
-
-            hitBuf.putInt(0, bufLen);
-            hitBuf.putInt(4, PayloadRegistry.PAYLOAD_ID_SIMPLE_HIT);
-            hitBuf.putLong(8, time);
-
-            hitBuf.putInt(16, recType);
-            hitBuf.putInt(20, cfgId);
-            hitBuf.putInt(24, srcId);
-            hitBuf.putLong(28, domId);
-            hitBuf.putShort(36, mode);
-
-            hitBuf.position(0);
+            hitBuf = createHit(hitBuf, time, hitSrcId + tailIndex, domId);
             chan.write(hitBuf);
         }
     }

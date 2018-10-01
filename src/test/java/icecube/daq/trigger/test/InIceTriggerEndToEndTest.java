@@ -3,7 +3,7 @@ package icecube.daq.trigger.test;
 import icecube.daq.common.MockAppender;
 import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.io.DAQComponentOutputProcess;
-import icecube.daq.io.SpliceablePayloadReader;
+import icecube.daq.io.SpliceableStreamReader;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.PayloadFactory;
@@ -176,8 +176,8 @@ public class InIceTriggerEndToEndTest
 
         ComponentObserver observer = new ComponentObserver();
 
-        SpliceablePayloadReader rdr =
-            new SpliceablePayloadReader("hitReader", splicer,
+        SpliceableStreamReader rdr =
+            new SpliceableStreamReader("hitReader", splicer,
                                         new PayloadFactory(cache));
         rdr.registerComponentObserver(observer);
 
@@ -247,7 +247,7 @@ public class InIceTriggerEndToEndTest
         return total;
     }
 
-    public static final void waitForStasis(SpliceablePayloadReader rdr,
+    public static final void waitForStasis(SpliceableStreamReader rdr,
                                            TriggerManager mgr,
                                            DAQComponentOutputProcess out,
                                            boolean debug)

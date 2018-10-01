@@ -2,7 +2,7 @@ package icecube.daq.trigger.test;
 
 import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.io.DAQComponentOutputProcess;
-import icecube.daq.io.PayloadReader;
+import icecube.daq.io.DAQStreamReader;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.trigger.component.TriggerComponent;
@@ -165,7 +165,7 @@ public final class DAQTestUtil
         }
     }
 
-    public static Pipe[] connectToReader(PayloadReader rdr,
+    public static Pipe[] connectToReader(DAQStreamReader rdr,
                                          IByteBufferCache cache,
                                          int numTails)
         throws IOException
@@ -179,7 +179,7 @@ public final class DAQTestUtil
         return chanList;
     }
 
-    public static Pipe connectToReader(PayloadReader rdr,
+    public static Pipe connectToReader(DAQStreamReader rdr,
                                        IByteBufferCache cache)
         throws IOException
     {

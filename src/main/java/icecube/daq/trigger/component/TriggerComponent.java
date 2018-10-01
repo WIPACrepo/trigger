@@ -3,7 +3,7 @@ package icecube.daq.trigger.component;
 import icecube.daq.common.DAQCmdInterface;
 import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.SimpleOutputEngine;
-import icecube.daq.io.SpliceablePayloadReader;
+import icecube.daq.io.SpliceableStreamReader;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.component.DAQComponent;
 import icecube.daq.juggler.component.DAQConnector;
@@ -64,7 +64,7 @@ public class TriggerComponent
     private IByteBufferCache inCache;
     private IByteBufferCache outCache;
     private Splicer<Spliceable> splicer;
-    private SpliceablePayloadReader inputEngine;
+    private SpliceableStreamReader inputEngine;
     private SimpleOutputEngine outputEngine;
 
     private boolean isGlobalTrigger;
@@ -155,7 +155,7 @@ public class TriggerComponent
 
         // Create and register input engine
         try {
-            inputEngine = new SpliceablePayloadReader(getName(), 25000,
+            inputEngine = new SpliceableStreamReader(getName(), 25000,
                                                       splicer, factory);
         } catch (IOException ioe) {
             LOG.error("Couldn't create input reader");
@@ -379,7 +379,7 @@ public class TriggerComponent
      * @return input reader
      */
     @Override
-    public SpliceablePayloadReader getReader()
+    public SpliceableStreamReader getReader()
     {
         return inputEngine;
     }
@@ -424,7 +424,7 @@ public class TriggerComponent
     @Override
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 17114 2018-09-26 09:51:56Z dglo $";
+        return "$Id: TriggerComponent.java 17123 2018-10-01 22:09:41Z dglo $";
     }
 
     /**

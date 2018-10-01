@@ -2,7 +2,7 @@ package icecube.daq.trigger.algorithm;
 
 import icecube.daq.common.MockAppender;
 import icecube.daq.io.DAQComponentOutputProcess;
-import icecube.daq.io.SpliceablePayloadReader;
+import icecube.daq.io.SpliceableStreamReader;
 import icecube.daq.juggler.alert.AlertQueue;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.SourceIdRegistry;
@@ -298,8 +298,8 @@ public class SimpleMajorityTriggerTest
 
         ComponentObserver observer = new ComponentObserver();
 
-        SpliceablePayloadReader rdr =
-            new SpliceablePayloadReader("hitReader", splicer, factory);
+        SpliceableStreamReader rdr =
+            new SpliceableStreamReader("hitReader", splicer, factory);
         rdr.registerComponentObserver(observer);
 
         try {
@@ -404,7 +404,7 @@ public class SimpleMajorityTriggerTest
     private void writeHits(VitreousBufferCache cache,
                            TriggerCollection trigCfg,
                            TriggerManager trigMgr,
-                           SpliceablePayloadReader rdr,
+                           SpliceableStreamReader rdr,
                            HKN1Splicer<Spliceable> splicer, int numTails,
                            int numObjs)
         throws DOMRegistryException, IOException, TriggerException

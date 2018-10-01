@@ -1,7 +1,7 @@
 package icecube.daq.trigger.component;
 
 import icecube.daq.io.DAQComponentOutputProcess;
-import icecube.daq.io.SpliceablePayloadReader;
+import icecube.daq.io.SpliceableStreamReader;
 import icecube.daq.juggler.component.IComponent;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.splicer.Splicer;
@@ -68,7 +68,7 @@ public interface DAQTriggerComponent
      *
      * @return input reader
      */
-    SpliceablePayloadReader getReader();
+    SpliceableStreamReader getReader();
 
     /**
      * Get the input splicer for this component.

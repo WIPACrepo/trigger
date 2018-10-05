@@ -217,7 +217,7 @@ public final class DAQTestUtil
         chanData.add(new ChannelData(name, srcOut));
         srcOut.configureBlocking(true);
 
-        out.addDataChannel(sinkOut, outCache);
+        out.addDataChannel(sinkOut, outCache, "conn2Sink");
 
         if (startOut) {
             startIOProcess(out);

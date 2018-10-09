@@ -245,8 +245,8 @@ public class SimpleMajorityTriggerTest
                      int numPerTail)
         throws DOMRegistryException, IOException, TriggerException
     {
-        if (allowRerun) {
-            System.setProperty("allowSMTRerun", "1");
+        if (!allowRerun) {
+            System.setProperty("disableSMTRerun", "1");
         }
         SimpleMajorityTrigger.setRerunProperty();
 
@@ -330,16 +330,21 @@ public class SimpleMajorityTriggerTest
         }
     }
 
-    private void writeClusteredHits(int threshold, int numRequests)
+    private void writeClusteredHits(int threshold, int numRequests,
+                                    boolean allowRerun)
         throws DOMRegistryException, IOException, TriggerException
     {
-        writeClusteredHits(threshold, numRequests, numRequests);
+        writeClusteredHits(threshold, numRequests, numRequests, allowRerun);
     }
 
     private void writeClusteredHits(int threshold, int numRequests,
-                                    int expRequests)
+                                    int expRequests, boolean allowRerun)
         throws DOMRegistryException, IOException, TriggerException
     {
+        if (!allowRerun) {
+            System.setProperty("disableSMTRerun", "1");
+        }
+
         SimpleMajorityTrigger trig = null;
         try {
             final String configDir = getConfigurationDirectory();
@@ -466,7 +471,7 @@ public class SimpleMajorityTriggerTest
         props.setProperty(SNDAQAlerter.PROPERTY, ":12345");
 
         // clear SMTRerun property
-        props.remove("allowSMTRerun");
+        props.remove("disableSMTRerun");
     }
 
     public static Test suite()
@@ -480,7 +485,7 @@ public class SimpleMajorityTriggerTest
     {
         // remove properties
         System.clearProperty(SNDAQAlerter.PROPERTY);
-        System.clearProperty("allowSMTRerun");
+        System.clearProperty("disableSMTRerun");
 
         appender.assertNoLogMessages();
 
@@ -540,40 +545,37 @@ public class SimpleMajorityTriggerTest
     {
         final int numReqs = 200;
 
-        writeClusteredHits(1, numReqs, numReqs / 2);
+        writeClusteredHits(1, numReqs, numReqs / 2, false);
     }
 
     public void testDirectSMT1New()
         throws DOMRegistryException, IOException, TriggerException
     {
-        System.setProperty("allowSMTRerun", "1");
-        writeClusteredHits(1, 200);
+        writeClusteredHits(1, 200, true);
     }
 
     public void testDirectSMT3Old()
         throws DOMRegistryException, IOException, TriggerException
     {
-        writeClusteredHits(3, 200);
+        writeClusteredHits(3, 200, false);
     }
 
     public void testDirectSMT3New()
         throws DOMRegistryException, IOException, TriggerException
     {
-        System.setProperty("allowSMTRerun", "1");
-        writeClusteredHits(3, 200);
+        writeClusteredHits(3, 200, true);
     }
 
     public void testDirectSMT8Old()
         throws DOMRegistryException, IOException, TriggerException
     {
-        writeClusteredHits(8, 200);
+        writeClusteredHits(8, 200, false);
     }
 
     public void testDirectSMT8New()
         throws DOMRegistryException, IOException, TriggerException
     {
-        System.setProperty("allowSMTRerun", "1");
-        writeClusteredHits(8, 200);
+        writeClusteredHits(8, 200, true);
     }
 
     public static void main(String[] args)

@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17114 2018-09-26 09:51:56Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17136 2018-10-09 21:24:08Z dglo $
  *
  * Date: August 19 2005
  *
@@ -116,7 +116,7 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17114 2018-09-26 09:51:56Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17136 2018-10-09 21:24:08Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -128,8 +128,8 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         LogFactory.getLog(SimpleMajorityTrigger.class);
 
     /**
-     * If the 'allowSMTRerun' property is set, hits are no longer dropped
-     * after a request has been created.
+     * If the 'disableSMTRerun' property is set, the hit which triggers a
+     * request will not be used as the starting point for a new request.
      */
     private static boolean allowRerun;
 
@@ -572,7 +572,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
     public static final void setRerunProperty()
     {
-        final String prop = System.getProperty("allowSMTRerun");
-        allowRerun = prop != null && prop.length() > 0;
+        final String prop = System.getProperty("disableSMTRerun");
+        allowRerun = prop == null || prop.length() == 0;
     }
 }

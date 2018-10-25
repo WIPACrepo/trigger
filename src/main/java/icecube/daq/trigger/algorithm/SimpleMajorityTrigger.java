@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17136 2018-10-09 21:24:08Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17180 2018-10-25 19:26:12Z dglo $
  *
  * Date: August 19 2005
  *
@@ -116,7 +116,7 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17136 2018-10-09 21:24:08Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17180 2018-10-25 19:26:12Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -573,6 +573,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
     public static final void setRerunProperty()
     {
         final String prop = System.getProperty("disableSMTRerun");
-        allowRerun = prop == null || prop.length() == 0;
+        allowRerun = prop == null;
     }
 }

@@ -28,8 +28,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * Collect requests from trigger algorithms in the proper order.
@@ -40,7 +39,7 @@ public class TriggerCollector
     /** Monitoring task frequency (in seconds) */
     public static final long MONI_SECONDS = 600;
 
-    private static final Log LOG = LogFactory.getLog(TriggerCollector.class);
+    private static final Logger LOG = Logger.getLogger(TriggerCollector.class);
 
     private ICollectorThread collThrd;
     private IOutputThread outThrd;
@@ -226,7 +225,7 @@ public class TriggerCollector
 class MonitoringTask
     extends TimerTask
 {
-    private static final Log LOG = LogFactory.getLog(MonitoringTask.class);
+    private static final Logger LOG = Logger.getLogger(MonitoringTask.class);
 
     /** Multiplicity data manager */
     private IMonitoringDataManager moniDataMgr;
@@ -278,7 +277,7 @@ class CollectorThread
      */
     public static final String IGNORE_SNDAQ_PROPERTY = "icecube.sndaq.ignore";
 
-    private static final Log LOG = LogFactory.getLog(CollectorThread.class);
+    private static final Logger LOG = Logger.getLogger(CollectorThread.class);
 
     /** Number of milliseconds in a second */
     private static final long MILLIS_PER_SECOND = 1000L;
@@ -788,7 +787,7 @@ interface IOutputThread
 class OutputThread
     implements IOutputThread, Runnable
 {
-    private static final Log LOG = LogFactory.getLog(OutputThread.class);
+    private static final Logger LOG = Logger.getLogger(OutputThread.class);
 
     private Thread thread;
     private boolean waiting;

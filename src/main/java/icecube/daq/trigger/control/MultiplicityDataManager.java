@@ -19,8 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * Build a hash key from the trigger triplet (source, type, config ID)
@@ -311,8 +310,8 @@ public class MultiplicityDataManager
     public static final int MULTIPLICITY_VERSION = 0;
 
     /** Log object for this class */
-    private static final Log LOG =
-        LogFactory.getLog(MultiplicityDataManager.class);
+    private static final Logger LOG =
+        Logger.getLogger(MultiplicityDataManager.class);
 
     private static final int MAX_BINS = 200;
 

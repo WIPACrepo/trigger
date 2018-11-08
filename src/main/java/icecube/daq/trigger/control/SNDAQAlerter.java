@@ -12,14 +12,13 @@ import icecube.daq.trigger.algorithm.SimpleMajorityTrigger;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 public class SNDAQAlerter
 {
     public static final String PROPERTY = "icecube.sndaq.zmq.address";
 
-    private static final Log LOG = LogFactory.getLog(SNDAQAlerter.class);
+    private static final Logger LOG = Logger.getLogger(SNDAQAlerter.class);
 
     private Alerter alerter;
 

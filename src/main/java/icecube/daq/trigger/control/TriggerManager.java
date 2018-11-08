@@ -37,8 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * Compare two trigger requests.
@@ -124,7 +123,7 @@ public class TriggerManager
         new DummyPayload(new UTCTime(0));
 
     /** Log object for this class */
-    private static final Log LOG = LogFactory.getLog(TriggerManager.class);
+    private static final Logger LOG = Logger.getLogger(TriggerManager.class);
 
     /** Source ID for this trigger component */
     private int srcId;

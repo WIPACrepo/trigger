@@ -15,8 +15,7 @@ import java.util.Set;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -36,7 +35,7 @@ public abstract class DomSetFactory
     /**
      * logging object
      */
-    private static final Log LOG = LogFactory.getLog(DomSetFactory.class);
+    private static final Logger LOG = Logger.getLogger(DomSetFactory.class);
 
     /**
      * Trigger configuration directory

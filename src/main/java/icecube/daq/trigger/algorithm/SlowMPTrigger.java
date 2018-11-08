@@ -13,8 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * This trigger looks for HLC pairs and groups them in 3-tuples. If a tuple fullfills certain conditions ( in
@@ -27,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 public class SlowMPTrigger extends AbstractTrigger
 {
 
-    private static final Log LOG = LogFactory.getLog(SlowMPTrigger.class);
+    private static final Logger LOG = Logger.getLogger(SlowMPTrigger.class);
     private long t_proximity; // t_proximity in nanoseconds, eliminates most muon_hlcs
     private long t_min;
     private long t_max;

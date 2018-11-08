@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17180 2018-10-25 19:26:12Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17207 2018-11-08 16:08:59Z dglo $
  *
  * Date: August 19 2005
  *
@@ -28,8 +28,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 class HitCollection
     implements Iterable<IHitPayload>
@@ -116,7 +115,7 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17180 2018-10-25 19:26:12Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17207 2018-11-08 16:08:59Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -124,8 +123,8 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
     /**
      * Log object for this class
      */
-    private static final Log LOG =
-        LogFactory.getLog(SimpleMajorityTrigger.class);
+    private static final Logger LOG =
+        Logger.getLogger(SimpleMajorityTrigger.class);
 
     /**
      * If the 'disableSMTRerun' property is set, the hit which triggers a

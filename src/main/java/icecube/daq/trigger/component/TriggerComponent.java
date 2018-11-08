@@ -37,8 +37,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -51,8 +50,8 @@ public class TriggerComponent
     implements DAQTriggerComponent
 {
     /** Message logger. */
-    private static final Log LOG =
-        LogFactory.getLog(TriggerComponent.class);
+    private static final Logger LOG =
+        Logger.getLogger(TriggerComponent.class);
 
     private static final Spliceable LAST_SPLICEABLE =
         SpliceableFactory.LAST_POSSIBLE_SPLICEABLE;
@@ -424,7 +423,7 @@ public class TriggerComponent
     @Override
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 17123 2018-10-01 22:09:41Z dglo $";
+        return "$Id: TriggerComponent.java 17207 2018-11-08 16:08:59Z dglo $";
     }
 
     /**

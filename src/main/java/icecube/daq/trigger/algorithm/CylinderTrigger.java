@@ -16,8 +16,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * The VolumeTrigger is based on the ClusterTrigger, with a slight modifications to
@@ -56,7 +55,7 @@ import org.apache.commons.logging.LogFactory;
 public class CylinderTrigger extends AbstractTrigger
 {
     /** Log object for this class */
-    private static final Log LOG = LogFactory.getLog(CylinderTrigger.class);
+    private static final Logger LOG = Logger.getLogger(CylinderTrigger.class);
 
     private long timeWindow;
     private int multiplicity;

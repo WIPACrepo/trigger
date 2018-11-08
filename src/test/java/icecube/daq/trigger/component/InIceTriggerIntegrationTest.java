@@ -39,8 +39,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.apache.log4j.BasicConfigurator;
 
 public class InIceTriggerIntegrationTest
@@ -288,7 +287,7 @@ public class InIceTriggerIntegrationTest
     class InIceValidator
         extends BaseValidator
     {
-        private Log LOG = LogFactory.getLog(InIceValidator.class);
+        private Logger LOG = Logger.getLogger(InIceValidator.class);
 
         private long timeSpan;
 

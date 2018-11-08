@@ -37,8 +37,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * Base class for trigger algorithms.
@@ -47,7 +46,7 @@ public abstract class AbstractTrigger
     implements AbstractTriggerMBean, ITriggerAlgorithm
 {
     /** Log object for this class */
-    private static final Log LOG = LogFactory.getLog(AbstractTrigger.class);
+    private static final Logger LOG = Logger.getLogger(AbstractTrigger.class);
 
     /** SPE hit type */
     public static final int SPE_HIT = 0x02;

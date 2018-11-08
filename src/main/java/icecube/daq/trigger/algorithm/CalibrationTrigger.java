@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 17114 2018-09-26 09:51:56Z dglo $
+ * Version $Id: CalibrationTrigger.java 17207 2018-11-08 16:08:59Z dglo $
  *
  * Date: August 27 2005
  *
@@ -25,8 +25,7 @@ import icecube.daq.trigger.exceptions.UnknownParameterException;
 import icecube.daq.util.DOMInfo;
 import icecube.daq.util.IDOMRegistry;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * This class is an implementation of a calibration trigger. It checks each hit
@@ -36,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 17114 2018-09-26 09:51:56Z dglo $
+ * @version $Id: CalibrationTrigger.java 17207 2018-11-08 16:08:59Z dglo $
  * @author pat
  */
 public class CalibrationTrigger extends AbstractTrigger
@@ -45,8 +44,8 @@ public class CalibrationTrigger extends AbstractTrigger
     /**
      * Log object for this class
      */
-    private static final Log LOG =
-        LogFactory.getLog(CalibrationTrigger.class);
+    private static final Logger LOG =
+        Logger.getLogger(CalibrationTrigger.class);
 
     private static int nextTriggerNumber;
     private int triggerNumber;

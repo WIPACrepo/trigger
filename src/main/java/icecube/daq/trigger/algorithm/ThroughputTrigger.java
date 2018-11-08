@@ -15,15 +15,14 @@ import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * This class receives unconditional-triggers,
  *  makes a new TriggerRequest for each input TriggerRequest
  *  and then pass them to GlobalTrigBag.java.
  *
- * @version $Id: ThroughputTrigger.java 17114 2018-09-26 09:51:56Z dglo $
+ * @version $Id: ThroughputTrigger.java 17207 2018-11-08 16:08:59Z dglo $
  * @author shseo
  */
 public class ThroughputTrigger
@@ -32,8 +31,8 @@ public class ThroughputTrigger
     /**
      * Log object for this class
      */
-    private static final Log LOG =
-        LogFactory.getLog(ThroughputTrigger.class);
+    private static final Logger LOG =
+        Logger.getLogger(ThroughputTrigger.class);
 
     /**
      * Create an instance of this class.

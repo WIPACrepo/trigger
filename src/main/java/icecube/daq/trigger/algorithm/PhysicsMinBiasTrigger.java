@@ -21,8 +21,7 @@ import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * This class implements a minimum bias trigger with a deadtime. It simply
@@ -38,8 +37,8 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
     /**
      * Log object for this class
      */
-    private static final Log LOG =
-        LogFactory.getLog(PhysicsMinBiasTrigger.class);
+    private static final Logger LOG =
+        Logger.getLogger(PhysicsMinBiasTrigger.class);
 
     private static int nextTriggerNumber;
     private int triggerNumber;

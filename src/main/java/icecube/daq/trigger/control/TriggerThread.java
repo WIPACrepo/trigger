@@ -3,8 +3,7 @@ package icecube.daq.trigger.control;
 import icecube.daq.payload.IPayload;
 import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * Trigger algorithm thread.
@@ -13,7 +12,7 @@ public class TriggerThread
     implements Runnable
 {
     /** Message logger. */
-    private static final Log LOG = LogFactory.getLog(TriggerThread.class);
+    private static final Logger LOG = Logger.getLogger(TriggerThread.class);
 
     private int id;
     private ITriggerAlgorithm algorithm;

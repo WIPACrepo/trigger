@@ -10,8 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * Container for accumulated request element data.
@@ -213,7 +212,7 @@ class ElementData
  */
 public abstract class ElementMerger
 {
-    private static final Log LOG = LogFactory.getLog(ElementMerger.class);
+    private static final Logger LOG = Logger.getLogger(ElementMerger.class);
 
     private static List<ElementData> addToList(List<ElementData> list,
                                                int type,

@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 17114 2018-09-26 09:51:56Z dglo $
+ * Version $Id: FixedRateTrigger.java 17207 2018-11-08 16:08:59Z dglo $
  *
  * Date: May 1 2006
  *
@@ -19,13 +19,12 @@ import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 17114 2018-09-26 09:51:56Z dglo $
+ * @version $Id: FixedRateTrigger.java 17207 2018-11-08 16:08:59Z dglo $
  * @author pat
  */
 public class FixedRateTrigger extends AbstractTrigger
@@ -34,8 +33,8 @@ public class FixedRateTrigger extends AbstractTrigger
     /**
      * Log object for this class
      */
-    private static final Log LOG =
-        LogFactory.getLog(FixedRateTrigger.class);
+    private static final Logger LOG =
+        Logger.getLogger(FixedRateTrigger.class);
 
     /**
      * unique id within this trigger type

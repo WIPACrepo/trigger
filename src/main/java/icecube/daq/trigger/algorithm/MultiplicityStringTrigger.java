@@ -24,8 +24,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * This class implements a string based trigger.  It will veto a number of doms from the top
@@ -42,8 +41,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
      * Log object for this class
      */
 
-    private static final Log LOG =
-        LogFactory.getLog(MultiplicityStringTrigger.class);
+    private static final Logger LOG =
+        Logger.getLogger(MultiplicityStringTrigger.class);
 
     private static int nextTriggerNumber;
     private int triggerNumber;

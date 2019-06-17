@@ -362,7 +362,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
                     // if this hit is not part of the trigger, update the earliest time of interest
                     if ( (hitsWithinTriggerWindow == null) ||
                          ((hitsWithinTriggerWindow != null) && (!hitsWithinTriggerWindow.contains(oldHit))) ) {
-                        IPayload oldHitPlus = new DummyPayload(oldHit.getHitTimeUTC().getOffsetUTCTime(0.1));
+                        IPayload oldHitPlus = new DummyPayload(oldHit.getHitTimeUTC().getOffsetUTCTime(1));
                         setEarliestPayloadOfInterest(oldHitPlus);
                     }
 
@@ -387,7 +387,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
                     if ( (hitsWithinTriggerWindow == null) ||
                          ((hitsWithinTriggerWindow != null) && (!hitsWithinTriggerWindow.contains(oldHit))) ) {
-                        IPayload oldHitPlus = new DummyPayload(oldHit.getHitTimeUTC().getOffsetUTCTime(0.1));
+                        IPayload oldHitPlus = new DummyPayload(oldHit.getHitTimeUTC().getOffsetUTCTime(1));
                         setEarliestPayloadOfInterest(oldHitPlus);
                     }
 
@@ -764,7 +764,7 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
 
         private IUTCTime endTime()
         {
-            return (startTime().getOffsetUTCTime((double) timeWindow));
+            return startTime().getOffsetUTCTime(timeWindow * 10L);
         }
 
         private boolean inTimeWindow(IUTCTime hitTime)

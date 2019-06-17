@@ -1,7 +1,7 @@
 /*
  * class: MinBiasTrigger
  *
- * Version $Id: MinBiasTrigger.java 17207 2018-11-08 16:08:59Z dglo $
+ * Version $Id: MinBiasTrigger.java 17400 2019-06-17 16:08:55Z dglo $
  *
  * Date: August 27 2005
  *
@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
  * This class implements a simple minimum bias trigger. It simply counts hits and
  * applies a prescale for determining when a trigger should be formed.
  *
- * @version $Id: MinBiasTrigger.java 17207 2018-11-08 16:08:59Z dglo $
+ * @version $Id: MinBiasTrigger.java 17400 2019-06-17 16:08:55Z dglo $
  * @author pat
  */
 public class MinBiasTrigger
@@ -143,7 +143,7 @@ public class MinBiasTrigger
 
         if (!formedTrigger) {
             // just update earliest time of interest
-            IUTCTime offsetTime = hit.getHitTimeUTC().getOffsetUTCTime(0.1);
+            IUTCTime offsetTime = hit.getHitTimeUTC().getOffsetUTCTime(1);
             IPayload earliest = new DummyPayload(offsetTime);
             setEarliestPayloadOfInterest(earliest);
         }

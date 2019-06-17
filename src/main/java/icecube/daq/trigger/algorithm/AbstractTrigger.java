@@ -168,8 +168,8 @@ public abstract class AbstractTrigger
             if (null != domId) {
                 domId = null;
             }
-            timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
-            timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
+            timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus() * 10L);
+            timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus() * 10L);
             break;
         case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL:
             if (null != stringId) {
@@ -180,16 +180,16 @@ public abstract class AbstractTrigger
             }
             if (srcId == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
                 timeOffset =
-                    firstTime.getOffsetUTCTime(roCfg.getOffset());
+                    firstTime.getOffsetUTCTime(roCfg.getOffset() * 10L);
                 timeMinus =
-                    timeOffset.getOffsetUTCTime(-roCfg.getMinus());
+                    timeOffset.getOffsetUTCTime(-roCfg.getMinus() * 10L);
                 timePlus =
-                    timeOffset.getOffsetUTCTime(roCfg.getPlus());
+                    timeOffset.getOffsetUTCTime(roCfg.getPlus() * 10L);
             } else {
                 timeMinus =
-                    firstTime.getOffsetUTCTime(-roCfg.getMinus());
+                    firstTime.getOffsetUTCTime(-roCfg.getMinus() * 10L);
                 timePlus =
-                    lastTime.getOffsetUTCTime(roCfg.getPlus());
+                    lastTime.getOffsetUTCTime(roCfg.getPlus() * 10L);
             }
             break;
         case IReadoutRequestElement.READOUT_TYPE_II_STRING:
@@ -202,12 +202,12 @@ public abstract class AbstractTrigger
                 domId = null;
             }
             if (srcId == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
-                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset());
-                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus());
-                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus());
+                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset() * 10L);
+                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus() * 10L);
+                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus() * 10L);
             } else {
-                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
-                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
+                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus() * 10L);
+                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus() * 10L);
             }
             break;
         case IReadoutRequestElement.READOUT_TYPE_II_MODULE:
@@ -220,12 +220,12 @@ public abstract class AbstractTrigger
                 LOG.error("ReadoutType = " + type + " but DomId is NULL!");
             }
             if (srcId == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
-                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset());
-                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus());
-                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus());
+                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset() * 10L);
+                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus() * 10L);
+                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus() * 10L);
             } else {
-                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
-                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
+                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus() * 10L);
+                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus() * 10L);
             }
             break;
         case IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL:
@@ -236,12 +236,12 @@ public abstract class AbstractTrigger
                 domId = null;
             }
             if (srcId == SourceIdRegistry.INICE_TRIGGER_SOURCE_ID) {
-                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset());
-                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus());
-                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus());
+                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset() * 10L);
+                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus() * 10L);
+                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus() * 10L);
             } else {
-                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
-                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
+                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus() * 10L);
+                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus() * 10L);
             }
             break;
         case IReadoutRequestElement.READOUT_TYPE_IT_MODULE:
@@ -254,20 +254,20 @@ public abstract class AbstractTrigger
                 LOG.error("ReadoutType = " + type + " but DomId is NULL!");
             }
             if (srcId == SourceIdRegistry.INICE_TRIGGER_SOURCE_ID) {
-                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset());
-                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus());
-                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus());
+                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset() * 10L);
+                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus() * 10L);
+                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus() * 10L);
             } else {
-                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
-                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
+                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus() * 10L);
+                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus() * 10L);
             }
             break;
         default:
             LOG.error("Unknown ReadoutType: " + type +
                       " -> Making it GLOBAL");
             type = IReadoutRequestElement.READOUT_TYPE_GLOBAL;
-            timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
-            timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
+            timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus() * 10L);
+            timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus() * 10L);
             break;
         }
 
@@ -333,7 +333,7 @@ public abstract class AbstractTrigger
         reportTrigger(triggerPayload);
 
         // update earliest hit time
-        IPayload dummy = new DummyPayload(time.getOffsetUTCTime(0.1));
+        IPayload dummy = new DummyPayload(time.getOffsetUTCTime(1));
         setEarliestPayloadOfInterest(dummy);
     }
 
@@ -442,7 +442,7 @@ public abstract class AbstractTrigger
         IUTCTime lastHitTime = lastHit.getHitTimeUTC();
 
         // update earliest hit time
-        IPayload dummy = new DummyPayload(lastHitTime.getOffsetUTCTime(0.1));
+        IPayload dummy = new DummyPayload(lastHitTime.getOffsetUTCTime(1));
         setEarliestPayloadOfInterest(dummy);
     }
 

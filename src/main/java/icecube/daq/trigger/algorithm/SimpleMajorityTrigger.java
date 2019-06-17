@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17207 2018-11-08 16:08:59Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17400 2019-06-17 16:08:55Z dglo $
  *
  * Date: August 19 2005
  *
@@ -115,7 +115,7 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17207 2018-11-08 16:08:59Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17400 2019-06-17 16:08:55Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -498,7 +498,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         }
 
         if (hitTime != null) {
-            final IUTCTime offsetTime = hitTime.getOffsetUTCTime(0.1);
+            final IUTCTime offsetTime = hitTime.getOffsetUTCTime(1);
             setEarliestPayloadOfInterest(new DummyPayload(offsetTime));
         }
     }
@@ -513,7 +513,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
         private IUTCTime endTime()
         {
-            return (startTime().getOffsetUTCTime((double) timeWindow));
+            return (startTime().getOffsetUTCTime(timeWindow * 10L));
         }
 
         private boolean inTimeWindow(IUTCTime hitTime)

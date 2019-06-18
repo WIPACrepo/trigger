@@ -23,7 +23,8 @@ import org.apache.log4j.Logger;
  * @author gluesenkamp
  *
  */
-public class SlowMPTrigger extends AbstractTrigger
+public class SlowMPTrigger
+    extends AbstractTrigger
 {
 
     private static final Logger LOG = Logger.getLogger(SlowMPTrigger.class);
@@ -480,7 +481,7 @@ public class SlowMPTrigger extends AbstractTrigger
         IHitPayload hitPayload = (IHitPayload) payload;
         // Check hit type and perhaps pre-screen DOMs based on channel
         boolean usableHit =
-            getHitType(hitPayload) == AbstractTrigger.SPE_HIT &&
+            getHitType(hitPayload) == ITriggerAlgorithm.SPE_HIT &&
             hitFilter.useHit(hitPayload);
 
         //if (domRegistry == null) {

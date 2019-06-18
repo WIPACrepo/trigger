@@ -5,7 +5,7 @@ import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.PayloadChecker;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
-import icecube.daq.trigger.algorithm.AbstractTrigger;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.util.DOMInfo;
 import icecube.daq.util.DOMRegistryException;
@@ -40,7 +40,7 @@ public class SPS2012Triggers
         this.registry = registry;
         this.checkSequentialTimes = checkSequentialTimes;
 
-        AbstractTrigger trig;
+        ITriggerAlgorithm trig;
 
         trig = createTrigger(3, -1, GLOBAL_TRIGGER, "ThroughputTrigger");
         add(trig);

@@ -48,9 +48,6 @@ public abstract class AbstractTrigger
     /** Log object for this class */
     private static final Logger LOG = Logger.getLogger(AbstractTrigger.class);
 
-    /** SPE hit type */
-    public static final int SPE_HIT = 0x02;
-
     /** Requests can be up to this number of DAQ ticks wide */
     private static final long REQUEST_WIDTH = 100000000;
 

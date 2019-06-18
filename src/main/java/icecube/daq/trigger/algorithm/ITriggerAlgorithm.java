@@ -21,6 +21,9 @@ import java.util.Map;
 public interface ITriggerAlgorithm
     extends Comparable<ITriggerAlgorithm>
 {
+    /** SPE hit type */
+    public static final int SPE_HIT = 0x02;
+
     /**
      * Add a trigger parameter.
      *

@@ -35,12 +35,10 @@ import org.apache.log4j.Logger;
  * @author vince
  */
 
-public class MultiplicityStringTrigger extends AbstractTrigger {
-
-    /**
-     * Log object for this class
-     */
-
+public class MultiplicityStringTrigger
+    extends AbstractTrigger
+{
+    /** Log object for this class */
     private static final Logger LOG =
         Logger.getLogger(MultiplicityStringTrigger.class);
 
@@ -216,8 +214,8 @@ public class MultiplicityStringTrigger extends AbstractTrigger {
         IHitPayload hit = (IHitPayload) payload;
 
         // make sure spe bit is on for this hit (must have 0x02)
-        int type = AbstractTrigger.getHitType(hit);
-        if (type != AbstractTrigger.SPE_HIT) {
+        int type = getHitType(hit);
+        if (type != ITriggerAlgorithm.SPE_HIT) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Hit type is " + hit.getTriggerType() + ", returning.");
             }

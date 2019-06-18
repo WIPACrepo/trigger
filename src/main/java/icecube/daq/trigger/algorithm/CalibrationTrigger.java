@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 17400 2019-06-17 16:08:55Z dglo $
+ * Version $Id: CalibrationTrigger.java 17403 2019-06-18 15:47:45Z dglo $
  *
  * Date: August 27 2005
  *
@@ -35,15 +35,13 @@ import org.apache.log4j.Logger;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 17400 2019-06-17 16:08:55Z dglo $
+ * @version $Id: CalibrationTrigger.java 17403 2019-06-18 15:47:45Z dglo $
  * @author pat
  */
-public class CalibrationTrigger extends AbstractTrigger
+public class CalibrationTrigger
+    extends AbstractTrigger
 {
-
-    /**
-     * Log object for this class
-     */
+    /** Log object for this class */
     private static final Logger LOG =
         Logger.getLogger(CalibrationTrigger.class);
 

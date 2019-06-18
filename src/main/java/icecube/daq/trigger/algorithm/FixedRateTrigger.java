@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 17400 2019-06-17 16:08:55Z dglo $
+ * Version $Id: FixedRateTrigger.java 17403 2019-06-18 15:47:45Z dglo $
  *
  * Date: May 1 2006
  *
@@ -24,15 +24,13 @@ import org.apache.log4j.Logger;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 17400 2019-06-17 16:08:55Z dglo $
+ * @version $Id: FixedRateTrigger.java 17403 2019-06-18 15:47:45Z dglo $
  * @author pat
  */
-public class FixedRateTrigger extends AbstractTrigger
+public class FixedRateTrigger
+    extends AbstractTrigger
 {
-
-    /**
-     * Log object for this class
-     */
+    /** Log object for this class */
     private static final Logger LOG =
         Logger.getLogger(FixedRateTrigger.class);
 

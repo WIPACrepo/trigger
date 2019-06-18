@@ -14,7 +14,7 @@ import icecube.daq.payload.impl.VitreousBufferCache;
 import icecube.daq.splicer.HKN1Splicer;
 import icecube.daq.splicer.Splicer;
 import icecube.daq.splicer.SplicerException;
-import icecube.daq.trigger.algorithm.AbstractTrigger;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.control.SNDAQAlerter;
 import icecube.daq.trigger.control.TriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -99,7 +99,7 @@ public class InIceTriggerIntegrationTest
         }
 
         synchronized (hitBuf) {
-            final int recType = AbstractTrigger.SPE_HIT;
+            final int recType = ITriggerAlgorithm.SPE_HIT;
             final int cfgId = 2;
             final int srcId = SourceIdRegistry.SIMULATION_HUB_SOURCE_ID;
             final short mode = 0;

@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17400 2019-06-17 16:08:55Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17403 2019-06-18 15:47:45Z dglo $
  *
  * Date: August 19 2005
  *
@@ -115,14 +115,13 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17400 2019-06-17 16:08:55Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17403 2019-06-18 15:47:45Z dglo $
  * @author pat
  */
-public final class SimpleMajorityTrigger extends AbstractTrigger
+public final class SimpleMajorityTrigger
+    extends AbstractTrigger
 {
-    /**
-     * Log object for this class
-     */
+    /** Log object for this class */
     private static final Logger LOG =
         Logger.getLogger(SimpleMajorityTrigger.class);
 
@@ -301,7 +300,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
          * Check hit type and perhaps pre-screen DOMs based on channel.
          */
         boolean usableHit =
-            getHitType(hit) == AbstractTrigger.SPE_HIT &&
+            getHitType(hit) == ITriggerAlgorithm.SPE_HIT &&
             hitFilter.useHit(hit);
         if (!usableHit) {
             if (LOG.isDebugEnabled()) {

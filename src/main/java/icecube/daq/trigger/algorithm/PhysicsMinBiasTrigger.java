@@ -31,12 +31,10 @@ import org.apache.log4j.Logger;
  * @version $Id: PhysicsMinBiasTrigger.java,v 1.20 2006/09/14 20:35:13 toale Exp $
  * @author pat
  */
-public class PhysicsMinBiasTrigger extends AbstractTrigger
+public class PhysicsMinBiasTrigger
+    extends AbstractTrigger
 {
-
-    /**
-     * Log object for this class
-     */
+    /** Log object for this class */
     private static final Logger LOG =
         Logger.getLogger(PhysicsMinBiasTrigger.class);
 
@@ -137,7 +135,7 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
         IHitPayload hit = (IHitPayload) payload;
 
         boolean usableHit =
-            getHitType(hit) == AbstractTrigger.SPE_HIT &&
+            getHitType(hit) == ITriggerAlgorithm.SPE_HIT &&
             hitFilter.useHit(hit);
 
         IUTCTime hitTime = hit.getHitTimeUTC();

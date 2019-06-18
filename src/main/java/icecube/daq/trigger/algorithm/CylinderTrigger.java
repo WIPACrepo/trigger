@@ -52,7 +52,8 @@ import org.apache.log4j.Logger;
  * @author kael
  *
  */
-public class CylinderTrigger extends AbstractTrigger
+public class CylinderTrigger
+    extends AbstractTrigger
 {
     /** Log object for this class */
     private static final Logger LOG = Logger.getLogger(CylinderTrigger.class);
@@ -213,7 +214,7 @@ public class CylinderTrigger extends AbstractTrigger
         }
 
         // if new hit is usable, add it to the queue
-        if (getHitType(hitPayload) == AbstractTrigger.SPE_HIT &&
+        if (getHitType(hitPayload) == ITriggerAlgorithm.SPE_HIT &&
             hitFilter.useHit(hitPayload))
         {
             triggerQueue.add(hitPayload);

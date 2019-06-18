@@ -400,18 +400,30 @@ class CollectorThread
     @Override
     public long getSNDAQAlertsDropped()
     {
+        if (alerter == null) {
+            return 0L;
+        }
+
         return alerter.getNumDropped();
     }
 
     @Override
     public int getSNDAQAlertsQueued()
     {
+        if (alerter == null) {
+            return 0;
+        }
+
         return alerter.getNumQueued();
     }
 
     @Override
     public long getSNDAQAlertsSent()
     {
+        if (alerter == null) {
+            return 0L;
+        }
+
         return alerter.getNumSent();
     }
 
@@ -439,6 +451,11 @@ class CollectorThread
 
     private void initializeSNDAQAlerter(List<ITriggerAlgorithm> algorithms)
     {
+        if (alerter != null) {
+            LOG.error("Attempted to create an existing SnDAQ alerter");
+            return;
+        }
+
         try {
             alerter = new SNDAQAlerter(algorithms);
         } catch (AlertException ae) {
@@ -451,6 +468,10 @@ class CollectorThread
 
     private void notifySNDAQ(List<ITriggerRequestPayload> list)
     {
+        if (alerter == null) {
+            LOG.error("Alerter " + alerter + " has not been initialized");
+        }
+
         if (!alerter.isActive()) {
             LOG.error("Alerter " + alerter + " is not active");
             return;

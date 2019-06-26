@@ -331,6 +331,8 @@ public class MultiplicityDataManager
 
     private int nextRunNumber = NO_NUMBER;
 
+    private int notMonitored;
+
     public MultiplicityDataManager()
     {
         algorithms = new ArrayList<ITriggerAlgorithm>();
@@ -381,11 +383,17 @@ public class MultiplicityDataManager
 
         // ignore requests seen before the first good time
         if (firstGoodTime == Integer.MIN_VALUE) {
-            final String msg =
-                String.format("Not monitoring request #%d seen before" +
-                              " first good time is set", req.getUID());
-            LOG.error(msg);
+            notMonitored++;
             return;
+        }
+
+        // log a warning if some payloads were not monitored
+        if (notMonitored > 0) {
+            final String msg =
+                String.format("Not monitoring %d requests before" +
+                              " first good time is set", notMonitored);
+            LOG.error(msg);
+            notMonitored = 0;
         }
 
         final long reqFirst = req.getFirstTimeUTC().longValue();

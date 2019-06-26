@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17087 2018-08-10 20:18:45Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17180 2018-10-25 19:26:12Z dglo $
  *
  * Date: August 19 2005
  *
@@ -22,9 +22,6 @@ import icecube.daq.trigger.exceptions.TimeOutOfOrderException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -109,6 +106,7 @@ class HitCollection
         return hits.size();
     }
 
+    @Override
     public String toString()
     {
         return "HitCollection*" + hits.size();
@@ -118,7 +116,7 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17087 2018-08-10 20:18:45Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17180 2018-10-25 19:26:12Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger extends AbstractTrigger
@@ -130,8 +128,8 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         LogFactory.getLog(SimpleMajorityTrigger.class);
 
     /**
-     * If the 'allowSMTRerun' property is set, hits are no longer dropped
-     * after a request has been created.
+     * If the 'disableSMTRerun' property is set, the hit which triggers a
+     * request will not be used as the starting point for a new request.
      */
     private static boolean allowRerun;
 
@@ -183,6 +181,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      *
      * @return true if it is
      */
+    @Override
     public boolean isConfigured()
     {
         return (configThreshold && configTimeWindow);
@@ -197,6 +196,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      * @throws UnknownParameterException if the parameter is unknown
      * @throws IllegalParameterValueException if the parameter value is bad
      */
+    @Override
     public void addParameter(String name, String value)
         throws UnknownParameterException, IllegalParameterValueException
     {
@@ -223,6 +223,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         super.addParameter(name, value);
     }
 
+    @Override
     public void setTriggerName(String triggerName)
     {
         super.triggerName = triggerName + triggerNumber;
@@ -239,6 +240,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      * @throws icecube.daq.trigger.exceptions.TriggerException
      *          if the algorithm doesn't like this payload
      */
+    @Override
     public void runTrigger(IPayload payload)
         throws TriggerException
     {
@@ -382,6 +384,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      * Flush the trigger. Basically indicates that there will be no further
      * payloads to process and no further calls to runTrigger.
      */
+    @Override
     public void flush()
     {
         if (haveTrigger()) {
@@ -465,6 +468,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
     /**
      * Reset the algorithm to its initial condition.
      */
+    @Override
     public void resetAlgorithm()
     {
         reset();
@@ -548,6 +552,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      *
      * @return the name used for monitoring this trigger
      */
+    @Override
     public String getMonitoringName()
     {
         return "SIMPLE_MULTIPLICITY";
@@ -559,6 +564,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
      *
      * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
      */
+    @Override
     public boolean hasValidMultiplicity()
     {
         return true;
@@ -566,7 +572,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
 
     public static final void setRerunProperty()
     {
-        final String prop = System.getProperty("allowSMTRerun");
-        allowRerun = prop != null && prop.length() > 0;
+        final String prop = System.getProperty("disableSMTRerun");
+        allowRerun = prop == null;
     }
 }

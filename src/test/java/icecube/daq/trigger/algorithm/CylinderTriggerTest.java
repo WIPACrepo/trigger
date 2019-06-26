@@ -2,7 +2,7 @@ package icecube.daq.trigger.algorithm;
 
 import icecube.daq.common.MockAppender;
 import icecube.daq.io.DAQComponentIOProcess;
-import icecube.daq.io.SpliceablePayloadReader;
+import icecube.daq.io.SpliceableStreamReader;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.PayloadFactory;
@@ -79,6 +79,7 @@ public class CylinderTriggerTest
         }
     }
 
+    @Override
     protected void setUp()
         throws Exception
     {
@@ -96,6 +97,7 @@ public class CylinderTriggerTest
         return new TestSuite(CylinderTriggerTest.class);
     }
 
+    @Override
     protected void tearDown()
         throws Exception
     {
@@ -159,8 +161,8 @@ public class CylinderTriggerTest
 
         ComponentObserver observer = new ComponentObserver();
 
-        SpliceablePayloadReader rdr =
-            new SpliceablePayloadReader("hitReader", splicer, factory);
+        SpliceableStreamReader rdr =
+            new SpliceableStreamReader("hitReader", splicer, factory);
         rdr.registerComponentObserver(observer);
 
         rdr.start();

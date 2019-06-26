@@ -1,7 +1,7 @@
 /*
  * class: DummyPayload
  *
- * Version $Id: DummyPayload.java 15570 2015-06-12 16:19:32Z dglo $
+ * Version $Id: DummyPayload.java 17114 2018-09-26 09:51:56Z dglo $
  *
  * Date: October 7 2005
  *
@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
 /**
  * This class is a dummy payload that only has a UTC time associated with it.
  *
- * @version $Id: DummyPayload.java 15570 2015-06-12 16:19:32Z dglo $
+ * @version $Id: DummyPayload.java 17114 2018-09-26 09:51:56Z dglo $
  * @author pat
  */
 public class DummyPayload
@@ -63,6 +63,7 @@ public class DummyPayload
      *
      * @return the usual comparison values
      */
+    @Override
     public int compareSpliceable(Spliceable spl)
     {
         if (spl == null) {
@@ -90,6 +91,7 @@ public class DummyPayload
      * @return Object which is a copy of the object which implements this
      *         interface.
      */
+    @Override
     public Object deepCopy()
     {
         return new DummyPayload(time);
@@ -100,6 +102,7 @@ public class DummyPayload
      *
      * @return UnimplementedError
      */
+    @Override
     public ByteBuffer getPayloadBacking()
     {
         throw new UnimplementedError();
@@ -112,6 +115,7 @@ public class DummyPayload
      * @return one of the defined types in
      *         icecube.daq.payload.PayloadInterfaceRegistry
      */
+    @Override
     public int getPayloadInterfaceType()
     {
         return -1;
@@ -122,6 +126,7 @@ public class DummyPayload
      *
      * @return UTC time object
      */
+    @Override
     public IUTCTime getPayloadTimeUTC()
     {
         if (utcTime == null) {
@@ -136,6 +141,7 @@ public class DummyPayload
      *
      * @return -1
      */
+    @Override
     public int getPayloadType()
     {
         return -1;
@@ -146,11 +152,13 @@ public class DummyPayload
      *
      * @return UTC time
      */
+    @Override
     public long getUTCTime()
     {
         return time;
     }
 
+    @Override
     public int length()
     {
         return 0;
@@ -159,6 +167,7 @@ public class DummyPayload
     /**
      * Do nothing
      */
+    @Override
     public void loadPayload()
     {
         // do nothing
@@ -167,6 +176,7 @@ public class DummyPayload
     /**
      * Do nothing
      */
+    @Override
     public void recycle()
     {
         // do nothing
@@ -177,6 +187,7 @@ public class DummyPayload
      *
      * @param cache ignored
      */
+    @Override
     public void setCache(IByteBufferCache cache)
     {
         // do nothing
@@ -187,6 +198,7 @@ public class DummyPayload
      *
      * @return debugging string
      */
+    @Override
     public String toString()
     {
         return "Dummy@" + time;

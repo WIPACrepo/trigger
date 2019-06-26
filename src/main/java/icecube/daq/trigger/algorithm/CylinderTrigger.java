@@ -273,6 +273,7 @@ public class CylinderTrigger extends AbstractTrigger
         return false;
     }
 
+    @Override
     public boolean isConfigured()
     {
         if (simpleMultiplicity < multiplicity) {
@@ -291,6 +292,7 @@ public class CylinderTrigger extends AbstractTrigger
      *
      * @return the name used for monitoring this trigger
      */
+    @Override
     public String getMonitoringName()
     {
         return "VOLUME";
@@ -302,6 +304,7 @@ public class CylinderTrigger extends AbstractTrigger
      *
      * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
      */
+    @Override
     public boolean hasValidMultiplicity()
     {
         return true;

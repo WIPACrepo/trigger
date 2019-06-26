@@ -2,7 +2,6 @@ package icecube.daq.trigger.component;
 
 import icecube.daq.common.MockAppender;
 import icecube.daq.io.DAQComponentIOProcess;
-import icecube.daq.io.SpliceablePayloadReader;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.alert.Alerter.Priority;
 import icecube.daq.payload.IByteBufferCache;
@@ -150,6 +149,7 @@ public class InIceTriggerIntegrationTest
         }
     }
 
+    @Override
     protected void setUp()
         throws Exception
     {
@@ -214,6 +214,7 @@ public class InIceTriggerIntegrationTest
         return new TestSuite(InIceTriggerIntegrationTest.class);
     }
 
+    @Override
     protected void tearDown()
         throws Exception
     {
@@ -304,6 +305,7 @@ public class InIceTriggerIntegrationTest
             nextEnd = nextStart + timeSpan;
         }
 
+        @Override
         public boolean validate(IWriteablePayload payload)
         {
             if (!(payload instanceof ITriggerRequestPayload)) {

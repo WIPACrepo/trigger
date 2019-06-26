@@ -1,7 +1,7 @@
 /*
  * class: TriggerReadout
  *
- * Version $Id: TriggerReadout.java 14467 2013-05-03 16:18:13Z dglo $
+ * Version $Id: TriggerReadout.java 17114 2018-09-26 09:51:56Z dglo $
  *
  * Date: November 23 2005
  *
@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class represents a trigger readout.
  *
- * @version $Id: TriggerReadout.java 14467 2013-05-03 16:18:13Z dglo $
+ * @version $Id: TriggerReadout.java 17114 2018-09-26 09:51:56Z dglo $
  * @author pat
  */
 public class TriggerReadout
@@ -129,6 +129,7 @@ public class TriggerReadout
      *
      * @return <tt>true</tt> if the objects are equal
      */
+    @Override
     public boolean equals(Object object)
     {
         return object != null && (object instanceof TriggerReadout) &&
@@ -221,6 +222,7 @@ public class TriggerReadout
      *
      * @return hash code
      */
+    @Override
     public int hashCode()
     {
         return toString().hashCode();
@@ -278,6 +280,7 @@ public class TriggerReadout
      * Print out the readout as a string.
      * @return string dump of readout
      */
+    @Override
     public String toString()
     {
         return getTypeAsString() + " : " + offset + " - " + minus + " + " +

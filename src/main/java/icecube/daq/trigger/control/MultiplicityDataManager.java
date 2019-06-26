@@ -68,6 +68,7 @@ class HashKey
         key = tmpSrc + (type << 5) + (cfgId << 13);
     }
 
+    @Override
     public int compareTo(Object obj)
     {
         if (obj == null) {
@@ -78,6 +79,7 @@ class HashKey
         return key - other.key;
     }
 
+    @Override
     public boolean equals(Object obj)
     {
         return compareTo(obj) == 0;
@@ -103,6 +105,7 @@ class HashKey
         return validMultiplicity;
     }
 
+    @Override
     public int hashCode()
     {
         return key;
@@ -113,6 +116,7 @@ class HashKey
         validMultiplicity = val;
     }
 
+    @Override
     public String toString()
     {
         return String.format("s%d/t%d/c%d/k%d", srcId, type, cfgId, key);
@@ -293,6 +297,7 @@ class Bins
         count++;
     }
 
+    @Override
     public String toString()
     {
         return "Bins[max=" + maxLen + ",ovflo=" + overflow +
@@ -331,6 +336,7 @@ public class MultiplicityDataManager
         algorithms = new ArrayList<ITriggerAlgorithm>();
     }
 
+    @Override
     public void add(ITriggerRequestPayload req)
         throws MultiplicityDataException
     {
@@ -451,7 +457,8 @@ public class MultiplicityDataManager
      * @return <tt>null</tt> if there are not enough bins to summarize
      */
     public Iterable<Map<String, Object>> getSummary(int numBins,
-                                                    boolean allowPartial)
+                                                    boolean allowPartial,
+                                                    boolean allowEmptyBins)
         throws MultiplicityDataException
     {
         if (binmap == null) {
@@ -462,7 +469,7 @@ public class MultiplicityDataManager
 
         List<Map<String, Object>> list = null;
         synchronized (binmap) {
-            if (binmap.size() == 0) {
+            if (binmap.size() == 0 && !allowEmptyBins) {
                 // don't bother sending empty list
                 list = null;
             } else {
@@ -511,6 +518,7 @@ public class MultiplicityDataManager
         return false;
     }
 
+    @Override
     public void reset()
         throws MultiplicityDataException
     {
@@ -531,6 +539,7 @@ public class MultiplicityDataManager
         nextRunNumber = NO_NUMBER;
     }
 
+    @Override
     public boolean sendFinal()
         throws MultiplicityDataException
     {
@@ -640,6 +649,7 @@ public class MultiplicityDataManager
      *
      * @return list of trigger count data.
      */
+    @Override
     public boolean sendSingleBin(boolean isFinal)
         throws MultiplicityDataException
     {
@@ -654,7 +664,7 @@ public class MultiplicityDataManager
                                                 " been set");
         }
 
-        Iterable<Map<String, Object>> mapper = getSummary(10, isFinal);
+        Iterable<Map<String, Object>> mapper = getSummary(10, isFinal, true);
         if (mapper == null) {
             // if there's no data, we're done
             return false;

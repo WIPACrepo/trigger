@@ -115,7 +115,7 @@ public class MultiplicityDataManagerTest
 
         mgr.add(new MockTriggerRequest(1, srcId, type, cfgId, 4, 5));
 
-        Iterable<Map<String, Object>> histo = mgr.getSummary(10, true);
+        Iterable<Map<String, Object>> histo = mgr.getSummary(10, true, true);
         assertNotNull("Histogram should not be null", histo);
         assertFalse("Unexpected histogram list " + histo,
                     histo.iterator().hasNext());
@@ -215,7 +215,7 @@ public class MultiplicityDataManagerTest
         mgr.add(new MockTriggerRequest(uid++, srcId, type, cfgId,
                                        nextBin + 4, nextBin + 5));
 
-        Iterable<Map<String, Object>> histo = mgr.getSummary(10, true);
+        Iterable<Map<String, Object>> histo = mgr.getSummary(10, true, true);
         assertNotNull("Histogram should not be null", histo);
 
         boolean found = false;
@@ -263,7 +263,7 @@ public class MultiplicityDataManagerTest
             binTime += Bins.WIDTH;
         }
 
-        Iterable<Map<String, Object>> histo = mgr.getSummary(10, true);
+        Iterable<Map<String, Object>> histo = mgr.getSummary(10, true, true);
         assertNotNull("Histogram should not be null", histo);
 
         int count = 0;
@@ -291,7 +291,7 @@ public class MultiplicityDataManagerTest
         mgr.setAlertQueue(new AlertQueue(alerter));
 
         try {
-            mgr.getSummary(10, true);
+            mgr.getSummary(10, true, true);
             fail("Should not succeed");
         } catch (MultiplicityDataException mde) {
             assertNotNull("Null message", mde.getMessage());
@@ -312,8 +312,12 @@ public class MultiplicityDataManagerTest
 
         mgr.start(123);
 
-        Iterable<Map<String, Object>> histo = mgr.getSummary(10, true);
-        assertNull("Unexpected histogram list " + histo, histo);
+        Iterable<Map<String, Object>> histo = mgr.getSummary(10, true, true);
+        assertNotNull("Unexpected null histogram list " + histo, histo);
+
+        for (Map<String, Object> map : histo) {
+            fail("Histogram list " + histo + " should be empty");
+        }
     }
 
     @Test

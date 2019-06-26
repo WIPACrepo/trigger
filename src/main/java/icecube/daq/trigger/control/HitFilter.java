@@ -101,6 +101,7 @@ public class HitFilter
      * Debugging string
      * @return debugging string
      */
+    @Override
     public String toString()
     {
         return "HitFilter[" + domSet + "]";

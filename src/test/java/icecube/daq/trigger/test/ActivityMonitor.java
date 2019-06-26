@@ -44,6 +44,7 @@ class AlgorithmData
         sent = val;
     }
 
+    @Override
     public String toString()
     {
         return String.format("%d->%d->%d", queuedIn, queuedOut, sent);
@@ -179,6 +180,7 @@ class TriggerMonitor
         return stopped;
     }
 
+    @Override
     public String toString()
     {
         if (comp == null) {

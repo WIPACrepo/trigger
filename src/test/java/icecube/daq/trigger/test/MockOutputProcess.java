@@ -28,7 +28,8 @@ public class MockOutputProcess
 
     @Override
     public QueuedOutputChannel addDataChannel(WritableByteChannel chan,
-                                              IByteBufferCache bufCache)
+                                              IByteBufferCache bufCache,
+                                              String name)
     {
         throw new Error("Unimplemented");
     }

@@ -99,6 +99,7 @@ public class MockAlgorithm
         trigMoniMap.put(key, value);
     }
 
+    @Override
     public int compareTo(ITriggerAlgorithm a)
     {
         int val = getTriggerName().compareTo(a.getTriggerName());
@@ -404,6 +405,7 @@ public class MockAlgorithm
         sub = null;
     }
 
+    @Override
     public String toString()
     {
         return String.format("MockAlgorithm[%s typ %d cfg %d src %d uid %d]",

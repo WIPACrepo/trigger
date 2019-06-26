@@ -45,6 +45,7 @@ public class Interval
      *
      * @return the usual values
      */
+    @Override
     public int compareTo(Object obj)
     {
         if (obj == null) {
@@ -113,6 +114,7 @@ public class Interval
      *
      * @return <tt>true</tt> if the objects are equal
      */
+    @Override
     public boolean equals(Object obj)
     {
         return compareTo(obj) == 0;
@@ -123,6 +125,7 @@ public class Interval
      *
      * @return hash code
      */
+    @Override
     public int hashCode()
     {
         final long modValue = Integer.MAX_VALUE / 256;
@@ -136,6 +139,7 @@ public class Interval
      *
      * @return debugging string
      */
+    @Override
     public String toString()
     {
         if (isEmpty()) {

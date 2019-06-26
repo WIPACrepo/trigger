@@ -96,6 +96,7 @@ public abstract class AbstractTrigger
      * @throws UnknownParameterException if the parameter is unknown
      * @throws IllegalParameterValueException if the parameter value is bad
      */
+    @Override
     public void addParameter(String name, String value)
         throws UnknownParameterException, IllegalParameterValueException
     {
@@ -110,11 +111,13 @@ public abstract class AbstractTrigger
      * @param minus minus
      * @param plus plus
      */
+    @Override
     public void addReadout(int rdoutType, int offset, int minus, int plus)
     {
         readouts.add(new TriggerReadout(rdoutType, offset, minus, plus));
     }
 
+    @Override
     public int compareTo(ITriggerAlgorithm a)
     {
         int val = getTriggerName().compareTo(a.getTriggerName());
@@ -292,6 +295,7 @@ public abstract class AbstractTrigger
     /**
      * Flush the algorithm.
      */
+    @Override
     public abstract void flush();
 
     protected void formTrigger(IUTCTime time)
@@ -457,6 +461,7 @@ public abstract class AbstractTrigger
      *
      * @return earliest payload
      */
+    @Override
     public IPayload getEarliestPayloadOfInterest()
     {
         return earliestPayloadOfInterest;
@@ -467,6 +472,7 @@ public abstract class AbstractTrigger
      *
      * @return earliest UTC time
      */
+    @Override
     public long getEarliestTime()
     {
         if (earliestPayloadOfInterest == null) {
@@ -502,6 +508,7 @@ public abstract class AbstractTrigger
      *
      * @return input queue size
      */
+    @Override
     public int getInputQueueSize()
     {
         if (subscriber == null) {
@@ -518,6 +525,7 @@ public abstract class AbstractTrigger
      *
      * @return next interval
      */
+    @Override
     public Interval getInterval(Interval interval)
     {
         if (interval.isEmpty()) {
@@ -621,6 +629,7 @@ public abstract class AbstractTrigger
      *
      * @return the name used for monitoring this trigger
      */
+    @Override
     public abstract String getMonitoringName();
 
     /**
@@ -639,6 +648,7 @@ public abstract class AbstractTrigger
      *
      * @return number of cached requests
      */
+    @Override
     public int getNumberOfCachedRequests()
     {
         return requests.size();
@@ -649,6 +659,7 @@ public abstract class AbstractTrigger
      *
      * @return release time
      */
+    @Override
     public long getReleaseTime()
     {
         return releaseTime;
@@ -659,6 +670,7 @@ public abstract class AbstractTrigger
      *
      * @return sent count
      */
+    @Override
     public long getSentTriggerCount()
     {
         return sentTriggerCounter;
@@ -669,11 +681,13 @@ public abstract class AbstractTrigger
      *
      * @return source ID
      */
+    @Override
     public int getSourceId()
     {
         return srcId;
     }
 
+    @Override
     public PayloadSubscriber getSubscriber()
     {
         return subscriber;
@@ -684,6 +698,7 @@ public abstract class AbstractTrigger
      *
      * @return configuration ID
      */
+    @Override
     public int getTriggerConfigId()
     {
         return trigCfgId;
@@ -694,6 +709,7 @@ public abstract class AbstractTrigger
      *
      * @return counter value
      */
+    @Override
     public int getTriggerCounter()
     {
         return triggerCounter;
@@ -725,6 +741,7 @@ public abstract class AbstractTrigger
      *
      * @return map of monitored quantity names and values
      */
+    @Override
     public Map<String, Object> getTriggerMonitorMap()
     {
         return null;
@@ -734,6 +751,7 @@ public abstract class AbstractTrigger
      * Get trigger name.
      * @return triggerName
      */
+    @Override
     public String getTriggerName()
     {
         return triggerName;
@@ -744,6 +762,7 @@ public abstract class AbstractTrigger
      *
      * @return trigger type
      */
+    @Override
     public int getTriggerType()
     {
         return trigType;
@@ -754,6 +773,7 @@ public abstract class AbstractTrigger
      *
      * @return <tt>true</tt> if there are non-flush requests available
      */
+    @Override
     public boolean hasCachedRequests()
     {
         synchronized (requests) {
@@ -767,6 +787,7 @@ public abstract class AbstractTrigger
      *
      * @return <tt>true</tt> if there are more payloads available
      */
+    @Override
     public boolean hasData()
     {
         if (subscriber == null) {
@@ -781,11 +802,13 @@ public abstract class AbstractTrigger
      *
      * @return <tt>true</tt> if the algorithm has been fully configured
      */
+    @Override
     public abstract boolean isConfigured();
 
     /**
      * Recycle all unused requests still cached in the algorithms.
      */
+    @Override
     public void recycleUnusedRequests()
     {
         int count = 0;
@@ -905,6 +928,7 @@ public abstract class AbstractTrigger
     /**
      * Reset the algorithm to its initial condition.
      */
+    @Override
     public void resetAlgorithm()
     {
         resetUID();
@@ -917,6 +941,7 @@ public abstract class AbstractTrigger
     /**
      * Reset the UID to signal a run switch.
      */
+    @Override
     public void resetUID()
     {
         triggerCounter = 0;
@@ -929,12 +954,14 @@ public abstract class AbstractTrigger
      *
      * @throws TriggerException if there was a problem running the algorithm
      */
+    @Override
     public abstract void runTrigger(IPayload payload)
         throws TriggerException;
 
     /**
      * Clear out all remaining payloads.
      */
+    @Override
     public void sendLast()
     {
         flush();
@@ -977,6 +1004,7 @@ public abstract class AbstractTrigger
      *
      * @param val source ID
      */
+    @Override
     public void setSourceId(int val)
     {
         srcId = val;
@@ -987,6 +1015,7 @@ public abstract class AbstractTrigger
      *
      * @param subscriber input queue subscriber
      */
+    @Override
     public void setSubscriber(PayloadSubscriber subscriber)
     {
         if (this.subscriber != null) {
@@ -1002,6 +1031,7 @@ public abstract class AbstractTrigger
      *
      * @param collector trigger collector
      */
+    @Override
     public void setTriggerCollector(ITriggerCollector collector)
     {
         this.collector = collector;
@@ -1012,6 +1042,7 @@ public abstract class AbstractTrigger
      *
      * @param val configuration ID
      */
+    @Override
     public void setTriggerConfigId(int val)
     {
         trigCfgId = val;
@@ -1022,6 +1053,7 @@ public abstract class AbstractTrigger
      *
      * @param triggerFactory trigger factory
      */
+    @Override
     public void setTriggerFactory(TriggerRequestFactory triggerFactory)
     {
         this.triggerFactory = triggerFactory;
@@ -1032,6 +1064,7 @@ public abstract class AbstractTrigger
      *
      * @param mgr trigger manager
      */
+    @Override
     public void setTriggerManager(ITriggerManager mgr)
     {
         this.mgr = mgr;
@@ -1042,6 +1075,7 @@ public abstract class AbstractTrigger
      *
      * @param triggerName trigger name
      */
+    @Override
     public void setTriggerName(String triggerName)
     {
         this.triggerName = triggerName;
@@ -1055,6 +1089,7 @@ public abstract class AbstractTrigger
      *
      * @param val trigger type
      */
+    @Override
     public void setTriggerType(int val)
     {
         trigType = val;
@@ -1063,6 +1098,7 @@ public abstract class AbstractTrigger
     /**
      * Unset the list subscriber client (for monitoring the input queue).
      */
+    @Override
     public void unsubscribe(SubscribedList list)
     {
         if (subscriber == null) {
@@ -1164,6 +1200,7 @@ public abstract class AbstractTrigger
      *
      * @return debugging string
      */
+    @Override
     public String toString()
     {
         return triggerName + "#" + sentTriggerCounter + "[" + requests.size() +

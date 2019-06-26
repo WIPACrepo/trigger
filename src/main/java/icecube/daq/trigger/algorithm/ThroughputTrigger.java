@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
  *  makes a new TriggerRequest for each input TriggerRequest
  *  and then pass them to GlobalTrigBag.java.
  *
- * @version $Id: ThroughputTrigger.java 15271 2014-11-19 18:46:22Z dglo $
+ * @version $Id: ThroughputTrigger.java 17114 2018-09-26 09:51:56Z dglo $
  * @author shseo
  */
 public class ThroughputTrigger
@@ -52,6 +52,7 @@ public class ThroughputTrigger
      * @param payload
      * @throws TriggerException
      */
+    @Override
     public void runTrigger(IPayload payload) throws TriggerException
     {
         LOG.debug("inside runTrigger in ThroughputTrigger");
@@ -69,11 +70,13 @@ public class ThroughputTrigger
       * method to flush the trigger
       * basically indicates that there will be no further payloads to process
       */
+    @Override
      public void flush()
      {
         //--nothing needs to be done in this ThroughputTrigger algorithm!
      }
 
+    @Override
     public boolean isConfigured()
     {
         return true;
@@ -87,6 +90,7 @@ public class ThroughputTrigger
      *
      * @throws UnknownParameterException if the parameter is unknown
      */
+    @Override
     public void addParameter(String name, String value)
         throws UnknownParameterException
     {
@@ -98,6 +102,7 @@ public class ThroughputTrigger
      *
      * @return the name used for monitoring this trigger
      */
+    @Override
     public String getMonitoringName()
     {
         return "THROUGHPUT";
@@ -109,6 +114,7 @@ public class ThroughputTrigger
      *
      * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
      */
+    @Override
     public boolean hasValidMultiplicity()
     {
         return true;

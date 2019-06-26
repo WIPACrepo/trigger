@@ -85,6 +85,7 @@ class ElementData
         return true;
     }
 
+    @Override
     public int compareTo(ElementData ed)
     {
         int val = type - ed.type;
@@ -118,6 +119,27 @@ class ElementData
     }
 
     /**
+     * Compare this DomSet with another object.
+     *
+     * @param other object being compared
+     *
+     * @return <tt>true</tt> if both sets contain the same DOM IDs
+     */
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other == null) {
+            return false;
+        }
+
+        if (!(other instanceof ElementData)) {
+            return getClass().equals(other.getClass());
+        }
+
+        return equals((ElementData) other);
+    }
+
+    /**
      * Is the specified object equal to this object?
      * @param obj object being compared
      * @return <tt>true</tt> if the objects are equal
@@ -146,6 +168,7 @@ class ElementData
      * Return this object's hash code
      * @return hash code
      */
+    @Override
     public int hashCode()
     {
         int high = type;
@@ -164,6 +187,7 @@ class ElementData
         return type == ed.type && srcId == ed.srcId && domId == ed.domId;
     }
 
+    @Override
     public String toString()
     {
         StringBuilder buf = new StringBuilder("[");

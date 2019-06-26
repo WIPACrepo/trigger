@@ -81,6 +81,7 @@ public class AlgorithmStatistics
         return algorithm.getInputQueueSize();
     }
 
+    @Override
     public String toString()
     {
         StringBuilder buf = new StringBuilder(getName());

@@ -132,21 +132,25 @@ public class SPS2012Triggers
         timeStep = 5000L / (long) (numHitsPerTrigger + 1);
     }
 
+    @Override
     public BaseValidator getAmandaValidator()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int getExpectedNumberOfAmandaPayloads(int numObjs)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public int getExpectedNumberOfInIcePayloads(int numObjs)
     {
         return numObjs / numHitsPerTrigger;
     }
 
+    @Override
     public BaseValidator getInIceValidator()
     {
         return new InIceValidator();
@@ -158,6 +162,7 @@ public class SPS2012Triggers
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void sendAmandaStops(WritableByteChannel[] x0)
         throws IOException
     {
@@ -187,6 +192,7 @@ public class SPS2012Triggers
         }
     }
 
+    @Override
     public void sendInIceStops(WritableByteChannel[] tails)
         throws IOException
     {

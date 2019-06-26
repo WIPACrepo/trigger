@@ -2,7 +2,7 @@ package icecube.daq.trigger.algorithm;
 
 import icecube.daq.common.MockAppender;
 import icecube.daq.io.DAQComponentOutputProcess;
-import icecube.daq.io.SpliceablePayloadReader;
+import icecube.daq.io.SpliceableStreamReader;
 import icecube.daq.juggler.alert.AlertQueue;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.SourceIdRegistry;
@@ -54,6 +54,7 @@ class MockCollector
 {
     private boolean changed;
 
+    @Override
     public void setChanged()
     {
         changed = true;
@@ -65,86 +66,103 @@ class MockManager
 {
     private long earliest;
 
+    @Override
     public void addTrigger(ITriggerAlgorithm x0)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void addTriggers(Iterable<ITriggerAlgorithm> x0)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void flush()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public AlertQueue getAlertQueue()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public Iterable<AlgorithmStatistics> getAlgorithmStatistics()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public IDOMRegistry getDOMRegistry()
     {
         throw new Error("Unimplemented");
     }
 
-    public Map<String, Integer> getQueuedInputs()
-    {
-        throw new Error("Unimplemented");
-    }
-
+    @Override
     public int getNumOutputsQueued()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
+    public Map<String, Integer> getQueuedInputs()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    @Override
     public int getSourceId()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public long getTotalProcessed()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public boolean isStopped()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void setDOMRegistry(IDOMRegistry req)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void setEarliestPayloadOfInterest(IPayload pay)
     {
         earliest = pay.getUTCTime();
     }
 
+    @Override
     public void setOutputEngine(DAQComponentOutputProcess proc)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void setSplicer(Splicer x0)
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void stopThread()
     {
         throw new Error("Unimplemented");
     }
 
+    @Override
     public void switchToNewRun(int i0)
     {
         throw new Error("Unimplemented");
@@ -227,8 +245,8 @@ public class SimpleMajorityTriggerTest
                      int numPerTail)
         throws DOMRegistryException, IOException, TriggerException
     {
-        if (allowRerun) {
-            System.setProperty("allowSMTRerun", "1");
+        if (!allowRerun) {
+            System.setProperty("disableSMTRerun", "1");
         }
         SimpleMajorityTrigger.setRerunProperty();
 
@@ -280,8 +298,8 @@ public class SimpleMajorityTriggerTest
 
         ComponentObserver observer = new ComponentObserver();
 
-        SpliceablePayloadReader rdr =
-            new SpliceablePayloadReader("hitReader", splicer, factory);
+        SpliceableStreamReader rdr =
+            new SpliceableStreamReader("hitReader", splicer, factory);
         rdr.registerComponentObserver(observer);
 
         try {
@@ -312,16 +330,21 @@ public class SimpleMajorityTriggerTest
         }
     }
 
-    private void writeClusteredHits(int threshold, int numRequests)
+    private void writeClusteredHits(int threshold, int numRequests,
+                                    boolean allowRerun)
         throws DOMRegistryException, IOException, TriggerException
     {
-        writeClusteredHits(threshold, numRequests, numRequests);
+        writeClusteredHits(threshold, numRequests, numRequests, allowRerun);
     }
 
     private void writeClusteredHits(int threshold, int numRequests,
-                                    int expRequests)
+                                    int expRequests, boolean allowRerun)
         throws DOMRegistryException, IOException, TriggerException
     {
+        if (!allowRerun) {
+            System.setProperty("disableSMTRerun", "1");
+        }
+
         SimpleMajorityTrigger trig = null;
         try {
             final String configDir = getConfigurationDirectory();
@@ -386,7 +409,7 @@ public class SimpleMajorityTriggerTest
     private void writeHits(VitreousBufferCache cache,
                            TriggerCollection trigCfg,
                            TriggerManager trigMgr,
-                           SpliceablePayloadReader rdr,
+                           SpliceableStreamReader rdr,
                            HKN1Splicer<Spliceable> splicer, int numTails,
                            int numObjs)
         throws DOMRegistryException, IOException, TriggerException
@@ -433,6 +456,7 @@ public class SimpleMajorityTriggerTest
                    trigMgr.isStopped());
     }
 
+    @Override
     protected void setUp()
         throws Exception
     {
@@ -447,7 +471,7 @@ public class SimpleMajorityTriggerTest
         props.setProperty(SNDAQAlerter.PROPERTY, ":12345");
 
         // clear SMTRerun property
-        props.remove("allowSMTRerun");
+        props.remove("disableSMTRerun");
     }
 
     public static Test suite()
@@ -455,12 +479,13 @@ public class SimpleMajorityTriggerTest
         return new TestSuite(SimpleMajorityTriggerTest.class);
     }
 
+    @Override
     protected void tearDown()
         throws Exception
     {
         // remove properties
         System.clearProperty(SNDAQAlerter.PROPERTY);
-        System.clearProperty("allowSMTRerun");
+        System.clearProperty("disableSMTRerun");
 
         appender.assertNoLogMessages();
 
@@ -520,40 +545,37 @@ public class SimpleMajorityTriggerTest
     {
         final int numReqs = 200;
 
-        writeClusteredHits(1, numReqs, numReqs / 2);
+        writeClusteredHits(1, numReqs, numReqs / 2, false);
     }
 
     public void testDirectSMT1New()
         throws DOMRegistryException, IOException, TriggerException
     {
-        System.setProperty("allowSMTRerun", "1");
-        writeClusteredHits(1, 200);
+        writeClusteredHits(1, 200, true);
     }
 
     public void testDirectSMT3Old()
         throws DOMRegistryException, IOException, TriggerException
     {
-        writeClusteredHits(3, 200);
+        writeClusteredHits(3, 200, false);
     }
 
     public void testDirectSMT3New()
         throws DOMRegistryException, IOException, TriggerException
     {
-        System.setProperty("allowSMTRerun", "1");
-        writeClusteredHits(3, 200);
+        writeClusteredHits(3, 200, true);
     }
 
     public void testDirectSMT8Old()
         throws DOMRegistryException, IOException, TriggerException
     {
-        writeClusteredHits(8, 200);
+        writeClusteredHits(8, 200, false);
     }
 
     public void testDirectSMT8New()
         throws DOMRegistryException, IOException, TriggerException
     {
-        System.setProperty("allowSMTRerun", "1");
-        writeClusteredHits(8, 200);
+        writeClusteredHits(8, 200, true);
     }
 
     public static void main(String[] args)

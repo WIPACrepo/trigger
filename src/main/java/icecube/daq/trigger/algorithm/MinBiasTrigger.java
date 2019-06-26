@@ -1,7 +1,7 @@
 /*
  * class: MinBiasTrigger
  *
- * Version $Id: MinBiasTrigger.java 15429 2015-02-20 19:22:20Z dglo $
+ * Version $Id: MinBiasTrigger.java 17114 2018-09-26 09:51:56Z dglo $
  *
  * Date: August 27 2005
  *
@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  * This class implements a simple minimum bias trigger. It simply counts hits and
  * applies a prescale for determining when a trigger should be formed.
  *
- * @version $Id: MinBiasTrigger.java 15429 2015-02-20 19:22:20Z dglo $
+ * @version $Id: MinBiasTrigger.java 17114 2018-09-26 09:51:56Z dglo $
  * @author pat
  */
 public class MinBiasTrigger
@@ -58,6 +58,7 @@ public class MinBiasTrigger
      * @throws UnknownParameterException if the parameter is unknown
      * @throws IllegalParameterValueException if the parameter value is bad
      */
+    @Override
     public void addParameter(String name, String value)
         throws UnknownParameterException, IllegalParameterValueException
     {
@@ -84,6 +85,7 @@ public class MinBiasTrigger
      * Flush the trigger. Basically indicates that there will be no further
      * payloads to process.
      */
+    @Override
     public void flush()
     {
         // nothing to do here
@@ -99,6 +101,7 @@ public class MinBiasTrigger
      *
      * @return true if it is
      */
+    @Override
     public boolean isConfigured()
     {
         return configPrescale;
@@ -112,6 +115,7 @@ public class MinBiasTrigger
      * @throws icecube.daq.trigger.exceptions.TriggerException
      *          if the algorithm doesn't like this payload
      */
+    @Override
     public void runTrigger(IPayload payload)
         throws TriggerException
     {
@@ -151,6 +155,7 @@ public class MinBiasTrigger
         this.prescale = prescale;
     }
 
+    @Override
     public void setTriggerName(String triggerName)
     {
         super.triggerName = triggerName + triggerNumber;
@@ -164,6 +169,7 @@ public class MinBiasTrigger
      *
      * @return the name used for monitoring this trigger
      */
+    @Override
     public String getMonitoringName()
     {
         return "MIN_BIAS";
@@ -175,6 +181,7 @@ public class MinBiasTrigger
      *
      * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
      */
+    @Override
     public boolean hasValidMultiplicity()
     {
         return true;

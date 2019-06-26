@@ -157,6 +157,7 @@ public class ClusterTrigger extends AbstractTrigger
      *
      * @return the name used for monitoring this trigger
      */
+    @Override
     public String getMonitoringName()
     {
         return "CLUSTER";
@@ -168,6 +169,7 @@ public class ClusterTrigger extends AbstractTrigger
      *
      * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
      */
+    @Override
     public boolean hasValidMultiplicity()
     {
         return true;
@@ -325,6 +327,7 @@ public class ClusterTrigger extends AbstractTrigger
         return true;
     }
 
+    @Override
     public boolean isConfigured()
     {
         return configTimeWindow && configMultiplicity && configCoherence;

@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 15433 2015-02-20 20:41:21Z dglo $
+ * Version $Id: FixedRateTrigger.java 17114 2018-09-26 09:51:56Z dglo $
  *
  * Date: May 1 2006
  *
@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 15433 2015-02-20 20:41:21Z dglo $
+ * @version $Id: FixedRateTrigger.java 17114 2018-09-26 09:51:56Z dglo $
  * @author pat
  */
 public class FixedRateTrigger extends AbstractTrigger
@@ -76,6 +76,7 @@ public class FixedRateTrigger extends AbstractTrigger
      *
      * @return true if it is
      */
+    @Override
     public boolean isConfigured()
     {
         return configInterval;
@@ -90,6 +91,7 @@ public class FixedRateTrigger extends AbstractTrigger
      * @throws UnknownParameterException if the parameter is unknown
      * @throws IllegalParameterValueException if the parameter value is bad
      */
+    @Override
     public void addParameter(String name, String value)
         throws UnknownParameterException, IllegalParameterValueException
     {
@@ -112,6 +114,7 @@ public class FixedRateTrigger extends AbstractTrigger
      * Set name of trigger, include triggerNumber
      * @param triggerName
      */
+    @Override
     public void setTriggerName(String triggerName)
     {
         super.triggerName = triggerName + triggerNumber;
@@ -141,6 +144,7 @@ public class FixedRateTrigger extends AbstractTrigger
     /**
      * Flush the trigger. Basically indicates that there will be no further payloads to process.
      */
+    @Override
     public void flush()
     {
         // nothing to do here
@@ -149,6 +153,7 @@ public class FixedRateTrigger extends AbstractTrigger
     /**
      * Reset the algorithm to its initial condition.
      */
+    @Override
     public void resetAlgorithm()
     {
         numberOfHitsProcessed = 0;
@@ -164,6 +169,7 @@ public class FixedRateTrigger extends AbstractTrigger
      * @throws icecube.daq.trigger.exceptions.TriggerException
      *          if the algorithm doesn't like this payload
      */
+    @Override
     public void runTrigger(IPayload payload)
         throws TriggerException
     {
@@ -197,6 +203,7 @@ public class FixedRateTrigger extends AbstractTrigger
      *
      * @return the name used for monitoring this trigger
      */
+    @Override
     public String getMonitoringName()
     {
         return "UNBIASED";
@@ -208,6 +215,7 @@ public class FixedRateTrigger extends AbstractTrigger
      *
      * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
      */
+    @Override
     public boolean hasValidMultiplicity()
     {
         return false;

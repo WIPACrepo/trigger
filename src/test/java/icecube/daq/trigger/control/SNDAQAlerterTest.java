@@ -99,6 +99,7 @@ class MyMockAlerter
         return expected.size() == 0;
     }
 
+    @Override
     public void sendObject(Object obj)
         throws AlertException
     {

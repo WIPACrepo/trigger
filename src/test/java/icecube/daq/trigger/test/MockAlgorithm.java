@@ -11,6 +11,7 @@ import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.control.PayloadSubscriber;
 import icecube.daq.trigger.control.SubscribedList;
 import icecube.daq.trigger.control.TriggerManager;
+import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -390,7 +391,8 @@ public class MockAlgorithm
     }
 
     @Override
-    public void setTriggerType(int type)
+    public void checkTriggerType(int type)
+        throws ConfigException
     {
         throw new Error("Unimplemented");
     }

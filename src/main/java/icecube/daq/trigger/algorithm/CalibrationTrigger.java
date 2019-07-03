@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 17403 2019-06-18 15:47:45Z dglo $
+ * Version $Id: CalibrationTrigger.java 17448 2019-07-03 18:03:15Z dglo $
  *
  * Date: August 27 2005
  *
@@ -35,15 +35,21 @@ import org.apache.log4j.Logger;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 17403 2019-06-18 15:47:45Z dglo $
+ * @version $Id: CalibrationTrigger.java 17448 2019-07-03 18:03:15Z dglo $
  * @author pat
  */
 public class CalibrationTrigger
     extends AbstractTrigger
 {
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 1;
+
     /** Log object for this class */
     private static final Logger LOG =
         Logger.getLogger(CalibrationTrigger.class);
+
+    /** I3Live monitoring name for this algorithm */
+    private static final String MONITORING_NAME = "CALIBRATION";
 
     private static int nextTriggerNumber;
     private int triggerNumber;
@@ -190,7 +196,18 @@ public class CalibrationTrigger
     @Override
     public String getMonitoringName()
     {
-        return "CALIBRATION";
+        return MONITORING_NAME;
+    }
+
+    /**
+     * Get the trigger type.
+     *
+     * @return trigger type
+     */
+    @Override
+    public int getTriggerType()
+    {
+        return TRIGGER_TYPE;
     }
 
     /**

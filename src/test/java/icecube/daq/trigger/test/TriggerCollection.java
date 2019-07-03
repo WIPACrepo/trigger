@@ -116,7 +116,7 @@ public abstract class TriggerCollection
      *
      * @return new trigger
      */
-    static ITriggerAlgorithm createTrigger(int type, int cfgId, int srcId,
+    static ITriggerAlgorithm createTrigger(int cfgId, int srcId,
                                            String name)
     {
         final String className;
@@ -141,7 +141,6 @@ public abstract class TriggerCollection
             throw new Error("Cannot create " + name + " trigger", ex);
         }
 
-        trig.setTriggerType(type);
         trig.setTriggerConfigId(cfgId);
         trig.setSourceId(srcId);
         trig.setTriggerName(name);

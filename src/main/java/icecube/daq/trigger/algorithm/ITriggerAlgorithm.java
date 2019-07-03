@@ -8,6 +8,7 @@ import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.control.PayloadSubscriber;
 import icecube.daq.trigger.control.SubscribedList;
+import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -270,11 +271,14 @@ public interface ITriggerAlgorithm
     void setTriggerName(String triggerName);
 
     /**
-     * Set trigger type.
+     * Check the trigger type.
      *
      * @param val trigger type
+     *
+     * @throws ConfigException if it doesn't match the expected value
      */
-    void setTriggerType(int val);
+    void checkTriggerType(int val)
+        throws ConfigException;
 
     /**
      * Disconnect the input provider.

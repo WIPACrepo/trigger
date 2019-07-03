@@ -76,7 +76,7 @@ public class CylinderTriggerConfig
         timeBase = 100000L;
         timeStep = 10000L / (long) (numHitsPerTrigger + 1);
 
-        trig = createTrigger(21, 21001, INICE_TRIGGER, "CylinderTrigger");
+        trig = createTrigger(21001, INICE_TRIGGER, "CylinderTrigger");
         trig.addParameter("multiplicity", "4");
         trig.addParameter("simpleMultiplicity",
                           Integer.toString(numHitsPerTrigger));

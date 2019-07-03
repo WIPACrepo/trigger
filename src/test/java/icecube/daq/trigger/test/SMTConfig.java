@@ -135,7 +135,7 @@ public class SMTConfig
         SMTParameters params = new SMTParameters(threshold);
 
         final ITriggerAlgorithm trig =
-            createTrigger(0, params.cfgId, params.srcId, "SMT" + threshold);
+            createTrigger(params.cfgId, params.srcId, "SMT" + threshold);
         params.configure(trig);
         add(trig);
 

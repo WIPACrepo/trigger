@@ -22,17 +22,21 @@ import org.apache.log4j.Logger;
  *  makes a new TriggerRequest for each input TriggerRequest
  *  and then pass them to GlobalTrigBag.java.
  *
- * @version $Id: ThroughputTrigger.java 17207 2018-11-08 16:08:59Z dglo $
+ * @version $Id: ThroughputTrigger.java 17448 2019-07-03 18:03:15Z dglo $
  * @author shseo
  */
 public class ThroughputTrigger
         extends AbstractGlobalTrigger
 {
-    /**
-     * Log object for this class
-     */
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 3;
+
+    /* Log object for this class */
     private static final Logger LOG =
         Logger.getLogger(ThroughputTrigger.class);
+
+    /** I3Live monitoring name for this algorithm */
+    private static final String MONITORING_NAME = "THROUGHPUT";
 
     /**
      * Create an instance of this class.
@@ -104,7 +108,18 @@ public class ThroughputTrigger
     @Override
     public String getMonitoringName()
     {
-        return "THROUGHPUT";
+        return MONITORING_NAME;
+    }
+
+    /**
+     * Get the trigger type.
+     *
+     * @return trigger type
+     */
+    @Override
+    public int getTriggerType()
+    {
+        return TRIGGER_TYPE;
     }
 
     /**

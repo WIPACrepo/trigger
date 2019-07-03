@@ -57,7 +57,6 @@ public abstract class AbstractTrigger
 
     protected String triggerName;
     private int trigCfgId;
-    private int trigType;
     private int srcId;
     private ArrayList<TriggerReadout> readouts =
         new ArrayList<TriggerReadout>();
@@ -118,7 +117,7 @@ public abstract class AbstractTrigger
     {
         int val = getTriggerName().compareTo(a.getTriggerName());
         if (val == 0) {
-            val = trigType - a.getTriggerType();
+            val = getTriggerType() - a.getTriggerType();
             if (val == 0) {
                 val = trigCfgId - a.getTriggerConfigId();
                 if (val == 0) {
@@ -319,7 +318,8 @@ public abstract class AbstractTrigger
         ArrayList<IWriteablePayload> hitList =
             new ArrayList<IWriteablePayload>();
         TriggerRequest triggerPayload =
-            (TriggerRequest) triggerFactory.createPayload(uid, trigType,
+            (TriggerRequest) triggerFactory.createPayload(uid,
+                                                          getTriggerType(),
                                                           trigCfgId, srcId,
                                                           time.longValue(),
                                                           time.longValue(),
@@ -421,7 +421,8 @@ public abstract class AbstractTrigger
 
         // make payload
         TriggerRequest triggerPayload =
-            (TriggerRequest) triggerFactory.createPayload(uid, trigType,
+            (TriggerRequest) triggerFactory.createPayload(uid,
+                                                          getTriggerType(),
                                                           trigCfgId, srcId,
                                                           firstTime.longValue(),
                                                           lastTime.longValue(),
@@ -754,17 +755,6 @@ public abstract class AbstractTrigger
     }
 
     /**
-     * Get the trigger type.
-     *
-     * @return trigger type
-     */
-    @Override
-    public int getTriggerType()
-    {
-        return trigType;
-    }
-
-    /**
      * Are there requests waiting to be processed?
      *
      * @return <tt>true</tt> if there are non-flush requests available
@@ -1086,9 +1076,13 @@ public abstract class AbstractTrigger
      * @param val trigger type
      */
     @Override
-    public void setTriggerType(int val)
+    public void checkTriggerType(int val)
+        throws ConfigException
     {
-        trigType = val;
+        if (getTriggerType() != val) {
+            throw new ConfigException("Trigger type should be " +
+                                      getTriggerType() + ", not " + val);
+        }
     }
 
     /**

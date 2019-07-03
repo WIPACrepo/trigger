@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17403 2019-06-18 15:47:45Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17448 2019-07-03 18:03:15Z dglo $
  *
  * Date: August 19 2005
  *
@@ -115,15 +115,21 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17403 2019-06-18 15:47:45Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17448 2019-07-03 18:03:15Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger
     extends AbstractTrigger
 {
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 0;
+
     /** Log object for this class */
     private static final Logger LOG =
         Logger.getLogger(SimpleMajorityTrigger.class);
+
+    /** I3Live monitoring name for this algorithm */
+    private static final String MONITORING_NAME = "SIMPLE_MULTIPLICITY";
 
     /**
      * If the 'disableSMTRerun' property is set, the hit which triggers a
@@ -553,7 +559,18 @@ public final class SimpleMajorityTrigger
     @Override
     public String getMonitoringName()
     {
-        return "SIMPLE_MULTIPLICITY";
+        return MONITORING_NAME;
+    }
+
+    /**
+     * Get the trigger type.
+     *
+     * @return trigger type
+     */
+    @Override
+    public int getTriggerType()
+    {
+        return TRIGGER_TYPE;
     }
 
     /**

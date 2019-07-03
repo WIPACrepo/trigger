@@ -52,6 +52,16 @@ import org.apache.log4j.Logger;
 public class ClusterTrigger
     extends AbstractTrigger
 {
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 14;
+
+    /** Log object for this class */
+    private static final Logger logger =
+        Logger.getLogger(ClusterTrigger.class);
+
+    /** I3Live monitoring name for this algorithm */
+    private static final String MONITORING_NAME = "CLUSTER";
+
     private long timeWindow;
     private boolean configTimeWindow;
 
@@ -64,8 +74,6 @@ public class ClusterTrigger
     private boolean configCoherence;
 
     private LinkedList<IHitPayload> triggerQueue;
-
-    private static final Logger logger = Logger.getLogger(ClusterTrigger.class);
 
     public ClusterTrigger()
     {
@@ -161,7 +169,18 @@ public class ClusterTrigger
     @Override
     public String getMonitoringName()
     {
-        return "CLUSTER";
+        return MONITORING_NAME;
+    }
+
+    /**
+     * Get the trigger type.
+     *
+     * @return trigger type
+     */
+    @Override
+    public int getTriggerType()
+    {
+        return TRIGGER_TYPE;
     }
 
     /**

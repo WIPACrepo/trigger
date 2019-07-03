@@ -195,6 +195,17 @@ public class ClusterTrigger
         return true;
     }
 
+    /**
+     * Is the trigger configured?
+     *
+     * @return true if it is
+     */
+    @Override
+    public boolean isConfigured()
+    {
+        return configTimeWindow && configMultiplicity && configCoherence;
+    }
+
     @Override
     public void runTrigger(IPayload payload) throws TriggerException
     {
@@ -345,11 +356,5 @@ public class ClusterTrigger
         }
 
         return true;
-    }
-
-    @Override
-    public boolean isConfigured()
-    {
-        return configTimeWindow && configMultiplicity && configCoherence;
     }
 }

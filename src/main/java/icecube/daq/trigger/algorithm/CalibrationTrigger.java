@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 17448 2019-07-03 18:03:15Z dglo $
+ * Version $Id: CalibrationTrigger.java 17449 2019-07-03 18:47:17Z dglo $
  *
  * Date: August 27 2005
  *
@@ -35,7 +35,7 @@ import org.apache.log4j.Logger;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 17448 2019-07-03 18:03:15Z dglo $
+ * @version $Id: CalibrationTrigger.java 17449 2019-07-03 18:47:17Z dglo $
  * @author pat
  */
 public class CalibrationTrigger
@@ -67,17 +67,6 @@ public class CalibrationTrigger
     public CalibrationTrigger()
     {
         triggerNumber = ++nextTriggerNumber;
-    }
-
-    /**
-     * Is the trigger configured?
-     *
-     * @return true if it is
-     */
-    @Override
-    public boolean isConfigured()
-    {
-        return configHitType;
     }
 
     /**
@@ -119,6 +108,51 @@ public class CalibrationTrigger
         if (LOG.isInfoEnabled()) {
             LOG.info("TriggerName set to " + super.triggerName);
         }
+    }
+
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    @Override
+    public String getMonitoringName()
+    {
+        return MONITORING_NAME;
+    }
+
+    /**
+     * Get the trigger type.
+     *
+     * @return trigger type
+     */
+    @Override
+    public int getTriggerType()
+    {
+        return TRIGGER_TYPE;
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    @Override
+    public boolean hasValidMultiplicity()
+    {
+        return true;
+    }
+
+    /**
+     * Is the trigger configured?
+     *
+     * @return true if it is
+     */
+    @Override
+    public boolean isConfigured()
+    {
+        return configHitType;
     }
 
     /**
@@ -186,39 +220,5 @@ public class CalibrationTrigger
     public void setHitType(int hitType)
     {
         this.hitType = hitType;
-    }
-
-    /**
-     * Get the monitoring name.
-     *
-     * @return the name used for monitoring this trigger
-     */
-    @Override
-    public String getMonitoringName()
-    {
-        return MONITORING_NAME;
-    }
-
-    /**
-     * Get the trigger type.
-     *
-     * @return trigger type
-     */
-    @Override
-    public int getTriggerType()
-    {
-        return TRIGGER_TYPE;
-    }
-
-    /**
-     * Does this algorithm include all relevant hits in each request
-     * so that it can be used to calculate multiplicity?
-     *
-     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
-     */
-    @Override
-    public boolean hasValidMultiplicity()
-    {
-        return true;
     }
 }

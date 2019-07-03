@@ -178,6 +178,59 @@ public class CylinderTrigger
         triggerQueue.clear();
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    @Override
+    public String getMonitoringName()
+    {
+        return MONITORING_NAME;
+    }
+
+    /**
+     * Get the trigger type.
+     *
+     * @return trigger type
+     */
+    @Override
+    public int getTriggerType()
+    {
+        return TRIGGER_TYPE;
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    @Override
+    public boolean hasValidMultiplicity()
+    {
+        return true;
+    }
+
+    /**
+     * Is the trigger configured?
+     *
+     * @return true if it is
+     */
+    @Override
+    public boolean isConfigured()
+    {
+        if (simpleMultiplicity < multiplicity) {
+            // if this is true, the volume checking code will never be run!
+            LOG.error("simpleMultiplicity (" + simpleMultiplicity +
+                      ") must be less than multiplicity (" + multiplicity +
+                      ")");
+            return false;
+        }
+
+        return true;
+    }
+
     @Override
     public void runTrigger(IPayload payload) throws TriggerException
     {
@@ -277,53 +330,5 @@ public class CylinderTrigger
         }
 
         return false;
-    }
-
-    @Override
-    public boolean isConfigured()
-    {
-        if (simpleMultiplicity < multiplicity) {
-            // if this is true, the volume checking code will never be run!
-            LOG.error("simpleMultiplicity (" + simpleMultiplicity +
-                      ") must be less than multiplicity (" + multiplicity +
-                      ")");
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Get the monitoring name.
-     *
-     * @return the name used for monitoring this trigger
-     */
-    @Override
-    public String getMonitoringName()
-    {
-        return MONITORING_NAME;
-    }
-
-    /**
-     * Get the trigger type.
-     *
-     * @return trigger type
-     */
-    @Override
-    public int getTriggerType()
-    {
-        return TRIGGER_TYPE;
-    }
-
-    /**
-     * Does this algorithm include all relevant hits in each request
-     * so that it can be used to calculate multiplicity?
-     *
-     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
-     */
-    @Override
-    public boolean hasValidMultiplicity()
-    {
-        return true;
     }
 }

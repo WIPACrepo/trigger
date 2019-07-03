@@ -112,6 +112,23 @@ public abstract class AbstractTrigger
         readouts.add(new TriggerReadout(rdoutType, offset, minus, plus));
     }
 
+    /**
+     * Check the trigger type.
+     *
+     * @param val trigger type
+     *
+     * @throws ConfigException if the configured trigger type is wrong
+     */
+    @Override
+    public void checkTriggerType(int val)
+        throws ConfigException
+    {
+        if (getTriggerType() != val) {
+            throw new ConfigException("Trigger type should be " +
+                                      getTriggerType() + ", not " + val);
+        }
+    }
+
     @Override
     public int compareTo(ITriggerAlgorithm a)
     {
@@ -1067,21 +1084,6 @@ public abstract class AbstractTrigger
         this.triggerName = triggerName;
         if (LOG.isDebugEnabled()) {
             LOG.debug("TriggerName = " + triggerName);
-        }
-    }
-
-    /**
-     * Set trigger type.
-     *
-     * @param val trigger type
-     */
-    @Override
-    public void checkTriggerType(int val)
-        throws ConfigException
-    {
-        if (getTriggerType() != val) {
-            throw new ConfigException("Trigger type should be " +
-                                      getTriggerType() + ", not " + val);
         }
     }
 

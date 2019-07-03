@@ -185,26 +185,6 @@ public class SlowMPTrigger
         //System.out.println("INITIALIZED SLOWMPTRIGGER");
     }
 
-    @Override
-    public boolean isConfigured()
-    {
-    	if (dc_algo_configured)
-    	{
-    		if (dc_algo)
-    		{
-    			return ( t_proximity_configured && t_min_configured && t_max_configured &&
-    					delta_d_configured && rel_v_configured && min_n_tuples_configured && max_event_length_configured );
-    		}
-    		else
-    		{
-    			return ( t_proximity_configured && t_min_configured && t_max_configured &&
-    	                alpha_min_configured && rel_v_configured && min_n_tuples_configured && max_event_length_configured );
-    		}
-    	}
-    	return false;
-
-    }
-
     /**
      * Add a trigger parameter.
      *
@@ -465,6 +445,17 @@ public class SlowMPTrigger
         muon_time_window = -1;
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    @Override
+    public String getMonitoringName()
+    {
+        return MONITORING_NAME;
+    }
+
     @Override
     public Map<String, Object> getTriggerMonitorMap() {
         HashMap<String, Object> map = new HashMap<String, Object>();
@@ -475,6 +466,48 @@ public class SlowMPTrigger
         map.put("trigger_list", trigger_list.size());
 
         return map;
+    }
+
+    /**
+     * Get the trigger type.
+     *
+     * @return trigger type
+     */
+    @Override
+    public int getTriggerType()
+    {
+        return TRIGGER_TYPE;
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    @Override
+    public boolean hasValidMultiplicity()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean isConfigured()
+    {
+    	if (dc_algo_configured)
+    	{
+    		if (dc_algo)
+    		{
+    			return ( t_proximity_configured && t_min_configured && t_max_configured &&
+    					delta_d_configured && rel_v_configured && min_n_tuples_configured && max_event_length_configured );
+    		}
+    		else
+    		{
+    			return ( t_proximity_configured && t_min_configured && t_max_configured &&
+    	                alpha_min_configured && rel_v_configured && min_n_tuples_configured && max_event_length_configured );
+    		}
+    	}
+    	return false;
     }
 
     @Override
@@ -838,39 +871,5 @@ public class SlowMPTrigger
         }
 
         return null;
-    }
-
-    /**
-     * Get the monitoring name.
-     *
-     * @return the name used for monitoring this trigger
-     */
-    @Override
-    public String getMonitoringName()
-    {
-        return MONITORING_NAME;
-    }
-
-    /**
-     * Get the trigger type.
-     *
-     * @return trigger type
-     */
-    @Override
-    public int getTriggerType()
-    {
-        return TRIGGER_TYPE;
-    }
-
-    /**
-     * Does this algorithm include all relevant hits in each request
-     * so that it can be used to calculate multiplicity?
-     *
-     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
-     */
-    @Override
-    public boolean hasValidMultiplicity()
-    {
-        return false;
     }
 }

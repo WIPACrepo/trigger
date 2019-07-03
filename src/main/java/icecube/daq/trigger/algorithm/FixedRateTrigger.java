@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 17448 2019-07-03 18:03:15Z dglo $
+ * Version $Id: FixedRateTrigger.java 17449 2019-07-03 18:47:17Z dglo $
  *
  * Date: May 1 2006
  *
@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 17448 2019-07-03 18:03:15Z dglo $
+ * @version $Id: FixedRateTrigger.java 17449 2019-07-03 18:47:17Z dglo $
  * @author pat
  */
 public class FixedRateTrigger
@@ -72,17 +72,6 @@ public class FixedRateTrigger
     public FixedRateTrigger()
     {
         triggerNumber = ++nextTriggerNumber;
-    }
-
-    /**
-     * Is the trigger configured?
-     *
-     * @return true if it is
-     */
-    @Override
-    public boolean isConfigured()
-    {
-        return configInterval;
     }
 
     /**
@@ -154,6 +143,51 @@ public class FixedRateTrigger
     }
 
     /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    @Override
+    public String getMonitoringName()
+    {
+        return MONITORING_NAME;
+    }
+
+    /**
+     * Get the trigger type.
+     *
+     * @return trigger type
+     */
+    @Override
+    public int getTriggerType()
+    {
+        return TRIGGER_TYPE;
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    @Override
+    public boolean hasValidMultiplicity()
+    {
+        return false;
+    }
+
+    /**
+     * Is the trigger configured?
+     *
+     * @return true if it is
+     */
+    @Override
+    public boolean isConfigured()
+    {
+        return configInterval;
+    }
+
+    /**
      * Reset the algorithm to its initial condition.
      */
     @Override
@@ -199,39 +233,5 @@ public class FixedRateTrigger
         IPayload oldHitPlus = new DummyPayload(hitTimeUTC.getOffsetUTCTime(1));
         setEarliestPayloadOfInterest(oldHitPlus);
         numberOfHitsProcessed++;
-    }
-
-    /**
-     * Get the monitoring name.
-     *
-     * @return the name used for monitoring this trigger
-     */
-    @Override
-    public String getMonitoringName()
-    {
-        return MONITORING_NAME;
-    }
-
-    /**
-     * Get the trigger type.
-     *
-     * @return trigger type
-     */
-    @Override
-    public int getTriggerType()
-    {
-        return TRIGGER_TYPE;
-    }
-
-    /**
-     * Does this algorithm include all relevant hits in each request
-     * so that it can be used to calculate multiplicity?
-     *
-     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
-     */
-    @Override
-    public boolean hasValidMultiplicity()
-    {
-        return false;
     }
 }

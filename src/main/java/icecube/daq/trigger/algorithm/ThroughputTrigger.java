@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
  *  makes a new TriggerRequest for each input TriggerRequest
  *  and then pass them to GlobalTrigBag.java.
  *
- * @version $Id: ThroughputTrigger.java 17448 2019-07-03 18:03:15Z dglo $
+ * @version $Id: ThroughputTrigger.java 17449 2019-07-03 18:47:17Z dglo $
  * @author shseo
  */
 public class ThroughputTrigger
@@ -47,43 +47,6 @@ public class ThroughputTrigger
     {
         super();
     }
-    /**
-     * This is the main method and called in GlobalTrigHandler.java.
-     * Since this is ThroughputTrigger, this method do nothing but wrapping
-     * an inputTrigger to GlobalTrigEvent (not the final GlobalTrigEvent yet.....).
-     *
-     * @param payload
-     * @throws TriggerException
-     */
-    @Override
-    public void runTrigger(IPayload payload) throws TriggerException
-    {
-        LOG.debug("inside runTrigger in ThroughputTrigger");
-        //DummyPayload dummy = new DummyPayload(mtGlobalTrigEventPayload.getFirstTimeUTC());
-        //setEarliestPayloadOfInterest(dummy);
-        try {
-            wrapTrigger((ITriggerRequestPayload) payload);
-        } catch (Exception e) {
-            LOG.error("Couldn't wrap trigger", e);
-        }
-
-    }
-
-    /**
-      * method to flush the trigger
-      * basically indicates that there will be no further payloads to process
-      */
-    @Override
-     public void flush()
-     {
-        //--nothing needs to be done in this ThroughputTrigger algorithm!
-     }
-
-    @Override
-    public boolean isConfigured()
-    {
-        return true;
-    }
 
     /**
      * Add a trigger parameter.
@@ -99,6 +62,16 @@ public class ThroughputTrigger
     {
         throw new UnknownParameterException("This trigger needs no parameter");
     }
+
+    /**
+      * method to flush the trigger
+      * basically indicates that there will be no further payloads to process
+      */
+    @Override
+     public void flush()
+     {
+        //--nothing needs to be done in this ThroughputTrigger algorithm!
+     }
 
     /**
      * Get the monitoring name.
@@ -132,5 +105,32 @@ public class ThroughputTrigger
     public boolean hasValidMultiplicity()
     {
         return true;
+    }
+
+    @Override
+    public boolean isConfigured()
+    {
+        return true;
+    }
+
+    /**
+     * This is the main method and called in GlobalTrigHandler.java.
+     * Since this is ThroughputTrigger, this method do nothing but wrapping
+     * an inputTrigger to GlobalTrigEvent (not the final GlobalTrigEvent yet.....).
+     *
+     * @param payload
+     * @throws TriggerException
+     */
+    @Override
+    public void runTrigger(IPayload payload) throws TriggerException
+    {
+        LOG.debug("inside runTrigger in ThroughputTrigger");
+        //DummyPayload dummy = new DummyPayload(mtGlobalTrigEventPayload.getFirstTimeUTC());
+        //setEarliestPayloadOfInterest(dummy);
+        try {
+            wrapTrigger((ITriggerRequestPayload) payload);
+        } catch (Exception e) {
+            LOG.error("Couldn't wrap trigger", e);
+        }
     }
 }

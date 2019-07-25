@@ -150,6 +150,18 @@ public class MockAlgorithm
         return intervals.get(0);
     }
 
+    /**
+     * Return the difference between the start of the first cached request
+     * and the earliest payload of interest (in DAQ ticks).
+     *
+     * @return latency in DAQ ticks
+     */
+    @Override
+    public long getLatency()
+    {
+        return -1L;
+    }
+
     @Override
     public String getMonitoringName()
     {

@@ -20,6 +20,21 @@ public class AlgorithmStatistics
         return "";
     }
 
+    public String getLatency()
+    {
+        final long latency = algorithm.getLatency();
+
+        if (latency < 10000L) {
+            return String.format("%.2fns", (float) latency / 10.0);
+        } else if (latency < 10000000L) {
+            return String.format("%.2fus", (float) latency / 10000.0);
+        } else if (latency < 10000000000L) {
+            return String.format("%.2fms", (float) latency / 10000000.0);
+        }
+
+        return String.format("%.2fs", (float) latency / 10000000000.0);
+    }
+
     /**
      * Return trigger name (without excess verbiage)
      *
@@ -84,11 +99,14 @@ public class AlgorithmStatistics
     @Override
     public String toString()
     {
+        final int cached = getNumberOfCachedRequests();
         StringBuilder buf = new StringBuilder(getName());
         buf.append(':').append(getNumberOfQueuedInputs());
         buf.append("->").append(getNumberOfCreatedRequests());
-        buf.append(" (").append(getNumberOfCachedRequests());
-        buf.append(" cached)");
+        if (cached > 0) {
+            buf.append(" (").append(cached).append(" cached, latency ");
+            buf.append(getLatency()).append(")");
+        }
 
         String extra = getExtra();
         if (extra.length() > 0) {

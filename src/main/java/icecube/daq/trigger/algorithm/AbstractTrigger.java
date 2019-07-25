@@ -639,6 +639,34 @@ public abstract class AbstractTrigger
     }
 
     /**
+     * Return the difference between the start of the first cached request
+     * and the earliest payload of interest (in DAQ ticks).
+     *
+     * @return latency in DAQ ticks
+     */
+    @Override
+    public long getLatency()
+    {
+        final long reqStart;
+        synchronized (requests) {
+            if (requests.size() == 0) {
+                return 0L;
+            }
+
+            reqStart = requests.get(0).getFirstTimeUTC().longValue();
+        }
+
+        final long earliest;
+        if (earliestPayloadOfInterest == null) {
+            return 0L;
+        }
+
+        // latency is the difference between the start time of the oldest
+        // request and the earliest payload of interest
+        return earliestPayloadOfInterest.getUTCTime() - reqStart;
+    }
+
+    /**
      * Get the monitoring name.
      *
      * @return the name used for monitoring this trigger

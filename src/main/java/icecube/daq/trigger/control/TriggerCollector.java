@@ -623,7 +623,8 @@ class CollectorThread
                     // Deal with overlapping request
                     if (interval.end < oldInterval.start) {
                         LOG.error("New interval " + interval +
-                                  " precedes old interval " + oldInterval);
+                                  " precedes old interval " + oldInterval +
+                                  "; stopping payload collector");
                         oldInterval = null;
                         stopping = true;
                         break;

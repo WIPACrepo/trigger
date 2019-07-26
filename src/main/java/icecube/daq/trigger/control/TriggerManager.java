@@ -253,6 +253,11 @@ public class TriggerManager
     @Override
     public void analyze(List<Spliceable> splicedObjects)
     {
+        if (inputList.getNumSubscribers() <= 0) {
+            throw new Error("No consumers for " + splicedObjects.size() +
+                            " hits");
+        }
+
         for (Spliceable spl : splicedObjects) {
             ILoadablePayload payload = (ILoadablePayload) spl;
 

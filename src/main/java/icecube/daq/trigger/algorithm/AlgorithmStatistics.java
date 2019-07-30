@@ -1,7 +1,15 @@
 package icecube.daq.trigger.algorithm;
 
+import icecube.daq.payload.IPayload;
+
+/**
+ * Produce a one-line summary of algorithm statistics
+ */
 public class AlgorithmStatistics
 {
+    private static final boolean ADD_EARLIEST = true;
+    private static final boolean ADD_LATENCY = true;
+
     private ITriggerAlgorithm algorithm;
 
     public AlgorithmStatistics(ITriggerAlgorithm algorithm)
@@ -9,6 +17,11 @@ public class AlgorithmStatistics
         this.algorithm = algorithm;
     }
 
+    /**
+     * Add special debugging stuff here
+     *
+     * @return extra debugging string
+     */
     public String getExtra()
     {
         /*
@@ -100,16 +113,43 @@ public class AlgorithmStatistics
     public String toString()
     {
         final int cached = getNumberOfCachedRequests();
+
         StringBuilder buf = new StringBuilder(getName());
         buf.append(':').append(getNumberOfQueuedInputs());
         buf.append("->").append(getNumberOfCreatedRequests());
+
+        boolean addParen = false;
         if (cached > 0) {
-            buf.append(" (").append(cached).append(" cached, latency ");
-            buf.append(getLatency()).append(")");
+            buf.append(" (").append(cached).append(" cached");
+            if (ADD_LATENCY) {
+                buf.append(", latency ").append(getLatency());
+            }
+            addParen = true;
+        }
+
+        if (ADD_EARLIEST) {
+            if (cached > 0) {
+                buf.append(", ");
+            } else {
+                buf.append(" (");
+                addParen = true;
+            }
+
+            IPayload earliest = algorithm.getEarliestPayloadOfInterest();
+            buf.append("earliest ");
+            if (earliest == null) {
+                buf.append("NULL");
+            } else {
+                buf.append(earliest.getUTCTime());
+            }
+        }
+
+        if (addParen) {
+            buf.append(")");
         }
 
         String extra = getExtra();
-        if (extra.length() > 0) {
+        if (extra != null && extra.length() > 0) {
             buf.append(" :: ").append(extra);
         }
 

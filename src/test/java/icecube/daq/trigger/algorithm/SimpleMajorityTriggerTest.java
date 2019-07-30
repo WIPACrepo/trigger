@@ -239,15 +239,9 @@ public class SimpleMajorityTriggerTest
         return configDir;
     }
 
-    private void run(int threshold, boolean allowRerun, int numTails,
-                     int numPerTail)
+    private void run(int threshold, int numTails, int numPerTail)
         throws DOMRegistryException, IOException, TriggerException
     {
-        if (!allowRerun) {
-            System.setProperty("disableSMTRerun", "1");
-        }
-        SimpleMajorityTrigger.setRerunProperty();
-
         final int srcNum;
         if (threshold == 1 || threshold == 6) {
             srcNum = TriggerCollection.ICETOP_TRIGGER;
@@ -312,9 +306,6 @@ public class SimpleMajorityTriggerTest
 
         try {
             int expected = numObjs / threshold;
-            if (!allowRerun && threshold == 1) {
-                expected /= 2;
-            }
 
             int diff = Math.abs(totReq - expected);
             assertTrue("Expected " + expected + " requests, not " + totReq,
@@ -328,21 +319,16 @@ public class SimpleMajorityTriggerTest
         }
     }
 
-    private void writeClusteredHits(int threshold, int numRequests,
-                                    boolean allowRerun)
+    private void writeClusteredHits(int threshold, int numRequests)
         throws DOMRegistryException, IOException, TriggerException
     {
-        writeClusteredHits(threshold, numRequests, numRequests, allowRerun);
+        writeClusteredHits(threshold, numRequests, numRequests);
     }
 
     private void writeClusteredHits(int threshold, int numRequests,
-                                    int expRequests, boolean allowRerun)
+                                    int expRequests)
         throws DOMRegistryException, IOException, TriggerException
     {
-        if (!allowRerun) {
-            System.setProperty("disableSMTRerun", "1");
-        }
-
         SimpleMajorityTrigger trig = null;
         try {
             final String configDir = getConfigurationDirectory();
@@ -490,90 +476,46 @@ public class SimpleMajorityTriggerTest
         super.tearDown();
     }
 
-    public void testComboOldSMT1()
+    public void testComboSMT1()
         throws DOMRegistryException, IOException, TriggerException
     {
-        run(1, false, 24, 1234);
+        run(1, 24, 1234);
     }
 
-    public void testComboNewSMT1()
+    public void testComboSMT3()
         throws DOMRegistryException, IOException, TriggerException
     {
-        run(1, true, 24, 1234);
+        run(3, 24, 1234);
     }
 
-    public void testComboOldSMT3()
+    public void testComboSMT6()
         throws DOMRegistryException, IOException, TriggerException
     {
-        run(3, false, 24, 1234);
+        run(6, 24, 1234);
     }
 
-    public void testComboNewSMT3()
+    public void testComboSMT8()
         throws DOMRegistryException, IOException, TriggerException
     {
-        run(3, true, 24, 1234);
+        run(8, 24, 1234);
     }
 
-    public void testComboOldSMT6()
+    public void testDirectSMT1()
         throws DOMRegistryException, IOException, TriggerException
     {
-        run(6, false, 24, 1234);
+        writeClusteredHits(1, 200);
     }
 
-    public void testComboNewSMT6()
+    public void testDirectSMT3()
         throws DOMRegistryException, IOException, TriggerException
     {
-        run(6, true, 24, 1234);
+        writeClusteredHits(3, 200);
     }
 
-    public void testComboOldSMT8()
+    public void testDirectSMT8()
         throws DOMRegistryException, IOException, TriggerException
     {
-        run(8, false, 24, 1234);
-    }
-
-    public void testComboNewSMT8()
-        throws DOMRegistryException, IOException, TriggerException
-    {
-        run(8, true, 24, 1234);
-    }
-
-    public void testDirectSMT1Old()
-        throws DOMRegistryException, IOException, TriggerException
-    {
-        final int numReqs = 200;
-
-        writeClusteredHits(1, numReqs, numReqs / 2, false);
-    }
-
-    public void testDirectSMT1New()
-        throws DOMRegistryException, IOException, TriggerException
-    {
-        writeClusteredHits(1, 200, true);
-    }
-
-    public void testDirectSMT3Old()
-        throws DOMRegistryException, IOException, TriggerException
-    {
-        writeClusteredHits(3, 200, false);
-    }
-
-    public void testDirectSMT3New()
-        throws DOMRegistryException, IOException, TriggerException
-    {
-        writeClusteredHits(3, 200, true);
-    }
-
-    public void testDirectSMT8Old()
-        throws DOMRegistryException, IOException, TriggerException
-    {
-        writeClusteredHits(8, 200, false);
-    }
-
-    public void testDirectSMT8New()
-        throws DOMRegistryException, IOException, TriggerException
-    {
-        writeClusteredHits(8, 200, true);
+        writeClusteredHits(8, 200);
     }
 
     public static void main(String[] args)

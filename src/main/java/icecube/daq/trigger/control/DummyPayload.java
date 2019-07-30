@@ -1,7 +1,7 @@
 /*
  * class: DummyPayload
  *
- * Version $Id: DummyPayload.java 17114 2018-09-26 09:51:56Z dglo $
+ * Version $Id: DummyPayload.java 17485 2019-07-30 15:10:03Z dglo $
  *
  * Date: October 7 2005
  *
@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
 /**
  * This class is a dummy payload that only has a UTC time associated with it.
  *
- * @version $Id: DummyPayload.java 17114 2018-09-26 09:51:56Z dglo $
+ * @version $Id: DummyPayload.java 17485 2019-07-30 15:10:03Z dglo $
  * @author pat
  */
 public class DummyPayload
@@ -51,7 +51,7 @@ public class DummyPayload
      *
      * @param time payload time
      */
-    private DummyPayload(long time)
+    public DummyPayload(long time)
     {
         this.time = time;
     }

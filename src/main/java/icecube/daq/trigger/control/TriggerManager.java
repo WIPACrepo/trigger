@@ -575,16 +575,17 @@ public class TriggerManager
             }
 
             // Calculate time since last hit
-            double timeDiff;
+            long timeDiff;
             if (timeOfLastHit == null) {
-                timeDiff = 0.0;
+                timeDiff = 0;
             } else {
-                timeDiff = hit.getHitTimeUTC().timeDiff_ns(timeOfLastHit);
+                timeDiff = hit.getUTCTime() - timeOfLastHit.longValue();
             }
 
             // check to see if timeDiff is reasonable, if not ignore it
-            if (timeDiff < 0.0) {
-                LOG.error("Hit from " + hit.getSourceID() +
+            if (timeDiff < 0) {
+                LOG.error("Hit " + hit.getUTCTime() +
+                          " from " + hit.getSourceID() +
                           " out of order! This time - Last time = " +
                           timeDiff + (srcOfLastHit == null ? "" :
                                       ", src of last hit = " +

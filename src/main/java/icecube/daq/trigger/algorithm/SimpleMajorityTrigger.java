@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17180 2018-10-25 19:26:12Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17496 2019-08-02 20:55:31Z dglo $
  *
  * Date: August 19 2005
  *
@@ -109,21 +109,27 @@ class HitCollection
     @Override
     public String toString()
     {
-        return "HitCollection*" + hits.size();
+        if (hits.size() < 1) {
+            return "HitCollection[]";
+        } else if (hits.size() == 1) {
+            return "HitCollection[" + getFirst().getUTCTime() + "]";
+        }
+
+        return "HitCollection*" + hits.size() + "[" + getFirst().getUTCTime() +
+            "-" + getLast().getUTCTime() + "]";
     }
 }
 
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17180 2018-10-25 19:26:12Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17496 2019-08-02 20:55:31Z dglo $
  * @author pat
  */
-public final class SimpleMajorityTrigger extends AbstractTrigger
+public final class SimpleMajorityTrigger
+    extends AbstractTrigger
 {
-    /**
-     * Log object for this class
-     */
+    /** Log object for this class */
     private static final Log LOG =
         LogFactory.getLog(SimpleMajorityTrigger.class);
 
@@ -168,23 +174,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         triggerNumber = ++nextTriggerNumber;
 
         setRerunProperty();
-    }
-
-    /*
-     *
-     * Methods of ITriggerConfig
-     *
-     */
-
-    /**
-     * Is the trigger configured?
-     *
-     * @return true if it is
-     */
-    @Override
-    public boolean isConfigured()
-    {
-        return (configThreshold && configTimeWindow);
     }
 
     /**
@@ -233,6 +222,40 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
     }
 
     /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    @Override
+    public String getMonitoringName()
+    {
+        return "SIMPLE_MULTIPLICITY";
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    @Override
+    public boolean hasValidMultiplicity()
+    {
+        return true;
+    }
+
+    /**
+     * Is the trigger configured?
+     *
+     * @return true if it is
+     */
+    @Override
+    public boolean isConfigured()
+    {
+        return (configThreshold && configTimeWindow);
+    }
+
+    /**
      * Run the trigger algorithm on a payload.
      *
      * @param payload payload to process
@@ -254,21 +277,6 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
             }
         }
 
-        runInternal(payload);
-    }
-
-    /**
-     * Run the trigger algorithm on a payload.
-     *
-     * @param payload payload to process
-     * @param rerunHit if a request is created, run the hit again
-     *
-     * @throws icecube.daq.trigger.exceptions.TriggerException
-     *          if the algorithm doesn't like this payload
-     */
-    private void runInternal(IPayload payload)
-        throws TriggerException
-    {
         // check that this is a hit
         int interfaceType = payload.getPayloadInterfaceType();
         if ((interfaceType != PayloadInterfaceRegistry.I_HIT_PAYLOAD) &&
@@ -293,7 +301,7 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         lastHitTime = hitTimeUTC;
 
         if (slidingTimeWindow.size() == 0) {
-            // Initialize earliest payload of interst
+            // Initialize earliest payload of interest
             setEarliestPayloadOfInterest(hit);
         }
 
@@ -540,34 +548,12 @@ public final class SimpleMajorityTrigger extends AbstractTrigger
         public String toString()
         {
             if (size() == 0) {
-                return "Window[]*0";
+                return "Window[]";
             }
 
-            return "Window[" + startTime() + "-" + endTime() + "]*" + size();
+            return "Window*" + size() + "[" + startTime() + "-" + endTime() +
+                "]";
         }
-    }
-
-    /**
-     * Get the monitoring name.
-     *
-     * @return the name used for monitoring this trigger
-     */
-    @Override
-    public String getMonitoringName()
-    {
-        return "SIMPLE_MULTIPLICITY";
-    }
-
-    /**
-     * Does this algorithm include all relevant hits in each request
-     * so that it can be used to calculate multiplicity?
-     *
-     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
-     */
-    @Override
-    public boolean hasValidMultiplicity()
-    {
-        return true;
     }
 
     public static final void setRerunProperty()

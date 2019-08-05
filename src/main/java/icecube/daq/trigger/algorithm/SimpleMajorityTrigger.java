@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17449 2019-07-03 18:47:17Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17506 2019-08-05 19:29:16Z dglo $
  *
  * Date: August 19 2005
  *
@@ -108,14 +108,21 @@ class HitCollection
     @Override
     public String toString()
     {
-        return "HitCollection*" + hits.size();
+        if (hits.size() < 1) {
+            return "HitCollection[]";
+        } else if (hits.size() == 1) {
+            return "HitCollection[" + getFirst().getUTCTime() + "]";
+        }
+
+        return "HitCollection*" + hits.size() + "[" + getFirst().getUTCTime() +
+            "-" + getLast().getUTCTime() + "]";
     }
 }
 
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17449 2019-07-03 18:47:17Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17506 2019-08-05 19:29:16Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger
@@ -132,10 +139,10 @@ public final class SimpleMajorityTrigger
     private static final String MONITORING_NAME = "SIMPLE_MULTIPLICITY";
 
     /**
-     * If the 'disableSMTRerun' property is set, the hit which triggers a
-     * request will not be used as the starting point for a new request.
+     * If the 'disableQuickPush' property is set, unused hits will not be
+     * used to determine when an interval can be released
      */
-    private static boolean allowRerun;
+    private static boolean allowQuickPush;
 
     private static int nextTriggerNumber;
     private int triggerNumber;
@@ -164,14 +171,14 @@ public final class SimpleMajorityTrigger
      */
     private IUTCTime lastHitTime = null;
 
-    /** If 'allowSMTRerun' was not set, log a warning */
-    private boolean loggedBuggy = false;
+    /** On the first trip through runTrigger(), log mode */
+    private boolean loggedQuick = false;
 
     public SimpleMajorityTrigger()
     {
         triggerNumber = ++nextTriggerNumber;
 
-        setRerunProperty();
+        checkQuickPushProperty();
     }
 
     /**
@@ -191,7 +198,7 @@ public final class SimpleMajorityTrigger
             threshold = Integer.parseInt(value);
             configThreshold = true;
         } else if (name.compareTo("timeWindow") == 0) {
-            timeWindow = Integer.parseInt(value);
+            setTimeWindow(Integer.parseInt(value));
             configTimeWindow = true;
         } else if (name.compareTo("triggerPrescale") == 0) {
             triggerPrescale = Integer.parseInt(value);
@@ -277,30 +284,15 @@ public final class SimpleMajorityTrigger
         throws TriggerException
     {
         // XXX when this is deleted, remove these phrases from all unit tests
-        if (!loggedBuggy) {
-            loggedBuggy = true;
-            if (!allowRerun) {
-                LOG.error("Using buggy SMT algorithm");
+        if (!loggedQuick) {
+            loggedQuick = true;
+            if (!allowQuickPush) {
+                LOG.error("Using slow SMT algorithm");
             } else {
-                LOG.error("Using fixed SMT algorithm");
+                LOG.error("Using quick SMT algorithm");
             }
         }
 
-        runInternal(payload);
-    }
-
-    /**
-     * Run the trigger algorithm on a payload.
-     *
-     * @param payload payload to process
-     * @param rerunHit if a request is created, run the hit again
-     *
-     * @throws icecube.daq.trigger.exceptions.TriggerException
-     *          if the algorithm doesn't like this payload
-     */
-    private void runInternal(IPayload payload)
-        throws TriggerException
-    {
         // check that this is a hit
         int interfaceType = payload.getPayloadInterfaceType();
         if ((interfaceType != PayloadInterfaceRegistry.I_HIT_PAYLOAD) &&
@@ -325,7 +317,7 @@ public final class SimpleMajorityTrigger
         lastHitTime = hitTimeUTC;
 
         if (slidingTimeWindow.size() == 0) {
-            // Initialize earliest payload of interst
+            // Initialize earliest payload of interest
             setEarliestPayloadOfInterest(hit);
         }
 
@@ -340,6 +332,27 @@ public final class SimpleMajorityTrigger
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Hit " + hit + " isn't usable");
             }
+
+            if (allowQuickPush) {
+                // if this hit is outside the window, flush cached interval
+                if (hitsWithinTriggerWindow.size() > 0) {
+                    long trigTime =
+                        hitsWithinTriggerWindow.getLast().getUTCTime();
+                    if (trigTime + timeWindow < hit.getUTCTime()) {
+                        flushTrigger();
+                        slidingTimeWindow.clear();
+                    }
+                }
+
+                // if this hit is outside the window, slide it
+                if (slidingTimeWindow.size() > 0 &&
+                    slidingTimeWindow.getFirst().getUTCTime() + timeWindow <
+                    hit.getUTCTime())
+                {
+                    slidingTimeWindow.slide();
+                }
+            }
+
             return;
         }
 
@@ -402,7 +415,7 @@ public final class SimpleMajorityTrigger
                                hitsWithinTriggerWindow.size() + " hits");
                  }
                  flushTrigger();
-                 if (allowRerun && rerunHit) {
+                 if (rerunHit) {
                      if (LOG.isDebugEnabled()) {
                          LOG.debug("Rerun analysis");
                      }
@@ -438,12 +451,12 @@ public final class SimpleMajorityTrigger
 
     public int getTimeWindow()
     {
-        return timeWindow;
+        return timeWindow / 10;
     }
 
     public void setTimeWindow(int timeWindow)
     {
-        this.timeWindow = timeWindow;
+        this.timeWindow = timeWindow * 10;
     }
 
     /**
@@ -546,7 +559,7 @@ public final class SimpleMajorityTrigger
 
         private IUTCTime endTime()
         {
-            return (startTime().getOffsetUTCTime(timeWindow * 10L));
+            return (startTime().getOffsetUTCTime(timeWindow));
         }
 
         private boolean inTimeWindow(IUTCTime hitTime)
@@ -572,16 +585,17 @@ public final class SimpleMajorityTrigger
         public String toString()
         {
             if (size() == 0) {
-                return "Window[]*0";
+                return "Window[]";
             }
 
-            return "Window[" + startTime() + "-" + endTime() + "]*" + size();
+            return "Window*" + size() + "[" + startTime() + "-" + endTime() +
+                "]";
         }
     }
 
-    public static final void setRerunProperty()
+    public static final void checkQuickPushProperty()
     {
-        final String prop = System.getProperty("disableSMTRerun");
-        allowRerun = prop == null;
+        final String prop = System.getProperty("disableQuickPush");
+        allowQuickPush = prop == null;
     }
 }

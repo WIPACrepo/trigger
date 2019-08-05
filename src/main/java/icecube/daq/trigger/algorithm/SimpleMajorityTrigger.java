@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17497 2019-08-05 17:18:13Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17502 2019-08-05 17:54:53Z dglo $
  *
  * Date: August 19 2005
  *
@@ -123,7 +123,7 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17497 2019-08-05 17:18:13Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17502 2019-08-05 17:54:53Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger
@@ -580,46 +580,9 @@ public final class SimpleMajorityTrigger
         }
     }
 
-<<<<<<< .mine
     public static final void checkQuickPushProperty()
     {
         final String prop = System.getProperty("disableQuickPush");
         allowQuickPush = prop == null;
     }
-||||||| .r17438
-    /**
-     * Get the monitoring name.
-     *
-     * @return the name used for monitoring this trigger
-     */
-    @Override
-    public String getMonitoringName()
-    {
-        return "SIMPLE_MULTIPLICITY";
-    }
-
-    /**
-     * Does this algorithm include all relevant hits in each request
-     * so that it can be used to calculate multiplicity?
-     *
-     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
-     */
-    @Override
-    public boolean hasValidMultiplicity()
-    {
-        return true;
-    }
-
-    public static final void setRerunProperty()
-    {
-        final String prop = System.getProperty("disableSMTRerun");
-        allowRerun = prop == null;
-    }
-=======
-    public static final void setRerunProperty()
-    {
-        final String prop = System.getProperty("disableSMTRerun");
-        allowRerun = prop == null;
-    }
->>>>>>> .r17496
 }

@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17496 2019-08-02 20:55:31Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17497 2019-08-05 17:18:13Z dglo $
  *
  * Date: August 19 2005
  *
@@ -123,7 +123,7 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17496 2019-08-02 20:55:31Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17497 2019-08-05 17:18:13Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger
@@ -133,11 +133,14 @@ public final class SimpleMajorityTrigger
     private static final Log LOG =
         LogFactory.getLog(SimpleMajorityTrigger.class);
 
+    /** I3Live monitoring name for this algorithm */
+    private static final String MONITORING_NAME = "SIMPLE_MULTIPLICITY";
+
     /**
-     * If the 'disableSMTRerun' property is set, the hit which triggers a
-     * request will not be used as the starting point for a new request.
+     * If the 'disableQuickPush' property is set, unused hits will not be
+     * used to determine when an interval can be released
      */
-    private static boolean allowRerun;
+    private static boolean allowQuickPush;
 
     private static int nextTriggerNumber;
     private int triggerNumber;
@@ -166,14 +169,14 @@ public final class SimpleMajorityTrigger
      */
     private IUTCTime lastHitTime = null;
 
-    /** If 'allowSMTRerun' was not set, log a warning */
-    private boolean loggedBuggy = false;
+    /** On the first trip through runTrigger(), log mode */
+    private boolean loggedQuick = false;
 
     public SimpleMajorityTrigger()
     {
         triggerNumber = ++nextTriggerNumber;
 
-        setRerunProperty();
+        checkQuickPushProperty();
     }
 
     /**
@@ -193,7 +196,7 @@ public final class SimpleMajorityTrigger
             threshold = Integer.parseInt(value);
             configThreshold = true;
         } else if (name.compareTo("timeWindow") == 0) {
-            timeWindow = Integer.parseInt(value);
+            setTimeWindow(Integer.parseInt(value));
             configTimeWindow = true;
         } else if (name.compareTo("triggerPrescale") == 0) {
             triggerPrescale = Integer.parseInt(value);
@@ -229,7 +232,7 @@ public final class SimpleMajorityTrigger
     @Override
     public String getMonitoringName()
     {
-        return "SIMPLE_MULTIPLICITY";
+        return MONITORING_NAME;
     }
 
     /**
@@ -268,12 +271,12 @@ public final class SimpleMajorityTrigger
         throws TriggerException
     {
         // XXX when this is deleted, remove these phrases from all unit tests
-        if (!loggedBuggy) {
-            loggedBuggy = true;
-            if (!allowRerun) {
-                LOG.error("Using buggy SMT algorithm");
+        if (!loggedQuick) {
+            loggedQuick = true;
+            if (!allowQuickPush) {
+                LOG.error("Using slow SMT algorithm");
             } else {
-                LOG.error("Using fixed SMT algorithm");
+                LOG.error("Using quick SMT algorithm");
             }
         }
 
@@ -316,6 +319,27 @@ public final class SimpleMajorityTrigger
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Hit " + hit + " isn't usable");
             }
+
+            if (allowQuickPush) {
+                // if this hit is outside the window, flush cached interval
+                if (hitsWithinTriggerWindow.size() > 0) {
+                    long trigTime =
+                        hitsWithinTriggerWindow.getLast().getUTCTime();
+                    if (trigTime + timeWindow < hit.getUTCTime()) {
+                        flushTrigger();
+                        slidingTimeWindow.clear();
+                    }
+                }
+
+                // if this hit is outside the window, slide it
+                if (slidingTimeWindow.size() > 0 &&
+                    slidingTimeWindow.getFirst().getUTCTime() + timeWindow <
+                    hit.getUTCTime())
+                {
+                    slidingTimeWindow.slide();
+                }
+            }
+
             return;
         }
 
@@ -378,7 +402,7 @@ public final class SimpleMajorityTrigger
                                hitsWithinTriggerWindow.size() + " hits");
                  }
                  flushTrigger();
-                 if (allowRerun && rerunHit) {
+                 if (rerunHit) {
                      if (LOG.isDebugEnabled()) {
                          LOG.debug("Rerun analysis");
                      }
@@ -414,12 +438,12 @@ public final class SimpleMajorityTrigger
 
     public int getTimeWindow()
     {
-        return timeWindow;
+        return timeWindow / 10;
     }
 
     public void setTimeWindow(int timeWindow)
     {
-        this.timeWindow = timeWindow;
+        this.timeWindow = timeWindow * 10;
     }
 
     /**
@@ -522,7 +546,7 @@ public final class SimpleMajorityTrigger
 
         private IUTCTime endTime()
         {
-            return (startTime().getOffsetUTCTime((double) timeWindow));
+            return (startTime().getOffsetUTCTime((double) (timeWindow / 10)));
         }
 
         private boolean inTimeWindow(IUTCTime hitTime)
@@ -556,9 +580,46 @@ public final class SimpleMajorityTrigger
         }
     }
 
+<<<<<<< .mine
+    public static final void checkQuickPushProperty()
+    {
+        final String prop = System.getProperty("disableQuickPush");
+        allowQuickPush = prop == null;
+    }
+||||||| .r17438
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    @Override
+    public String getMonitoringName()
+    {
+        return "SIMPLE_MULTIPLICITY";
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    @Override
+    public boolean hasValidMultiplicity()
+    {
+        return true;
+    }
+
     public static final void setRerunProperty()
     {
         final String prop = System.getProperty("disableSMTRerun");
         allowRerun = prop == null;
     }
+=======
+    public static final void setRerunProperty()
+    {
+        final String prop = System.getProperty("disableSMTRerun");
+        allowRerun = prop == null;
+    }
+>>>>>>> .r17496
 }

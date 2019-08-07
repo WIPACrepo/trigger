@@ -72,6 +72,14 @@ public interface ITriggerAlgorithm
     Interval getInterval(Interval interval);
 
     /**
+     * Return the difference between the start of the first cached request
+     * and the earliest payload of interest (in DAQ ticks).
+     *
+     * @return latency in DAQ ticks
+     */
+    long getLatency();
+
+    /**
      * Get the monitoring name.
      *
      * @return the name used for monitoring this trigger

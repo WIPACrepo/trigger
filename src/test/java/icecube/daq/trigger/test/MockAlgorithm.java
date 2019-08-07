@@ -149,6 +149,11 @@ public class MockAlgorithm
         return intervals.get(0);
     }
 
+    public long getLatency()
+    {
+        return -1L;
+    }
+
     @Override
     public String getMonitoringName()
     {

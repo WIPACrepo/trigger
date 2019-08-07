@@ -17,6 +17,14 @@ public interface AbstractTriggerMBean
     int getInputQueueSize();
 
     /**
+     * Return the difference between the start of the first cached request
+     * and the earliest payload of interest (in DAQ ticks).
+     *
+     * @return latency in DAQ ticks
+     */
+    long getLatency();
+
+    /**
      * Get number of cached requests.
      *
      * @return number of cached requests

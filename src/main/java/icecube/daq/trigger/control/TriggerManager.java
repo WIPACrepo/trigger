@@ -306,7 +306,7 @@ public class TriggerManager
     @Override
     public void flush()
     {
-        if (queueList.getNumSubscribers() > 0) {
+        if (!queueList.isEmpty()) {
             try {
                 queueList.push(FLUSH_PAYLOAD);
             } catch (Error err) {
@@ -986,13 +986,13 @@ public class TriggerManager
     @Override
     public void unsubscribeAll()
     {
-        if (queueList.getNumSubscribers() > 0) {
+        if (!queueList.isEmpty()) {
             for (ITriggerAlgorithm a : algorithms) {
                 a.unsubscribe(queueList);
                 a.resetAlgorithm();
             }
 
-            if (queueList.getNumSubscribers() > 0) {
+            if (!queueList.isEmpty()) {
                 LOG.error(String.format("SubscribedList still has %d entries",
                                         queueList.size()));
             }

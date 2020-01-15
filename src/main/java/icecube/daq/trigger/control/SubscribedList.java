@@ -49,7 +49,7 @@ public class SubscribedList
      */
     public void push(IPayload pay)
     {
-        if (subs.size() == 0) {
+        if (subs.isEmpty()) {
             throw new Error("No subscribers have been added");
         }
 
@@ -152,7 +152,7 @@ public class SubscribedList
         @Override
         public boolean hasData()
         {
-            return list.size() > 0;
+            return !list.isEmpty();
         }
 
         /**
@@ -176,7 +176,7 @@ public class SubscribedList
         public IPayload pop()
         {
             synchronized (list) {
-                while (!stopping && list.size() == 0) {
+                while (!stopping && list.isEmpty()) {
                     try {
                         list.wait();
                     } catch (InterruptedException ie) {
@@ -184,7 +184,7 @@ public class SubscribedList
                     }
                 }
 
-                if (stopping && list.size() == 0) {
+                if (stopping && list.isEmpty()) {
                     stopped = true;
                     return null;
                 }

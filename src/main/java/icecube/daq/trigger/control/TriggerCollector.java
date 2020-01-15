@@ -58,7 +58,7 @@ public class TriggerCollector
                             IMonitoringDataManager moniDataMgr,
                             SubscriptionManager subMgr)
     {
-        if (algorithms == null || algorithms.size() == 0) {
+        if (algorithms == null || algorithms.isEmpty()) {
             throw new Error("No algorithms specified");
         }
 
@@ -670,7 +670,7 @@ class CollectorThread
             notifySNDAQ(list);
         }
 
-        if (list.size() == 0) {
+        if (list.isEmpty()) {
             LOG.error("No requests found for interval " + interval);
         } else if (list.size() == 1) {
             pushTrigger(list.get(0));
@@ -911,7 +911,7 @@ class OutputThread
         }
 
         // cannot fix this request if there are no subrequests
-        if (payList == null || payList.size() == 0) {
+        if (payList == null || payList.isEmpty()) {
             return false;
         }
 
@@ -1018,9 +1018,9 @@ class OutputThread
         boolean warnedChannel = false;
 
         ByteBuffer trigBuf;
-        while (!stopping || outputQueue.size() > 0) {
+        while (!stopping || !outputQueue.isEmpty()) {
             synchronized (outputQueue) {
-                if (!stopping && outputQueue.size() == 0) {
+                if (!stopping && outputQueue.isEmpty()) {
                     try {
                         waiting = true;
                         outputQueue.wait();
@@ -1031,7 +1031,7 @@ class OutputThread
                     waiting = false;
                 }
 
-                if (outputQueue.size() == 0) {
+                if (outputQueue.isEmpty()) {
                     trigBuf = null;
                 } else {
                     trigBuf = outputQueue.removeFirst();

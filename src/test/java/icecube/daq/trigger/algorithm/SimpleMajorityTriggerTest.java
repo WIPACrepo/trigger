@@ -193,8 +193,8 @@ public class SimpleMajorityTriggerTest
                     !msg.startsWith("Resetting counter ") &&
                     !msg.startsWith("Resetting decrement ") &&
                     !msg.startsWith("No match for timegate ") &&
-                    !msg.startsWith("Using buggy SMT algorithm") &&
-                    !msg.startsWith("Using fixed SMT algorithm") &&
+                    !msg.startsWith("Using slow SMT algorithm") &&
+                    !msg.startsWith("Using quick SMT algorithm") &&
                     !(msg.startsWith("Recycled ") &&
                       msg.contains(" unused ") &&
                       msg.endsWith(" requests")))

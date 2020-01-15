@@ -521,7 +521,7 @@ public class TriggerManager
 
         for (ITriggerAlgorithm trigger : algorithms) {
             Map<String, Object> moniMap = trigger.getTriggerMonitorMap();
-            if (moniMap != null && moniMap.size() > 0) {
+            if (moniMap != null && !moniMap.isEmpty()) {
                 String trigName = trigger.getTriggerName() + "-" +
                     trigger.getTriggerConfigId();
                 for (Map.Entry<String, Object> entry : moniMap.entrySet()) {
@@ -667,7 +667,7 @@ public class TriggerManager
                     return;
                 }
 
-                if (subList == null || subList.size() == 0) {
+                if (subList == null || subList.isEmpty()) {
                     LOG.error("No subtriggers found in " + req);
                     return;
                 }

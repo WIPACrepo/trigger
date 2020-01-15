@@ -76,9 +76,15 @@ public class TriggerThread
     public void run()
     {
         while (true) {
-            IPayload pay = algorithm.getSubscriber().pop();
+            PayloadSubscriber sub = algorithm.getSubscriber();
+            if (sub == null) {
+                // if there's no subscriber, we're done
+                break;
+            }
+
+            IPayload pay = sub.pop();
             if (pay == null) {
-                if (stopping && algorithm.getSubscriber().isStopped()) {
+                if (stopping && sub.isStopped()) {
                     break;
                 }
 

@@ -26,8 +26,10 @@ public class SubscribedList
     public Map<String, Integer> getLengths()
     {
         HashMap<String, Integer> map = new HashMap<String, Integer>();
-        for (PayloadSubscriber sub : subs) {
-            map.put(sub.getName(), sub.size());
+        synchronized (subs) {
+            for (PayloadSubscriber sub : subs) {
+                map.put(sub.getName(), sub.size());
+            }
         }
         return map;
     }
@@ -43,6 +45,16 @@ public class SubscribedList
     }
 
     /**
+     * Are there any subscribers to this list?
+     *
+     * @return <tt>false</tt> if the list has one or more subscribers
+     */
+    public boolean isEmpty()
+    {
+        return subs.isEmpty();
+    }
+
+    /**
      * Push a new payload onto the list
      *
      * @param pay new payload
@@ -53,8 +65,10 @@ public class SubscribedList
             throw new Error("No subscribers have been added");
         }
 
-        for (PayloadSubscriber sub : subs) {
-            sub.push(pay);
+        synchronized (subs) {
+            for (PayloadSubscriber sub : subs) {
+                sub.push(pay);
+            }
         }
     }
 
@@ -66,10 +80,12 @@ public class SubscribedList
     public int size()
     {
         int longest = 0;
-        for (PayloadSubscriber sub : subs) {
-            final int len = sub.size();
-            if (len > longest) {
-                longest = len;
+        synchronized (subs) {
+            for (PayloadSubscriber sub : subs) {
+                final int len = sub.size();
+                if (len > longest) {
+                    longest = len;
+                }
             }
         }
         return longest;

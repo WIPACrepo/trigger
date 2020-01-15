@@ -475,11 +475,15 @@ public abstract class AbstractTrigger
     @Override
     public long getEarliestTime()
     {
-        if (earliestPayloadOfInterest == null) {
-            return 0;
+        final long val;
+        synchronized (this) {
+            if (earliestPayloadOfInterest == null) {
+                return 0;
+            }
+
+            val = earliestPayloadOfInterest.getUTCTime();
         }
 
-        final long val = earliestPayloadOfInterest.getUTCTime();
         if (earliestMonitorTime == Long.MIN_VALUE) {
             earliestMonitorTime = val;
         }
@@ -546,10 +550,12 @@ public abstract class AbstractTrigger
         }
 
         final long earliest;
-        if (earliestPayloadOfInterest == null) {
-            earliest = 0L;
-        } else {
-            earliest = earliestPayloadOfInterest.getUTCTime();
+        synchronized (this) {
+            if (earliestPayloadOfInterest == null) {
+                earliest = 0L;
+            } else {
+                earliest = earliestPayloadOfInterest.getUTCTime();
+            }
         }
 
         long start = interval.start;
@@ -642,14 +648,15 @@ public abstract class AbstractTrigger
             reqStart = requests.get(0).getFirstTimeUTC().longValue();
         }
 
-        final long earliest;
-        if (earliestPayloadOfInterest == null) {
-            return 0L;
-        }
+        synchronized (this) {
+            if (earliestPayloadOfInterest == null) {
+                return 0L;
+            }
 
-        // latency is the difference between the start time of the oldest
-        // request and the earliest payload of interest
-        return earliestPayloadOfInterest.getUTCTime() - reqStart;
+            // latency is the difference between the start time of the oldest
+            // request and the earliest payload of interest
+            return earliestPayloadOfInterest.getUTCTime() - reqStart;
+        }
     }
 
     /**
@@ -1023,8 +1030,10 @@ public abstract class AbstractTrigger
      */
     protected void setEarliestPayloadOfInterest(IPayload payload)
     {
-        earliestPayloadOfInterest = payload;
-        mgr.setEarliestPayloadOfInterest(earliestPayloadOfInterest);
+        synchronized (this) {
+            earliestPayloadOfInterest = payload;
+            mgr.setEarliestPayloadOfInterest(earliestPayloadOfInterest);
+        }
     }
 
     /**

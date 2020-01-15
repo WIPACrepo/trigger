@@ -134,7 +134,7 @@ public class TriggerManager
     private List<ITriggerAlgorithm> algorithms =
         new ArrayList<ITriggerAlgorithm>();
 
-    private SubscribedList inputList = new SubscribedList();
+    private SubscribedList queueList = new SubscribedList();
 
     /** gather histograms for monitoring */
     private MultiplicityDataManager multiDataMgr;
@@ -263,7 +263,7 @@ public class TriggerManager
             }
 
             if (isValidIncomingPayload(payload)) {
-                synchronized (inputList) {
+                synchronized (queueList) {
                     pushInput(payload);
                 }
 
@@ -306,9 +306,9 @@ public class TriggerManager
     @Override
     public void flush()
     {
-        if (inputList.getNumSubscribers() > 0) {
+        if (queueList.getNumSubscribers() > 0) {
             try {
-                inputList.push(FLUSH_PAYLOAD);
+                queueList.push(FLUSH_PAYLOAD);
             } catch (Error err) {
                 LOG.error("Failed to flush input list", err);
             }
@@ -378,7 +378,7 @@ public class TriggerManager
     @Override
     public Map<String, Integer> getQueuedInputs()
     {
-        return inputList.getLengths();
+        return queueList.getLengths();
     }
 
     /**
@@ -641,7 +641,7 @@ public class TriggerManager
             PayloadInterfaceRegistry.I_TRIGGER_REQUEST)
         {
             // queue ordinary payload
-            inputList.push((IPayload) payload.deepCopy());
+            queueList.push((IPayload) payload.deepCopy());
         } else {
             try {
                 payload.loadPayload();
@@ -656,7 +656,7 @@ public class TriggerManager
             ITriggerRequestPayload req = (ITriggerRequestPayload) payload;
             if (!req.isMerged()) {
                 // queue single trigger request
-                inputList.push((IPayload) payload.deepCopy());
+                queueList.push((IPayload) payload.deepCopy());
             } else {
                 // extract list of merged triggers
                 List subList;
@@ -686,7 +686,7 @@ public class TriggerManager
                         continue;
                     }
 
-                    inputList.push((IPayload) sub.deepCopy());
+                    queueList.push((IPayload) sub.deepCopy());
                 }
             }
         }
@@ -949,7 +949,7 @@ public class TriggerManager
     {
         for (ITriggerAlgorithm algo : algorithms) {
             PayloadSubscriber subscriber =
-                inputList.subscribe(algo.getTriggerName());
+                queueList.subscribe(algo.getTriggerName());
             algo.setSubscriber(subscriber);
         }
     }
@@ -986,15 +986,15 @@ public class TriggerManager
     @Override
     public void unsubscribeAll()
     {
-        if (inputList.getNumSubscribers() > 0) {
+        if (queueList.getNumSubscribers() > 0) {
             for (ITriggerAlgorithm a : algorithms) {
-                a.unsubscribe(inputList);
+                a.unsubscribe(queueList);
                 a.resetAlgorithm();
             }
 
-            if (inputList.getNumSubscribers() > 0) {
+            if (queueList.getNumSubscribers() > 0) {
                 LOG.error(String.format("SubscribedList still has %d entries",
-                                        inputList.size()));
+                                        queueList.size()));
             }
         }
     }
@@ -1007,7 +1007,7 @@ public class TriggerManager
             numQueued += a.getNumberOfCachedRequests();
         }
 
-        return "TrigMgr[in#" + inputList.size() + ",req#" + numQueued +
+        return "TrigMgr[in#" + queueList.size() + ",req#" + numQueued +
             "," + collector + "]";
     }
 }

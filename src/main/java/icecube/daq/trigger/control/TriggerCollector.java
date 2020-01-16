@@ -659,6 +659,8 @@ class CollectorThread
             a.recycleUnusedRequests();
         }
 
+        subMgr.unsubscribeAll();
+
         stopped = true;
     }
 
@@ -758,8 +760,6 @@ class CollectorThread
             thread.join();
         }
         trigThreads.clear();
-
-        subMgr.unsubscribeAll();
     }
 
     @Override

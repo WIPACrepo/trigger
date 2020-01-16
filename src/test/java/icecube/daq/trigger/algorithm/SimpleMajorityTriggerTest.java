@@ -195,6 +195,7 @@ public class SimpleMajorityTriggerTest
                     !msg.startsWith("No match for timegate ") &&
                     !msg.startsWith("Using slow SMT algorithm") &&
                     !msg.startsWith("Using quick SMT algorithm") &&
+                    !msg.startsWith("Earliest time went ") &&
                     !(msg.startsWith("Recycled ") &&
                       msg.contains(" unused ") &&
                       msg.endsWith(" requests")))
@@ -305,7 +306,7 @@ public class SimpleMajorityTriggerTest
         final int totReq = outProc.getNumberWritten() + recycled;
 
         try {
-            int expected = numObjs / threshold;
+            int expected = (numObjs / threshold) - 2;
 
             int diff = Math.abs(totReq - expected);
             assertTrue("Expected " + expected + " requests, not " + totReq,

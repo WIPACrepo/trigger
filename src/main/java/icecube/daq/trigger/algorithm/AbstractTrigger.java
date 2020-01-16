@@ -1240,7 +1240,7 @@ public abstract class AbstractTrigger
     @Override
     public String toString()
     {
-        return triggerName + "#" + sentTriggerCounter + "[" + requests.size() +
-            "]";
+        return triggerName + "[" + subscriber.size() + "=>" + requests.size() +
+            "=>" + sentTriggerCounter + "]";
     }
 }

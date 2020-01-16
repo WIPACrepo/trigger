@@ -76,8 +76,8 @@ public class InIceTriggerIntegrationTest
                       msg.endsWith(" rope entries")) &&
                     !msg.startsWith("Resetting counter ") &&
                     !msg.startsWith("No match for timegate ") &&
-                    !msg.startsWith("Using buggy SMT algorithm") &&
-                    !msg.startsWith("Using fixed SMT algorithm"))
+                    !msg.startsWith("Using slow SMT algorithm") &&
+                    !msg.startsWith("Using quick SMT algorithm"))
                 {
                     fail("Bad log message#" + i + ": " +
                          appender.getMessage(i));

@@ -302,7 +302,7 @@ public class MockAlgorithm
     @Override
     public void resetAlgorithm()
     {
-        throw new Error("Unimplemented");
+        // do nothing
     }
 
     @Override

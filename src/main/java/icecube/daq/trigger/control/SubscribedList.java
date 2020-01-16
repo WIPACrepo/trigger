@@ -13,10 +13,30 @@ import java.util.Map;
  */
 public class SubscribedList
 {
+    private static final int CHUNK_SIZE = 1000;
+
     /**
      * List of subscribers
      */
     private List<PayloadSubscriber> subs = new ArrayList<PayloadSubscriber>();
+
+    private ArrayList<IPayload> staged = new ArrayList<IPayload>();
+
+    /**
+     * Push any cached payloads out to the algorithm threads
+     */
+    public void flush()
+    {
+        synchronized (subs) {
+            synchronized (staged) {
+                for (PayloadSubscriber sub : subs) {
+                    sub.pushAll(staged);
+                }
+
+                staged.clear();
+            }
+        }
+    }
 
     /**
      * Get the lengths of all subscriber lists
@@ -61,13 +81,21 @@ public class SubscribedList
      */
     public void push(IPayload pay)
     {
-        if (subs.isEmpty()) {
-            throw new Error("No subscribers have been added");
-        }
+        if (!subs.isEmpty()) {
+            if (CHUNK_SIZE == 1) {
+                synchronized (subs) {
+                    for (PayloadSubscriber sub : subs) {
+                        sub.push(pay);
+                    }
+                }
+            } else {
+                synchronized (staged) {
+                    staged.add(pay);
 
-        synchronized (subs) {
-            for (PayloadSubscriber sub : subs) {
-                sub.push(pay);
+                    if (staged.size() > CHUNK_SIZE) {
+                        flush();
+                    }
+                }
             }
         }
     }
@@ -219,6 +247,22 @@ public class SubscribedList
         {
             synchronized (list) {
                 list.addLast(pay);
+
+                // let subscribers know that there's data available
+                list.notify();
+            }
+        }
+
+        /**
+         * Add a list of payloads to the queue.
+         *
+         * @param payloads list of payload
+         */
+        @Override
+        public void pushAll(List<IPayload> payloads)
+        {
+            synchronized (list) {
+                list.addAll(payloads);
 
                 // let subscribers know that there's data available
                 list.notify();

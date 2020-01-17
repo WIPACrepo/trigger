@@ -185,6 +185,13 @@ public interface ITriggerAlgorithm
     boolean isConfigured();
 
     /**
+     * Has this algorithm finished with all incoming payloads?
+     *
+     * @return <tt>true</tt> if the algorithm has processed all its data
+     */
+    boolean isStopped();
+
+    /**
      * Recycle all unused requests still cached in the algorithms.
      */
     void recycleUnusedRequests();

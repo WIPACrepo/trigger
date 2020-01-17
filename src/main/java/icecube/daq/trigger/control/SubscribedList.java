@@ -31,6 +31,7 @@ public class SubscribedList
             synchronized (staged) {
                 for (PayloadSubscriber sub : subs) {
                     sub.pushAll(staged);
+                    sub.stop();
                 }
 
                 staged.clear();
@@ -207,6 +208,10 @@ public class SubscribedList
         @Override
         public boolean isStopped()
         {
+            if (stopping && list.isEmpty()) {
+                stopped = true;
+            }
+
             return stopped;
         }
 

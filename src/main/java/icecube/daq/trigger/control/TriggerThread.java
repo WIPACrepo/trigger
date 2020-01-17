@@ -85,12 +85,14 @@ public class TriggerThread
 
             IPayload pay = sub.pop();
             if (pay == null) {
-                if (stopping && sub.isStopped()) {
+                if (!sub.isStopped()) {
+                    LOG.error("Ignoring null payload for " +
+                              algorithm.getTriggerName());
+                } else if (stopping) {
+                    // algorithm is stopping and subscriber has stopped
                     break;
                 }
 
-                LOG.error("Ignoring null payload for " +
-                          algorithm.getTriggerName());
             } else if (pay == TriggerManager.FLUSH_PAYLOAD) {
                 algorithm.sendLast();
             } else {

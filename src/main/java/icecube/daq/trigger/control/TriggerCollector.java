@@ -547,7 +547,7 @@ class CollectorThread
             if (stopping) {
                 boolean algoStopped = true;
                 for (ITriggerAlgorithm a : algorithms) {
-                    if (a.hasData() || a.hasCachedRequests()) {
+                    if (!a.isStopped()) {
                         algoStopped = false;
                         break;
                     }

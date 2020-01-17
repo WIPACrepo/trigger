@@ -844,6 +844,17 @@ public abstract class AbstractTrigger
     public abstract boolean isConfigured();
 
     /**
+     * Has this algorithm's input stream been stopped?
+     *
+     * @return <tt>true</tt> if the algorithm's input stream has stopped
+     */
+    @Override
+    public boolean isStopped()
+    {
+        return subscriber.isStopped() && !hasCachedRequests();
+    }
+
+    /**
      * Recycle all unused requests still cached in the algorithms.
      */
     @Override

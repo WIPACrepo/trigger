@@ -35,8 +35,6 @@ import java.util.Map;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
 
 public class TriggerManagerTest
@@ -298,8 +296,9 @@ public class TriggerManagerTest
 
         splObjs.clear();
 
-        final float diff = (badOrder.getUTCTime() - goodOrder.getUTCTime());
-        final String msg1 = "Hit from " + badOrder.getSourceID() +
+        final long diff = (badOrder.getUTCTime() - goodOrder.getUTCTime());
+        final String msg1 = "Hit " + badOrder.getUTCTime() + " from " +
+            badOrder.getSourceID() +
             " out of order! This time - Last time = " + diff +
             ", src of last hit = " + goodOrder.getSourceID();
         appender.assertLogMessage(msg1);

@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 17662 2020-01-28 19:09:09Z dglo $
+ * Version $Id: FixedRateTrigger.java 17666 2020-01-28 20:20:45Z dglo $
  *
  * Date: May 1 2006
  *
@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 17662 2020-01-28 19:09:09Z dglo $
+ * @version $Id: FixedRateTrigger.java 17666 2020-01-28 20:20:45Z dglo $
  * @author pat
  */
 public class FixedRateTrigger
@@ -222,16 +222,16 @@ public class FixedRateTrigger
 
         if (numberOfHitsProcessed == 0) {
             // set time of first trigger to be first hit time + interval
-            nextTrigger = hitTimeUTC.getOffsetUTCTime(interval);
+            nextTrigger = hitTimeUTC.getOffsetUTCTime(interval * 10L);
         } else {
             // issue triggers until one comes after this hit
             while (hitTimeUTC.compareTo(nextTrigger) >= 0) {
                 formTrigger(nextTrigger);
-                nextTrigger = nextTrigger.getOffsetUTCTime(interval);
+                nextTrigger = nextTrigger.getOffsetUTCTime(interval * 10L);
             }
         }
 
-        IPayload oldHitPlus = new DummyPayload(hitTimeUTC.getOffsetUTCTime(0.1));
+        IPayload oldHitPlus = new DummyPayload(hitTimeUTC.getOffsetUTCTime(1));
         setEarliestPayloadOfInterest(oldHitPlus);
         numberOfHitsProcessed++;
     }

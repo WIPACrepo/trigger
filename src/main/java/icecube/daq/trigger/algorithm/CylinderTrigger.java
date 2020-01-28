@@ -269,7 +269,7 @@ public class CylinderTrigger
 
             // set earliest time to just before this time
             IUTCTime earliestUTC =
-                earliest.getPayloadTimeUTC().getOffsetUTCTime(-0.1);
+                earliest.getPayloadTimeUTC().getOffsetUTCTime(-1);
             setEarliestPayloadOfInterest(new DummyPayload(earliestUTC));
         }
 

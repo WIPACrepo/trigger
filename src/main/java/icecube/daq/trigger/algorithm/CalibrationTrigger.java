@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 17662 2020-01-28 19:09:09Z dglo $
+ * Version $Id: CalibrationTrigger.java 17666 2020-01-28 20:20:45Z dglo $
  *
  * Date: August 27 2005
  *
@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 17662 2020-01-28 19:09:09Z dglo $
+ * @version $Id: CalibrationTrigger.java 17666 2020-01-28 20:20:45Z dglo $
  * @author pat
  */
 public class CalibrationTrigger
@@ -204,7 +204,7 @@ public class CalibrationTrigger
         } else {
             // this is not, update earliest time of interest
             IPayload earliest =
-                new DummyPayload(hit.getHitTimeUTC().getOffsetUTCTime(0.1));
+                new DummyPayload(hit.getHitTimeUTC().getOffsetUTCTime(1));
             setEarliestPayloadOfInterest(earliest);
         }
     }

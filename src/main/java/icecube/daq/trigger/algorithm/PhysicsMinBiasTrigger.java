@@ -184,7 +184,7 @@ public class PhysicsMinBiasTrigger
             // this hit comes after the end of the deadtime window,
             // count it
             numberProcessed++;
-            deadtimeWindow = hitTime.getOffsetUTCTime(deadtime);
+            deadtimeWindow = hitTime.getOffsetUTCTime(deadtime * 10L);
             if (numberProcessed % prescale == 0) {
                 // report this as a trigger and update the deadtime window
                 formTrigger(hit, null, null);
@@ -195,7 +195,7 @@ public class PhysicsMinBiasTrigger
         if (!formedTrigger) {
             // just update earliest time of interest
             IPayload earliest =
-                new DummyPayload(hitTime.getOffsetUTCTime(0.1));
+                new DummyPayload(hitTime.getOffsetUTCTime(1));
             setEarliestPayloadOfInterest(earliest);
         }
     }

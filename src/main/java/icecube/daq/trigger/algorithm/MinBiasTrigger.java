@@ -1,7 +1,7 @@
 /*
  * class: MinBiasTrigger
  *
- * Version $Id: MinBiasTrigger.java 17114 2018-09-26 09:51:56Z dglo $
+ * Version $Id: MinBiasTrigger.java 17662 2020-01-28 19:09:09Z dglo $
  *
  * Date: August 27 2005
  *
@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  * This class implements a simple minimum bias trigger. It simply counts hits and
  * applies a prescale for determining when a trigger should be formed.
  *
- * @version $Id: MinBiasTrigger.java 17114 2018-09-26 09:51:56Z dglo $
+ * @version $Id: MinBiasTrigger.java 17662 2020-01-28 19:09:09Z dglo $
  * @author pat
  */
 public class MinBiasTrigger
@@ -35,6 +35,16 @@ public class MinBiasTrigger
 {
     /** Log object for this class */
     private static final Log LOG = LogFactory.getLog(MinBiasTrigger.class);
+
+    /**
+     * I3Live monitoring name for this algorithm
+     *
+     * NOTE: PnF calls both MinBias and PhysicsMinBias "MIN_BIAS"
+     */
+    private static final String MONITORING_NAME = "MIN_BIAS";
+
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 2;
 
     private static int nextTriggerNumber;
     private int triggerNumber;
@@ -94,6 +104,40 @@ public class MinBiasTrigger
     public int getPrescale()
     {
         return prescale;
+    }
+
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    @Override
+    public String getMonitoringName()
+    {
+        return MONITORING_NAME;
+    }
+
+    /**
+     * Get the trigger type.
+     *
+     * @return trigger type
+     */
+    @Override
+    public int getTriggerType()
+    {
+        return TRIGGER_TYPE;
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    @Override
+    public boolean hasValidMultiplicity()
+    {
+        return true;
     }
 
     /**
@@ -162,28 +206,5 @@ public class MinBiasTrigger
         if (LOG.isInfoEnabled()) {
             LOG.info("TriggerName set to " + super.triggerName);
         }
-    }
-
-    /**
-     * Get the monitoring name.
-     *
-     * @return the name used for monitoring this trigger
-     */
-    @Override
-    public String getMonitoringName()
-    {
-        return "MIN_BIAS";
-    }
-
-    /**
-     * Does this algorithm include all relevant hits in each request
-     * so that it can be used to calculate multiplicity?
-     *
-     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
-     */
-    @Override
-    public boolean hasValidMultiplicity()
-    {
-        return true;
     }
 }

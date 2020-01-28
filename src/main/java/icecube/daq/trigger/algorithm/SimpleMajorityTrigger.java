@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17502 2019-08-05 17:54:53Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17662 2020-01-28 19:09:09Z dglo $
  *
  * Date: August 19 2005
  *
@@ -123,7 +123,7 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17502 2019-08-05 17:54:53Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17662 2020-01-28 19:09:09Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger
@@ -135,6 +135,9 @@ public final class SimpleMajorityTrigger
 
     /** I3Live monitoring name for this algorithm */
     private static final String MONITORING_NAME = "SIMPLE_MULTIPLICITY";
+
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 0;
 
     /**
      * If the 'disableQuickPush' property is set, unused hits will not be
@@ -236,6 +239,17 @@ public final class SimpleMajorityTrigger
     }
 
     /**
+     * Get the trigger type.
+     *
+     * @return trigger type
+     */
+    @Override
+    public int getTriggerType()
+    {
+        return TRIGGER_TYPE;
+    }
+
+    /**
      * Does this algorithm include all relevant hits in each request
      * so that it can be used to calculate multiplicity?
      *
@@ -312,8 +326,7 @@ public final class SimpleMajorityTrigger
          * Skip hits that we don't use.
          * Check hit type and perhaps pre-screen DOMs based on channel.
          */
-        boolean usableHit =
-            getHitType(hit) == AbstractTrigger.SPE_HIT &&
+        boolean usableHit = getHitType(hit) == SPE_HIT &&
             hitFilter.useHit(hit);
         if (!usableHit) {
             if (LOG.isDebugEnabled()) {

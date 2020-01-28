@@ -7,7 +7,7 @@ import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.SourceID;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
-import icecube.daq.trigger.algorithm.AbstractTrigger;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.util.DOMRegistryException;
@@ -51,11 +51,12 @@ public abstract class TriggerCollection
     private static ByteBuffer stopMsg;
     private static ByteBuffer trigBuf;
 
-    private ArrayList<AbstractTrigger> list = new ArrayList<AbstractTrigger>();
+    private ArrayList<ITriggerAlgorithm> list =
+        new ArrayList<ITriggerAlgorithm>();
 
     private int hitSrcId = SIMHUB;
 
-    void add(AbstractTrigger trig)
+    void add(ITriggerAlgorithm trig)
     {
         list.add(trig);
     }
@@ -65,7 +66,7 @@ public abstract class TriggerCollection
         int srcId = trigHandler.getSourceId();
 
         int numAdded = 0;
-        for (AbstractTrigger t : list) {
+        for (ITriggerAlgorithm t : list) {
             if (srcId == t.getSourceId()) {
                 trigHandler.addTrigger(t);
                 numAdded++;
@@ -87,7 +88,7 @@ public abstract class TriggerCollection
                                        long domId)
         throws IOException
     {
-        final int recType = AbstractTrigger.SPE_HIT;
+        final int recType = ITriggerAlgorithm.SPE_HIT;
         final int cfgId = 2;
         final short mode = 0;
 
@@ -116,8 +117,7 @@ public abstract class TriggerCollection
      *
      * @return new trigger
      */
-    static AbstractTrigger createTrigger(int type, int cfgId, int srcId,
-                                         String name)
+    static ITriggerAlgorithm createTrigger(int cfgId, int srcId, String name)
     {
         final String className;
         if (name.startsWith("SMT")) {
@@ -133,14 +133,13 @@ public abstract class TriggerCollection
             throw new Error("Cannot find " + className);
         }
 
-        AbstractTrigger trig;
+        ITriggerAlgorithm trig;
         try {
-            trig = (AbstractTrigger) trigClass.newInstance();
+            trig = (ITriggerAlgorithm) trigClass.newInstance();
         } catch (Exception ex) {
-            throw new Error("Cannot create " + name + " trigger");
+            throw new Error("Cannot create " + name + " trigger", ex);
         }
 
-        trig.setTriggerType(type);
         trig.setTriggerConfigId(cfgId);
         trig.setSourceId(srcId);
         trig.setTriggerName(name);
@@ -148,7 +147,7 @@ public abstract class TriggerCollection
         return trig;
     }
 
-    public Iterable<AbstractTrigger> get()
+    public Iterable<ITriggerAlgorithm> get()
     {
         return list;
     }

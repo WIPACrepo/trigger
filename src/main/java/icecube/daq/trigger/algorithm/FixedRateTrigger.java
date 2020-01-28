@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 17114 2018-09-26 09:51:56Z dglo $
+ * Version $Id: FixedRateTrigger.java 17662 2020-01-28 19:09:09Z dglo $
  *
  * Date: May 1 2006
  *
@@ -25,17 +25,21 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 17114 2018-09-26 09:51:56Z dglo $
+ * @version $Id: FixedRateTrigger.java 17662 2020-01-28 19:09:09Z dglo $
  * @author pat
  */
-public class FixedRateTrigger extends AbstractTrigger
+public class FixedRateTrigger
+    extends AbstractTrigger
 {
-
-    /**
-     * Log object for this class
-     */
+    /** Log object for this class */
     private static final Log LOG =
         LogFactory.getLog(FixedRateTrigger.class);
+
+    /** I3Live monitoring name for this algorithm */
+    private static final String MONITORING_NAME = "UNBIASED";
+
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 23;
 
     /**
      * unique id within this trigger type
@@ -69,17 +73,6 @@ public class FixedRateTrigger extends AbstractTrigger
     public FixedRateTrigger()
     {
         triggerNumber = ++nextTriggerNumber;
-    }
-
-    /**
-     * Is the trigger configured?
-     *
-     * @return true if it is
-     */
-    @Override
-    public boolean isConfigured()
-    {
-        return configInterval;
     }
 
     /**
@@ -151,6 +144,51 @@ public class FixedRateTrigger extends AbstractTrigger
     }
 
     /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    @Override
+    public String getMonitoringName()
+    {
+        return MONITORING_NAME;
+    }
+
+    /**
+     * Get the trigger type.
+     *
+     * @return trigger type
+     */
+    @Override
+    public int getTriggerType()
+    {
+        return TRIGGER_TYPE;
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    @Override
+    public boolean hasValidMultiplicity()
+    {
+        return false;
+    }
+
+    /**
+     * Is the trigger configured?
+     *
+     * @return true if it is
+     */
+    @Override
+    public boolean isConfigured()
+    {
+        return configInterval;
+    }
+
+    /**
      * Reset the algorithm to its initial condition.
      */
     @Override
@@ -196,28 +234,5 @@ public class FixedRateTrigger extends AbstractTrigger
         IPayload oldHitPlus = new DummyPayload(hitTimeUTC.getOffsetUTCTime(0.1));
         setEarliestPayloadOfInterest(oldHitPlus);
         numberOfHitsProcessed++;
-    }
-
-    /**
-     * Get the monitoring name.
-     *
-     * @return the name used for monitoring this trigger
-     */
-    @Override
-    public String getMonitoringName()
-    {
-        return "UNBIASED";
-    }
-
-    /**
-     * Does this algorithm include all relevant hits in each request
-     * so that it can be used to calculate multiplicity?
-     *
-     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
-     */
-    @Override
-    public boolean hasValidMultiplicity()
-    {
-        return false;
     }
 }

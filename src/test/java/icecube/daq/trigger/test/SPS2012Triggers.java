@@ -5,7 +5,7 @@ import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.PayloadChecker;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
-import icecube.daq.trigger.algorithm.AbstractTrigger;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.util.DOMInfo;
 import icecube.daq.util.DOMRegistryException;
@@ -40,54 +40,54 @@ public class SPS2012Triggers
         this.registry = registry;
         this.checkSequentialTimes = checkSequentialTimes;
 
-        AbstractTrigger trig;
+        ITriggerAlgorithm trig;
 
-        trig = createTrigger(3, -1, GLOBAL_TRIGGER, "ThroughputTrigger");
+        trig = createTrigger(-1, GLOBAL_TRIGGER, "ThroughputTrigger");
         add(trig);
 
-        trig = createTrigger(13, 106, ICETOP_TRIGGER, "PhysicsMinBiasTrigger");
+        trig = createTrigger(106, ICETOP_TRIGGER, "PhysicsMinBiasTrigger");
         trig.addParameter("deadtime", "5000");
         trig.addParameter("prescale", "200");
         trig.addReadout(1, 0, 10000, 10000);
         trig.addReadout(2, 0, 4000, 6000);
         add(trig);
 
-        trig = createTrigger(0, 102, ICETOP_TRIGGER, "SimpleMajorityTrigger");
+        trig = createTrigger(102, ICETOP_TRIGGER, "SimpleMajorityTrigger");
         trig.addParameter("threshold", "6");
         trig.addParameter("timeWindow", "5000");
         trig.addReadout(0, 0, 10000, 10000);
         add(trig);
 
-        trig = createTrigger(1, 1009, ICETOP_TRIGGER, "CalibrationTrigger");
+        trig = createTrigger(1009, ICETOP_TRIGGER, "CalibrationTrigger");
         trig.addParameter("hitType", "4");
         trig.addReadout(0, 0, 1000, 1000);
         add(trig);
 
-        trig = createTrigger(2, 101, ICETOP_TRIGGER, "MinBiasTrigger");
+        trig = createTrigger(101, ICETOP_TRIGGER, "MinBiasTrigger");
         trig.addParameter("prescale", "10000");
         trig.addReadout(0, 0, 10000, 10000);
         add(trig);
 
-        trig = createTrigger(23, 23050, INICE_TRIGGER, "FixedRateTrigger");
+        trig = createTrigger(23050, INICE_TRIGGER, "FixedRateTrigger");
         trig.addParameter("interval", "30000000000");
         trig.addReadout(0, 0, 5000000, 5000000);
         add(trig);
 
-        trig = createTrigger(13, 106, INICE_TRIGGER, "PhysicsMinBiasTrigger");
+        trig = createTrigger(106, INICE_TRIGGER, "PhysicsMinBiasTrigger");
         trig.addParameter("deadtime", "5000");
         trig.addParameter("prescale", "200");
         trig.addReadout(1, 0, 10000, 10000);
         trig.addReadout(2, 0, 4000, 6000);
         add(trig);
 
-        trig = createTrigger(0, 1006, INICE_TRIGGER, "SimpleMajorityTrigger");
+        trig = createTrigger(1006, INICE_TRIGGER, "SimpleMajorityTrigger");
         trig.addParameter("threshold", "8");
         trig.addParameter("timeWindow", "5000");
         trig.addReadout(1, 0, 10000, 10000);
         trig.addReadout(2, 0, 4000, 6000);
         add(trig);
 
-        trig = createTrigger(24, 24002, INICE_TRIGGER, "SlowMPTrigger");
+        trig = createTrigger(24002, INICE_TRIGGER, "SlowMPTrigger");
         trig.addParameter("t_proximity", "2500");
         trig.addParameter("t_max", "500000");
         trig.addParameter("alpha_min", "140");
@@ -99,7 +99,7 @@ public class SPS2012Triggers
         trig.addReadout(2, 0, 4000, 6000);
         add(trig);
 
-        trig = createTrigger(21, 21001, INICE_TRIGGER, "CylinderTrigger");
+        trig = createTrigger(21001, INICE_TRIGGER, "CylinderTrigger");
         trig.addParameter("multiplicity", "4");
         trig.addParameter("simpleMultiplicity", "8");
         trig.addParameter("radius", "175");
@@ -110,7 +110,7 @@ public class SPS2012Triggers
         trig.addReadout(2, 0, 4000, 6000);
         add(trig);
 
-        trig = createTrigger(14, 1007, INICE_TRIGGER, "ClusterTrigger");
+        trig = createTrigger(1007, INICE_TRIGGER, "ClusterTrigger");
         trig.addParameter("multiplicity", "5");
         trig.addParameter("coherenceLength", "7");
         trig.addParameter("timeWindow", "1500");
@@ -119,7 +119,7 @@ public class SPS2012Triggers
         trig.addReadout(2, 0, 4000, 6000);
         add(trig);
 
-        trig = createTrigger(0, 1011, INICE_TRIGGER, "SimpleMajorityTrigger");
+        trig = createTrigger(1011, INICE_TRIGGER, "SimpleMajorityTrigger");
         trig.addParameter("threshold", "3");
         trig.addParameter("timeWindow", "2500");
         trig.addParameter("domSet", "6");

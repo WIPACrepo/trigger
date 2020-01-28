@@ -359,7 +359,7 @@ public class SimpleMajorityTriggerTest
 
             SMTConfig trigCfg = new SMTConfig(registry, threshold);
 
-            for (AbstractTrigger tmpTrig : trigCfg.get()) {
+            for (ITriggerAlgorithm tmpTrig : trigCfg.get()) {
                 if (!(tmpTrig instanceof SimpleMajorityTrigger)) {
                     fail("Found non-SMT trigger " +
                          tmpTrig.getClass().getName() + ": " + tmpTrig);

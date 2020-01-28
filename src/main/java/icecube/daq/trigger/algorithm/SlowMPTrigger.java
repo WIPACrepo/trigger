@@ -24,10 +24,18 @@ import org.apache.commons.logging.LogFactory;
  * @author gluesenkamp
  *
  */
-public class SlowMPTrigger extends AbstractTrigger
+public class SlowMPTrigger
+    extends AbstractTrigger
 {
-
+    /** Log object for this class */
     private static final Log LOG = LogFactory.getLog(SlowMPTrigger.class);
+
+    /** I3Live monitoring name for this algorithm */
+    private static final String MONITORING_NAME = "SLOW_PARTICLE";
+
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 24;
+
     private long t_proximity; // t_proximity in nanoseconds, eliminates most muon_hlcs
     private long t_min;
     private long t_max;
@@ -176,26 +184,6 @@ public class SlowMPTrigger extends AbstractTrigger
        // configHitFilter(5);
 
         //System.out.println("INITIALIZED SLOWMPTRIGGER");
-    }
-
-    @Override
-    public boolean isConfigured()
-    {
-    	if (dc_algo_configured)
-    	{
-    		if (dc_algo)
-    		{
-    			return ( t_proximity_configured && t_min_configured && t_max_configured &&
-    					delta_d_configured && rel_v_configured && min_n_tuples_configured && max_event_length_configured );
-    		}
-    		else
-    		{
-    			return ( t_proximity_configured && t_min_configured && t_max_configured &&
-    	                alpha_min_configured && rel_v_configured && min_n_tuples_configured && max_event_length_configured );
-    		}
-    	}
-    	return false;
-
     }
 
     /**
@@ -458,6 +446,17 @@ public class SlowMPTrigger extends AbstractTrigger
         muon_time_window = -1;
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    @Override
+    public String getMonitoringName()
+    {
+        return MONITORING_NAME;
+    }
+
     @Override
     public Map<String, Object> getTriggerMonitorMap() {
         HashMap<String, Object> map = new HashMap<String, Object>();
@@ -470,6 +469,54 @@ public class SlowMPTrigger extends AbstractTrigger
         return map;
     }
 
+    /**
+     * Get the trigger type.
+     *
+     * @return trigger type
+     */
+    @Override
+    public int getTriggerType()
+    {
+        return TRIGGER_TYPE;
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    @Override
+    public boolean hasValidMultiplicity()
+    {
+        return false;
+    }
+
+    /**
+     * Is the trigger configured?
+     *
+     * @return true if it is
+     */
+    @Override
+    public boolean isConfigured()
+    {
+    	if (dc_algo_configured)
+    	{
+    		if (dc_algo)
+    		{
+    			return ( t_proximity_configured && t_min_configured && t_max_configured &&
+    					delta_d_configured && rel_v_configured && min_n_tuples_configured && max_event_length_configured );
+    		}
+    		else
+    		{
+    			return ( t_proximity_configured && t_min_configured && t_max_configured &&
+    	                alpha_min_configured && rel_v_configured && min_n_tuples_configured && max_event_length_configured );
+    		}
+    	}
+    	return false;
+
+    }
+
     @Override
     public void runTrigger(IPayload payload) throws TriggerException
     {
@@ -480,8 +527,7 @@ public class SlowMPTrigger extends AbstractTrigger
         // This upcast should be safe now
         IHitPayload hitPayload = (IHitPayload) payload;
         // Check hit type and perhaps pre-screen DOMs based on channel
-        boolean usableHit =
-            getHitType(hitPayload) == AbstractTrigger.SPE_HIT &&
+        boolean usableHit = getHitType(hitPayload) == SPE_HIT &&
             hitFilter.useHit(hitPayload);
 
         //if (domRegistry == null) {
@@ -831,28 +877,5 @@ public class SlowMPTrigger extends AbstractTrigger
         }
 
         return null;
-    }
-
-    /**
-     * Get the monitoring name.
-     *
-     * @return the name used for monitoring this trigger
-     */
-    @Override
-    public String getMonitoringName()
-    {
-        return "SLOW_PARTICLE";
-    }
-
-    /**
-     * Does this algorithm include all relevant hits in each request
-     * so that it can be used to calculate multiplicity?
-     *
-     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
-     */
-    @Override
-    public boolean hasValidMultiplicity()
-    {
-        return false;
     }
 }

@@ -49,9 +49,6 @@ public abstract class AbstractTrigger
     /** Log object for this class */
     private static final Log LOG = LogFactory.getLog(AbstractTrigger.class);
 
-    /** SPE hit type */
-    public static final int SPE_HIT = 0x02;
-
     /** Requests can be up to this number of DAQ ticks wide */
     private static final long REQUEST_WIDTH = 100000000;
 
@@ -61,7 +58,6 @@ public abstract class AbstractTrigger
 
     protected String triggerName;
     private int trigCfgId;
-    private int trigType;
     private int srcId;
     private ArrayList<TriggerReadout> readouts =
         new ArrayList<TriggerReadout>();
@@ -117,12 +113,29 @@ public abstract class AbstractTrigger
         readouts.add(new TriggerReadout(rdoutType, offset, minus, plus));
     }
 
+    /**
+     * Check the trigger type.
+     *
+     * @param val trigger type
+     *
+     * @throws ConfigException if the configured trigger type is wrong
+     */
+    @Override
+    public void checkTriggerType(int val)
+        throws ConfigException
+    {
+        if (getTriggerType() != val) {
+            throw new ConfigException("Trigger type should be " +
+                                      getTriggerType() + ", not " + val);
+        }
+    }
+
     @Override
     public int compareTo(ITriggerAlgorithm a)
     {
         int val = getTriggerName().compareTo(a.getTriggerName());
         if (val == 0) {
-            val = trigType - a.getTriggerType();
+            val = getTriggerType() - a.getTriggerType();
             if (val == 0) {
                 val = trigCfgId - a.getTriggerConfigId();
                 if (val == 0) {
@@ -323,7 +336,8 @@ public abstract class AbstractTrigger
         ArrayList<IWriteablePayload> hitList =
             new ArrayList<IWriteablePayload>();
         TriggerRequest triggerPayload =
-            (TriggerRequest) triggerFactory.createPayload(uid, trigType,
+            (TriggerRequest) triggerFactory.createPayload(uid,
+                                                          getTriggerType(),
                                                           trigCfgId, srcId,
                                                           time.longValue(),
                                                           time.longValue(),
@@ -425,7 +439,8 @@ public abstract class AbstractTrigger
 
         // make payload
         TriggerRequest triggerPayload =
-            (TriggerRequest) triggerFactory.createPayload(uid, trigType,
+            (TriggerRequest) triggerFactory.createPayload(uid,
+                                                          getTriggerType(),
                                                           trigCfgId, srcId,
                                                           firstTime.longValue(),
                                                           lastTime.longValue(),
@@ -793,17 +808,6 @@ public abstract class AbstractTrigger
     }
 
     /**
-     * Get the trigger type.
-     *
-     * @return trigger type
-     */
-    @Override
-    public int getTriggerType()
-    {
-        return trigType;
-    }
-
-    /**
      * Are there requests waiting to be processed?
      *
      * @return <tt>true</tt> if there are non-flush requests available
@@ -1130,17 +1134,6 @@ public abstract class AbstractTrigger
         if (LOG.isDebugEnabled()) {
             LOG.debug("TriggerName = " + triggerName);
         }
-    }
-
-    /**
-     * Set trigger type.
-     *
-     * @param val trigger type
-     */
-    @Override
-    public void setTriggerType(int val)
-    {
-        trigType = val;
     }
 
     /**

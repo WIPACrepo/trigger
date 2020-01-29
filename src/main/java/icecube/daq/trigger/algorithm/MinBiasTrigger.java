@@ -1,7 +1,7 @@
 /*
  * class: MinBiasTrigger
  *
- * Version $Id: MinBiasTrigger.java 17449 2019-07-03 18:47:17Z dglo $
+ * Version $Id: MinBiasTrigger.java 17683 2020-01-29 17:39:28Z dglo $
  *
  * Date: August 27 2005
  *
@@ -26,15 +26,12 @@ import org.apache.log4j.Logger;
  * This class implements a simple minimum bias trigger. It simply counts hits and
  * applies a prescale for determining when a trigger should be formed.
  *
- * @version $Id: MinBiasTrigger.java 17449 2019-07-03 18:47:17Z dglo $
+ * @version $Id: MinBiasTrigger.java 17683 2020-01-29 17:39:28Z dglo $
  * @author pat
  */
 public class MinBiasTrigger
     extends AbstractTrigger
 {
-    /** Numeric type for this algorithm */
-    public static final int TRIGGER_TYPE = 2;
-
     /** Log object for this class */
     private static final Logger LOG = Logger.getLogger(MinBiasTrigger.class);
 
@@ -44,6 +41,9 @@ public class MinBiasTrigger
      * NOTE: PnF calls both MinBias and PhysicsMinBias "MIN_BIAS"
      */
     private static final String MONITORING_NAME = "MIN_BIAS";
+
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 2;
 
     private static int nextTriggerNumber;
     private int triggerNumber;

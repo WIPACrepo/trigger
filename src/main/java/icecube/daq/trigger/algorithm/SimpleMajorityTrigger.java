@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17506 2019-08-05 19:29:16Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17683 2020-01-29 17:39:28Z dglo $
  *
  * Date: August 19 2005
  *
@@ -122,21 +122,21 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17506 2019-08-05 19:29:16Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17683 2020-01-29 17:39:28Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger
     extends AbstractTrigger
 {
-    /** Numeric type for this algorithm */
-    public static final int TRIGGER_TYPE = 0;
-
     /** Log object for this class */
     private static final Logger LOG =
         Logger.getLogger(SimpleMajorityTrigger.class);
 
     /** I3Live monitoring name for this algorithm */
     private static final String MONITORING_NAME = "SIMPLE_MULTIPLICITY";
+
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 0;
 
     /**
      * If the 'disableQuickPush' property is set, unused hits will not be
@@ -325,8 +325,7 @@ public final class SimpleMajorityTrigger
          * Skip hits that we don't use.
          * Check hit type and perhaps pre-screen DOMs based on channel.
          */
-        boolean usableHit =
-            getHitType(hit) == ITriggerAlgorithm.SPE_HIT &&
+        boolean usableHit = getHitType(hit) == SPE_HIT &&
             hitFilter.useHit(hit);
         if (!usableHit) {
             if (LOG.isDebugEnabled()) {

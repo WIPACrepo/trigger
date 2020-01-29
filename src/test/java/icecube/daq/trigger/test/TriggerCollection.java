@@ -51,7 +51,8 @@ public abstract class TriggerCollection
     private static ByteBuffer stopMsg;
     private static ByteBuffer trigBuf;
 
-    private ArrayList<ITriggerAlgorithm> list = new ArrayList<ITriggerAlgorithm>();
+    private ArrayList<ITriggerAlgorithm> list =
+        new ArrayList<ITriggerAlgorithm>();
 
     private int hitSrcId = SIMHUB;
 
@@ -116,8 +117,7 @@ public abstract class TriggerCollection
      *
      * @return new trigger
      */
-    static ITriggerAlgorithm createTrigger(int cfgId, int srcId,
-                                           String name)
+    static ITriggerAlgorithm createTrigger(int cfgId, int srcId, String name)
     {
         final String className;
         if (name.startsWith("SMT")) {
@@ -137,7 +137,6 @@ public abstract class TriggerCollection
         try {
             trig = (ITriggerAlgorithm) trigClass.newInstance();
         } catch (Exception ex) {
-            ex.printStackTrace();
             throw new Error("Cannot create " + name + " trigger", ex);
         }
 

@@ -26,14 +26,14 @@ import org.apache.log4j.Logger;
 public class SlowMPTrigger
     extends AbstractTrigger
 {
-    /** Numeric type for this algorithm */
-    public static final int TRIGGER_TYPE = 24;
-
     /** Log object for this class */
     private static final Logger LOG = Logger.getLogger(SlowMPTrigger.class);
 
     /** I3Live monitoring name for this algorithm */
     private static final String MONITORING_NAME = "SLOW_PARTICLE";
+
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 24;
 
     /**
      * If 'true', log a warning every time SlowMP tries to move the earliest
@@ -497,6 +497,11 @@ public class SlowMPTrigger
         return false;
     }
 
+    /**
+     * Is the trigger configured?
+     *
+     * @return true if it is
+     */
     @Override
     public boolean isConfigured()
     {
@@ -539,8 +544,7 @@ public class SlowMPTrigger
         // This upcast should be safe now
         IHitPayload hitPayload = (IHitPayload) payload;
         // Check hit type and perhaps pre-screen DOMs based on channel
-        boolean usableHit =
-            getHitType(hitPayload) == ITriggerAlgorithm.SPE_HIT &&
+        boolean usableHit = getHitType(hitPayload) == SPE_HIT &&
             hitFilter.useHit(hitPayload);
 
         //if (domRegistry == null) {

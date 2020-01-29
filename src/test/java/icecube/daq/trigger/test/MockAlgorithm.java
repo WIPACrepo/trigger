@@ -101,6 +101,13 @@ public class MockAlgorithm
     }
 
     @Override
+    public void checkTriggerType(int type)
+        throws ConfigException
+    {
+        throw new Error("Unimplemented");
+    }
+
+    @Override
     public int compareTo(ITriggerAlgorithm a)
     {
         int val = getTriggerName().compareTo(a.getTriggerName());
@@ -409,13 +416,6 @@ public class MockAlgorithm
 
     @Override
     public void setTriggerName(String name)
-    {
-        throw new Error("Unimplemented");
-    }
-
-    @Override
-    public void checkTriggerType(int type)
-        throws ConfigException
     {
         throw new Error("Unimplemented");
     }

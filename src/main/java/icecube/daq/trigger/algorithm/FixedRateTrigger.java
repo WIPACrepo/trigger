@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 17449 2019-07-03 18:47:17Z dglo $
+ * Version $Id: FixedRateTrigger.java 17683 2020-01-29 17:39:28Z dglo $
  *
  * Date: May 1 2006
  *
@@ -24,21 +24,21 @@ import org.apache.log4j.Logger;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 17449 2019-07-03 18:47:17Z dglo $
+ * @version $Id: FixedRateTrigger.java 17683 2020-01-29 17:39:28Z dglo $
  * @author pat
  */
 public class FixedRateTrigger
     extends AbstractTrigger
 {
-    /** Numeric type for this algorithm */
-    public static final int TRIGGER_TYPE = 23;
-
     /** Log object for this class */
     private static final Logger LOG =
         Logger.getLogger(FixedRateTrigger.class);
 
     /** I3Live monitoring name for this algorithm */
     private static final String MONITORING_NAME = "UNBIASED";
+
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 23;
 
     /**
      * unique id within this trigger type

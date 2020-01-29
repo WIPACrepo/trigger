@@ -55,14 +55,14 @@ import org.apache.log4j.Logger;
 public class CylinderTrigger
     extends AbstractTrigger
 {
-    /** Numeric type for this algorithm */
-    public static final int TRIGGER_TYPE = 21;
-
     /** Log object for this class */
     private static final Logger LOG = Logger.getLogger(CylinderTrigger.class);
 
     /** I3Live monitoring name for this algorithm */
     private static final String MONITORING_NAME = "VOLUME";
+
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 21;
 
     private long timeWindow;
     private int multiplicity;
@@ -273,7 +273,7 @@ public class CylinderTrigger
         }
 
         // if new hit is usable, add it to the queue
-        if (getHitType(hitPayload) == ITriggerAlgorithm.SPE_HIT &&
+        if (getHitType(hitPayload) == SPE_HIT &&
             hitFilter.useHit(hitPayload))
         {
             triggerQueue.add(hitPayload);

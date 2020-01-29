@@ -34,9 +34,6 @@ import org.apache.log4j.Logger;
 public class PhysicsMinBiasTrigger
     extends AbstractTrigger
 {
-    /** Numeric type for this algorithm */
-    public static final int TRIGGER_TYPE = 13;
-
     /** Log object for this class */
     private static final Logger LOG =
         Logger.getLogger(PhysicsMinBiasTrigger.class);
@@ -47,6 +44,9 @@ public class PhysicsMinBiasTrigger
      * NOTE: PnF calls both MinBias and PhysicsMinBias "MIN_BIAS"
      */
     private static final String MONITORING_NAME = "MIN_BIAS";
+
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 13;
 
     private static int nextTriggerNumber;
     private int triggerNumber;
@@ -98,15 +98,6 @@ public class PhysicsMinBiasTrigger
             throw new UnknownParameterException("Unknown parameter: " + name);
         }
         super.addParameter(name, value);
-    }
-
-    @Override
-    public void setTriggerName(String triggerName)
-    {
-        super.triggerName = triggerName + triggerNumber;
-        if (LOG.isInfoEnabled()) {
-            LOG.info("TriggerName set to " + super.triggerName);
-        }
     }
 
     /**
@@ -178,8 +169,7 @@ public class PhysicsMinBiasTrigger
         }
         IHitPayload hit = (IHitPayload) payload;
 
-        boolean usableHit =
-            getHitType(hit) == ITriggerAlgorithm.SPE_HIT &&
+        boolean usableHit = getHitType(hit) == SPE_HIT &&
             hitFilter.useHit(hit);
 
         IUTCTime hitTime = hit.getHitTimeUTC();
@@ -236,5 +226,14 @@ public class PhysicsMinBiasTrigger
     public void setDeadtime(int deadtime)
     {
         this.deadtime = deadtime;
+    }
+
+    @Override
+    public void setTriggerName(String triggerName)
+    {
+        super.triggerName = triggerName + triggerNumber;
+        if (LOG.isInfoEnabled()) {
+            LOG.info("TriggerName set to " + super.triggerName);
+        }
     }
 }

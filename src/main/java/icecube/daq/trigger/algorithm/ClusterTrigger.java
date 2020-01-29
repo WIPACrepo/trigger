@@ -52,15 +52,15 @@ import org.apache.log4j.Logger;
 public class ClusterTrigger
     extends AbstractTrigger
 {
-    /** Numeric type for this algorithm */
-    public static final int TRIGGER_TYPE = 14;
-
     /** Log object for this class */
     private static final Logger logger =
         Logger.getLogger(ClusterTrigger.class);
 
     /** I3Live monitoring name for this algorithm */
     private static final String MONITORING_NAME = "CLUSTER";
+
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 14;
 
     private long timeWindow;
     private boolean configTimeWindow;
@@ -273,7 +273,7 @@ public class ClusterTrigger
         }
 
         // if new hit is usable, add it to the queue
-        boolean use1 = getHitType(hitPayload) == ITriggerAlgorithm.SPE_HIT;
+        boolean use1 = getHitType(hitPayload) == SPE_HIT;
         boolean use2 = hitFilter.useHit(hitPayload);
         boolean usable = use1 && use2;
         if (usable)

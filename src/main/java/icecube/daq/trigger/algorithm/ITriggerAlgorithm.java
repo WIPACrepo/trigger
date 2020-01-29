@@ -48,6 +48,16 @@ public interface ITriggerAlgorithm
     void addReadout(int rdoutType, int offset, int minus, int plus);
 
     /**
+     * Check the trigger type.
+     *
+     * @param val trigger type
+     *
+     * @throws ConfigException if it doesn't match the expected value
+     */
+    void checkTriggerType(int val)
+        throws ConfigException;
+
+    /**
      * Flush the algorithm.
      */
     void flush();
@@ -284,16 +294,6 @@ public interface ITriggerAlgorithm
      * @param triggerName trigger name
      */
     void setTriggerName(String triggerName);
-
-    /**
-     * Check the trigger type.
-     *
-     * @param val trigger type
-     *
-     * @throws ConfigException if it doesn't match the expected value
-     */
-    void checkTriggerType(int val)
-        throws ConfigException;
 
     /**
      * Disconnect the input provider.

@@ -22,21 +22,21 @@ import org.apache.log4j.Logger;
  *  makes a new TriggerRequest for each input TriggerRequest
  *  and then pass them to GlobalTrigBag.java.
  *
- * @version $Id: ThroughputTrigger.java 17449 2019-07-03 18:47:17Z dglo $
+ * @version $Id: ThroughputTrigger.java 17683 2020-01-29 17:39:28Z dglo $
  * @author shseo
  */
 public class ThroughputTrigger
         extends AbstractGlobalTrigger
 {
-    /** Numeric type for this algorithm */
-    public static final int TRIGGER_TYPE = 3;
-
     /* Log object for this class */
     private static final Logger LOG =
         Logger.getLogger(ThroughputTrigger.class);
 
     /** I3Live monitoring name for this algorithm */
     private static final String MONITORING_NAME = "THROUGHPUT";
+
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 3;
 
     /**
      * Create an instance of this class.
@@ -68,10 +68,10 @@ public class ThroughputTrigger
       * basically indicates that there will be no further payloads to process
       */
     @Override
-     public void flush()
-     {
+    public void flush()
+    {
         //--nothing needs to be done in this ThroughputTrigger algorithm!
-     }
+    }
 
     /**
      * Get the monitoring name.
@@ -107,6 +107,11 @@ public class ThroughputTrigger
         return true;
     }
 
+    /**
+     * Is the trigger configured?
+     *
+     * @return true if it is
+     */
     @Override
     public boolean isConfigured()
     {

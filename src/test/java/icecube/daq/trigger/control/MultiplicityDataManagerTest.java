@@ -19,8 +19,6 @@ import java.util.Map;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
 
 public class MultiplicityDataManagerTest

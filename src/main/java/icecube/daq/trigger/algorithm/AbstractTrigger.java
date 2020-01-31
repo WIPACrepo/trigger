@@ -1046,6 +1046,14 @@ public abstract class AbstractTrigger
     protected void setEarliestPayloadOfInterest(IPayload payload)
     {
         synchronized (this) {
+            if (earliestPayloadOfInterest != null &&
+                earliestPayloadOfInterest.getUTCTime() > payload.getUTCTime())
+            {
+                long diff = earliestPayloadOfInterest.getUTCTime() -
+                    payload.getUTCTime();
+                LOG.error("Earliest time went " + diff + " ticks backward");
+            }
+
             earliestPayloadOfInterest = payload;
             mgr.setEarliestPayloadOfInterest(earliestPayloadOfInterest);
         }

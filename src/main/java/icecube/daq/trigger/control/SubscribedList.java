@@ -31,7 +31,6 @@ public class SubscribedList
             synchronized (staged) {
                 for (PayloadSubscriber sub : subs) {
                     sub.pushAll(staged);
-                    sub.stop();
                 }
 
                 staged.clear();
@@ -118,6 +117,23 @@ public class SubscribedList
             }
         }
         return longest;
+    }
+
+    /**
+     * Flush any remaining payloads and stop all subscribers
+     */
+    public void stop()
+    {
+        synchronized (subs) {
+            synchronized (staged) {
+                for (PayloadSubscriber sub : subs) {
+                    sub.pushAll(staged);
+                    sub.stop();
+                }
+
+                staged.clear();
+            }
+        }
     }
 
     /**

@@ -196,6 +196,7 @@ class InputThread
 
         // push out any cached payloads
         queueList.flush();
+        queueList.stop();
 
         if (dropped > 0) {
             LOG.error("Warning: dropped " + dropped + " payloads from input");

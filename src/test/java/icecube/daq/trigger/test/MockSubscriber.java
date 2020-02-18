@@ -46,7 +46,7 @@ public class MockSubscriber
         }
 
         if (payloads.size() < 1) {
-            return null;
+            return PayloadSubscriber.STOPPED_PAYLOAD;
         }
 
         return payloads.remove(0);

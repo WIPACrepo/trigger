@@ -83,13 +83,30 @@ public class TriggerThread
             }
 
             IPayload pay = sub.pop();
-            if (pay == null) {
+            if (pay == PayloadSubscriber.STOPPED_PAYLOAD) {
                 if (!sub.isStopped()) {
-                    LOG.error("Ignoring null payload for " +
+                    // miscoded subscriber, STOPPED_PAYLOAD means stopped
+                    LOG.error("Ignoring STOPPED_PAYLOAD for " +
                               algorithm.getTriggerName());
-                } else if (stopping) {
-                    // algorithm is stopping and subscriber has stopped
-                    break;
+                }
+                else
+                {
+                    // subscriber/trigger thread are stopped sequentially so
+                    // spin momentarily waiting to receive stop notification
+                    int spin = 0;
+                    while (!stopping && spin++ < 10)
+                    {
+                        try{ Thread.sleep(100);} catch (InterruptedException e){}
+                    }
+
+                    if(stopping)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        throw  new Error("Unexpected stop sequence");
+                    }
                 }
 
             } else if (pay == TriggerManager.FLUSH_PAYLOAD) {

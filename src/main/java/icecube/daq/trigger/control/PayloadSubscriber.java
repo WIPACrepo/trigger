@@ -3,12 +3,17 @@ package icecube.daq.trigger.control;
 import java.util.List;
 
 import icecube.daq.payload.IPayload;
+import icecube.daq.payload.impl.UTCTime;
 
 /**
  * Subscriber to a shared list of Payloads
  */
 public interface PayloadSubscriber
 {
+    /** Payload used to indicate that input is stopped */
+    public static final IPayload STOPPED_PAYLOAD =
+            new DummyPayload(new UTCTime(0));
+
     /**
      * Get subscriber name
      *

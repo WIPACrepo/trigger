@@ -182,7 +182,6 @@ public class TriggerManagerTest
 
         TriggerManager mgr = new TriggerManager(src, bufCache);
 
-        mgr.startInputThread();
         try {
             mgr.analyze(new ArrayList());
         } catch (Error err) {
@@ -190,10 +189,7 @@ public class TriggerManagerTest
 
             final String msg = "No consumers for 0 hits";
             assertEquals("Unexpected error message", msg, err.getMessage());
-        } finally {
-            mgr.stopInputThread();
         }
-        waitForStopped(mgr);
     }
 
     @Test
@@ -207,7 +203,6 @@ public class TriggerManagerTest
         List splObjs = new ArrayList();
         splObjs.add(new MyHit(123, 456));
 
-        mgr.startInputThread();
         try {
             mgr.analyze(splObjs);
             fail("Should not succeed");
@@ -216,10 +211,7 @@ public class TriggerManagerTest
 
             final String msg = "No consumers for 1 hits";
             assertEquals("Unexpected error message", msg, err.getMessage());
-        } finally {
-            mgr.stopInputThread();
         }
-        waitForStopped(mgr);
     }
 
     @Test
@@ -236,14 +228,7 @@ public class TriggerManagerTest
         List splObjs = new ArrayList();
         splObjs.add(new NonHit(123, 456));
 
-        mgr.startInputThread();
-        try {
-            mgr.analyze(splObjs);
-        } finally {
-            mgr.stopInputThread();
-        }
-        waitForStopped(mgr);
-
+        mgr.analyze(splObjs);
         splObjs.clear();
 
         final String msg1 = "TriggerHandler only knows about either" +
@@ -270,14 +255,7 @@ public class TriggerManagerTest
         List splObjs = new ArrayList();
         splObjs.add(new MyHit(123, 234));
 
-        mgr.startInputThread();
-        try {
-            mgr.analyze(splObjs);
-        } finally {
-            mgr.stopInputThread();
-        }
-        waitForStopped(mgr);
-
+        mgr.analyze(splObjs);
         splObjs.clear();
 
         MyHit goodOrder = new MyHit(123, 345);
@@ -286,14 +264,7 @@ public class TriggerManagerTest
         MyHit badOrder = new MyHit(321, 246);
         splObjs.add(badOrder);
 
-        mgr.startInputThread();
-        try {
-            mgr.analyze(splObjs);
-        } finally {
-            mgr.stopInputThread();
-        }
-        waitForStopped(mgr);
-
+        mgr.analyze(splObjs);
         splObjs.clear();
 
         final long diff = (badOrder.getUTCTime() - goodOrder.getUTCTime());
@@ -323,27 +294,13 @@ public class TriggerManagerTest
         List splObjs = new ArrayList();
         splObjs.add(new MyHit(123, 234));
 
-        mgr.startInputThread();
-        try {
-            mgr.analyze(splObjs);
-        } finally {
-            mgr.stopInputThread();
-        }
-        waitForStopped(mgr);
-
+        mgr.analyze(splObjs);
         splObjs.clear();
 
         splObjs.add(new MyHit(123, 246));
         splObjs.add(new MyHit(321, 345));
 
-        mgr.startInputThread();
-        try {
-            mgr.analyze(splObjs);
-        } finally {
-            mgr.stopInputThread();
-        }
-        waitForStopped(mgr);
-
+        mgr.analyze(splObjs);
         splObjs.clear();
     }
 
@@ -361,14 +318,7 @@ public class TriggerManagerTest
         List splObjs = new ArrayList();
         splObjs.add(new MockTriggerRequest(1, 2, 3, 4, 5));
 
-        mgr.startInputThread();
-        try {
-            mgr.analyze(splObjs);
-        } finally {
-            mgr.stopInputThread();
-        }
-        waitForStopped(mgr);
-
+        mgr.analyze(splObjs);
         splObjs.clear();
 
         final String msg1 = "Source #" + INICE_ID +
@@ -395,27 +345,13 @@ public class TriggerManagerTest
         List splObjs = new ArrayList();
         splObjs.add(new MockTriggerRequest(1, 2, 3, 4, 5));
 
-        mgr.startInputThread();
-        try {
-            mgr.analyze(splObjs);
-        } finally {
-            mgr.stopInputThread();
-        }
-        waitForStopped(mgr);
-
+        mgr.analyze(splObjs);
         splObjs.clear();
 
         splObjs.add(new MockTriggerRequest(2, 2, 2, 6, 7));
         splObjs.add(new MockTriggerRequest(4, 1, 7, 14, 16));
 
-        mgr.startInputThread();
-        try {
-            mgr.analyze(splObjs);
-        } finally {
-            mgr.stopInputThread();
-        }
-        waitForStopped(mgr);
-
+        mgr.analyze(splObjs);
         splObjs.clear();
     }
 
@@ -433,14 +369,7 @@ public class TriggerManagerTest
         List splObjs = new ArrayList();
         splObjs.add(new MockTriggerRequest(1, 2, 3, 4, 5));
 
-        mgr.startInputThread();
-        try {
-            mgr.analyze(splObjs);
-        } finally {
-            mgr.stopInputThread();
-        }
-        waitForStopped(mgr);
-
+        mgr.analyze(splObjs);
         splObjs.clear();
 
         splObjs.add(new MockTriggerRequest(2, 2, 2, 6, 7));
@@ -449,14 +378,7 @@ public class TriggerManagerTest
         merged.setMerged();
         splObjs.add(merged);
 
-        mgr.startInputThread();
-        try {
-            mgr.analyze(splObjs);
-        } finally {
-            mgr.stopInputThread();
-        }
-        waitForStopped(mgr);
-
+        mgr.analyze(splObjs);
         splObjs.clear();
 
         final String msg = "No subtriggers found in " + merged;
@@ -478,14 +400,7 @@ public class TriggerManagerTest
         List splObjs = new ArrayList();
         splObjs.add(new MockTriggerRequest(1, 2, 3, 4, 5));
 
-        mgr.startInputThread();
-        try {
-            mgr.analyze(splObjs);
-        } finally {
-            mgr.stopInputThread();
-        }
-        waitForStopped(mgr);
-
+        mgr.analyze(splObjs);
         splObjs.clear();
 
         splObjs.add(new MockTriggerRequest(2, 2, 2, 6, 7));
@@ -496,14 +411,7 @@ public class TriggerManagerTest
 
         splObjs.add(merged);
 
-        mgr.startInputThread();
-        try {
-            mgr.analyze(splObjs);
-        } finally {
-            mgr.stopInputThread();
-        }
-        waitForStopped(mgr);
-
+        mgr.analyze(splObjs);
         splObjs.clear();
     }
 
@@ -938,19 +846,6 @@ public class TriggerManagerTest
 
         // XXX this doesn't validate the body of the alert
         alerter.waitForAlerts(100);
-    }
-
-    private void waitForStopped(TriggerManager mgr)
-    {
-        for (int i = 0; i < 100; i++) {
-            if (mgr.isStopped()) break;
-
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException ie) {
-                break;
-            }
-        }
     }
 
     class MyHit

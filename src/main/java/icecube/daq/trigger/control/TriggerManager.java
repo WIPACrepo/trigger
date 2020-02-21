@@ -111,140 +111,6 @@ class TriggerRequestComparator
     }
 }
 
-class InputThread
-    implements Runnable
-{
-    /** Log object for this class */
-    private static final Logger LOG = Logger.getLogger(InputThread.class);
-
-    private static final int CHUNK_SIZE = 2000;
-
-    private int srcId;
-    private SubscribedList queueList;
-    private TriggerManager mgr;
-
-    private ArrayDeque<ILoadablePayload> inputQueue =
-        new ArrayDeque<ILoadablePayload>();
-
-    private Thread thread;
-    private boolean waiting;
-    private boolean stopping;
-
-    InputThread(int srcId, SubscribedList queueList, TriggerManager mgr)
-    {
-        this.srcId = srcId;
-        this.queueList = queueList;
-        this.mgr = mgr;
-    }
-
-    boolean isStopped()
-    {
-        return thread == null ||
-            (!stopping && !thread.isAlive());
-    }
-
-    void push(ILoadablePayload payload)
-    {
-        if (stopping) {
-            LOG.error("Ignoring payload after stop");
-        } else {
-            synchronized (inputQueue) {
-                inputQueue.addLast(payload);
-                if (inputQueue.size() >= CHUNK_SIZE) {
-                    inputQueue.notify();
-                }
-            }
-        }
-    }
-
-    public void run()
-    {
-        int dropped = 0;
-        while (!stopping || !inputQueue.isEmpty()) {
-            ILoadablePayload payload;
-            synchronized (inputQueue) {
-                final boolean waitLoop = !stopping && inputQueue.isEmpty();
-                if (waitLoop) {
-                    try {
-                        waiting = true;
-                        inputQueue.wait();
-                    } catch (InterruptedException iex) {
-                        LOG.error("Interrupt while waiting for input queue",
-                                  iex);
-                    } finally {
-                        waiting = false;
-                    }
-                }
-
-                final boolean isEmpty = inputQueue.isEmpty();
-                if (isEmpty) {
-                    continue;
-                }
-
-                payload = inputQueue.removeFirst();
-            }
-
-            if (queueList.isEmpty()) {
-                dropped++;
-            } else {
-                queueList.push(payload);
-            }
-        }
-
-        mgr.flush();
-        mgr.stopCollectorThread();
-
-        // push out any cached payloads
-        queueList.flush();
-        queueList.stop();
-
-        if (dropped > 0) {
-            LOG.error("Warning: dropped " + dropped + " payloads from input");
-        }
-
-        stopping = false;
-        thread = null;
-    }
-
-    public int size()
-    {
-        return inputQueue.size();
-    }
-
-    public void start()
-    {
-        thread = new Thread(this);
-        thread.setName("InputThread");
-        thread.start();
-    }
-
-    public void stop()
-    {
-        synchronized (inputQueue) {
-            stopping = true;
-            inputQueue.notify();
-        }
-    }
-
-    @Override
-    public String toString()
-    {
-        String stateStr;
-        if (thread == null) {
-            stateStr = "noThread";
-        } else if (!thread.isAlive()) {
-            stateStr = "dead";
-        } else if (stopping) {
-            stateStr = "stopping";
-        } else if (waiting) {
-            stateStr = "waiting";
-        } else {
-            stateStr = "running";
-        }
-
-        return "InThrd[" + stateStr + ",inQ#" + inputQueue.size() + "]";
-    }
-}
 
 /**
  * Read in hits from the splicer and send them to the algorithms.
@@ -270,7 +136,6 @@ public class TriggerManager
         new ArrayList<ITriggerAlgorithm>();
 
     private SubscribedList queueList = new SubscribedList();
-    private InputThread inputThread;
 
     /** gather histograms for monitoring */
     private MultiplicityDataManager multiDataMgr;
@@ -389,10 +254,6 @@ public class TriggerManager
         if (queueList.isEmpty()) {
             throw new Error("No consumers for " + splicedObjects.size() +
                             " hits");
-        }
-
-        if (inputThread == null) {
-            throw new Error("Input thread is not running!");
         }
 
         for (Spliceable spl : splicedObjects) {
@@ -680,10 +541,6 @@ public class TriggerManager
     @Override
     public boolean isStopped()
     {
-        if (inputThread != null && !inputThread.isStopped()) {
-            return false;
-        }
-
         if (collector != null && !collector.isStopped()) {
             return false;
         }
@@ -775,7 +632,7 @@ public class TriggerManager
     }
 
     /**
-     * Pass the next payload to the input thread.
+     * Pass the next payload to the subscribers
      *
      * @param payload next payload
      */
@@ -785,7 +642,7 @@ public class TriggerManager
             PayloadInterfaceRegistry.I_TRIGGER_REQUEST)
         {
             // queue ordinary payload
-            inputThread.push((ILoadablePayload) payload.deepCopy());
+            queueList.push((ILoadablePayload) payload.deepCopy());
         } else {
             try {
                 payload.loadPayload();
@@ -800,7 +657,7 @@ public class TriggerManager
             ITriggerRequestPayload req = (ITriggerRequestPayload) payload;
             if (!req.isMerged()) {
                 // queue single trigger request
-                inputThread.push((ILoadablePayload) payload.deepCopy());
+                queueList.push((ILoadablePayload) payload.deepCopy());
             } else {
                 // extract list of merged triggers
                 List subList;
@@ -830,7 +687,7 @@ public class TriggerManager
                         continue;
                     }
 
-                    inputThread.push((ILoadablePayload) sub.deepCopy());
+                    queueList.push((ILoadablePayload) sub.deepCopy());
                 }
             }
         }
@@ -1017,16 +874,6 @@ public class TriggerManager
         this.splicer.addSplicerListener(this);
     }
 
-    public void startInputThread()
-    {
-        if (inputThread != null && !inputThread.isStopped()) {
-            LOG.error("Input thread was not stopped");
-        }
-
-        inputThread = new InputThread(srcId, queueList, this);
-        inputThread.start();
-    }
-
     /**
      * Do nothing.
      *
@@ -1058,23 +905,6 @@ public class TriggerManager
         }
 
         collector.startThreads(splicer);
-
-        startInputThread();
-    }
-
-
-    public void stopCollectorThread()
-    {
-        if (collector != null && !collector.isStopped()) {
-            collector.stop();
-        }
-    }
-
-    public void stopInputThread()
-    {
-        if (inputThread != null && !inputThread.isStopped()) {
-            inputThread.stop();
-        }
     }
 
     /**
@@ -1083,7 +913,9 @@ public class TriggerManager
     @Override
     public void stopThread()
     {
-        stopInputThread();
+        if (collector != null && !collector.isStopped()) {
+            collector.stop();
+        }
     }
 
     /**
@@ -1094,7 +926,10 @@ public class TriggerManager
     @Override
     public void stopped(SplicerChangedEvent<Spliceable> evt)
     {
-        stopInputThread();
+        flush();
+        stopThread();
+
+        queueList.stop();
 
         // clear cached values
         timeOfLastHit = null;
@@ -1175,9 +1010,7 @@ public class TriggerManager
             numQueued += a.getNumberOfCachedRequests();
         }
 
-        return "TrigMgr[" + inputThread +
-            ",queue#" + queueList.size() +
-            ",req#" + numQueued +
+        return "TrigMgr[in#" + queueList.size() + ",req#" + numQueued +
             "," + collector + "]";
     }
 }

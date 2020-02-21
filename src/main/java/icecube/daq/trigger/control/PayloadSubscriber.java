@@ -51,13 +51,6 @@ public interface PayloadSubscriber
     void push(IPayload pay);
 
     /**
-     * Add a list of payloads to the queue.
-     *
-     * @param payloads list of payload
-     */
-    void pushAll(List<IPayload> payloads);
-
-    /**
      * Get the number of queued payloads
      *
      * @return size of internal queue

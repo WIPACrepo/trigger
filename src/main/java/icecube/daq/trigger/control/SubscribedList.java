@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * A list which can feed its contents to multiple subscribers
@@ -19,19 +20,23 @@ public class SubscribedList
     /** Support for runtime selection of PayloadSubscriber impl */
     private static final String SubscriberImplCfg =
             System.getProperty("icecube.daq.trigger.control.subscriber-impl",
-                    SubscriberImpl.LOCK_FREE_LIST_SUBSCRIBER.name());
+                    SubscriberImpl.LOCK_FREE_LIST_SUBSCRIBER_BEST_PERF.name());
 
     private static final SubscriberImpl SubscriberFactory =
             SubscriberImpl.valueOf(SubscriberImplCfg.toUpperCase());
 
-    private static final int CHUNK_SIZE = SubscriberFactory.getChunkSize();
 
-    static enum SubscriberImpl
+    /**
+     * Factory for selecting the PayloadSubscriber implementation.
+     *
+     * Queue selection is critical to overall trigger performance.  Changes should be validated
+     * for performance under a representative production load.
+     */
+    enum SubscriberImpl
     {
         // used c 2013-2020
-        // high chunking value offsets performance cost when list is in
-        // contention
-        LIST_SUBSCRIBER(1000)
+        // high performance cost
+        LIST_SUBSCRIBER()
                 {
                     @Override
                     public PayloadSubscriber createSubscriber(final String name)
@@ -40,24 +45,39 @@ public class SubscribedList
                     }
                 },
 
-        // introduced 2020
-        LOCK_FREE_LIST_SUBSCRIBER(1)
+
+        // introduced 2020 - great performance, standard JDK lock-free Queue<T> implementation
+        LOCK_FREE_LIST_SUBSCRIBER()
                 {
                     @Override
                     public PayloadSubscriber createSubscriber(final String name)
                     {
-                        return new LockFreeListSubscriber(name);
+                        ConcurrentLinkedQueue<IPayload> base = new ConcurrentLinkedQueue<>();
+                        QueueStrategy<IPayload> q =
+                                new QueueStrategy.NonBlockingPollBackoff<>(base, 100, 1000);
+
+
+                        return new LockFreeListSubscriber(q, name);
+                    }
+                },
+        // introduced 2020 - great performance, 3rd party Queue<T> implementation
+        // NOTE: Thread safe only with a single thread producer and a single thread consumer
+        LOCK_FREE_LIST_SUBSCRIBER_BEST_PERF()
+                {
+                    @Override
+                    public PayloadSubscriber createSubscriber(final String name)
+                    {
+                        //chunk size chosen to hold about 1 sec worth of hits
+                        SpscUnboundedArrayQueue<IPayload> base = new SpscUnboundedArrayQueue<IPayload>(1024 * 128);
+                        QueueStrategy<IPayload> q =
+                                new QueueStrategy.NonBlockingPollBackoff<>(base, 100, 1000);
+
+
+                        return new LockFreeListSubscriber(q, name);
                     }
                 };
 
-        final int chunkSize;
 
-        SubscriberImpl(final int chunkSize)
-        {
-            this.chunkSize = chunkSize;
-        }
-
-        public int getChunkSize(){return chunkSize;}
         public abstract PayloadSubscriber createSubscriber(String name);
 
     }
@@ -70,21 +90,6 @@ public class SubscribedList
 
     private ArrayList<IPayload> staged = new ArrayList<IPayload>();
 
-    /**
-     * Push any cached payloads out to the algorithm threads
-     */
-    public void flush()
-    {
-        synchronized (subs) {
-            synchronized (staged) {
-                for (PayloadSubscriber sub : subs) {
-                    sub.pushAll(staged);
-                }
-
-                staged.clear();
-            }
-        }
-    }
 
     /**
      * Get the lengths of all subscriber lists
@@ -129,22 +134,12 @@ public class SubscribedList
      */
     public void push(IPayload pay)
     {
-        if (!subs.isEmpty()) {
-            if (CHUNK_SIZE == 1) {
-                synchronized (subs) {
-                    for (PayloadSubscriber sub : subs) {
-                        sub.push(pay);
-                    }
-                }
-            } else {
-                synchronized (staged) {
-                    staged.add(pay);
+        if (subs.size() == 0) {
+            throw new Error("No subscribers have been added");
+        }
 
-                    if (staged.size() > CHUNK_SIZE) {
-                        flush();
-                    }
-                }
-            }
+        for (PayloadSubscriber sub : subs) {
+            sub.push(pay);
         }
     }
 
@@ -168,14 +163,13 @@ public class SubscribedList
     }
 
     /**
-     * Flush any remaining payloads and stop all subscribers
+     * Stop all subscribers
      */
     public void stop()
     {
         synchronized (subs) {
             synchronized (staged) {
                 for (PayloadSubscriber sub : subs) {
-                    sub.pushAll(staged);
                     sub.stop();
                 }
 
@@ -331,21 +325,6 @@ public class SubscribedList
             }
         }
 
-        /**
-         * Add a list of payloads to the queue.
-         *
-         * @param payloads list of payload
-         */
-        @Override
-        public void pushAll(List<IPayload> payloads)
-        {
-            synchronized (list) {
-                list.addAll(payloads);
-
-                // let subscribers know that there's data available
-                list.notify();
-            }
-        }
 
         /**
          * Get the number of queued payloads
@@ -394,8 +373,7 @@ public class SubscribedList
         /**
          * List of payloads
          */
-        SpscUnboundedArrayQueue<IPayload> base = new SpscUnboundedArrayQueue<IPayload>(1024 * 128); //chunk size about 1 sec worth of
-        QueueStrategy<IPayload> q =  new QueueStrategy.NonBlockingPollBackoff(base, 100, 1000);
+       final  QueueStrategy<IPayload> q;
 
         /** Subscriber name */
         private String name;
@@ -407,10 +385,12 @@ public class SubscribedList
         /**
          * Create a list subscriber
          *
+         * @param q
          * @param name subscriber name
          */
-        LockFreeListSubscriber(String name)
+        LockFreeListSubscriber(QueueStrategy<IPayload> q, String name)
         {
+            this.q = q;
             this.name = name;
         }
 
@@ -499,15 +479,6 @@ public class SubscribedList
             }
         }
 
-        @Override
-        public void pushAll(final List<IPayload> payloads)
-        {
-            for (int i = 0; i < payloads.size(); i++)
-            {
-                push( payloads.get(i));
-            }
-        }
-
         /**
          * Get the number of queued payloads
          *
@@ -542,4 +513,5 @@ public class SubscribedList
                     (stopped ? ":stopped" : "");
         }
     }
+
 }

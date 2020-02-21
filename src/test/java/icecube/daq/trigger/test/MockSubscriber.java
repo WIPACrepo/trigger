@@ -59,12 +59,6 @@ public class MockSubscriber
     }
 
     @Override
-    public void pushAll(List<IPayload> payloads)
-    {
-        throw new Error("Unimplemented");
-    }
-
-    @Override
     public int size()
     {
         return payloads.size();

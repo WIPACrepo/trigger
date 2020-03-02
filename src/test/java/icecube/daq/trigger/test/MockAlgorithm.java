@@ -254,6 +254,17 @@ public class MockAlgorithm
         throw new Error("Unimplemented");
     }
 
+    /**
+     * Has this algorithm's input stream been stopped?
+     *
+     * @return <tt>true</tt> if the algorithm's input stream has stopped
+     */
+    @Override
+    public boolean isStopped()
+    {
+        return sub.isStopped() && !hasCachedRequests();
+    }
+
     @Override
     public void recycleUnusedRequests()
     {
@@ -302,7 +313,7 @@ public class MockAlgorithm
     @Override
     public void resetAlgorithm()
     {
-        throw new Error("Unimplemented");
+        // do nothing
     }
 
     @Override

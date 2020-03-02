@@ -214,7 +214,7 @@ public class CylinderTrigger extends AbstractTrigger
         }
 
         // if new hit is usable, add it to the queue
-        if (getHitType(hitPayload) == AbstractTrigger.SPE_HIT &&
+        if (getHitType(hitPayload) == SPE_HIT &&
             hitFilter.useHit(hitPayload))
         {
             triggerQueue.add(hitPayload);

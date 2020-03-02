@@ -77,14 +77,39 @@ public class TriggerThread
     public void run()
     {
         while (true) {
-            IPayload pay = algorithm.getSubscriber().pop();
-            if (pay == null) {
-                if (stopping && algorithm.getSubscriber().isStopped()) {
-                    break;
+            PayloadSubscriber sub = algorithm.getSubscriber();
+            if (sub == null) {
+                // if there's no subscriber, we're done
+                break;
+            }
+
+            IPayload pay = sub.pop();
+            if (pay == PayloadSubscriber.STOPPED_PAYLOAD) {
+                if (!sub.isStopped()) {
+                    // miscoded subscriber, STOPPED_PAYLOAD means stopped
+                    LOG.error("Ignoring STOPPED_PAYLOAD for " +
+                              algorithm.getTriggerName());
+                }
+                else
+                {
+                    // subscriber/trigger thread are stopped sequentially so
+                    // spin momentarily waiting to receive stop notification
+                    int spin = 0;
+                    while (!stopping && spin++ < 10)
+                    {
+                        try{ Thread.sleep(100);} catch (InterruptedException e){}
+                    }
+
+                    if(stopping)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        throw  new Error("Unexpected stop sequence");
+                    }
                 }
 
-                LOG.error("Ignoring null payload for " +
-                          algorithm.getTriggerName());
             } else if (pay == TriggerManager.FLUSH_PAYLOAD) {
                 algorithm.sendLast();
             } else {

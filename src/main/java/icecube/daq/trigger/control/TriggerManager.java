@@ -31,6 +31,7 @@ import icecube.daq.util.IDOMRegistry;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -134,7 +135,7 @@ public class TriggerManager
     private List<ITriggerAlgorithm> algorithms =
         new ArrayList<ITriggerAlgorithm>();
 
-    private SubscribedList inputList = new SubscribedList();
+    private SubscribedList queueList = new SubscribedList();
 
     /** gather histograms for monitoring */
     private MultiplicityDataManager multiDataMgr;
@@ -152,13 +153,9 @@ public class TriggerManager
     private long inputCount;
 
     /**
-     * source of last hit, used for monitoring
+     * source and time of last hit, used for monitoring
      */
     private ISourceID srcOfLastHit;
-
-    /**
-     * time of last hit, used for monitoring
-     */
     private IUTCTime timeOfLastHit;
 
     /** Current run number */
@@ -254,27 +251,25 @@ public class TriggerManager
     @Override
     public void analyze(List<Spliceable> splicedObjects)
     {
+        if (queueList.isEmpty()) {
+            throw new Error("No consumers for " + splicedObjects.size() +
+                            " hits");
+        }
+
         for (Spliceable spl : splicedObjects) {
             ILoadablePayload payload = (ILoadablePayload) spl;
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("  Processing payload " + inputCount +
-                          " with time " + payload.getPayloadTimeUTC());
-            }
-
-            if (isValidIncomingPayload(payload)) {
-                synchronized (inputList) {
-                    pushInput(payload);
-                }
-
-                inputCount++;
-            } else {
+            if (!isValidPayload(payload)) {
                 LOG.error("Ignoring invalid payload " + payload);
+            } else {
+                pushInput(payload);
             }
 
             // we're done with this payload
             payload.recycle();
         }
+
+        inputCount += splicedObjects.size();
     }
 
     /**
@@ -306,9 +301,9 @@ public class TriggerManager
     @Override
     public void flush()
     {
-        if (inputList.getNumSubscribers() > 0) {
+        if (!queueList.isEmpty()) {
             try {
-                inputList.push(FLUSH_PAYLOAD);
+                queueList.push(FLUSH_PAYLOAD);
             } catch (Error err) {
                 LOG.error("Failed to flush input list", err);
             }
@@ -378,7 +373,7 @@ public class TriggerManager
     @Override
     public Map<String, Integer> getQueuedInputs()
     {
-        return inputList.getLengths();
+        return queueList.getLengths();
     }
 
     /**
@@ -521,7 +516,7 @@ public class TriggerManager
 
         for (ITriggerAlgorithm trigger : algorithms) {
             Map<String, Object> moniMap = trigger.getTriggerMonitorMap();
-            if (moniMap != null && moniMap.size() > 0) {
+            if (moniMap != null && !moniMap.isEmpty()) {
                 String trigName = trigger.getTriggerName() + "-" +
                     trigger.getTriggerConfigId();
                 for (Map.Entry<String, Object> entry : moniMap.entrySet()) {
@@ -546,17 +541,16 @@ public class TriggerManager
     @Override
     public boolean isStopped()
     {
-        if (collector == null) {
-            return true;
+        if (collector != null && !collector.isStopped()) {
+            return false;
         }
 
-        return collector.isStopped();
+        return true;
     }
 
-    private boolean isValidIncomingPayload(ILoadablePayload payload)
+    private boolean isValidPayload(ILoadablePayload payload)
     {
         int iType = payload.getPayloadInterfaceType();
-
         // make sure we have hit payloads (or hit data payloads)
         if (iType == PayloadInterfaceRegistry.I_HIT_PAYLOAD ||
             iType == PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)
@@ -635,13 +629,18 @@ public class TriggerManager
         return true;
     }
 
+    /**
+     * Pass the next payload to the subscribers
+     *
+     * @param payload next payload
+     */
     private void pushInput(ILoadablePayload payload)
     {
         if (payload.getPayloadInterfaceType() !=
             PayloadInterfaceRegistry.I_TRIGGER_REQUEST)
         {
             // queue ordinary payload
-            inputList.push((IPayload) payload.deepCopy());
+            queueList.push((ILoadablePayload) payload.deepCopy());
         } else {
             try {
                 payload.loadPayload();
@@ -656,7 +655,7 @@ public class TriggerManager
             ITriggerRequestPayload req = (ITriggerRequestPayload) payload;
             if (!req.isMerged()) {
                 // queue single trigger request
-                inputList.push((IPayload) payload.deepCopy());
+                queueList.push((ILoadablePayload) payload.deepCopy());
             } else {
                 // extract list of merged triggers
                 List subList;
@@ -667,7 +666,7 @@ public class TriggerManager
                     return;
                 }
 
-                if (subList == null || subList.size() == 0) {
+                if (subList == null || subList.isEmpty()) {
                     LOG.error("No subtriggers found in " + req);
                     return;
                 }
@@ -686,7 +685,7 @@ public class TriggerManager
                         continue;
                     }
 
-                    inputList.push((IPayload) sub.deepCopy());
+                    queueList.push((ILoadablePayload) sub.deepCopy());
                 }
             }
         }
@@ -928,6 +927,8 @@ public class TriggerManager
         flush();
         stopThread();
 
+        queueList.stop();
+
         // clear cached values
         timeOfLastHit = null;
         srcOfLastHit = null;
@@ -949,7 +950,7 @@ public class TriggerManager
     {
         for (ITriggerAlgorithm algo : algorithms) {
             PayloadSubscriber subscriber =
-                inputList.subscribe(algo.getTriggerName());
+                queueList.subscribe(algo.getTriggerName());
             algo.setSubscriber(subscriber);
         }
     }
@@ -986,15 +987,15 @@ public class TriggerManager
     @Override
     public void unsubscribeAll()
     {
-        if (inputList.getNumSubscribers() > 0) {
+        if (!queueList.isEmpty()) {
             for (ITriggerAlgorithm a : algorithms) {
-                a.unsubscribe(inputList);
+                a.unsubscribe(queueList);
                 a.resetAlgorithm();
             }
 
-            if (inputList.getNumSubscribers() > 0) {
+            if (!queueList.isEmpty()) {
                 LOG.error(String.format("SubscribedList still has %d entries",
-                                        inputList.size()));
+                                        queueList.size()));
             }
         }
     }
@@ -1007,7 +1008,7 @@ public class TriggerManager
             numQueued += a.getNumberOfCachedRequests();
         }
 
-        return "TrigMgr[in#" + inputList.size() + ",req#" + numQueued +
+        return "TrigMgr[in#" + queueList.size() + ",req#" + numQueued +
             "," + collector + "]";
     }
 }

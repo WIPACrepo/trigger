@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
  *  makes a new TriggerRequest for each input TriggerRequest
  *  and then pass them to GlobalTrigBag.java.
  *
- * @version $Id: ThroughputTrigger.java 17732 2020-03-02 17:49:07Z dglo $
+ * @version $Id: ThroughputTrigger.java 17735 2020-03-02 21:45:26Z dglo $
  * @author shseo
  */
 public class ThroughputTrigger
@@ -71,11 +71,16 @@ public class ThroughputTrigger
       * basically indicates that there will be no further payloads to process
       */
     @Override
-     public void flush()
-     {
+    public void flush()
+    {
         //--nothing needs to be done in this ThroughputTrigger algorithm!
-     }
+    }
 
+    /**
+     * Is the trigger configured?
+     *
+     * @return true if it is
+     */
     @Override
     public boolean isConfigured()
     {

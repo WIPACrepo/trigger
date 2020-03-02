@@ -1,22 +1,95 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.payload.IPayload;
+import icecube.daq.performance.queue.QueueStrategy;
+import org.jctools.queues.SpscUnboundedArrayQueue;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * A list which can feed its contents to multiple subscribers
  */
 public class SubscribedList
 {
+
+    /** Support for runtime selection of PayloadSubscriber impl */
+    private static final String SubscriberImplCfg =
+            System.getProperty("icecube.daq.trigger.control.subscriber-impl",
+                    SubscriberImpl.LOCK_FREE_LIST_SUBSCRIBER_BEST_PERF.name());
+
+    private static final SubscriberImpl SubscriberFactory =
+            SubscriberImpl.valueOf(SubscriberImplCfg.toUpperCase());
+
+
+    /**
+     * Factory for selecting the PayloadSubscriber implementation.
+     *
+     * Queue selection is critical to overall trigger performance.  Changes should be validated
+     * for performance under a representative production load.
+     */
+    enum SubscriberImpl
+    {
+        // used c 2013-2020
+        // high performance cost
+        LIST_SUBSCRIBER()
+                {
+                    @Override
+                    public PayloadSubscriber createSubscriber(final String name)
+                    {
+                        return new ListSubscriber(name);
+                    }
+                },
+
+
+        // introduced 2020 - great performance, standard JDK lock-free Queue<T> implementation
+        LOCK_FREE_LIST_SUBSCRIBER()
+                {
+                    @Override
+                    public PayloadSubscriber createSubscriber(final String name)
+                    {
+                        ConcurrentLinkedQueue<IPayload> base = new ConcurrentLinkedQueue<>();
+                        QueueStrategy<IPayload> q =
+                                new QueueStrategy.NonBlockingPollBackoff<>(base, 100, 1000);
+
+
+                        return new LockFreeListSubscriber(q, name);
+                    }
+                },
+        // introduced 2020 - great performance, 3rd party Queue<T> implementation
+        // NOTE: Thread safe only with a single thread producer and a single thread consumer
+        LOCK_FREE_LIST_SUBSCRIBER_BEST_PERF()
+                {
+                    @Override
+                    public PayloadSubscriber createSubscriber(final String name)
+                    {
+                        //chunk size chosen to hold about 1 sec worth of hits
+                        SpscUnboundedArrayQueue<IPayload> base = new SpscUnboundedArrayQueue<IPayload>(1024 * 128);
+                        QueueStrategy<IPayload> q =
+                                new QueueStrategy.NonBlockingPollBackoff<>(base, 100, 1000);
+
+
+                        return new LockFreeListSubscriber(q, name);
+                    }
+                };
+
+
+        public abstract PayloadSubscriber createSubscriber(String name);
+
+    }
+
+
     /**
      * List of subscribers
      */
     private List<PayloadSubscriber> subs = new ArrayList<PayloadSubscriber>();
+
+    private List<IPayload> staged = new ArrayList<IPayload>();
+
 
     /**
      * Get the lengths of all subscriber lists
@@ -26,8 +99,10 @@ public class SubscribedList
     public Map<String, Integer> getLengths()
     {
         HashMap<String, Integer> map = new HashMap<String, Integer>();
-        for (PayloadSubscriber sub : subs) {
-            map.put(sub.getName(), sub.size());
+        synchronized (subs) {
+            for (PayloadSubscriber sub : subs) {
+                map.put(sub.getName(), sub.size());
+            }
         }
         return map;
     }
@@ -40,6 +115,16 @@ public class SubscribedList
     public int getNumSubscribers()
     {
         return subs.size();
+    }
+
+    /**
+     * Are there any subscribers to this list?
+     *
+     * @return <tt>false</tt> if the list has one or more subscribers
+     */
+    public boolean isEmpty()
+    {
+        return subs.isEmpty();
     }
 
     /**
@@ -66,13 +151,31 @@ public class SubscribedList
     public int size()
     {
         int longest = 0;
-        for (PayloadSubscriber sub : subs) {
-            final int len = sub.size();
-            if (len > longest) {
-                longest = len;
+        synchronized (subs) {
+            for (PayloadSubscriber sub : subs) {
+                final int len = sub.size();
+                if (len > longest) {
+                    longest = len;
+                }
             }
         }
         return longest;
+    }
+
+    /**
+     * Stop all subscribers
+     */
+    public void stop()
+    {
+        synchronized (subs) {
+            synchronized (staged) {
+                for (PayloadSubscriber sub : subs) {
+                    sub.stop();
+                }
+
+                staged.clear();
+            }
+        }
     }
 
     /**
@@ -84,7 +187,7 @@ public class SubscribedList
      */
     public PayloadSubscriber subscribe(String name)
     {
-        PayloadSubscriber newSub = new ListSubscriber(name);
+        PayloadSubscriber newSub = SubscriberFactory.createSubscriber(name);
         synchronized (subs) {
             subs.add(newSub);
         }
@@ -152,7 +255,10 @@ public class SubscribedList
         @Override
         public boolean hasData()
         {
-            return list.size() > 0;
+            synchronized (list)
+            {
+                return !list.isEmpty();
+            }
         }
 
         /**
@@ -175,21 +281,31 @@ public class SubscribedList
         @Override
         public IPayload pop()
         {
-            synchronized (list) {
-                while (!stopping && list.size() == 0) {
+
+            //Note: Support TriggerThread looping post-stop
+            if(stopped)
+            {
+                return PayloadSubscriber.STOPPED_PAYLOAD;
+            }
+
+            synchronized (list)
+            {
+                while(list.isEmpty())
+                {
                     try {
                         list.wait();
                     } catch (InterruptedException ie) {
-                        return null;
+                        throw new Error("Unexpected interruption", ie);
                     }
                 }
 
-                if (stopping && list.size() == 0) {
+                IPayload payload = list.removeFirst();
+                if(payload == PayloadSubscriber.STOPPED_PAYLOAD)
+                {
                     stopped = true;
-                    return null;
                 }
+                return payload;
 
-                return list.removeFirst();
             }
         }
 
@@ -217,7 +333,10 @@ public class SubscribedList
         @Override
         public int size()
         {
-            return list.size();
+            synchronized (list)
+            {
+                return list.size();
+            }
         }
 
         /**
@@ -226,10 +345,8 @@ public class SubscribedList
         @Override
         public void stop()
         {
-            synchronized (list) {
-                stopping = true;
-                list.notify();
-            }
+            stopping = true;
+            push(PayloadSubscriber.STOPPED_PAYLOAD);
         }
 
         /**
@@ -240,9 +357,160 @@ public class SubscribedList
         @Override
         public String toString()
         {
-            return name + "@" + list.size() +
-                (stopping ? ":stopping" : "") +
-                (stopped ? ":stopped" : "");
+            return name + "@" + size() +
+                    (stopping ? ":stopping" : "") +
+                    (stopped ? ":stopped" : "");
         }
     }
+
+
+    /**
+     * PayloadSubscribe implemented with a lock-free queue
+     */
+    public static class LockFreeListSubscriber implements PayloadSubscriber
+    {
+        /**
+         * List of payloads
+         */
+       final  QueueStrategy<IPayload> q;
+
+        /** Subscriber name */
+        private String name;
+        /** Is the list stopping? */
+        private volatile boolean stopping;
+        /** Has the list been stopped? */
+        private volatile boolean stopped;
+
+        /**
+         * Create a list subscriber
+         *
+         * @param q
+         * @param name subscriber name
+         */
+        LockFreeListSubscriber(QueueStrategy<IPayload> q, String name)
+        {
+            this.q = q;
+            this.name = name;
+        }
+
+        /**
+         * Get subscriber name
+         *
+         * @return name
+         */
+        @Override
+        public String getName()
+        {
+            return name;
+        }
+
+        /**
+         * Is there data available?
+         *
+         * @return <tt>true</tt> if there are more payloads available
+         */
+        @Override
+        public boolean hasData()
+        {
+            //return list.size() > 0;
+
+            return q.size() > 0;
+        }
+
+        /**
+         * Has this list been stopped?
+         *
+         * @return <tt>true</tt> if the list has been stopped
+         */
+        @Override
+        public boolean isStopped()
+        {
+            return stopped;
+        }
+
+        /**
+         * Return the next available payload.  Note that this may block if
+         * there are no payloads queued.
+         *
+         * @return next available payload.
+         */
+        @Override
+        public IPayload pop()
+        {
+
+            //Note: Support TriggerThread looping post-stop
+            if(stopped)
+            {
+                return PayloadSubscriber.STOPPED_PAYLOAD;
+            }
+
+            try
+            {
+                IPayload payload = q.dequeue();
+                if(payload == PayloadSubscriber.STOPPED_PAYLOAD)
+                {
+                    stopped = true;
+                }
+                return payload;
+            }
+            catch (InterruptedException ie)
+            {
+                throw new Error("Unexpected interruption", ie);
+            }
+
+        }
+
+        /**
+         * Add a payload to the queue.
+         *
+         * @param pay payload
+         */
+        @Override
+        public void push(IPayload pay)
+        {
+            try
+            {
+                q.enqueue(pay);
+            }
+            catch (InterruptedException ie)
+            {
+                throw new Error("Unexpected interruption", ie);
+            }
+        }
+
+        /**
+         * Get the number of queued payloads
+         *
+         * @return size of internal queue
+         */
+        @Override
+        public int size()
+        {
+            return q.size();
+        }
+
+        /**
+         * No more payloads will be collected
+         */
+        @Override
+        public void stop()
+        {
+            stopping = true;
+            push(PayloadSubscriber.STOPPED_PAYLOAD);
+        }
+
+        /**
+         * Return a description of this subscriber
+         *
+         * @return string
+         */
+        @Override
+        public String toString()
+        {
+            return name + "@" + size() +
+                    (stopping ? ":stopping" : "") +
+                    (stopped ? ":stopped" : "");
+        }
+    }
+
 }

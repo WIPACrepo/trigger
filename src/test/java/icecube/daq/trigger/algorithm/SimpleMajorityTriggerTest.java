@@ -14,6 +14,7 @@ import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.SpliceableComparator;
 import icecube.daq.splicer.SpliceableFactory;
 import icecube.daq.splicer.Splicer;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.control.ITriggerCollector;
 import icecube.daq.trigger.control.ITriggerManager;
@@ -197,6 +198,7 @@ public class SimpleMajorityTriggerTest
                     !msg.startsWith("No match for timegate ") &&
                     !msg.startsWith("Using slow SMT algorithm") &&
                     !msg.startsWith("Using quick SMT algorithm") &&
+                    !msg.startsWith("Earliest time went ") &&
                     !msg.startsWith("TriggerName set to SMT") &&
                     !msg.startsWith("HKN1Splicer was started") &&
                     !msg.startsWith("HKN1Splicer was stopped") &&
@@ -317,7 +319,7 @@ public class SimpleMajorityTriggerTest
         final int totReq = outProc.getNumberWritten() + recycled;
 
         try {
-            int expected = numObjs / threshold;
+            int expected = (numObjs / threshold) - 2;
 
             int diff = Math.abs(totReq - expected);
             assertTrue("Expected " + expected + " requests, not " + totReq,
@@ -358,7 +360,7 @@ public class SimpleMajorityTriggerTest
 
             SMTConfig trigCfg = new SMTConfig(registry, threshold);
 
-            for (AbstractTrigger tmpTrig : trigCfg.get()) {
+            for (ITriggerAlgorithm tmpTrig : trigCfg.get()) {
                 if (!(tmpTrig instanceof SimpleMajorityTrigger)) {
                     fail("Found non-SMT trigger " +
                          tmpTrig.getClass().getName() + ": " + tmpTrig);

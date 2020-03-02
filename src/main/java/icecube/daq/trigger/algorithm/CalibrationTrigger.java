@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 17732 2020-03-02 17:49:07Z dglo $
+ * Version $Id: CalibrationTrigger.java 17735 2020-03-02 21:45:26Z dglo $
  *
  * Date: August 27 2005
  *
@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 17732 2020-03-02 17:49:07Z dglo $
+ * @version $Id: CalibrationTrigger.java 17735 2020-03-02 21:45:26Z dglo $
  * @author pat
  */
 public class CalibrationTrigger extends AbstractTrigger
@@ -47,6 +47,9 @@ public class CalibrationTrigger extends AbstractTrigger
      */
     private static final Log LOG =
         LogFactory.getLog(CalibrationTrigger.class);
+
+    /** Numeric type for this algorithm */
+    public static final int TRIGGER_TYPE = 1;
 
     private static int nextTriggerNumber;
     private int triggerNumber;
@@ -109,13 +112,19 @@ public class CalibrationTrigger extends AbstractTrigger
         super.addParameter(name, value);
     }
 
+    /**
+     * Flush the trigger. Basically indicates that there will be no further
+     * payloads to process.
+     */
     @Override
-    public void setTriggerName(String triggerName)
+    public void flush()
     {
-        super.triggerName = triggerName + triggerNumber;
-        if (LOG.isInfoEnabled()) {
-            LOG.info("TriggerName set to " + super.triggerName);
-        }
+        // nothing to be done here since this trigger does not buffer anything.
+    }
+
+    public int getHitType()
+    {
+        return hitType;
     }
 
     /**
@@ -163,21 +172,6 @@ public class CalibrationTrigger extends AbstractTrigger
                 new DummyPayload(hit.getHitTimeUTC().getOffsetUTCTime(0.1));
             setEarliestPayloadOfInterest(earliest);
         }
-    }
-
-    /**
-     * Flush the trigger. Basically indicates that there will be no further
-     * payloads to process.
-     */
-    @Override
-    public void flush()
-    {
-        // nothing has to be done here since this trigger does not buffer anything.
-    }
-
-    public int getHitType()
-    {
-        return hitType;
     }
 
     public void setHitType(int hitType)

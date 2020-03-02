@@ -470,6 +470,11 @@ public class SlowMPTrigger extends AbstractTrigger
         return map;
     }
 
+    /**
+     * Is the trigger configured?
+     *
+     * @return true if it is
+     */
     @Override
     public void runTrigger(IPayload payload) throws TriggerException
     {
@@ -480,8 +485,7 @@ public class SlowMPTrigger extends AbstractTrigger
         // This upcast should be safe now
         IHitPayload hitPayload = (IHitPayload) payload;
         // Check hit type and perhaps pre-screen DOMs based on channel
-        boolean usableHit =
-            getHitType(hitPayload) == AbstractTrigger.SPE_HIT &&
+        boolean usableHit = getHitType(hitPayload) == SPE_HIT &&
             hitFilter.useHit(hitPayload);
 
         //if (domRegistry == null) {

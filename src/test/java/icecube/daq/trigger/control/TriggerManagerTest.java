@@ -184,7 +184,14 @@ public class TriggerManagerTest
 
         TriggerManager mgr = new TriggerManager(src, bufCache);
 
-        mgr.analyze(new ArrayList());
+        try {
+            mgr.analyze(new ArrayList());
+        } catch (Error err) {
+            assertNotNull("Message should not be null", err.getMessage());
+
+            final String msg = "No consumers for 0 hits";
+            assertEquals("Unexpected error message", msg, err.getMessage());
+        }
     }
 
     @Test
@@ -204,7 +211,7 @@ public class TriggerManagerTest
         } catch (Error err) {
             assertNotNull("Message should not be null", err.getMessage());
 
-            final String msg = "No subscribers have been added";
+            final String msg = "No consumers for 1 hits";
             assertEquals("Unexpected error message", msg, err.getMessage());
         }
     }

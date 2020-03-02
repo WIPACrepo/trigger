@@ -5,6 +5,7 @@ import icecube.daq.trigger.control.PayloadSubscriber;
 import icecube.daq.trigger.control.TriggerThread;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MockSubscriber
     implements PayloadSubscriber
@@ -45,7 +46,7 @@ public class MockSubscriber
         }
 
         if (payloads.size() < 1) {
-            return null;
+            return PayloadSubscriber.STOPPED_PAYLOAD;
         }
 
         return payloads.remove(0);

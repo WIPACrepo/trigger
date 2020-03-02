@@ -242,11 +242,9 @@ public class ClusterTrigger extends AbstractTrigger
         }
 
         // if new hit is usable, add it to the queue
-        boolean use1 = getHitType(hitPayload) == AbstractTrigger.SPE_HIT;
-        boolean use2 = hitFilter.useHit(hitPayload);
-        boolean usable = use1 && use2;
-        if (usable)
-        {
+        boolean usableHit = getHitType(hitPayload) == SPE_HIT &&
+            hitFilter.useHit(hitPayload);
+        if (usableHit) {
             triggerQueue.add(hitPayload);
         }
     }

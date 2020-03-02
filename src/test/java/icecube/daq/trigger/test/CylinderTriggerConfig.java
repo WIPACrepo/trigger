@@ -5,7 +5,7 @@ import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.PayloadChecker;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
-import icecube.daq.trigger.algorithm.AbstractTrigger;
+import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
 import icecube.daq.trigger.config.TriggerParameter;
 import icecube.daq.trigger.config.TriggerReadout;
 import icecube.daq.trigger.exceptions.TriggerException;
@@ -70,7 +70,7 @@ public class CylinderTriggerConfig
     {
         this.checkSequentialTimes = checkSequentialTimes;
 
-        AbstractTrigger trig;
+        ITriggerAlgorithm trig;
 
         numHitsPerTrigger = 8;
         timeBase = 100000L;

@@ -104,15 +104,6 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
         super.addParameter(name, value);
     }
 
-    @Override
-    public void setTriggerName(String triggerName)
-    {
-        super.triggerName = triggerName + triggerNumber;
-        if (LOG.isInfoEnabled()) {
-            LOG.info("TriggerName set to " + super.triggerName);
-        }
-    }
-
     /**
      * Run the trigger algorithm on a payload.
      *
@@ -137,8 +128,7 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
         }
         IHitPayload hit = (IHitPayload) payload;
 
-        boolean usableHit =
-            getHitType(hit) == AbstractTrigger.SPE_HIT &&
+        boolean usableHit = getHitType(hit) == SPE_HIT &&
             hitFilter.useHit(hit);
 
         IUTCTime hitTime = hit.getHitTimeUTC();
@@ -218,5 +208,14 @@ public class PhysicsMinBiasTrigger extends AbstractTrigger
     public boolean hasValidMultiplicity()
     {
         return true;
+    }
+
+    @Override
+    public void setTriggerName(String triggerName)
+    {
+        super.triggerName = triggerName + triggerNumber;
+        if (LOG.isInfoEnabled()) {
+            LOG.info("TriggerName set to " + super.triggerName);
+        }
     }
 }

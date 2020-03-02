@@ -21,6 +21,9 @@ import java.util.Map;
 public interface ITriggerAlgorithm
     extends Comparable<ITriggerAlgorithm>
 {
+    /** SPE hit type */
+    public static final int SPE_HIT = 0x02;
+
     /**
      * Add a trigger parameter.
      *
@@ -183,6 +186,13 @@ public interface ITriggerAlgorithm
      * @return <tt>true</tt> if the algorithm has been fully configured
      */
     boolean isConfigured();
+
+    /**
+     * Has this algorithm finished with all incoming payloads?
+     *
+     * @return <tt>true</tt> if the algorithm has processed all its data
+     */
+    boolean isStopped();
 
     /**
      * Recycle all unused requests still cached in the algorithms.

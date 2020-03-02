@@ -1,15 +1,7 @@
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.payload.IPayload;
-
-/**
- * Produce a one-line summary of algorithm statistics
- */
 public class AlgorithmStatistics
 {
-    private static final boolean ADD_EARLIEST = true;
-    private static final boolean ADD_LATENCY = true;
-
     private ITriggerAlgorithm algorithm;
 
     public AlgorithmStatistics(ITriggerAlgorithm algorithm)
@@ -17,11 +9,6 @@ public class AlgorithmStatistics
         this.algorithm = algorithm;
     }
 
-    /**
-     * Add special debugging stuff here
-     *
-     * @return extra debugging string
-     */
     public String getExtra()
     {
         /*
@@ -31,21 +18,6 @@ public class AlgorithmStatistics
         */
 
         return "";
-    }
-
-    public String getLatency()
-    {
-        final long latency = algorithm.getLatency();
-
-        if (latency < 10000L) {
-            return String.format("%.2fns", (float) latency / 10.0);
-        } else if (latency < 10000000L) {
-            return String.format("%.2fus", (float) latency / 10000.0);
-        } else if (latency < 10000000000L) {
-            return String.format("%.2fms", (float) latency / 10000000.0);
-        }
-
-        return String.format("%.2fs", (float) latency / 10000000000.0);
     }
 
     /**
@@ -112,44 +84,14 @@ public class AlgorithmStatistics
     @Override
     public String toString()
     {
-        final int cached = getNumberOfCachedRequests();
-
         StringBuilder buf = new StringBuilder(getName());
         buf.append(':').append(getNumberOfQueuedInputs());
         buf.append("->").append(getNumberOfCreatedRequests());
-
-        boolean addParen = false;
-        if (cached > 0) {
-            buf.append(" (").append(cached).append(" cached");
-            if (ADD_LATENCY) {
-                buf.append(", latency ").append(getLatency());
-            }
-            addParen = true;
-        }
-
-        if (ADD_EARLIEST) {
-            if (cached > 0) {
-                buf.append(", ");
-            } else {
-                buf.append(" (");
-                addParen = true;
-            }
-
-            IPayload earliest = algorithm.getEarliestPayloadOfInterest();
-            buf.append("earliest ");
-            if (earliest == null) {
-                buf.append("NULL");
-            } else {
-                buf.append(earliest.getUTCTime());
-            }
-        }
-
-        if (addParen) {
-            buf.append(")");
-        }
+        buf.append(" (").append(getNumberOfCachedRequests());
+        buf.append(" cached)");
 
         String extra = getExtra();
-        if (extra != null && extra.length() > 0) {
+        if (extra.length() > 0) {
             buf.append(" :: ").append(extra);
         }
 

@@ -11,7 +11,6 @@ import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.control.PayloadSubscriber;
 import icecube.daq.trigger.control.SubscribedList;
 import icecube.daq.trigger.control.TriggerManager;
-import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -101,13 +100,6 @@ public class MockAlgorithm
     }
 
     @Override
-    public void checkTriggerType(int type)
-        throws ConfigException
-    {
-        throw new Error("Unimplemented");
-    }
-
-    @Override
     public int compareTo(ITriggerAlgorithm a)
     {
         int val = getTriggerName().compareTo(a.getTriggerName());
@@ -157,13 +149,6 @@ public class MockAlgorithm
         return intervals.get(0);
     }
 
-    /**
-     * Return the difference between the start of the first cached request
-     * and the earliest payload of interest (in DAQ ticks).
-     *
-     * @return latency in DAQ ticks
-     */
-    @Override
     public long getLatency()
     {
         return -1L;
@@ -269,17 +254,6 @@ public class MockAlgorithm
         throw new Error("Unimplemented");
     }
 
-    /**
-     * Has this algorithm's input stream been stopped?
-     *
-     * @return <tt>true</tt> if the algorithm's input stream has stopped
-     */
-    @Override
-    public boolean isStopped()
-    {
-        return sub.isStopped() && !hasCachedRequests();
-    }
-
     @Override
     public void recycleUnusedRequests()
     {
@@ -328,7 +302,7 @@ public class MockAlgorithm
     @Override
     public void resetAlgorithm()
     {
-        // do nothing
+        throw new Error("Unimplemented");
     }
 
     @Override
@@ -416,6 +390,12 @@ public class MockAlgorithm
 
     @Override
     public void setTriggerName(String name)
+    {
+        throw new Error("Unimplemented");
+    }
+
+    @Override
+    public void setTriggerType(int type)
     {
         throw new Error("Unimplemented");
     }

@@ -5,7 +5,6 @@ import icecube.daq.trigger.control.PayloadSubscriber;
 import icecube.daq.trigger.control.TriggerThread;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class MockSubscriber
     implements PayloadSubscriber
@@ -54,12 +53,6 @@ public class MockSubscriber
 
     @Override
     public void push(IPayload pay)
-    {
-        throw new Error("Unimplemented");
-    }
-
-    @Override
-    public void pushAll(List<IPayload> payloads)
     {
         throw new Error("Unimplemented");
     }

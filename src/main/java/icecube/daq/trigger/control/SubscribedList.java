@@ -13,30 +13,10 @@ import java.util.Map;
  */
 public class SubscribedList
 {
-    private static final int CHUNK_SIZE = 1000;
-
     /**
      * List of subscribers
      */
     private List<PayloadSubscriber> subs = new ArrayList<PayloadSubscriber>();
-
-    private ArrayList<IPayload> staged = new ArrayList<IPayload>();
-
-    /**
-     * Push any cached payloads out to the algorithm threads
-     */
-    public void flush()
-    {
-        synchronized (subs) {
-            synchronized (staged) {
-                for (PayloadSubscriber sub : subs) {
-                    sub.pushAll(staged);
-                }
-
-                staged.clear();
-            }
-        }
-    }
 
     /**
      * Get the lengths of all subscriber lists
@@ -46,10 +26,8 @@ public class SubscribedList
     public Map<String, Integer> getLengths()
     {
         HashMap<String, Integer> map = new HashMap<String, Integer>();
-        synchronized (subs) {
-            for (PayloadSubscriber sub : subs) {
-                map.put(sub.getName(), sub.size());
-            }
+        for (PayloadSubscriber sub : subs) {
+            map.put(sub.getName(), sub.size());
         }
         return map;
     }
@@ -65,38 +43,18 @@ public class SubscribedList
     }
 
     /**
-     * Are there any subscribers to this list?
-     *
-     * @return <tt>false</tt> if the list has one or more subscribers
-     */
-    public boolean isEmpty()
-    {
-        return subs.isEmpty();
-    }
-
-    /**
      * Push a new payload onto the list
      *
      * @param pay new payload
      */
     public void push(IPayload pay)
     {
-        if (!subs.isEmpty()) {
-            if (CHUNK_SIZE == 1) {
-                synchronized (subs) {
-                    for (PayloadSubscriber sub : subs) {
-                        sub.push(pay);
-                    }
-                }
-            } else {
-                synchronized (staged) {
-                    staged.add(pay);
+        if (subs.size() == 0) {
+            throw new Error("No subscribers have been added");
+        }
 
-                    if (staged.size() > CHUNK_SIZE) {
-                        flush();
-                    }
-                }
-            }
+        for (PayloadSubscriber sub : subs) {
+            sub.push(pay);
         }
     }
 
@@ -108,32 +66,13 @@ public class SubscribedList
     public int size()
     {
         int longest = 0;
-        synchronized (subs) {
-            for (PayloadSubscriber sub : subs) {
-                final int len = sub.size();
-                if (len > longest) {
-                    longest = len;
-                }
+        for (PayloadSubscriber sub : subs) {
+            final int len = sub.size();
+            if (len > longest) {
+                longest = len;
             }
         }
         return longest;
-    }
-
-    /**
-     * Flush any remaining payloads and stop all subscribers
-     */
-    public void stop()
-    {
-        synchronized (subs) {
-            synchronized (staged) {
-                for (PayloadSubscriber sub : subs) {
-                    sub.pushAll(staged);
-                    sub.stop();
-                }
-
-                staged.clear();
-            }
-        }
     }
 
     /**
@@ -213,7 +152,7 @@ public class SubscribedList
         @Override
         public boolean hasData()
         {
-            return !list.isEmpty();
+            return list.size() > 0;
         }
 
         /**
@@ -224,10 +163,6 @@ public class SubscribedList
         @Override
         public boolean isStopped()
         {
-            if (stopping && list.isEmpty()) {
-                stopped = true;
-            }
-
             return stopped;
         }
 
@@ -241,7 +176,7 @@ public class SubscribedList
         public IPayload pop()
         {
             synchronized (list) {
-                while (!stopping && list.isEmpty()) {
+                while (!stopping && list.size() == 0) {
                     try {
                         list.wait();
                     } catch (InterruptedException ie) {
@@ -249,7 +184,7 @@ public class SubscribedList
                     }
                 }
 
-                if (stopping && list.isEmpty()) {
+                if (stopping && list.size() == 0) {
                     stopped = true;
                     return null;
                 }
@@ -268,22 +203,6 @@ public class SubscribedList
         {
             synchronized (list) {
                 list.addLast(pay);
-
-                // let subscribers know that there's data available
-                list.notify();
-            }
-        }
-
-        /**
-         * Add a list of payloads to the queue.
-         *
-         * @param payloads list of payload
-         */
-        @Override
-        public void pushAll(List<IPayload> payloads)
-        {
-            synchronized (list) {
-                list.addAll(payloads);
 
                 // let subscribers know that there's data available
                 list.notify();

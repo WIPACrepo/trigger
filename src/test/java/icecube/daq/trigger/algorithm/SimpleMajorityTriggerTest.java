@@ -45,6 +45,8 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
 
 class MockCollector
@@ -195,7 +197,10 @@ public class SimpleMajorityTriggerTest
                     !msg.startsWith("No match for timegate ") &&
                     !msg.startsWith("Using slow SMT algorithm") &&
                     !msg.startsWith("Using quick SMT algorithm") &&
-                    !msg.startsWith("Earliest time went ") &&
+                    !msg.startsWith("TriggerName set to SMT") &&
+                    !msg.startsWith("HKN1Splicer was started") &&
+                    !msg.startsWith("HKN1Splicer was stopped") &&
+                    !msg.startsWith("pushing LAST_POSSIBLE_SPLICEABLE") &&
                     !(msg.startsWith("Recycled ") &&
                       msg.contains(" unused ") &&
                       msg.endsWith(" requests")))
@@ -240,9 +245,15 @@ public class SimpleMajorityTriggerTest
         return configDir;
     }
 
-    private void run(int threshold, int numTails, int numPerTail)
+    private void run(int threshold, boolean allowQuick, int numTails,
+                     int numPerTail)
         throws DOMRegistryException, IOException, TriggerException
     {
+        if (!allowQuick) {
+            System.setProperty("disableQuickPush", "1");
+        }
+        SimpleMajorityTrigger.checkQuickPushProperty();
+
         final int srcNum;
         if (threshold == 1 || threshold == 6) {
             srcNum = TriggerCollection.ICETOP_TRIGGER;
@@ -306,7 +317,7 @@ public class SimpleMajorityTriggerTest
         final int totReq = outProc.getNumberWritten() + recycled;
 
         try {
-            int expected = (numObjs / threshold) - 2;
+            int expected = numObjs / threshold;
 
             int diff = Math.abs(totReq - expected);
             assertTrue("Expected " + expected + " requests, not " + totReq,
@@ -320,16 +331,22 @@ public class SimpleMajorityTriggerTest
         }
     }
 
-    private void writeClusteredHits(int threshold, int numRequests)
+    private void writeClusteredHits(int threshold, int numRequests,
+                                    boolean allowQuick)
         throws DOMRegistryException, IOException, TriggerException
     {
-        writeClusteredHits(threshold, numRequests, numRequests);
+        writeClusteredHits(threshold, numRequests, numRequests, allowQuick);
     }
 
     private void writeClusteredHits(int threshold, int numRequests,
-                                    int expRequests)
+                                    int expRequests, boolean allowQuick)
         throws DOMRegistryException, IOException, TriggerException
     {
+        if (!allowQuick) {
+            System.setProperty("disableQuickPush", "1");
+        }
+        //SimpleMajorityTrigger.checkQuickPushProperty();
+
         SimpleMajorityTrigger trig = null;
         try {
             final String configDir = getConfigurationDirectory();
@@ -341,7 +358,7 @@ public class SimpleMajorityTriggerTest
 
             SMTConfig trigCfg = new SMTConfig(registry, threshold);
 
-            for (ITriggerAlgorithm tmpTrig : trigCfg.get()) {
+            for (AbstractTrigger tmpTrig : trigCfg.get()) {
                 if (!(tmpTrig instanceof SimpleMajorityTrigger)) {
                     fail("Found non-SMT trigger " +
                          tmpTrig.getClass().getName() + ": " + tmpTrig);
@@ -455,8 +472,8 @@ public class SimpleMajorityTriggerTest
         // initialize SNDAQ ZMQ address to nonsense
         props.setProperty(SNDAQAlerter.PROPERTY, ":12345");
 
-        // clear SMTRerun property
-        props.remove("disableSMTRerun");
+        // clear SMT Quick Push property
+        props.remove("disableQuickPush");
     }
 
     public static Test suite()
@@ -470,53 +487,97 @@ public class SimpleMajorityTriggerTest
     {
         // remove properties
         System.clearProperty(SNDAQAlerter.PROPERTY);
-        System.clearProperty("disableSMTRerun");
+        System.clearProperty("disableQuickPush");
 
         appender.assertNoLogMessages();
 
         super.tearDown();
     }
 
-    public void testComboSMT1()
+    public void testComboSMT1Slow()
         throws DOMRegistryException, IOException, TriggerException
     {
-        run(1, 24, 1234);
+        run(1, false, 24, 1234);
     }
 
-    public void testComboSMT3()
+    public void testComboSMT1Quick()
         throws DOMRegistryException, IOException, TriggerException
     {
-        run(3, 24, 1234);
+        run(1, true, 24, 1234);
     }
 
-    public void testComboSMT6()
+    public void testComboSMT3Slow()
         throws DOMRegistryException, IOException, TriggerException
     {
-        run(6, 24, 1234);
+        run(3, false, 24, 1234);
     }
 
-    public void testComboSMT8()
+    public void testComboSMT3Quick()
         throws DOMRegistryException, IOException, TriggerException
     {
-        run(8, 24, 1234);
+        run(3, true, 24, 1234);
     }
 
-    public void testDirectSMT1()
+    public void testComboSMT6Slow()
         throws DOMRegistryException, IOException, TriggerException
     {
-        writeClusteredHits(1, 200);
+        run(6, false, 24, 1234);
     }
 
-    public void testDirectSMT3()
+    public void testComboSMT6Quick()
         throws DOMRegistryException, IOException, TriggerException
     {
-        writeClusteredHits(3, 200);
+        run(6, true, 24, 1234);
     }
 
-    public void testDirectSMT8()
+    public void testComboSMT8Slow()
         throws DOMRegistryException, IOException, TriggerException
     {
-        writeClusteredHits(8, 200);
+        run(8, false, 24, 1234);
+    }
+
+    public void testComboSMT8Quick()
+        throws DOMRegistryException, IOException, TriggerException
+    {
+        run(8, true, 24, 1234);
+    }
+
+    public void testDirectSMT1Slow()
+        throws DOMRegistryException, IOException, TriggerException
+    {
+        final int numReqs = 200;
+
+        writeClusteredHits(1, numReqs, numReqs, false);
+    }
+
+    public void testDirectSMT1Quick()
+        throws DOMRegistryException, IOException, TriggerException
+    {
+        writeClusteredHits(1, 200, true);
+    }
+
+    public void testDirectSMT3Slow()
+        throws DOMRegistryException, IOException, TriggerException
+    {
+        writeClusteredHits(3, 200, false);
+    }
+
+    public void testDirectSMT3Quick()
+        throws DOMRegistryException, IOException, TriggerException
+    {
+        writeClusteredHits(3, 200, true);
+    }
+
+    public void testDirectSMT8Slow()
+        throws DOMRegistryException, IOException, TriggerException
+    {
+        writeClusteredHits(8, 200, false);
+    }
+
+    public void testDirectSMT8Quick()
+        throws DOMRegistryException, IOException, TriggerException
+    {
+        writeClusteredHits(8, 200, true);
     }
 
     public static void main(String[] args)

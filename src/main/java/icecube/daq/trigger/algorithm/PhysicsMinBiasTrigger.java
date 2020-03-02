@@ -32,23 +32,14 @@ import org.apache.commons.logging.LogFactory;
  * @version $Id: PhysicsMinBiasTrigger.java,v 1.20 2006/09/14 20:35:13 toale Exp $
  * @author pat
  */
-public class PhysicsMinBiasTrigger
-    extends AbstractTrigger
+public class PhysicsMinBiasTrigger extends AbstractTrigger
 {
 
-    /** Log object for this class */
+    /**
+     * Log object for this class
+     */
     private static final Log LOG =
         LogFactory.getLog(PhysicsMinBiasTrigger.class);
-
-    /**
-     * I3Live monitoring name for this algorithm
-     *
-     * NOTE: PnF calls both MinBias and PhysicsMinBias "MIN_BIAS"
-     */
-    private static final String MONITORING_NAME = "MIN_BIAS";
-
-    /** Numeric type for this algorithm */
-    public static final int TRIGGER_TYPE = 13;
 
     private static int nextTriggerNumber;
     private int triggerNumber;
@@ -65,6 +56,17 @@ public class PhysicsMinBiasTrigger
     public PhysicsMinBiasTrigger()
     {
         triggerNumber = ++nextTriggerNumber;
+    }
+
+    /**
+     * Is the trigger configured?
+     *
+     * @return true if it is
+     */
+    @Override
+    public boolean isConfigured()
+    {
+        return (configPrescale && configDeadtime);
     }
 
     /**
@@ -102,49 +104,13 @@ public class PhysicsMinBiasTrigger
         super.addParameter(name, value);
     }
 
-    /**
-     * Get the monitoring name.
-     *
-     * @return the name used for monitoring this trigger
-     */
     @Override
-    public String getMonitoringName()
+    public void setTriggerName(String triggerName)
     {
-        return MONITORING_NAME;
-    }
-
-    /**
-     * Get the trigger type.
-     *
-     * @return trigger type
-     */
-    @Override
-    public int getTriggerType()
-    {
-        return TRIGGER_TYPE;
-    }
-
-    /**
-     * Does this algorithm include all relevant hits in each request
-     * so that it can be used to calculate multiplicity?
-     *
-     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
-     */
-    @Override
-    public boolean hasValidMultiplicity()
-    {
-        return true;
-    }
-
-    /**
-     * Is the trigger configured?
-     *
-     * @return true if it is
-     */
-    @Override
-    public boolean isConfigured()
-    {
-        return (configPrescale && configDeadtime);
+        super.triggerName = triggerName + triggerNumber;
+        if (LOG.isInfoEnabled()) {
+            LOG.info("TriggerName set to " + super.triggerName);
+        }
     }
 
     /**
@@ -171,7 +137,8 @@ public class PhysicsMinBiasTrigger
         }
         IHitPayload hit = (IHitPayload) payload;
 
-        boolean usableHit = getHitType(hit) == SPE_HIT &&
+        boolean usableHit =
+            getHitType(hit) == AbstractTrigger.SPE_HIT &&
             hitFilter.useHit(hit);
 
         IUTCTime hitTime = hit.getHitTimeUTC();
@@ -184,7 +151,7 @@ public class PhysicsMinBiasTrigger
             // this hit comes after the end of the deadtime window,
             // count it
             numberProcessed++;
-            deadtimeWindow = hitTime.getOffsetUTCTime(deadtime * 10L);
+            deadtimeWindow = hitTime.getOffsetUTCTime(deadtime);
             if (numberProcessed % prescale == 0) {
                 // report this as a trigger and update the deadtime window
                 formTrigger(hit, null, null);
@@ -195,7 +162,7 @@ public class PhysicsMinBiasTrigger
         if (!formedTrigger) {
             // just update earliest time of interest
             IPayload earliest =
-                new DummyPayload(hitTime.getOffsetUTCTime(1));
+                new DummyPayload(hitTime.getOffsetUTCTime(0.1));
             setEarliestPayloadOfInterest(earliest);
         }
     }
@@ -230,12 +197,26 @@ public class PhysicsMinBiasTrigger
         this.deadtime = deadtime;
     }
 
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
     @Override
-    public void setTriggerName(String triggerName)
+    public String getMonitoringName()
     {
-        super.triggerName = triggerName + triggerNumber;
-        if (LOG.isInfoEnabled()) {
-            LOG.info("TriggerName set to " + super.triggerName);
-        }
+        return "MIN_BIAS";
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    @Override
+    public boolean hasValidMultiplicity()
+    {
+        return true;
     }
 }

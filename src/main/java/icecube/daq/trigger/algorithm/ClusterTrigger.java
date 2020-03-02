@@ -49,19 +49,8 @@ import org.apache.log4j.Logger;
  * @author kael
  *
  */
-public class ClusterTrigger
-    extends AbstractTrigger
+public class ClusterTrigger extends AbstractTrigger
 {
-    /** Log object for this class */
-    private static final Logger logger =
-        Logger.getLogger(ClusterTrigger.class);
-
-    /** I3Live monitoring name for this algorithm */
-    private static final String MONITORING_NAME = "CLUSTER";
-
-    /** Numeric type for this algorithm */
-    public static final int TRIGGER_TYPE = 14;
-
     private long timeWindow;
     private boolean configTimeWindow;
 
@@ -74,6 +63,8 @@ public class ClusterTrigger
     private boolean configCoherence;
 
     private LinkedList<IHitPayload> triggerQueue;
+
+    private static final Logger logger = Logger.getLogger(ClusterTrigger.class);
 
     public ClusterTrigger()
     {
@@ -169,18 +160,7 @@ public class ClusterTrigger
     @Override
     public String getMonitoringName()
     {
-        return MONITORING_NAME;
-    }
-
-    /**
-     * Get the trigger type.
-     *
-     * @return trigger type
-     */
-    @Override
-    public int getTriggerType()
-    {
-        return TRIGGER_TYPE;
+        return "CLUSTER";
     }
 
     /**
@@ -193,17 +173,6 @@ public class ClusterTrigger
     public boolean hasValidMultiplicity()
     {
         return true;
-    }
-
-    /**
-     * Is the trigger configured?
-     *
-     * @return true if it is
-     */
-    @Override
-    public boolean isConfigured()
-    {
-        return configTimeWindow && configMultiplicity && configCoherence;
     }
 
     @Override
@@ -268,12 +237,12 @@ public class ClusterTrigger
 
             // set earliest time to just before this time
             IUTCTime earliestUTC =
-                earliest.getPayloadTimeUTC().getOffsetUTCTime(-1);
+                earliest.getPayloadTimeUTC().getOffsetUTCTime(-0.1);
             setEarliestPayloadOfInterest(new DummyPayload(earliestUTC));
         }
 
         // if new hit is usable, add it to the queue
-        boolean use1 = getHitType(hitPayload) == SPE_HIT;
+        boolean use1 = getHitType(hitPayload) == AbstractTrigger.SPE_HIT;
         boolean use2 = hitFilter.useHit(hitPayload);
         boolean usable = use1 && use2;
         if (usable)
@@ -356,5 +325,11 @@ public class ClusterTrigger
         }
 
         return true;
+    }
+
+    @Override
+    public boolean isConfigured()
+    {
+        return configTimeWindow && configMultiplicity && configCoherence;
     }
 }

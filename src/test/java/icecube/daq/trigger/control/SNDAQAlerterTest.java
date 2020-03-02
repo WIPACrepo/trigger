@@ -20,6 +20,8 @@ import java.util.ArrayDeque;
 import org.junit.*;
 import static org.junit.Assert.*;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
 
 class MyMockAlerter
@@ -232,10 +234,12 @@ public class SNDAQAlerterTest
             new ArrayList<ITriggerAlgorithm>();
 
         final int cfgId = 123;
+        final int trigType = 456;
 
         SimpleMajorityTrigger smt8 = new SimpleMajorityTrigger();
         smt8.setTriggerName("SimpleMajorityTrigger-Test8");
         smt8.setTriggerConfigId(cfgId);
+        smt8.setTriggerType(trigType);
         smt8.setThreshold(8);
 
         algorithms.add(smt8);
@@ -256,7 +260,7 @@ public class SNDAQAlerterTest
             endTime = startTime + oneSecond;
 
             MockTriggerRequest req =
-                new MockTriggerRequest(i + 10, smt8.getTriggerType(), cfgId,
+                new MockTriggerRequest(i + 10, trigType, cfgId,
                                        startTime, endTime);
             for (int j = 0; j <= i; j++) {
                 req.addPayload(new MockHit(startTime + ((long) j) * 10000L));

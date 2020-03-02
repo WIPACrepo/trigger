@@ -77,22 +77,14 @@ public class TriggerThread
     public void run()
     {
         while (true) {
-            PayloadSubscriber sub = algorithm.getSubscriber();
-            if (sub == null) {
-                // if there's no subscriber, we're done
-                break;
-            }
-
-            IPayload pay = sub.pop();
+            IPayload pay = algorithm.getSubscriber().pop();
             if (pay == null) {
-                if (!sub.isStopped()) {
-                    LOG.error("Ignoring null payload for " +
-                              algorithm.getTriggerName());
-                } else if (stopping) {
-                    // algorithm is stopping and subscriber has stopped
+                if (stopping && algorithm.getSubscriber().isStopped()) {
                     break;
                 }
 
+                LOG.error("Ignoring null payload for " +
+                          algorithm.getTriggerName());
             } else if (pay == TriggerManager.FLUSH_PAYLOAD) {
                 algorithm.sendLast();
             } else {

@@ -8,7 +8,6 @@ import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.control.Interval;
 import icecube.daq.trigger.control.PayloadSubscriber;
 import icecube.daq.trigger.control.SubscribedList;
-import icecube.daq.trigger.exceptions.ConfigException;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.exceptions.IllegalParameterValueException;
 import icecube.daq.trigger.exceptions.UnknownParameterException;
@@ -22,9 +21,6 @@ import java.util.Map;
 public interface ITriggerAlgorithm
     extends Comparable<ITriggerAlgorithm>
 {
-    /** SPE hit type */
-    public static final int SPE_HIT = 0x02;
-
     /**
      * Add a trigger parameter.
      *
@@ -46,16 +42,6 @@ public interface ITriggerAlgorithm
      * @param plus plus
      */
     void addReadout(int rdoutType, int offset, int minus, int plus);
-
-    /**
-     * Check the trigger type.
-     *
-     * @param val trigger type
-     *
-     * @throws ConfigException if it doesn't match the expected value
-     */
-    void checkTriggerType(int val)
-        throws ConfigException;
 
     /**
      * Flush the algorithm.
@@ -199,13 +185,6 @@ public interface ITriggerAlgorithm
     boolean isConfigured();
 
     /**
-     * Has this algorithm finished with all incoming payloads?
-     *
-     * @return <tt>true</tt> if the algorithm has processed all its data
-     */
-    boolean isStopped();
-
-    /**
      * Recycle all unused requests still cached in the algorithms.
      */
     void recycleUnusedRequests();
@@ -294,6 +273,13 @@ public interface ITriggerAlgorithm
      * @param triggerName trigger name
      */
     void setTriggerName(String triggerName);
+
+    /**
+     * Set trigger type.
+     *
+     * @param val trigger type
+     */
+    void setTriggerType(int val);
 
     /**
      * Disconnect the input provider.

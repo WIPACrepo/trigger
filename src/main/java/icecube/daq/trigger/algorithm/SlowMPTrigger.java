@@ -24,24 +24,10 @@ import org.apache.commons.logging.LogFactory;
  * @author gluesenkamp
  *
  */
-public class SlowMPTrigger
-    extends AbstractTrigger
+public class SlowMPTrigger extends AbstractTrigger
 {
-    /** Log object for this class */
+
     private static final Log LOG = LogFactory.getLog(SlowMPTrigger.class);
-
-    /** I3Live monitoring name for this algorithm */
-    private static final String MONITORING_NAME = "SLOW_PARTICLE";
-
-    /** Numeric type for this algorithm */
-    public static final int TRIGGER_TYPE = 24;
-
-    /**
-     * If 'true', log a warning every time SlowMP tries to move the earliest
-     * payload time backward
-     */
-    private static final boolean WARN_IF_EARLIEST_REGRESSED = false;
-
     private long t_proximity; // t_proximity in nanoseconds, eliminates most muon_hlcs
     private long t_min;
     private long t_max;
@@ -190,6 +176,26 @@ public class SlowMPTrigger
        // configHitFilter(5);
 
         //System.out.println("INITIALIZED SLOWMPTRIGGER");
+    }
+
+    @Override
+    public boolean isConfigured()
+    {
+    	if (dc_algo_configured)
+    	{
+    		if (dc_algo)
+    		{
+    			return ( t_proximity_configured && t_min_configured && t_max_configured &&
+    					delta_d_configured && rel_v_configured && min_n_tuples_configured && max_event_length_configured );
+    		}
+    		else
+    		{
+    			return ( t_proximity_configured && t_min_configured && t_max_configured &&
+    	                alpha_min_configured && rel_v_configured && min_n_tuples_configured && max_event_length_configured );
+    		}
+    	}
+    	return false;
+
     }
 
     /**
@@ -452,17 +458,6 @@ public class SlowMPTrigger
         muon_time_window = -1;
     }
 
-    /**
-     * Get the monitoring name.
-     *
-     * @return the name used for monitoring this trigger
-     */
-    @Override
-    public String getMonitoringName()
-    {
-        return MONITORING_NAME;
-    }
-
     @Override
     public Map<String, Object> getTriggerMonitorMap() {
         HashMap<String, Object> map = new HashMap<String, Object>();
@@ -475,66 +470,6 @@ public class SlowMPTrigger
         return map;
     }
 
-    /**
-     * Get the trigger type.
-     *
-     * @return trigger type
-     */
-    @Override
-    public int getTriggerType()
-    {
-        return TRIGGER_TYPE;
-    }
-
-    /**
-     * Does this algorithm include all relevant hits in each request
-     * so that it can be used to calculate multiplicity?
-     *
-     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
-     */
-    @Override
-    public boolean hasValidMultiplicity()
-    {
-        return false;
-    }
-
-    /**
-     * Is the trigger configured?
-     *
-     * @return true if it is
-     */
-    @Override
-    public boolean isConfigured()
-    {
-    	if (dc_algo_configured)
-    	{
-    		if (dc_algo)
-    		{
-    			return ( t_proximity_configured && t_min_configured && t_max_configured &&
-    					delta_d_configured && rel_v_configured && min_n_tuples_configured && max_event_length_configured );
-    		}
-    		else
-    		{
-    			return ( t_proximity_configured && t_min_configured && t_max_configured &&
-    	                alpha_min_configured && rel_v_configured && min_n_tuples_configured && max_event_length_configured );
-    		}
-    	}
-    	return false;
-    }
-
-    private void setEarliestIfPossible(IHitPayload hit, String location)
-    {
-        IPayload current = getEarliestPayloadOfInterest();
-        if (current == null || current.getUTCTime() <= hit.getUTCTime()) {
-            setEarliestPayloadOfInterest(hit);
-        } else if (WARN_IF_EARLIEST_REGRESSED) {
-            LOG.warn("Not regressing earliest time from " +
-                     current.getUTCTime() + " to " + hit.getUTCTime() +
-                     " (location " + location + ", diff " +
-                     (hit.getUTCTime() - current.getUTCTime()) + ")");
-        }
-    }
-
     @Override
     public void runTrigger(IPayload payload) throws TriggerException
     {
@@ -545,7 +480,8 @@ public class SlowMPTrigger
         // This upcast should be safe now
         IHitPayload hitPayload = (IHitPayload) payload;
         // Check hit type and perhaps pre-screen DOMs based on channel
-        boolean usableHit = getHitType(hitPayload) == SPE_HIT &&
+        boolean usableHit =
+            getHitType(hitPayload) == AbstractTrigger.SPE_HIT &&
             hitFilter.useHit(hitPayload);
 
         //if (domRegistry == null) {
@@ -616,7 +552,7 @@ public class SlowMPTrigger
                         two_hit_list.add(check_payload);
                         // set earliest payload of interest ?=!
                         //LOG.info("Adding two_hit entry -> muon == -1");
-                        setEarliestIfPossible(check_payload.get_hit(), "A");
+                        setEarliestPayloadOfInterest(check_payload.get_hit());
                     }
                     else
                     {
@@ -629,8 +565,7 @@ public class SlowMPTrigger
                             two_hit_list.add(check_payload);
                             //LOG.info("Adding two_hit entry -> muon time window was set.. is now unset..");
                             muon_time_window = -1;
-                            setEarliestIfPossible(check_payload.get_hit(),
-                                                  "B");
+                            setEarliestPayloadOfInterest(check_payload.get_hit());
                             // set earliest payload of interest ?=!
                         }
                     }
@@ -689,7 +624,7 @@ public class SlowMPTrigger
         one_hit_list.add(new_hit); // at the end add the current hitPayload for further comparisons
         if(two_hit_list.size() == 0)
         {
-            setEarliestIfPossible(one_hit_list.getFirst().get_hit(), "C");
+            setEarliestPayloadOfInterest(one_hit_list.getFirst().get_hit());
         }
         else if(one_hit_list.getFirst().get_time() - two_hit_list.getLast().get_time() > t_max) // definetely cannot prdouce a trigger, set earliest palyoad
         {
@@ -722,7 +657,7 @@ public class SlowMPTrigger
         else
         {
             //two_hit_list.clear();
-            setEarliestIfPossible(one_hit_list.getFirst().get_hit(), "D");
+            setEarliestPayloadOfInterest(one_hit_list.getFirst().get_hit());
         }
 
         //ListIterator list_iterator = trigger_list.listIterator();
@@ -896,5 +831,28 @@ public class SlowMPTrigger
         }
 
         return null;
+    }
+
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    @Override
+    public String getMonitoringName()
+    {
+        return "SLOW_PARTICLE";
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    @Override
+    public boolean hasValidMultiplicity()
+    {
+        return false;
     }
 }

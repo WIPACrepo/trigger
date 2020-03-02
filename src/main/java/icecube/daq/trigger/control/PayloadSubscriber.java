@@ -1,7 +1,5 @@
 package icecube.daq.trigger.control;
 
-import java.util.List;
-
 import icecube.daq.payload.IPayload;
 
 /**
@@ -44,13 +42,6 @@ public interface PayloadSubscriber
      * @param pay payload
      */
     void push(IPayload pay);
-
-    /**
-     * Add a list of payloads to the queue.
-     *
-     * @param payloads list of payload
-     */
-    void pushAll(List<IPayload> payloads);
 
     /**
      * Get the number of queued payloads

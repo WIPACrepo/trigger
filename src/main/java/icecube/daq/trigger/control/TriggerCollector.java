@@ -59,7 +59,7 @@ public class TriggerCollector
                             IMonitoringDataManager moniDataMgr,
                             SubscriptionManager subMgr)
     {
-        if (algorithms == null || algorithms.isEmpty()) {
+        if (algorithms == null || algorithms.size() == 0) {
             throw new Error("No algorithms specified");
         }
 
@@ -401,30 +401,18 @@ class CollectorThread
     @Override
     public long getSNDAQAlertsDropped()
     {
-        if (alerter == null) {
-            return 0L;
-        }
-
         return alerter.getNumDropped();
     }
 
     @Override
     public int getSNDAQAlertsQueued()
     {
-        if (alerter == null) {
-            return 0;
-        }
-
         return alerter.getNumQueued();
     }
 
     @Override
     public long getSNDAQAlertsSent()
     {
-        if (alerter == null) {
-            return 0L;
-        }
-
         return alerter.getNumSent();
     }
 
@@ -452,11 +440,6 @@ class CollectorThread
 
     private void initializeSNDAQAlerter(List<ITriggerAlgorithm> algorithms)
     {
-        if (alerter != null) {
-            LOG.error("Attempted to create an existing SnDAQ alerter");
-            return;
-        }
-
         try {
             alerter = new SNDAQAlerter(algorithms);
         } catch (AlertException ae) {
@@ -469,10 +452,6 @@ class CollectorThread
 
     private void notifySNDAQ(List<ITriggerRequestPayload> list)
     {
-        if (alerter == null) {
-            LOG.error("Alerter " + alerter + " has not been initialized");
-        }
-
         if (!alerter.isActive()) {
             LOG.error("Alerter " + alerter + " is not active");
             return;
@@ -568,7 +547,7 @@ class CollectorThread
             if (stopping) {
                 boolean algoStopped = true;
                 for (ITriggerAlgorithm a : algorithms) {
-                    if (!a.isStopped()) {
+                    if (a.hasData() || a.hasCachedRequests()) {
                         algoStopped = false;
                         break;
                     }
@@ -624,8 +603,7 @@ class CollectorThread
                     // Deal with overlapping request
                     if (interval.end < oldInterval.start) {
                         LOG.error("New interval " + interval +
-                                  " precedes old interval " + oldInterval +
-                                  "; stopping payload collector");
+                                  " precedes old interval " + oldInterval);
                         oldInterval = null;
                         stopping = true;
                         break;
@@ -660,8 +638,6 @@ class CollectorThread
             a.recycleUnusedRequests();
         }
 
-        subMgr.unsubscribeAll();
-
         stopped = true;
     }
 
@@ -673,7 +649,7 @@ class CollectorThread
             notifySNDAQ(list);
         }
 
-        if (list.isEmpty()) {
+        if (list.size() == 0) {
             LOG.error("No requests found for interval " + interval);
         } else if (list.size() == 1) {
             pushTrigger(list.get(0));
@@ -761,6 +737,8 @@ class CollectorThread
             thread.join();
         }
         trigThreads.clear();
+
+        subMgr.unsubscribeAll();
     }
 
     @Override
@@ -912,7 +890,7 @@ class OutputThread
         }
 
         // cannot fix this request if there are no subrequests
-        if (payList == null || payList.isEmpty()) {
+        if (payList == null || payList.size() == 0) {
             return false;
         }
 
@@ -1019,9 +997,9 @@ class OutputThread
         boolean warnedChannel = false;
 
         ByteBuffer trigBuf;
-        while (!stopping || !outputQueue.isEmpty()) {
+        while (!stopping || outputQueue.size() > 0) {
             synchronized (outputQueue) {
-                if (!stopping && outputQueue.isEmpty()) {
+                if (!stopping && outputQueue.size() == 0) {
                     try {
                         waiting = true;
                         outputQueue.wait();
@@ -1032,7 +1010,7 @@ class OutputThread
                     waiting = false;
                 }
 
-                if (outputQueue.isEmpty()) {
+                if (outputQueue.size() == 0) {
                     trigBuf = null;
                 } else {
                     trigBuf = outputQueue.removeFirst();

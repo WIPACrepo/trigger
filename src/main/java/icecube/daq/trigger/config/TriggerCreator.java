@@ -67,7 +67,7 @@ public abstract class TriggerCreator
             trig.setTriggerConfigId(cfgId);
 
             int trigType = Integer.parseInt(getElementText(n, "triggerType"));
-            trig.checkTriggerType(trigType);
+            trig.setTriggerType(trigType);
 
             trig.setSourceId(srcId);
 

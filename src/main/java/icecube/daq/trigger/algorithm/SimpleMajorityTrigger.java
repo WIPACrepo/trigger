@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17666 2020-01-28 20:20:45Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17732 2020-03-02 17:49:07Z dglo $
  *
  * Date: August 19 2005
  *
@@ -123,7 +123,7 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17666 2020-01-28 20:20:45Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17732 2020-03-02 17:49:07Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger
@@ -135,9 +135,6 @@ public final class SimpleMajorityTrigger
 
     /** I3Live monitoring name for this algorithm */
     private static final String MONITORING_NAME = "SIMPLE_MULTIPLICITY";
-
-    /** Numeric type for this algorithm */
-    public static final int TRIGGER_TYPE = 0;
 
     /**
      * If the 'disableQuickPush' property is set, unused hits will not be
@@ -239,17 +236,6 @@ public final class SimpleMajorityTrigger
     }
 
     /**
-     * Get the trigger type.
-     *
-     * @return trigger type
-     */
-    @Override
-    public int getTriggerType()
-    {
-        return TRIGGER_TYPE;
-    }
-
-    /**
      * Does this algorithm include all relevant hits in each request
      * so that it can be used to calculate multiplicity?
      *
@@ -326,7 +312,8 @@ public final class SimpleMajorityTrigger
          * Skip hits that we don't use.
          * Check hit type and perhaps pre-screen DOMs based on channel.
          */
-        boolean usableHit = getHitType(hit) == SPE_HIT &&
+        boolean usableHit =
+            getHitType(hit) == AbstractTrigger.SPE_HIT &&
             hitFilter.useHit(hit);
         if (!usableHit) {
             if (LOG.isDebugEnabled()) {
@@ -544,7 +531,7 @@ public final class SimpleMajorityTrigger
         }
 
         if (hitTime != null) {
-            final IUTCTime offsetTime = hitTime.getOffsetUTCTime(1);
+            final IUTCTime offsetTime = hitTime.getOffsetUTCTime(0.1);
             setEarliestPayloadOfInterest(new DummyPayload(offsetTime));
         }
     }
@@ -559,7 +546,7 @@ public final class SimpleMajorityTrigger
 
         private IUTCTime endTime()
         {
-            return (startTime().getOffsetUTCTime(timeWindow));
+            return (startTime().getOffsetUTCTime((double) (timeWindow / 10)));
         }
 
         private boolean inTimeWindow(IUTCTime hitTime)

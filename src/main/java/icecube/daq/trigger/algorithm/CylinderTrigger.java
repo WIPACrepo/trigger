@@ -53,17 +53,10 @@ import org.apache.commons.logging.LogFactory;
  * @author kael
  *
  */
-public class CylinderTrigger
-    extends AbstractTrigger
+public class CylinderTrigger extends AbstractTrigger
 {
     /** Log object for this class */
     private static final Log LOG = LogFactory.getLog(CylinderTrigger.class);
-
-    /** I3Live monitoring name for this algorithm */
-    private static final String MONITORING_NAME = "VOLUME";
-
-    /** Numeric type for this algorithm */
-    public static final int TRIGGER_TYPE = 21;
 
     private long timeWindow;
     private int multiplicity;
@@ -179,59 +172,6 @@ public class CylinderTrigger
         triggerQueue.clear();
     }
 
-    /**
-     * Get the monitoring name.
-     *
-     * @return the name used for monitoring this trigger
-     */
-    @Override
-    public String getMonitoringName()
-    {
-        return MONITORING_NAME;
-    }
-
-    /**
-     * Get the trigger type.
-     *
-     * @return trigger type
-     */
-    @Override
-    public int getTriggerType()
-    {
-        return TRIGGER_TYPE;
-    }
-
-    /**
-     * Does this algorithm include all relevant hits in each request
-     * so that it can be used to calculate multiplicity?
-     *
-     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
-     */
-    @Override
-    public boolean hasValidMultiplicity()
-    {
-        return true;
-    }
-
-    /**
-     * Is the trigger configured?
-     *
-     * @return true if it is
-     */
-    @Override
-    public boolean isConfigured()
-    {
-        if (simpleMultiplicity < multiplicity) {
-            // if this is true, the volume checking code will never be run!
-            LOG.error("simpleMultiplicity (" + simpleMultiplicity +
-                      ") must be less than multiplicity (" + multiplicity +
-                      ")");
-            return false;
-        }
-
-        return true;
-    }
-
     @Override
     public void runTrigger(IPayload payload) throws TriggerException
     {
@@ -269,12 +209,12 @@ public class CylinderTrigger
 
             // set earliest time to just before this time
             IUTCTime earliestUTC =
-                earliest.getPayloadTimeUTC().getOffsetUTCTime(-1);
+                earliest.getPayloadTimeUTC().getOffsetUTCTime(-0.1);
             setEarliestPayloadOfInterest(new DummyPayload(earliestUTC));
         }
 
         // if new hit is usable, add it to the queue
-        if (getHitType(hitPayload) == SPE_HIT &&
+        if (getHitType(hitPayload) == AbstractTrigger.SPE_HIT &&
             hitFilter.useHit(hitPayload))
         {
             triggerQueue.add(hitPayload);
@@ -331,5 +271,42 @@ public class CylinderTrigger
         }
 
         return false;
+    }
+
+    @Override
+    public boolean isConfigured()
+    {
+        if (simpleMultiplicity < multiplicity) {
+            // if this is true, the volume checking code will never be run!
+            LOG.error("simpleMultiplicity (" + simpleMultiplicity +
+                      ") must be less than multiplicity (" + multiplicity +
+                      ")");
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get the monitoring name.
+     *
+     * @return the name used for monitoring this trigger
+     */
+    @Override
+    public String getMonitoringName()
+    {
+        return "VOLUME";
+    }
+
+    /**
+     * Does this algorithm include all relevant hits in each request
+     * so that it can be used to calculate multiplicity?
+     *
+     * @return <tt>true</tt> if this algorithm can supply a valid multiplicity
+     */
+    @Override
+    public boolean hasValidMultiplicity()
+    {
+        return true;
     }
 }

@@ -5,7 +5,7 @@ import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.PayloadChecker;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
-import icecube.daq.trigger.algorithm.ITriggerAlgorithm;
+import icecube.daq.trigger.algorithm.AbstractTrigger;
 import icecube.daq.trigger.config.DomSet;
 import icecube.daq.trigger.config.DomSetFactory;
 import icecube.daq.trigger.config.TriggerParameter;
@@ -71,7 +71,7 @@ class SMTParameters
         }
     }
 
-    void configure(ITriggerAlgorithm trig)
+    void configure(AbstractTrigger trig)
         throws TriggerException
     {
         trig.setSourceId(srcId);
@@ -134,8 +134,8 @@ public class SMTConfig
 
         SMTParameters params = new SMTParameters(threshold);
 
-        final ITriggerAlgorithm trig =
-            createTrigger(params.cfgId, params.srcId, "SMT" + threshold);
+        final AbstractTrigger trig =
+            createTrigger(0, params.cfgId, params.srcId, "SMT" + threshold);
         params.configure(trig);
         add(trig);
 

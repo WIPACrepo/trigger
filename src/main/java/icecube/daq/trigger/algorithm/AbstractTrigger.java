@@ -49,6 +49,9 @@ public abstract class AbstractTrigger
     /** Log object for this class */
     private static final Log LOG = LogFactory.getLog(AbstractTrigger.class);
 
+    /** SPE hit type */
+    public static final int SPE_HIT = 0x02;
+
     /** Requests can be up to this number of DAQ ticks wide */
     private static final long REQUEST_WIDTH = 100000000;
 
@@ -58,6 +61,7 @@ public abstract class AbstractTrigger
 
     protected String triggerName;
     private int trigCfgId;
+    private int trigType;
     private int srcId;
     private ArrayList<TriggerReadout> readouts =
         new ArrayList<TriggerReadout>();
@@ -113,29 +117,12 @@ public abstract class AbstractTrigger
         readouts.add(new TriggerReadout(rdoutType, offset, minus, plus));
     }
 
-    /**
-     * Check the trigger type.
-     *
-     * @param val trigger type
-     *
-     * @throws ConfigException if the configured trigger type is wrong
-     */
-    @Override
-    public void checkTriggerType(int val)
-        throws ConfigException
-    {
-        if (getTriggerType() != val) {
-            throw new ConfigException("Trigger type should be " +
-                                      getTriggerType() + ", not " + val);
-        }
-    }
-
     @Override
     public int compareTo(ITriggerAlgorithm a)
     {
         int val = getTriggerName().compareTo(a.getTriggerName());
         if (val == 0) {
-            val = getTriggerType() - a.getTriggerType();
+            val = trigType - a.getTriggerType();
             if (val == 0) {
                 val = trigCfgId - a.getTriggerConfigId();
                 if (val == 0) {
@@ -182,8 +169,8 @@ public abstract class AbstractTrigger
             if (null != domId) {
                 domId = null;
             }
-            timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus() * 10L);
-            timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus() * 10L);
+            timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
+            timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
             break;
         case IReadoutRequestElement.READOUT_TYPE_II_GLOBAL:
             if (null != stringId) {
@@ -194,16 +181,16 @@ public abstract class AbstractTrigger
             }
             if (srcId == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
                 timeOffset =
-                    firstTime.getOffsetUTCTime(roCfg.getOffset() * 10L);
+                    firstTime.getOffsetUTCTime(roCfg.getOffset());
                 timeMinus =
-                    timeOffset.getOffsetUTCTime(-roCfg.getMinus() * 10L);
+                    timeOffset.getOffsetUTCTime(-roCfg.getMinus());
                 timePlus =
-                    timeOffset.getOffsetUTCTime(roCfg.getPlus() * 10L);
+                    timeOffset.getOffsetUTCTime(roCfg.getPlus());
             } else {
                 timeMinus =
-                    firstTime.getOffsetUTCTime(-roCfg.getMinus() * 10L);
+                    firstTime.getOffsetUTCTime(-roCfg.getMinus());
                 timePlus =
-                    lastTime.getOffsetUTCTime(roCfg.getPlus() * 10L);
+                    lastTime.getOffsetUTCTime(roCfg.getPlus());
             }
             break;
         case IReadoutRequestElement.READOUT_TYPE_II_STRING:
@@ -216,12 +203,12 @@ public abstract class AbstractTrigger
                 domId = null;
             }
             if (srcId == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
-                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset() * 10L);
-                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus() * 10L);
-                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus() * 10L);
+                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset());
+                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus());
             } else {
-                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus() * 10L);
-                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus() * 10L);
+                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
             }
             break;
         case IReadoutRequestElement.READOUT_TYPE_II_MODULE:
@@ -234,12 +221,12 @@ public abstract class AbstractTrigger
                 LOG.error("ReadoutType = " + type + " but DomId is NULL!");
             }
             if (srcId == SourceIdRegistry.ICETOP_TRIGGER_SOURCE_ID) {
-                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset() * 10L);
-                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus() * 10L);
-                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus() * 10L);
+                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset());
+                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus());
             } else {
-                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus() * 10L);
-                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus() * 10L);
+                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
             }
             break;
         case IReadoutRequestElement.READOUT_TYPE_IT_GLOBAL:
@@ -250,12 +237,12 @@ public abstract class AbstractTrigger
                 domId = null;
             }
             if (srcId == SourceIdRegistry.INICE_TRIGGER_SOURCE_ID) {
-                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset() * 10L);
-                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus() * 10L);
-                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus() * 10L);
+                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset());
+                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus());
             } else {
-                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus() * 10L);
-                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus() * 10L);
+                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
             }
             break;
         case IReadoutRequestElement.READOUT_TYPE_IT_MODULE:
@@ -268,20 +255,20 @@ public abstract class AbstractTrigger
                 LOG.error("ReadoutType = " + type + " but DomId is NULL!");
             }
             if (srcId == SourceIdRegistry.INICE_TRIGGER_SOURCE_ID) {
-                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset() * 10L);
-                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus() * 10L);
-                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus() * 10L);
+                timeOffset = firstTime.getOffsetUTCTime(roCfg.getOffset());
+                timeMinus = timeOffset.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = timeOffset.getOffsetUTCTime(roCfg.getPlus());
             } else {
-                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus() * 10L);
-                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus() * 10L);
+                timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
+                timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
             }
             break;
         default:
             LOG.error("Unknown ReadoutType: " + type +
                       " -> Making it GLOBAL");
             type = IReadoutRequestElement.READOUT_TYPE_GLOBAL;
-            timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus() * 10L);
-            timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus() * 10L);
+            timeMinus = firstTime.getOffsetUTCTime(-roCfg.getMinus());
+            timePlus = lastTime.getOffsetUTCTime(roCfg.getPlus());
             break;
         }
 
@@ -336,8 +323,7 @@ public abstract class AbstractTrigger
         ArrayList<IWriteablePayload> hitList =
             new ArrayList<IWriteablePayload>();
         TriggerRequest triggerPayload =
-            (TriggerRequest) triggerFactory.createPayload(uid,
-                                                          getTriggerType(),
+            (TriggerRequest) triggerFactory.createPayload(uid, trigType,
                                                           trigCfgId, srcId,
                                                           time.longValue(),
                                                           time.longValue(),
@@ -348,7 +334,7 @@ public abstract class AbstractTrigger
         reportTrigger(triggerPayload);
 
         // update earliest hit time
-        IPayload dummy = new DummyPayload(time.getOffsetUTCTime(1));
+        IPayload dummy = new DummyPayload(time.getOffsetUTCTime(0.1));
         setEarliestPayloadOfInterest(dummy);
     }
 
@@ -439,8 +425,7 @@ public abstract class AbstractTrigger
 
         // make payload
         TriggerRequest triggerPayload =
-            (TriggerRequest) triggerFactory.createPayload(uid,
-                                                          getTriggerType(),
+            (TriggerRequest) triggerFactory.createPayload(uid, trigType,
                                                           trigCfgId, srcId,
                                                           firstTime.longValue(),
                                                           lastTime.longValue(),
@@ -458,7 +443,7 @@ public abstract class AbstractTrigger
         IUTCTime lastHitTime = lastHit.getHitTimeUTC();
 
         // update earliest hit time
-        IPayload dummy = new DummyPayload(lastHitTime.getOffsetUTCTime(1));
+        IPayload dummy = new DummyPayload(lastHitTime.getOffsetUTCTime(0.1));
         setEarliestPayloadOfInterest(dummy);
     }
 
@@ -490,15 +475,11 @@ public abstract class AbstractTrigger
     @Override
     public long getEarliestTime()
     {
-        final long val;
-        synchronized (this) {
-            if (earliestPayloadOfInterest == null) {
-                return 0;
-            }
-
-            val = earliestPayloadOfInterest.getUTCTime();
+        if (earliestPayloadOfInterest == null) {
+            return 0;
         }
 
+        final long val = earliestPayloadOfInterest.getUTCTime();
         if (earliestMonitorTime == Long.MIN_VALUE) {
             earliestMonitorTime = val;
         }
@@ -565,12 +546,10 @@ public abstract class AbstractTrigger
         }
 
         final long earliest;
-        synchronized (this) {
-            if (earliestPayloadOfInterest == null) {
-                earliest = 0L;
-            } else {
-                earliest = earliestPayloadOfInterest.getUTCTime();
-            }
+        if (earliestPayloadOfInterest == null) {
+            earliest = 0L;
+        } else {
+            earliest = earliestPayloadOfInterest.getUTCTime();
         }
 
         long start = interval.start;
@@ -663,15 +642,14 @@ public abstract class AbstractTrigger
             reqStart = requests.get(0).getFirstTimeUTC().longValue();
         }
 
-        synchronized (this) {
-            if (earliestPayloadOfInterest == null) {
-                return 0L;
-            }
-
-            // latency is the difference between the start time of the oldest
-            // request and the earliest payload of interest
-            return earliestPayloadOfInterest.getUTCTime() - reqStart;
+        final long earliest;
+        if (earliestPayloadOfInterest == null) {
+            return 0L;
         }
+
+        // latency is the difference between the start time of the oldest
+        // request and the earliest payload of interest
+        return earliestPayloadOfInterest.getUTCTime() - reqStart;
     }
 
     /**
@@ -808,6 +786,17 @@ public abstract class AbstractTrigger
     }
 
     /**
+     * Get the trigger type.
+     *
+     * @return trigger type
+     */
+    @Override
+    public int getTriggerType()
+    {
+        return trigType;
+    }
+
+    /**
      * Are there requests waiting to be processed?
      *
      * @return <tt>true</tt> if there are non-flush requests available
@@ -843,17 +832,6 @@ public abstract class AbstractTrigger
      */
     @Override
     public abstract boolean isConfigured();
-
-    /**
-     * Has this algorithm's input stream been stopped?
-     *
-     * @return <tt>true</tt> if the algorithm's input stream has stopped
-     */
-    @Override
-    public boolean isStopped()
-    {
-        return subscriber.isStopped() && !hasCachedRequests();
-    }
 
     /**
      * Recycle all unused requests still cached in the algorithms.
@@ -1045,18 +1023,8 @@ public abstract class AbstractTrigger
      */
     protected void setEarliestPayloadOfInterest(IPayload payload)
     {
-        synchronized (this) {
-            if (earliestPayloadOfInterest != null &&
-                earliestPayloadOfInterest.getUTCTime() > payload.getUTCTime())
-            {
-                long diff = earliestPayloadOfInterest.getUTCTime() -
-                    payload.getUTCTime();
-                LOG.error("Earliest time went " + diff + " ticks backward");
-            }
-
-            earliestPayloadOfInterest = payload;
-            mgr.setEarliestPayloadOfInterest(earliestPayloadOfInterest);
-        }
+        earliestPayloadOfInterest = payload;
+        mgr.setEarliestPayloadOfInterest(earliestPayloadOfInterest);
     }
 
     /**
@@ -1142,6 +1110,17 @@ public abstract class AbstractTrigger
         if (LOG.isDebugEnabled()) {
             LOG.debug("TriggerName = " + triggerName);
         }
+    }
+
+    /**
+     * Set trigger type.
+     *
+     * @param val trigger type
+     */
+    @Override
+    public void setTriggerType(int val)
+    {
+        trigType = val;
     }
 
     /**
@@ -1252,7 +1231,7 @@ public abstract class AbstractTrigger
     @Override
     public String toString()
     {
-        return triggerName + "[" + subscriber.size() + "=>" + requests.size() +
-            "=>" + sentTriggerCounter + "]";
+        return triggerName + "#" + sentTriggerCounter + "[" + requests.size() +
+            "]";
     }
 }

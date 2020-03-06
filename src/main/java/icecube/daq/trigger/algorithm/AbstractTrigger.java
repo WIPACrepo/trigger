@@ -48,9 +48,6 @@ public abstract class AbstractTrigger
     /** Log object for this class */
     private static final Logger LOG = Logger.getLogger(AbstractTrigger.class);
 
-    /** If true, print a warning whenever the earliest time goes backward */
-    private static final boolean WARN_TIME_BACKWARD = false;
-
     /** Requests can be up to this number of DAQ ticks wide */
     private static final long REQUEST_WIDTH = 100000000;
 
@@ -1053,9 +1050,7 @@ public abstract class AbstractTrigger
             {
                 long diff = earliestPayloadOfInterest.getUTCTime() -
                     payload.getUTCTime();
-                if (WARN_TIME_BACKWARD) {
-                    LOG.error("Earliest time went " + diff + " ticks backward");
-                }
+                LOG.error("Earliest time went " + diff + " ticks backward");
             }
 
             earliestPayloadOfInterest = payload;

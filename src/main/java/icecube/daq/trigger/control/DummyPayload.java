@@ -1,7 +1,7 @@
 /*
  * class: DummyPayload
  *
- * Version $Id: DummyPayload.java 17485 2019-07-30 15:10:03Z dglo $
+ * Version $Id: DummyPayload.java 17760 2020-03-12 14:29:31Z dglo $
  *
  * Date: October 7 2005
  *
@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
 /**
  * This class is a dummy payload that only has a UTC time associated with it.
  *
- * @version $Id: DummyPayload.java 17485 2019-07-30 15:10:03Z dglo $
+ * @version $Id: DummyPayload.java 17760 2020-03-12 14:29:31Z dglo $
  * @author pat
  */
 public class DummyPayload
@@ -106,19 +106,6 @@ public class DummyPayload
     public ByteBuffer getPayloadBacking()
     {
         throw new UnimplementedError();
-    }
-
-    /**
-     * returns the Payload interface type as defined in the
-     * PayloadInterfaceRegistry.
-     *
-     * @return one of the defined types in
-     *         icecube.daq.payload.PayloadInterfaceRegistry
-     */
-    @Override
-    public int getPayloadInterfaceType()
-    {
-        return -1;
     }
 
     /**

@@ -1,7 +1,7 @@
 /*
  * class: MinBiasTrigger
  *
- * Version $Id: MinBiasTrigger.java 17683 2020-01-29 17:39:28Z dglo $
+ * Version $Id: MinBiasTrigger.java 17760 2020-03-12 14:29:31Z dglo $
  *
  * Date: August 27 2005
  *
@@ -10,7 +10,6 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
@@ -26,7 +25,7 @@ import org.apache.log4j.Logger;
  * This class implements a simple minimum bias trigger. It simply counts hits and
  * applies a prescale for determining when a trigger should be formed.
  *
- * @version $Id: MinBiasTrigger.java 17683 2020-01-29 17:39:28Z dglo $
+ * @version $Id: MinBiasTrigger.java 17760 2020-03-12 14:29:31Z dglo $
  * @author pat
  */
 public class MinBiasTrigger
@@ -166,12 +165,9 @@ public class MinBiasTrigger
             throw new TriggerException("Prescale has not been set!");
         }
 
-        int interfaceType = payload.getPayloadInterfaceType();
-        if ((interfaceType != PayloadInterfaceRegistry.I_HIT_PAYLOAD) &&
-            (interfaceType != PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD))
-        {
-            throw new TriggerException("Expecting an IHitPayload, got type " +
-                                       interfaceType);
+        if (!(payload instanceof IHitPayload)) {
+            throw new TriggerException("Expecting an IHitPayload, not " +
+                                       payload.getClass().getName());
         }
         IHitPayload hit = (IHitPayload) payload;
 

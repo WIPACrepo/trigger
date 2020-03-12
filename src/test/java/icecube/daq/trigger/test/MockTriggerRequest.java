@@ -6,7 +6,6 @@ import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.Spliceable;
 
@@ -144,12 +143,6 @@ public class MockTriggerRequest
     public ByteBuffer getPayloadBacking()
     {
         throw new Error("Unimplemented");
-    }
-
-    @Override
-    public int getPayloadInterfaceType()
-    {
-        return PayloadInterfaceRegistry.I_TRIGGER_REQUEST;
     }
 
     @Override

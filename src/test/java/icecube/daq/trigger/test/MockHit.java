@@ -1,6 +1,5 @@
 package icecube.daq.trigger.test;
 
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.IHitPayload;
@@ -107,12 +106,6 @@ public class MockHit
         }
 
         return backingBuf;
-    }
-
-    @Override
-    public int getPayloadInterfaceType()
-    {
-        return PayloadInterfaceRegistry.I_HIT_PAYLOAD;
     }
 
     @Override

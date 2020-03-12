@@ -1,6 +1,5 @@
 package icecube.daq.trigger.test;
 
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IUTCTime;

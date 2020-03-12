@@ -8,7 +8,6 @@ import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.splicer.Splicer;
@@ -226,7 +225,7 @@ public class TriggerManagerTest
         mgr.subscribeAll();
 
         List splObjs = new ArrayList();
-        splObjs.add(new NonHit(123, 456));
+        splObjs.add(new NonHit(123));
 
         mgr.analyze(splObjs);
         splObjs.clear();
@@ -848,8 +847,24 @@ public class TriggerManagerTest
         alerter.waitForAlerts(100);
     }
 
-    class MyHit
+    class NonHit
         extends MockPayload
+        implements Spliceable
+    {
+        NonHit(long timeVal)
+        {
+            super(timeVal);
+        }
+
+        @Override
+        public int compareSpliceable(Spliceable spl)
+        {
+            throw new Error("Unimplemented");
+        }
+    }
+
+    class MyHit
+        extends NonHit
         implements IHitPayload, Spliceable
     {
         private int srcId;
@@ -860,14 +875,6 @@ public class TriggerManagerTest
         MyHit(int srcId, long timeVal)
         {
             super(timeVal);
-
-            this.srcId = srcId;
-        }
-
-        @Override
-        public int compareSpliceable(Spliceable spl)
-        {
-            throw new Error("Unimplemented");
         }
 
         @Override
@@ -905,12 +912,6 @@ public class TriggerManagerTest
         }
 
         @Override
-        public int getPayloadInterfaceType()
-        {
-            return PayloadInterfaceRegistry.I_HIT_PAYLOAD;
-        }
-
-        @Override
         public ISourceID getSourceID()
         {
             if (srcObj == null) {
@@ -936,21 +937,6 @@ public class TriggerManagerTest
         public boolean hasChannelID()
         {
             throw new Error("Unimplemented");
-        }
-    }
-
-    class NonHit
-        extends MyHit
-    {
-        NonHit(int srcId, long timeVal)
-        {
-            super(srcId, timeVal);
-        }
-
-        @Override
-        public int getPayloadInterfaceType()
-        {
-            return Integer.MIN_VALUE;
         }
     }
 }

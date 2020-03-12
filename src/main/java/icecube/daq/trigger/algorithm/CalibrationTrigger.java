@@ -1,7 +1,7 @@
 /*
  * class: CalibrationTrigger
  *
- * Version $Id: CalibrationTrigger.java 17683 2020-01-29 17:39:28Z dglo $
+ * Version $Id: CalibrationTrigger.java 17760 2020-03-12 14:29:31Z dglo $
  *
  * Date: August 27 2005
  *
@@ -10,7 +10,6 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IDOMID;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
@@ -35,7 +34,7 @@ import org.apache.log4j.Logger;
  * This trigger is an example of an 'instantaneous trigger' since it is capable
  * of making a decision based only on the current hit.
  *
- * @version $Id: CalibrationTrigger.java 17683 2020-01-29 17:39:28Z dglo $
+ * @version $Id: CalibrationTrigger.java 17760 2020-03-12 14:29:31Z dglo $
  * @author pat
  */
 public class CalibrationTrigger
@@ -174,9 +173,7 @@ public class CalibrationTrigger
         throws TriggerException
     {
 
-        int interfaceType = payload.getPayloadInterfaceType();
-        if ((interfaceType != PayloadInterfaceRegistry.I_HIT_PAYLOAD) &&
-            (interfaceType != PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)) {
+        if (!(payload instanceof IHitPayload)) {
             throw new TriggerException("Expecting an IHitPayload");
         }
         IHitPayload hit = (IHitPayload) payload;

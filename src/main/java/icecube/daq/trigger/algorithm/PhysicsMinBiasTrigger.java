@@ -10,7 +10,6 @@
 
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.IHitPayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
@@ -161,11 +160,9 @@ public class PhysicsMinBiasTrigger
             throw new TriggerException("Prescale has not been set!");
         }
 
-        int interfaceType = payload.getPayloadInterfaceType();
-        if ((interfaceType != PayloadInterfaceRegistry.I_HIT_PAYLOAD) &&
-            (interfaceType != PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)) {
-            throw new TriggerException("Expecting an IHitPayload, got type " +
-                                       interfaceType);
+        if (!(payload instanceof IHitPayload)) {
+            throw new TriggerException("Expecting an IHitPayload, not " +
+                                       payload.getClass().getName());
         }
         IHitPayload hit = (IHitPayload) payload;
 

@@ -12,7 +12,6 @@ import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadFormatException;
-import icecube.daq.payload.PayloadInterfaceRegistry;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.TriggerRequestFactory;
 import icecube.daq.payload.impl.UTCTime;
@@ -550,12 +549,8 @@ public class TriggerManager
 
     private boolean isValidPayload(ILoadablePayload payload)
     {
-        int iType = payload.getPayloadInterfaceType();
-
         // make sure we have hit payloads (or hit data payloads)
-        if (iType == PayloadInterfaceRegistry.I_HIT_PAYLOAD ||
-            iType == PayloadInterfaceRegistry.I_HIT_DATA_PAYLOAD)
-        {
+        if (payload instanceof IHitPayload) {
             IHitPayload hit = (IHitPayload) payload;
             if (hit.getHitTimeUTC() == null) {
                 LOG.error("Bad hit buf " + payload.getPayloadBacking() +
@@ -586,7 +581,7 @@ public class TriggerManager
 
             timeOfLastHit = hit.getHitTimeUTC();
             srcOfLastHit = hit.getSourceID();
-        } else if (iType == PayloadInterfaceRegistry.I_TRIGGER_REQUEST) {
+        } else if (payload instanceof ITriggerRequestPayload) {
             if (srcId != SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID) {
                 LOG.error("Source #" + srcId +
                           " cannot process trigger requests");
@@ -638,9 +633,7 @@ public class TriggerManager
      */
     private void pushInput(ILoadablePayload payload)
     {
-        if (payload.getPayloadInterfaceType() !=
-            PayloadInterfaceRegistry.I_TRIGGER_REQUEST)
-        {
+        if (!(payload instanceof ITriggerRequestPayload)) {
             // queue ordinary payload
             queueList.push((ILoadablePayload) payload.deepCopy());
         } else {

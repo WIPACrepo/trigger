@@ -1,7 +1,7 @@
 /*
  * class: DummyPayload
  *
- * Version $Id: DummyPayload.java 17760 2020-03-12 14:29:31Z dglo $
+ * Version $Id: DummyPayload.java 17771 2020-03-19 22:06:07Z dglo $
  *
  * Date: October 7 2005
  *
@@ -11,23 +11,23 @@
 package icecube.daq.trigger.control;
 
 import icecube.daq.payload.IByteBufferCache;
-import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.impl.UTCTime;
 import icecube.daq.splicer.Spliceable;
 import icecube.daq.trigger.exceptions.UnimplementedError;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
  * This class is a dummy payload that only has a UTC time associated with it.
  *
- * @version $Id: DummyPayload.java 17760 2020-03-12 14:29:31Z dglo $
+ * @version $Id: DummyPayload.java 17771 2020-03-19 22:06:07Z dglo $
  * @author pat
  */
 public class DummyPayload
-    implements Spliceable, ILoadablePayload
+    implements Spliceable, IPayload
 {
     private long time;
     private IUTCTime utcTime;
@@ -178,6 +178,14 @@ public class DummyPayload
     public void setCache(IByteBufferCache cache)
     {
         // do nothing
+    }
+
+    @Override
+    public int writePayload(boolean writeLoaded, int destOffset,
+                            ByteBuffer buf)
+        throws IOException
+    {
+        throw new Error("Unimplemented");
     }
 
     /**

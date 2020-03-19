@@ -196,7 +196,7 @@ public class ElementMergerTest
                 {
                     // cannot merge new element with different source
                     elems.add(prevElem);
-                } else if (!isSameDOM(prevElem.getDomID(), elem.getDomID())) {
+                } else if (!isSameDOM(prevElem.getDOMID(), elem.getDOMID())) {
                     // cannot merge new element with different DOM
                     elems.add(prevElem);
                 } else if (prevElem.getLastTime() < elem.getFirstTime()) {
@@ -277,7 +277,7 @@ public class ElementMergerTest
                 if (elem.getReadoutType() == chkElem.getReadoutType() &&
                     elem.getFirstTime() == chkElem.getFirstTime() &&
                     elem.getLastTime() == chkElem.getLastTime() &&
-                    isSameDOM(elem.getDomID(), chkElem.getDomID()) &&
+                    isSameDOM(elem.getDOMID(), chkElem.getDOMID()) &&
                     isSameSource(elem.getSourceID(), chkElem.getSourceID()))
                 {
                     foundElem = chkElem;
@@ -478,7 +478,7 @@ public class ElementMergerTest
         IReadoutRequestElement elem = elems.get(0);
         assertEquals("Bad type", II_GLOBAL, elem.getReadoutType());
         assertSourceId(NO_STRING, elem.getSourceID());
-        assertDOMId(NO_DOM, elem.getDomID());
+        assertDOMId(NO_DOM, elem.getDOMID());
         assertEquals("Bad first time",
                      firstTime, elem.getFirstTime());
         assertEquals("Bad last time",
@@ -535,7 +535,7 @@ public class ElementMergerTest
             }
 
             assertSourceId(NO_STRING, elem.getSourceID());
-            assertDOMId(NO_DOM, elem.getDomID());
+            assertDOMId(NO_DOM, elem.getDOMID());
 
             assertEquals("Bad first time for " + elem,
                          expFirst, elem.getFirstTime());
@@ -588,7 +588,7 @@ public class ElementMergerTest
         for (IReadoutRequestElement elem : elems) {
             assertEquals("Bad type", IT_GLOBAL, elem.getReadoutType());
             assertSourceId(NO_STRING, elem.getSourceID());
-            assertDOMId(NO_DOM, elem.getDomID());
+            assertDOMId(NO_DOM, elem.getDOMID());
 
             if (!sawOne && elem.getFirstTime() == firstOne) {
                 sawOne = true;
@@ -665,7 +665,7 @@ public class ElementMergerTest
             }
 
             assertSourceId(NO_STRING, elem.getSourceID());
-            assertDOMId(NO_DOM, elem.getDomID());
+            assertDOMId(NO_DOM, elem.getDOMID());
 
             assertEquals("Bad first time for " + elem,
                          expFirst, elem.getFirstTime());
@@ -722,7 +722,7 @@ public class ElementMergerTest
         for (IReadoutRequestElement elem : elems) {
             assertEquals("Bad type", II_GLOBAL, elem.getReadoutType());
             assertSourceId(NO_STRING, elem.getSourceID());
-            assertDOMId(NO_DOM, elem.getDomID());
+            assertDOMId(NO_DOM, elem.getDOMID());
 
             if (!sawOne && elem.getFirstTime() == firstOne) {
                 sawOne = true;
@@ -792,7 +792,7 @@ public class ElementMergerTest
 
         for (IReadoutRequestElement elem : elems) {
             assertSourceId(NO_STRING, elem.getSourceID());
-            assertDOMId(NO_DOM, elem.getDomID());
+            assertDOMId(NO_DOM, elem.getDOMID());
 
             if (elem.getReadoutType() == II_GLOBAL) {
                 numII++;
@@ -932,7 +932,7 @@ public class ElementMergerTest
 
         for (IReadoutRequestElement elem : elems) {
             assertSourceId(NO_STRING, elem.getSourceID());
-            assertDOMId(NO_DOM, elem.getDomID());
+            assertDOMId(NO_DOM, elem.getDOMID());
 
             if (elem.getReadoutType() == II_GLOBAL) {
                 numII++;

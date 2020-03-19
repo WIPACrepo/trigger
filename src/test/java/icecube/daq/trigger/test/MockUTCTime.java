@@ -1,11 +1,10 @@
 package icecube.daq.trigger.test;
 
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.Poolable;
 import icecube.daq.payload.impl.UTCTime;
 
 public class MockUTCTime
-    implements IUTCTime, Poolable
+    implements IUTCTime
 {
     private long time;
 
@@ -39,17 +38,6 @@ public class MockUTCTime
         return new MockUTCTime(time);
     }
 
-    /**
-     * Object is able to dispose of itself.
-     * This means it is able to return itself to the pool from
-     * which it came.
-     */
-    @Override
-    public void dispose()
-    {
-        // do nothing
-    }
-
     @Override
     public boolean equals(Object obj)
     {
@@ -60,23 +48,6 @@ public class MockUTCTime
     public IUTCTime getOffsetUTCTime(long ticks)
     {
         return new MockUTCTime(time + ticks);
-    }
-
-    /**
-     * Get an object from the pool in a non-static context.
-     *
-     * @return object of this type from the object pool.
-     */
-    @Override
-    public Poolable getPoolable()
-    {
-        return new MockUTCTime(-1);
-    }
-
-    @Override
-    public long longValue()
-    {
-        return time;
     }
 
     @Override
@@ -90,13 +61,10 @@ public class MockUTCTime
             (int) (time % modValue);
     }
 
-    /**
-     * Object knows how to recycle itself
-     */
     @Override
-    public void recycle()
+    public long longValue()
     {
-        // do nothing
+        return time;
     }
 
     @Override

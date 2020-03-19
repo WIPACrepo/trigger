@@ -8,7 +8,7 @@ import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.IWriteablePayload;
+import icecube.daq.payload.IPayload;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.ReadoutRequest;
 import icecube.daq.payload.impl.ReadoutRequestElement;
@@ -332,8 +332,7 @@ public abstract class AbstractTrigger
             new ReadoutRequest(time.longValue(), uid, srcId, readoutElements);
 
         // make payload
-        ArrayList<IWriteablePayload> hitList =
-            new ArrayList<IWriteablePayload>();
+        ArrayList<IPayload> hitList = new ArrayList<IPayload>();
         TriggerRequest triggerPayload =
             (TriggerRequest) triggerFactory.createPayload(uid,
                                                           getTriggerType(),
@@ -424,11 +423,10 @@ public abstract class AbstractTrigger
                                readoutElements);
 
         // copy hits so they can be recycled
-        ArrayList<IWriteablePayload> hitList =
-            new ArrayList<IWriteablePayload>();
+        ArrayList<IPayload> hitList = new ArrayList<IPayload>();
         for (Object obj : hits) {
-            IWriteablePayload hit = (IWriteablePayload) obj;
-            IWriteablePayload copy = (IWriteablePayload) hit.deepCopy();
+            IPayload hit = (IPayload) obj;
+            IPayload copy = (IPayload) hit.deepCopy();
             if (copy.getUTCTime() < 0) {
                 LOG.error("Ignoring bad hit " + copy + " (from " + hit + ")");
                 continue;

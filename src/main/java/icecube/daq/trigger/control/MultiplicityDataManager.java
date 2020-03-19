@@ -3,6 +3,7 @@ package icecube.daq.trigger.control;
 import icecube.daq.juggler.alert.AlertException;
 import icecube.daq.juggler.alert.AlertQueue;
 import icecube.daq.juggler.alert.Alerter;
+import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ITriggerRequestPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.PayloadFormatException;
@@ -15,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -348,7 +350,7 @@ public class MultiplicityDataManager
 
         if (req.isMerged() || req.getTriggerConfigID() == -1) {
             // extract list of merged triggers
-            List subList;
+            Collection<IPayload> subList;
             try {
                 subList = req.getPayloads();
             } catch (PayloadFormatException pfe) {
@@ -362,8 +364,8 @@ public class MultiplicityDataManager
             }
 
             // count individual triggers
-            for (Object obj : subList) {
-                ITriggerRequestPayload sub = (ITriggerRequestPayload) obj;
+            for (IPayload pay : subList) {
+                ITriggerRequestPayload sub = (ITriggerRequestPayload) pay;
 
                 try {
                     sub.loadPayload();
@@ -416,7 +418,7 @@ public class MultiplicityDataManager
                                                 req, mde);
         }
 
-        List payloads;
+        Collection<IPayload> payloads;
         try {
             payloads = req.getPayloads();
         } catch (Exception ex) {

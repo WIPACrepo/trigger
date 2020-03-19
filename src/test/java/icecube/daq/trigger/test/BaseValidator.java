@@ -1,6 +1,6 @@
 package icecube.daq.trigger.test;
 
-import icecube.daq.payload.IWriteablePayload;
+import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
 import icecube.daq.payload.impl.TriggerRequestFactory;
 import icecube.daq.trigger.exceptions.UnimplementedError;
@@ -46,7 +46,7 @@ public abstract class BaseValidator
             return true;
         }
 
-        IWriteablePayload payload;
+        IPayload payload;
         try {
             payload = factory.createPayload(payBuf, 0);
         } catch (Exception ex) {
@@ -64,7 +64,7 @@ public abstract class BaseValidator
     }
 
     @Override
-    public boolean validate(IWriteablePayload payload)
+    public boolean validate(IPayload payload)
     {
         throw new UnimplementedError();
     }

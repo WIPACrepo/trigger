@@ -5,8 +5,8 @@ import icecube.daq.io.DAQComponentIOProcess;
 import icecube.daq.juggler.component.DAQCompException;
 import icecube.daq.juggler.alert.Alerter.Priority;
 import icecube.daq.payload.IByteBufferCache;
+import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ITriggerRequestPayload;
-import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.PayloadChecker;
 import icecube.daq.payload.PayloadRegistry;
 import icecube.daq.payload.SourceIdRegistry;
@@ -305,7 +305,7 @@ public class InIceTriggerIntegrationTest
         }
 
         @Override
-        public boolean validate(IWriteablePayload payload)
+        public boolean validate(IPayload payload)
         {
             if (!(payload instanceof ITriggerRequestPayload)) {
                 LOG.error("Unexpected payload " + payload.getClass().getName());

@@ -4,10 +4,10 @@ import icecube.daq.io.DAQComponentOutputProcess;
 import icecube.daq.io.OutputChannel;
 import icecube.daq.juggler.alert.AlertException;
 import icecube.daq.payload.IByteBufferCache;
+import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
-import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.PayloadFormatException;
 import icecube.daq.payload.SourceIdRegistry;
 import icecube.daq.payload.impl.ReadoutRequest;
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
@@ -692,8 +693,8 @@ class CollectorThread
                 ElementMerger.merge(rReq, list);
             }
 
-            ArrayList<IWriteablePayload> hack =
-                new ArrayList<IWriteablePayload>(list);
+            ArrayList<IPayload> hack =
+                new ArrayList<IPayload>(list);
             ITriggerRequestPayload mergedReq =
                 new TriggerRequest(mergedUID, -1, -1, srcId, interval.start,
                                    interval.end, rReq, hack);
@@ -902,7 +903,7 @@ class OutputThread
             return true;
         }
 
-        List payList;
+        Collection<IPayload> payList;
         try {
             payList = req.getPayloads();
         } catch (PayloadFormatException pfe) {
@@ -916,12 +917,12 @@ class OutputThread
         }
 
         boolean fixed = true;
-        for (Object obj : payList) {
-            ITriggerRequestPayload tr = (ITriggerRequestPayload) obj;
+        for (IPayload pay : payList) {
+            ITriggerRequestPayload tr = (ITriggerRequestPayload) pay;
 
             // XXX should verify that each subrequest is ThroughputTrigger
 
-            List subList;
+            Collection<IPayload> subList;
             try {
                 subList = tr.getPayloads();
             } catch (PayloadFormatException pfe) {
@@ -939,8 +940,12 @@ class OutputThread
                 continue;
             }
 
-            ITriggerRequestPayload lowest =
-                (ITriggerRequestPayload) subList.get(0);
+            ITriggerRequestPayload lowest = null;
+            for (IPayload sub : subList) {
+                lowest = (ITriggerRequestPayload) sub;
+                break;
+            }
+
             ISourceID lowSrcId = lowest.getSourceID();
             if (lowSrcId == null) {
                 LOG.error("Cannot find source ID of request " + lowest +

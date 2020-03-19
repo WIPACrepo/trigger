@@ -46,10 +46,10 @@ class ElementData
             srcId = rre.getSourceID().getSourceID();
         }
 
-        if (rre.getDomID() == null) {
+        if (rre.getDOMID() == null) {
             domId = IReadoutRequestElement.NO_DOM;
         } else {
-            domId = rre.getDomID().longValue();
+            domId = rre.getDOMID().longValue();
         }
     }
 

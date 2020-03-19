@@ -1,16 +1,15 @@
 package icecube.daq.trigger.test;
 
 import icecube.daq.payload.IByteBufferCache;
-import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
-import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.PayloadFormatException;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public abstract class MockPayload
-    implements Comparable, ILoadablePayload, IWriteablePayload
+    implements Comparable, IPayload
 {
     private long time;
     private PayloadFormatException loadPFException;
@@ -40,12 +39,6 @@ public abstract class MockPayload
 
     @Override
     public Object deepCopy()
-    {
-        throw new Error("Unimplemented");
-    }
-
-    @Override
-    public void dispose()
     {
         throw new Error("Unimplemented");
     }

@@ -6,7 +6,6 @@ import icecube.daq.juggler.alert.AlertQueue;
 import icecube.daq.juggler.alert.Alerter;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IHitPayload;
-import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
@@ -32,6 +31,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -256,7 +256,7 @@ public class TriggerManager
         }
 
         for (Spliceable spl : splicedObjects) {
-            ILoadablePayload payload = (ILoadablePayload) spl;
+            IPayload payload = (IPayload) spl;
 
             if (!isValidPayload(payload)) {
                 LOG.error("Ignoring invalid payload " + payload);
@@ -547,7 +547,7 @@ public class TriggerManager
         return true;
     }
 
-    private boolean isValidPayload(ILoadablePayload payload)
+    private boolean isValidPayload(IPayload payload)
     {
         // make sure we have hit payloads (or hit data payloads)
         if (payload instanceof IHitPayload) {
@@ -631,11 +631,11 @@ public class TriggerManager
      *
      * @param payload next payload
      */
-    private void pushInput(ILoadablePayload payload)
+    private void pushInput(IPayload payload)
     {
         if (!(payload instanceof ITriggerRequestPayload)) {
             // queue ordinary payload
-            queueList.push((ILoadablePayload) payload.deepCopy());
+            queueList.push((IPayload) payload.deepCopy());
         } else {
             try {
                 payload.loadPayload();
@@ -650,10 +650,10 @@ public class TriggerManager
             ITriggerRequestPayload req = (ITriggerRequestPayload) payload;
             if (!req.isMerged()) {
                 // queue single trigger request
-                queueList.push((ILoadablePayload) payload.deepCopy());
+                queueList.push((IPayload) payload.deepCopy());
             } else {
                 // extract list of merged triggers
-                List subList;
+                Collection<IPayload> subList;
                 try {
                     subList = req.getPayloads();
                 } catch (PayloadFormatException pfe) {
@@ -667,8 +667,8 @@ public class TriggerManager
                 }
 
                 // queue individual triggers
-                for (Object obj : subList) {
-                    ITriggerRequestPayload sub = (ITriggerRequestPayload) obj;
+                for (IPayload pay : subList) {
+                    ITriggerRequestPayload sub = (ITriggerRequestPayload) pay;
 
                     try {
                         sub.loadPayload();
@@ -680,7 +680,7 @@ public class TriggerManager
                         continue;
                     }
 
-                    queueList.push((ILoadablePayload) sub.deepCopy());
+                    queueList.push((IPayload) sub.deepCopy());
                 }
             }
         }

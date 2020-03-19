@@ -1,7 +1,7 @@
 package icecube.daq.trigger.test;
 
 import icecube.daq.payload.IByteBufferCache;
-import icecube.daq.payload.ILoadablePayload;
+import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.IReadoutRequestElement;
 import icecube.daq.payload.ISourceID;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MockReadoutRequest
-    implements ILoadablePayload, IReadoutRequest
+    implements IPayload, IReadoutRequest
 {
     private int uid;
     private int srcId;
@@ -180,6 +180,14 @@ public class MockReadoutRequest
      */
     @Override
     public void setUID(int uid)
+    {
+        throw new Error("Unimplemented");
+    }
+
+    @Override
+    public int writePayload(boolean writeLoaded, int destOffset,
+                            ByteBuffer buf)
+        throws IOException
     {
         throw new Error("Unimplemented");
     }

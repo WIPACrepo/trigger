@@ -1,7 +1,7 @@
 package icecube.daq.trigger.test;
 
+import icecube.daq.payload.IPayload;
 import icecube.daq.payload.ITriggerRequestPayload;
-import icecube.daq.payload.IWriteablePayload;
 import icecube.daq.payload.PayloadChecker;
 import icecube.daq.splicer.SplicerException;
 import icecube.daq.splicer.StrandTail;
@@ -171,7 +171,7 @@ public class CylinderTriggerConfig
         }
 
         @Override
-        public boolean validate(IWriteablePayload payload)
+        public boolean validate(IPayload payload)
         {
             if (!(payload instanceof ITriggerRequestPayload)) {
                 throw new Error("Unexpected payload " +

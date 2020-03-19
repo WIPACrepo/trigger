@@ -4,11 +4,13 @@ import icecube.daq.common.MockAppender;
 import icecube.daq.payload.IByteBufferCache;
 import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IUTCTime;
+import icecube.daq.payload.PayloadFormatException;
 import icecube.daq.trigger.control.ITriggerManager;
 import icecube.daq.trigger.exceptions.TriggerException;
 import icecube.daq.trigger.test.MockAlgorithm;
 import icecube.daq.trigger.test.MockSubscriber;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +64,28 @@ class MyPayload
     }
 
     @Override
+    public void loadPayload()
+        throws IOException, PayloadFormatException
+    {
+        throw new Error("Unimplemented");
+    }
+
+    @Override
+    public void recycle()
+    {
+        throw new Error("Unimplemented");
+    }
+
+    @Override
     public void setCache(IByteBufferCache x0)
+    {
+        throw new Error("Unimplemented");
+    }
+
+    @Override
+    public int writePayload(boolean writeLoaded, int destOffset,
+                            ByteBuffer buf)
+        throws IOException
     {
         throw new Error("Unimplemented");
     }

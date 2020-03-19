@@ -1,7 +1,7 @@
 package icecube.daq.trigger.algorithm;
 
-import icecube.daq.payload.ILoadablePayload;
 import icecube.daq.payload.IByteBufferCache;
+import icecube.daq.payload.IPayload;
 import icecube.daq.payload.IReadoutRequest;
 import icecube.daq.payload.ISourceID;
 import icecube.daq.payload.ITriggerRequestPayload;
@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class FlushRequest
-    implements ILoadablePayload, ITriggerRequestPayload, Spliceable
+    implements IPayload, ITriggerRequestPayload, Spliceable
 {
     public static final int UID = -12345;
     public static final long FLUSH_TIME = Long.MAX_VALUE;
@@ -62,12 +62,12 @@ public class FlushRequest
     @Override
     public int compareSpliceable(Spliceable spl)
     {
-        if (!(spl instanceof ILoadablePayload)) {
+        if (!(spl instanceof IPayload)) {
             return getClass().getName().compareTo(spl.getClass().getName());
         }
 
 
-        long val = ((ILoadablePayload) spl).getUTCTime() - utcTime;
+        long val = ((IPayload) spl).getUTCTime() - utcTime;
         if (val < 0) {
             return -1;
         } else if (val > 0) {
@@ -87,7 +87,7 @@ public class FlushRequest
             newList = new ArrayList(dataList.size());
 
             for (Iterator iter = dataList.iterator(); iter.hasNext(); ) {
-                newList.add(((ILoadablePayload) iter.next()).deepCopy());
+                newList.add(((IPayload) iter.next()).deepCopy());
             }
         }
 
@@ -95,17 +95,11 @@ public class FlushRequest
         if (rReq == null) {
             newReq = null;
         } else {
-            newReq = (IReadoutRequest) ((ILoadablePayload) rReq).deepCopy();
+            newReq = (IReadoutRequest) ((IPayload) rReq).deepCopy();
         }
 
         return new FlushRequest(utcTime, type, cfgId, srcId,
                                 firstTime, lastTime, newList, newReq);
-    }
-
-    @Override
-    public void dispose()
-    {
-        throw new Error("Unimplemented");
     }
 
     @Override
@@ -116,12 +110,6 @@ public class FlushRequest
         }
 
         return firstUTC;
-    }
-
-    @Override
-    public List getHitList()
-    {
-        throw new Error("Unimplemented");
     }
 
     @Override

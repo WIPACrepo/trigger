@@ -74,10 +74,10 @@ public class MockReadoutRequestElement
             srcId = elem.getSourceID().getSourceID();
         }
 
-        if (isGlobal || elem.getDomID() == null) {
+        if (isGlobal || elem.getDOMID() == null) {
             domId = IReadoutRequestElement.NO_DOM;
         } else {
-            domId = elem.getDomID().longValue();
+            domId = elem.getDOMID().longValue();
         }
     }
 
@@ -88,13 +88,7 @@ public class MockReadoutRequestElement
     }
 
     @Override
-    public void dispose()
-    {
-        // do nothing
-    }
-
-    @Override
-    public IDOMID getDomID()
+    public IDOMID getDOMID()
     {
         if (domObj == null && domId != IReadoutRequestElement.NO_DOM) {
             domObj = new MockDOMID(domId);

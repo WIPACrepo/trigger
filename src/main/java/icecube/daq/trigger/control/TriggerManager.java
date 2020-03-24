@@ -552,7 +552,7 @@ public class TriggerManager
         // make sure we have hit payloads (or hit data payloads)
         if (payload instanceof IHitPayload) {
             IHitPayload hit = (IHitPayload) payload;
-            if (hit.getHitTimeUTC() == null) {
+            if (hit.getPayloadTimeUTC() == null) {
                 LOG.error("Bad hit buf " + payload.getPayloadBacking() +
                           " len " + payload.length() +
                           " type " + payload.getPayloadType() +
@@ -579,7 +579,7 @@ public class TriggerManager
                 return false;
             }
 
-            timeOfLastHit = hit.getHitTimeUTC();
+            timeOfLastHit = hit.getPayloadTimeUTC();
             srcOfLastHit = hit.getSourceID();
         } else if (payload instanceof ITriggerRequestPayload) {
             if (srcId != SourceIdRegistry.GLOBAL_TRIGGER_SOURCE_ID) {

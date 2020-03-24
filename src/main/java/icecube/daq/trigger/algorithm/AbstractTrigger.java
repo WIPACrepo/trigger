@@ -451,11 +451,8 @@ public abstract class AbstractTrigger
         // report it
         reportTrigger(triggerPayload);
 
-        // set earliest payload of interest to 1/10 ns after the last hit
-        IUTCTime lastHitTime = lastHit.getHitTimeUTC();
-
         // update earliest hit time
-        IPayload dummy = new DummyPayload(lastHitTime.getOffsetUTCTime(1));
+        IPayload dummy = new DummyPayload(lastTime.getOffsetUTCTime(1));
         setEarliestPayloadOfInterest(dummy);
     }
 

@@ -1,7 +1,7 @@
 /*
  * class: SimpleMajorityTrigger
  *
- * Version $Id: SimpleMajorityTrigger.java 17760 2020-03-12 14:29:31Z dglo $
+ * Version $Id: SimpleMajorityTrigger.java 17776 2020-03-24 18:32:31Z dglo $
  *
  * Date: August 19 2005
  *
@@ -121,7 +121,7 @@ class HitCollection
 /**
  * This class implements a simple multiplicty trigger.
  *
- * @version $Id: SimpleMajorityTrigger.java 17760 2020-03-12 14:29:31Z dglo $
+ * @version $Id: SimpleMajorityTrigger.java 17776 2020-03-24 18:32:31Z dglo $
  * @author pat
  */
 public final class SimpleMajorityTrigger
@@ -298,7 +298,7 @@ public final class SimpleMajorityTrigger
         }
         IHitPayload hit = (IHitPayload) payload;
 
-        IUTCTime hitTimeUTC = hit.getHitTimeUTC();
+        IUTCTime hitTimeUTC = hit.getPayloadTimeUTC();
         if (hitTimeUTC == null) {
             throw new TriggerException("Hit time was null");
         }
@@ -361,7 +361,7 @@ public final class SimpleMajorityTrigger
          * Set the window front to the current hit time and slide the window
          * tail forward, removing hits no longer in the window.
          */
-        updateSlidingWindow(hit.getHitTimeUTC());
+        updateSlidingWindow(hit.getPayloadTimeUTC());
 
         // Add hit to the sliding window
         if (!slidingTimeWindow.contains(hit)) {
@@ -477,7 +477,7 @@ public final class SimpleMajorityTrigger
      */
     private IUTCTime getTriggerWindowStart()
     {
-        return hitsWithinTriggerWindow.getFirst().getHitTimeUTC();
+        return hitsWithinTriggerWindow.getFirst().getPayloadTimeUTC();
     }
 
     /**
@@ -486,7 +486,7 @@ public final class SimpleMajorityTrigger
      */
     private IUTCTime getTriggerWindowStop()
     {
-        return hitsWithinTriggerWindow.getLast().getHitTimeUTC();
+        return hitsWithinTriggerWindow.getLast().getPayloadTimeUTC();
     }
 
     public int getNumberOfHitsWithinSlidingTimeWindow()
@@ -535,7 +535,7 @@ public final class SimpleMajorityTrigger
              * hit, by definition, is part of the trigger.
              */
             if (!haveTrigger()) {
-                hitTime = oldHit.getHitTimeUTC();
+                hitTime = oldHit.getPayloadTimeUTC();
             }
         }
 
@@ -575,7 +575,7 @@ public final class SimpleMajorityTrigger
 
         private IUTCTime startTime()
         {
-            return getFirst().getHitTimeUTC();
+            return getFirst().getPayloadTimeUTC();
         }
 
         public String toString()

@@ -169,7 +169,7 @@ public class PhysicsMinBiasTrigger
         boolean usableHit = getHitType(hit) == SPE_HIT &&
             hitFilter.useHit(hit);
 
-        IUTCTime hitTime = hit.getHitTimeUTC();
+        IUTCTime hitTime = hit.getPayloadTimeUTC();
         if (hitTime == null) {
             throw new TriggerException("Hit time was null");
         }

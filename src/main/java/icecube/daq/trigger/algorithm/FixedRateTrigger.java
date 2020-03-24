@@ -1,7 +1,7 @@
 /*
  * class: FixedRateTrigger
  *
- * Version $Id: FixedRateTrigger.java 17760 2020-03-12 14:29:31Z dglo $
+ * Version $Id: FixedRateTrigger.java 17776 2020-03-24 18:32:31Z dglo $
  *
  * Date: May 1 2006
  *
@@ -23,7 +23,7 @@ import org.apache.log4j.Logger;
 /**
  * This class implements a trigger that is satisfied every N nanoseconds.
  *
- * @version $Id: FixedRateTrigger.java 17760 2020-03-12 14:29:31Z dglo $
+ * @version $Id: FixedRateTrigger.java 17776 2020-03-24 18:32:31Z dglo $
  * @author pat
  */
 public class FixedRateTrigger
@@ -214,7 +214,7 @@ public class FixedRateTrigger
             throw new TriggerException("Expecting an IHitPayload");
         }
         IHitPayload hit = (IHitPayload) payload;
-        IUTCTime hitTimeUTC = hit.getHitTimeUTC();
+        IUTCTime hitTimeUTC = hit.getPayloadTimeUTC();
 
         if (numberOfHitsProcessed == 0) {
             // set time of first trigger to be first hit time + interval

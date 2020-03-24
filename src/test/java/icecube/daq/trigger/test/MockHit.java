@@ -52,7 +52,7 @@ public class MockHit
             return getClass().getName().compareTo(spl.getClass().getName());
         }
 
-        return getHitTimeUTC().compareTo(((IHitPayload) spl).getHitTimeUTC());
+        return getPayloadTimeUTC().compareTo(((IHitPayload) spl).getPayloadTimeUTC());
     }
 
     @Override
@@ -81,12 +81,6 @@ public class MockHit
         }
 
         return domObj;
-    }
-
-    @Override
-    public IUTCTime getHitTimeUTC()
-    {
-        return getPayloadTimeUTC();
     }
 
     @Override

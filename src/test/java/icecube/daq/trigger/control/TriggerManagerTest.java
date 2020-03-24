@@ -896,16 +896,6 @@ public class TriggerManagerTest
         }
 
         @Override
-        public IUTCTime getHitTimeUTC()
-        {
-            if (timeObj == null) {
-                timeObj = new MockUTCTime(getUTCTime());
-            }
-
-            return timeObj;
-        }
-
-        @Override
         public double getIntegratedCharge()
         {
             throw new Error("Unimplemented");

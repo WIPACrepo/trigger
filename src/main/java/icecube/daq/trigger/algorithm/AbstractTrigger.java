@@ -312,80 +312,43 @@ public abstract class AbstractTrigger
 
     protected void formTrigger(IUTCTime time)
     {
-        if (null == triggerFactory) {
-            throw new Error("TriggerFactory is not set!");
-        }
-
-        // create readout requests
-        ArrayList<IReadoutRequestElement> readoutElements =
-            new ArrayList<IReadoutRequestElement>();
-        Iterator readoutIter = readouts.iterator();
-        while (readoutIter.hasNext()) {
-            TriggerReadout readout = (TriggerReadout) readoutIter.next();
-            readoutElements.add(createReadoutElement(time, time, readout, null,
-                                                     null));
-        }
-
-        final int uid = getNextUID();
-
-        IReadoutRequest readoutRequest =
-            new ReadoutRequest(time.longValue(), uid, srcId, readoutElements);
-
-        // make payload
-        ArrayList<IPayload> hitList = new ArrayList<IPayload>();
-        TriggerRequest triggerPayload =
-            (TriggerRequest) triggerFactory.createPayload(uid,
-                                                          getTriggerType(),
-                                                          trigCfgId, srcId,
-                                                          time.longValue(),
-                                                          time.longValue(),
-                                                          readoutRequest,
-                                                          hitList);
-
-        // report it
-        reportTrigger(triggerPayload);
-
-        // update earliest hit time
-        IPayload dummy = new DummyPayload(time.getOffsetUTCTime(1));
-        setEarliestPayloadOfInterest(dummy);
-    }
-
-    protected void formTrigger(IUTCTime firstTime, IUTCTime lastTime)
-    {
-        throw new UnimplementedError();
+        formTrigger(null, time, time, null, null);
     }
 
     protected void formTrigger(IHitPayload hit, IDOMID dom, ISourceID string)
     {
-        List hitList = new ArrayList(1);
+        List<IHitPayload> hitList = new ArrayList<IHitPayload>(1);
         hitList.add(hit);
+
         formTrigger(hitList, dom, string);
     }
 
-    protected void formTrigger(List hits, IDOMID dom, ISourceID string)
+    protected void formTrigger(List<IHitPayload> hits, IDOMID dom,
+                               ISourceID string)
     {
         final int numberOfHits = hits.size();
         if (numberOfHits == 0) {
             throw new Error("Cannot form trigger from empty list of hits");
         }
 
-        formTrigger(hits, (IHitPayload) hits.get(0),
-                    (IHitPayload) hits.get(numberOfHits - 1), dom, string);
+        formTrigger(hits, hits.get(0).getPayloadTimeUTC(),
+                    hits.get(numberOfHits - 1).getPayloadTimeUTC(), dom,
+                    string);
     }
 
-    protected void formTrigger(List hits)
+    protected void formTrigger(List<IHitPayload> hits)
     {
         final int num = hits.size();
         if (num == 0) {
             throw new Error("Cannot form trigger from empty list of hits");
         }
 
-        formTrigger(hits, (IHitPayload) hits.get(0),
-                    (IHitPayload) hits.get(num - 1), null, null);
+        formTrigger(hits, hits.get(0).getPayloadTimeUTC(),
+                    hits.get(num - 1).getPayloadTimeUTC(), null, null);
     }
 
-    private void formTrigger(Collection hits, IHitPayload firstHit,
-                             IHitPayload lastHit, IDOMID dom, ISourceID string)
+    private void formTrigger(Collection<IHitPayload> hits, IUTCTime firstTime,
+                             IUTCTime lastTime, IDOMID dom, ISourceID string)
     {
         if (null == triggerFactory) {
             throw new Error("TriggerFactory is not set!");
@@ -396,18 +359,19 @@ public abstract class AbstractTrigger
             throw new Error("Cannot form trigger from empty list of hits");
         }
 
-        // get times (this assumes that the hits are time-ordered)
-        IUTCTime firstTime = firstHit.getPayloadTimeUTC();
-        IUTCTime lastTime = lastHit.getPayloadTimeUTC();
-
-        if (LOG.isDebugEnabled() && (triggerCounter % printMod == 0)) {
-            LOG.debug("New Trigger " + triggerCounter + " from " +
-                      triggerName + " includes " + numberOfHits +
-                      " hits:  First time = " + firstTime + " Last time = " +
-                      lastTime);
+        // copy hits so they can be recycled
+        ArrayList<IPayload> hitList = new ArrayList<IPayload>();
+        if (hits != null) {
+            for (IHitPayload hit : hits) {
+                IHitPayload copy = (IHitPayload) hit.deepCopy();
+                if (copy.getUTCTime() < 0) {
+                    LOG.error("Ignoring bad hit " + copy + " (from " + hit +
+                              ")");
+                    continue;
+                }
+                hitList.add(copy);
+            }
         }
-
-        final int uid = getNextUID();
 
         // create readout requests
         ArrayList<IReadoutRequestElement> readoutElements =
@@ -418,21 +382,12 @@ public abstract class AbstractTrigger
             readoutElements.add(createReadoutElement(firstTime, lastTime,
                                                      readout, dom, string));
         }
+
+        final int uid = getNextUID();
+
         IReadoutRequest readoutRequest =
             new ReadoutRequest(firstTime.longValue(), uid, srcId,
                                readoutElements);
-
-        // copy hits so they can be recycled
-        ArrayList<IPayload> hitList = new ArrayList<IPayload>();
-        for (Object obj : hits) {
-            IPayload hit = (IPayload) obj;
-            IPayload copy = (IPayload) hit.deepCopy();
-            if (copy.getUTCTime() < 0) {
-                LOG.error("Ignoring bad hit " + copy + " (from " + hit + ")");
-                continue;
-            }
-            hitList.add(copy);
-        }
 
         // make payload
         TriggerRequest triggerPayload =
@@ -444,14 +399,10 @@ public abstract class AbstractTrigger
                                                           readoutRequest,
                                                           hitList);
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Created " + triggerPayload);
-        }
-
         // report it
         reportTrigger(triggerPayload);
 
-        // update earliest hit time
+        // set earliest payload of interest to 1/10 ns after the last hit
         IPayload dummy = new DummyPayload(lastTime.getOffsetUTCTime(1));
         setEarliestPayloadOfInterest(dummy);
     }

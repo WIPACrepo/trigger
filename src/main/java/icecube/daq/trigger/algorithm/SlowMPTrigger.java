@@ -35,12 +35,6 @@ public class SlowMPTrigger
     /** Numeric type for this algorithm */
     public static final int TRIGGER_TYPE = 24;
 
-    /**
-     * If 'true', log a warning every time SlowMP tries to move the earliest
-     * payload time backward
-     */
-    private static final boolean WARN_IF_EARLIEST_REGRESSED = false;
-
     private long t_proximity; // t_proximity in nanoseconds, eliminates most muon_hlcs
     private long t_min;
     private long t_max;
@@ -521,19 +515,6 @@ public class SlowMPTrigger
     	return false;
     }
 
-    private void setEarliestIfPossible(IHitPayload hit, String location)
-    {
-        IPayload current = getEarliestPayloadOfInterest();
-        if (current == null || current.getUTCTime() <= hit.getUTCTime()) {
-            setEarliestPayloadOfInterest(hit);
-        } else if (WARN_IF_EARLIEST_REGRESSED) {
-            LOG.warn("Not regressing earliest time from " +
-                     current.getUTCTime() + " to " + hit.getUTCTime() +
-                     " (location " + location + ", diff " +
-                     (hit.getUTCTime() - current.getUTCTime()) + ")");
-        }
-    }
-
     @Override
     public void runTrigger(IPayload payload) throws TriggerException
     {
@@ -615,7 +596,7 @@ public class SlowMPTrigger
                         two_hit_list.add(check_payload);
                         // set earliest payload of interest ?=!
                         //LOG.info("Adding two_hit entry -> muon == -1");
-                        setEarliestIfPossible(check_payload.get_hit(), "A");
+                        setEarliestPayloadOfInterest(check_payload.get_hit());
                     }
                     else
                     {
@@ -628,8 +609,7 @@ public class SlowMPTrigger
                             two_hit_list.add(check_payload);
                             //LOG.info("Adding two_hit entry -> muon time window was set.. is now unset..");
                             muon_time_window = -1;
-                            setEarliestIfPossible(check_payload.get_hit(),
-                                                  "B");
+                            setEarliestPayloadOfInterest(check_payload.get_hit());
                             // set earliest payload of interest ?=!
                         }
                     }
@@ -688,7 +668,7 @@ public class SlowMPTrigger
         one_hit_list.add(new_hit); // at the end add the current hitPayload for further comparisons
         if(two_hit_list.size() == 0)
         {
-            setEarliestIfPossible(one_hit_list.getFirst().get_hit(), "C");
+            setEarliestPayloadOfInterest(one_hit_list.getFirst().get_hit());
         }
         else if(one_hit_list.getFirst().get_time() - two_hit_list.getLast().get_time() > t_max) // definetely cannot prdouce a trigger, set earliest palyoad
         {
@@ -721,7 +701,7 @@ public class SlowMPTrigger
         else
         {
             //two_hit_list.clear();
-            setEarliestIfPossible(one_hit_list.getFirst().get_hit(), "D");
+            setEarliestPayloadOfInterest(one_hit_list.getFirst().get_hit());
         }
 
         //ListIterator list_iterator = trigger_list.listIterator();

@@ -354,14 +354,13 @@ public abstract class AbstractTrigger
             throw new Error("TriggerFactory is not set!");
         }
 
-        final int numberOfHits = hits.size();
-        if (numberOfHits == 0) {
-            throw new Error("Cannot form trigger from empty list of hits");
-        }
-
         // copy hits so they can be recycled
         ArrayList<IPayload> hitList = new ArrayList<IPayload>();
         if (hits != null) {
+            if (hits.size() == 0) {
+                throw new Error("Cannot form trigger from empty list of hits");
+            }
+
             for (IHitPayload hit : hits) {
                 IHitPayload copy = (IHitPayload) hit.deepCopy();
                 if (copy.getUTCTime() < 0) {

@@ -175,7 +175,7 @@ public class InIceTriggerIntegrationTest
         DAQTestUtil.connectToSink("iiOut", comp.getWriter(),
                                   comp.getOutputCache(), validator);
 
-        comp.starting(12345);
+        comp.starting(12345, 0);
 
         DAQTestUtil.startComponentIO(comp);
 

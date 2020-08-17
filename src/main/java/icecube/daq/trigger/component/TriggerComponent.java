@@ -423,7 +423,7 @@ public class TriggerComponent
     @Override
     public String getVersionInfo()
     {
-        return "$Id: TriggerComponent.java 17207 2018-11-08 16:08:59Z dglo $";
+        return "$Id: TriggerComponent.java 17851 2020-08-17 22:20:12Z dglo $";
     }
 
     /**
@@ -479,7 +479,7 @@ public class TriggerComponent
      * Send trigger triplets before starting.
      */
     @Override
-    public void starting(int runNumber)
+    public void starting(int runNumber, int domMode)
     {
         triggerManager.setRunNumber(runNumber);
 
